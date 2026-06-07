@@ -1,0 +1,17 @@
+apex/jobscheduler/framework/aconfig/job.aconfig
+apex/jobscheduler/framework/java/android/app/job/JobInfo.java
+apex/jobscheduler/framework/java/android/app/job/JobParameters.java
+apex/jobscheduler/framework/java/android/app/job/JobServiceEngine.java
+apex/jobscheduler/service/aconfig/alarm.aconfig
+apex/jobscheduler/service/aconfig/app_idle.aconfig
+apex/jobscheduler/service/aconfig/job.aconfig
+apex/jobscheduler/service/java/com/android/server/alarm/AlarmManagerService.java
+apex/jobscheduler/service/java/com/android/server/job/JobConcurrencyManager.java
+apex/jobscheduler/service/java/com/android/server/job/JobSchedulerService.java
+apex/jobscheduler/service/java/com/android/server/job/JobSchedulerShellCommand.java
+apex/jobscheduler/service/java/com/android/server/job/JobServiceContext.java
+apex/jobscheduler/service/java/com/android/server/job/controllers/DeviceIdleJobsController.java
+apex/jobscheduler/service/java/com/android/server/job/controllers/JobStatus.java
+apex/jobscheduler/service/java/com/android/server/job/controllers/QuotaController.java
+apex/jobscheduler/service/java/com/android/server/usage/AppIdleHistory.java
+apex/jobscheduler/service/java/com/android/server/usage/AppStandbyController.java

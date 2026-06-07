@@ -1,0 +1,10 @@
+# Local AOSP source checkouts are temporary evidence workspaces.
+frameworks-base/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Generated temporary files
+*.tmp

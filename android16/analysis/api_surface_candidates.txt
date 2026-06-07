@@ -1,0 +1,10 @@
+core/api/current.txt
+core/api/module-lib-current.txt
+core/api/system-current.txt
+core/api/test-current.txt
+libs/appfunctions/api/current.txt
+location/api/system-current.txt
+nfc/api/current.txt
+nfc/api/module-lib-current.txt
+nfc/api/system-current.txt
+packages/CrashRecovery/framework/api/system-current.txt
