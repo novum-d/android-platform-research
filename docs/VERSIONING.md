@@ -58,7 +58,7 @@ targetSdkVersion 36
 
 ## Android 17
 
-When Android 17 research starts, create:
+Android 17 research directory:
 
 ```text
 android17/
@@ -71,7 +71,20 @@ android17/
   templates/
 ```
 
-Copy Android 16 structure only as a starting point. Update all release-specific fields:
+Current status:
+
+```text
+From: android-16.0.0_r4
+To:   TBD: Android 17 AOSP tag
+```
+
+Android 17 official Behavior Change documentation is available, but the local
+`frameworks-base` checkout currently has no `android-17*` tag.
+
+Until the target Android 17 AOSP tag is available, do not assign High confidence
+to AOSP-backed conclusions.
+
+When the Android 17 AOSP tag is available, update all release-specific fields:
 
 - Android version name
 - API level / targetSdkVersion
@@ -81,8 +94,6 @@ Copy Android 16 structure only as a starting point. Update all release-specific 
 - compat framework links
 - classification rules if Android 17 changes the wording or applicability model
 - templates and verification matrices
-
-Do not edit Android 16 files to represent Android 17 behavior.
 
 ## Practical Rule
 
