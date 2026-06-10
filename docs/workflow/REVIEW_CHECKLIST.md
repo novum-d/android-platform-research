@@ -22,7 +22,7 @@
 - [ ] OSアップデートのみ、targetSdk変更のみ、compat flag 強制変更の検証マトリクスがある
 - [ ] 事実と推測が分離されている
 - [ ] アプリ開発者への影響が書かれている
-- [ ] Service Impact Examples がある場合、実発生確認済みの事実と起こりうる影響例が分離されている
+- [ ] Service Impact Examples（サービス影響例）がある場合、実発生確認済みの事実と起こりうる影響例が分離されている
 - [ ] 顧客説明用の結論がある
 - [ ] Required Actions がある
 - [ ] Confidence がある

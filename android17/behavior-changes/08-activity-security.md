@@ -326,6 +326,36 @@ Conclusions:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: 通知 / 外部イベントから画面起動するアプリ
+
+- 対象サービス例: チャット着信、決済承認、配車・配送通知、認証 prompt。
+- 影響を受ける実装パターン: `IntentSender` / `PendingIntent` と broad BAL opt-in で background から Activity を起動する実装。
+- 発生条件: Android 17 / targetSdkVersion 37 で BAL protections が IntentSender に拡張され、legacy mode が不十分になる場合。
+- ユーザーに見える症状: 期待した画面が自動で開かない、通知 tap 後の遷移が変わる可能性。
+- 開発・運用への影響: notification flow、PendingIntent sender / creator 責務、foreground visibility 条件の見直しが必要になる可能性。
+- 推奨対応候補: `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` など granular controls へ移行する。
+- 根拠: 公式 statement と report の missing AOSP evidence。
+- Confidence（信頼度）: Low
+- 注意: failure mode と compat toggle は未確認。
+
+## Example 2（例2）: SDK が Activity 起動を委譲する連携機能
+
+- 対象サービス例: OAuth / SSO SDK、決済 SDK、端末連携 SDK、広告 SDK。
+- 影響を受ける実装パターン: host app と SDK / 外部 app の間で IntentSender による Activity 起動を委譲する実装。
+- 発生条件: calling app visibility や BAL opt-in mode が新要件と合わない場合。
+- ユーザーに見える症状: 認証画面や確認画面が表示されない、flow が途中で止まる可能性。
+- 開発・運用への影響: SDK version 更新、integration guide 変更、strict mode / lint 対応が必要になる可能性。
+- 推奨対応候補: Activity 起動を user-initiated / visible context に寄せ、legacy constant 利用を棚卸しする。
+- 根拠: 公式 statement と report の action candidates。
+- Confidence（信頼度）: Low
+- 注意: 実サービス名を出す場合は owner 確認が必要。
+
+---
+
 # Required Actions
 
 ## Must

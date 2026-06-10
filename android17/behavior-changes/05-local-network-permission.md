@@ -343,6 +343,36 @@ Reason:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: スマートホーム / IoT デバイス連携
+
+- 対象サービス例: 家電操作、照明、カメラ、ハブ、Matter / local discovery 補助アプリ。
+- 影響を受ける実装パターン: LAN device discovery、mDNS / NSD、direct socket connection を permission なしで行う実装。
+- 発生条件: Android 17 / targetSdkVersion 37 で local network access が runtime permission または system picker 配下になる場合。
+- ユーザーに見える症状: 近くの機器が見つからない、初期設定が進まない、ローカル接続が失敗する可能性。
+- 開発・運用への影響: permission request UX、device picker adoption、support 手順の更新が必要になる可能性。
+- 推奨対応候補: `ACCESS_LOCAL_NETWORK` 対応または system-mediated picker の採用を検討する。
+- 根拠: 公式 statement と report の AOSP evidence limitation。
+- Confidence（信頼度）: Low
+- 注意: Android 17 tag 未取得のため enforcement path は未確認。
+
+## Example 2（例2）: キャスト / プリンター / POS 連携
+
+- 対象サービス例: casting、LAN printer、payment terminal、店舗 POS 周辺機器連携。
+- 影響を受ける実装パターン: local IP scan、service discovery、persistent LAN socket に依存する機能。
+- 発生条件: targetSdkVersion 37 で local network permission が未許可、または picker path に移行していない場合。
+- ユーザーに見える症状: プリンターや端末が表示されない、接続済み機器が offline 表示になる可能性。
+- 開発・運用への影響: device onboarding、permission denied 時の fallback、店舗運用マニュアル更新が必要になる可能性。
+- 推奨対応候補: permission state を明示的に扱い、必要な場合は user education と再試行導線を用意する。
+- 根拠: 公式 statement と report の expected behavior matrix。
+- Confidence（信頼度）: Low
+- 注意: 実サービスでの発生確認ではない。
+
+---
+
 # Required Actions
 
 ## Must

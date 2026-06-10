@@ -313,6 +313,36 @@ Reason:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: 設定値を reflection で差し替えるアプリ / SDK
+
+- 対象サービス例: A/B test SDK、feature flag framework、社内 debug tool。
+- 影響を受ける実装パターン: `static final` fields を reflection / Unsafe / instrumentation で書き換える実装。
+- 発生条件: Android 17 / targetSdkVersion 37 で `static final` fields が unmodifiable と扱われる場合。
+- ユーザーに見える症状: feature flag が切り替わらない、debug menu の変更が反映されない、初期化時に例外が出る可能性。
+- 開発・運用への影響: runtime patching 前提の設定更新、テスト環境の差し替え、SDK initialization の見直しが必要になる可能性。
+- 推奨対応候補: mutable holder / DI / build-time config に移行し、`static final` 直接変更を避ける。
+- 根拠: 公式 Behavior Change statement と report の AOSP evidence limitation。
+- Confidence（信頼度）: Low
+- 注意: どの API path で例外または no-op になるかは Android 17 AOSP tag 待ち。
+
+## Example 2（例2）: テスト / mocking framework に依存するアプリ
+
+- 対象サービス例: 大規模 Android app の instrumented test、E2E test、SDK integration test。
+- 影響を受ける実装パターン: production code の `static final` constant を test runtime で書き換える test utility。
+- 発生条件: targetSdkVersion 37 の test build / app process で static final mutation が拒否される場合。
+- ユーザーに見える症状: 直接の本番ユーザー影響は限定的だが、テスト失敗により release validation が詰まる可能性。
+- 開発・運用への影響: test fixture、mocking strategy、CI の Android 17 対応が必要になる可能性。
+- 推奨対応候補: constructor injection、interface abstraction、test-only build variants に移行する。
+- 根拠: 公式 statement と report の targetSdkVersion gate 未確認事項。
+- Confidence（信頼度）: Low
+- 注意: 実サービス障害ではなく開発・検証 pipeline への影響例。
+
+---
+
 # Required Actions
 
 ## Must

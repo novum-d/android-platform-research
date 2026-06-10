@@ -342,6 +342,36 @@ Reason:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: 企業ネットワーク / TLS inspection 環境の業務アプリ
+
+- 対象サービス例: 社内 SaaS、MDM 管理端末、社内 proxy 経由の業務アプリ。
+- 影響を受ける実装パターン: ClientHello / SNI を network appliance が観測する前提の TLS inspection / routing / policy enforcement。
+- 発生条件: Android 17 で ECH が有効になり、network appliance が期待する hostname visibility が変わる場合。
+- ユーザーに見える症状: 社内ネットワークで接続失敗、proxy policy mismatch、特定 endpoint だけ接続できない可能性。
+- 開発・運用への影響: network team と ECH 対応、DNS / HTTPS RR、proxy policy の確認が必要になる可能性。
+- 推奨対応候補: ECH 詳細ページと network policy を照合し、検証環境で endpoint 別接続テストを行う。
+- 根拠: 公式 Behavior Change statement と report の missing AOSP evidence。
+- Confidence（信頼度）: Low
+- 注意: 実ネットワークでの発生確認ではない。ECH availability は DNS / server / network condition に依存する可能性がある。
+
+## Example 2（例2）: 独自ネットワーク診断 / SNI ベース制御を持つアプリ
+
+- 対象サービス例: VPN app、network monitor、security app、developer diagnostics tool。
+- 影響を受ける実装パターン: TLS handshake metadata や SNI を前提に接続先分類・診断を行う実装。
+- 発生条件: platform networking が ECH を使い、外部から見える handshake 情報が変わる場合。
+- ユーザーに見える症状: 診断結果が不正確になる、接続先分類が失敗する、policy 表示が変わる可能性。
+- 開発・運用への影響: ECH 対応の telemetry / logging / support documentation 更新が必要になる可能性。
+- 推奨対応候補: public hostname 依存を減らし、app-layer / explicit config による診断へ寄せる。
+- 根拠: 公式 statement と report の target / gate 未確認事項。
+- Confidence（信頼度）: Low
+- 注意: Android 17 AOSP tag と実通信条件の確認が必要。
+
+---
+
 # Required Actions
 
 ## Must

@@ -332,6 +332,36 @@ Conclusions:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: SMS OTP 自動入力ログイン
+
+- 対象サービス例: ログイン、サインアップ、本人確認、アカウント復旧。
+- 影響を受ける実装パターン: `SMS_RECEIVED_ACTION` や SMS provider query で標準 SMS 本文から OTP を直接抽出する実装。
+- 発生条件: Android 17 / targetSdkVersion 37、standard SMS OTP、WebOTP / SMS Retriever format ではない SMS、exempted app ではない場合。
+- ユーザーに見える症状: OTP が自動入力されない、認証完了まで手入力が必要になる、認証がタイムアウトする可能性。
+- 開発・運用への影響: OTP delivery format、認証 funnel、support 問い合わせ、fallback UX の見直しが必要になる可能性。
+- 推奨対応候補: SMS Retriever API または SMS User Consent API へ移行する。
+- 根拠: 公式 statement と report の expected behavior matrix。
+- Confidence（信頼度）: Low
+- 注意: AOSP gate / exemption 条件は未確認。
+
+## Example 2（例2）: 決済 / 高リスク操作の SMS 確認
+
+- 対象サービス例: 決済承認、送金、端末変更、2段階認証。
+- 影響を受ける実装パターン: SMS inbox を直接読んで OTP を抽出し、短時間の transaction flow に組み込む実装。
+- 発生条件: 受信後 3 時間 delay により OTP 有効期限内に SMS が利用できない場合。
+- ユーザーに見える症状: 自動確認が失敗し、手入力または再送が必要になる可能性。
+- 開発・運用への影響: OTP expiry、再送 policy、不正防止 UX、サポート導線の再設計が必要になる可能性。
+- 推奨対応候補: 直接 SMS 読み取り依存をなくし、公式 OTP API と手入力 fallback を整備する。
+- 根拠: 公式 statement と report の developer impact。
+- Confidence（信頼度）: Low
+- 注意: 実サービスでの発生確認ではない。
+
+---
+
 # Required Actions
 
 ## Must

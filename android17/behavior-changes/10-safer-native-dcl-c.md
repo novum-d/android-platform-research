@@ -320,6 +320,36 @@ Conclusions:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: Plugin / hotfix framework を使うアプリ
+
+- 対象サービス例: ゲーム、動画編集、業務アプリ、SDK plugin platform。
+- 影響を受ける実装パターン: 実行時に `.so` を download / extract し、writable なまま `System.load()` する実装。
+- 発生条件: Android 17 / targetSdkVersion 37 で native file が read-only でない場合。
+- ユーザーに見える症状: 起動失敗、plugin 機能停止、特定 feature の `UnsatisfiedLinkError` によるクラッシュの可能性。
+- 開発・運用への影響: native artifact 配布、permission hardening、rollback、crash monitoring の見直しが必要になる可能性。
+- 推奨対応候補: dynamic loading を避ける。必要な場合は書き込み完了後に read-only として mark してから load する。
+- 根拠: 公式 statement と report の expected behavior。
+- Confidence（信頼度）: Low
+- 注意: exact file mode requirement は AOSP tag 待ち。
+
+## Example 2（例2）: ML / media engine の native component 更新
+
+- 対象サービス例: on-device ML、音声処理、画像処理、ゲーム engine update。
+- 影響を受ける実装パターン: model runtime や media codec helper の native library を app private storage に更新配置する実装。
+- 発生条件: native file が writable 状態のまま `System.load()` される場合。
+- ユーザーに見える症状: ML 推論、画像処理、音声処理など特定機能だけが起動しない可能性。
+- 開発・運用への影響: download / verify / chmod / load の順序、integrity check、error recovery の見直しが必要になる可能性。
+- 推奨対応候補: native component を配布物に同梱するか、更新後に read-only 化と integrity verification を行う。
+- 根拠: 公式 statement と report の action candidates。
+- Confidence（信頼度）: Low
+- 注意: `System.loadLibrary()` との境界は未確認。
+
+---
+
 # Required Actions
 
 ## Must

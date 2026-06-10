@@ -319,6 +319,36 @@ Conclusions:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: Public API backend への HTTPS 通信
+
+- 対象サービス例: ログイン API、決済 API、コンテンツ配信 API。
+- 影響を受ける実装パターン: CT 要件を満たさない公開証明書チェーンを使う endpoint に platform TLS で接続する実装。
+- 発生条件: Android 17 / targetSdkVersion 37 で CT が default enabled になり、証明書チェーンが CT policy を満たさない場合。
+- ユーザーに見える症状: API 通信失敗、ログイン不能、決済失敗、コンテンツ取得失敗の可能性。
+- 開発・運用への影響: certificate issuance、CT log inclusion、証明書更新手順の確認が必要になる可能性。
+- 推奨対応候補: 接続先証明書の CT 対応を棚卸しし、Android 16 opt-in または Android 17 環境で事前検証する。
+- 根拠: 公式 statement と report の expected behavior。
+- Confidence（信頼度）: Low
+- 注意: AOSP gate / exception 条件は未確認。
+
+## Example 2（例2）: Staging / private PKI 環境
+
+- 対象サービス例: QA 環境、社内 API、private CA を使う検証環境。
+- 影響を受ける実装パターン: public CT log に載らない証明書や private trust anchor を使う接続。
+- 発生条件: Android 17 / targetSdkVersion 37 で CT default policy が staging endpoint にも適用される場合。
+- ユーザーに見える症状: 社内検証や beta build でだけ通信失敗する可能性。
+- 開発・運用への影響: Network Security Config、debug overrides、private PKI 例外条件の確認が必要になる可能性。
+- 推奨対応候補: staging 証明書運用を見直し、CT policy 対象外条件があるか Android 17 AOSP tag 後に確認する。
+- 根拠: 公式 statement と report の missing evidence。
+- Confidence（信頼度）: Low
+- 注意: private CA の扱いは未確認であり、断定しない。
+
+---
+
 # Required Actions
 
 ## Must

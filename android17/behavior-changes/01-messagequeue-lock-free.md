@@ -314,6 +314,36 @@ Reason:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: UI 操作が多い一般アプリ
+
+- 対象サービス例: チャット、SNS、EC、ニュースなど、メインスレッドで UI 更新とイベント処理が多いアプリ。
+- 影響を受ける実装パターン: `Handler` / `Looper` / `MessageQueue` の待機・dispatch timing に暗黙依存している実装。
+- 発生条件: Android 17 の MessageQueue 実装変更が、アプリの timing assumption とずれる場合。
+- ユーザーに見える症状: スクロール、タップ反応、画面遷移、アニメーションの timing が変わる可能性。
+- 開発・運用への影響: flaky な UI test、race condition、main thread timing に依存した処理の再検証が必要になる可能性。
+- 推奨対応候補: main thread blocking、busy wait、implicit ordering 依存を棚卸しし、Android 17 で UI / instrumentation test を実施する。
+- 根拠: 公式 Behavior Change statement と report の AOSP evidence limitation。
+- Confidence（信頼度）: Low
+- 注意: 実サービスで発生確認した事実ではない。AOSP tag 入手後に MessageQueue diff と gate を再確認する。
+
+## Example 2（例2）: SDK / framework が Looper timing に依存するアプリ
+
+- 対象サービス例: analytics SDK、広告 SDK、リアルタイム通信 SDK、独自 UI framework を組み込むアプリ。
+- 影響を受ける実装パターン: `postAtFrontOfQueue`、synchronous barrier、idle handler、message ordering に強く依存する処理。
+- 発生条件: MessageQueue の lock-free 化により、従来の timing / ordering 前提が露呈する場合。
+- ユーザーに見える症状: callback の順序違い、初期化遅延、画面表示直後のイベント欠落。
+- 開発・運用への影響: SDK vendor への確認、race condition test、Android 17 beta / preview での回帰確認が必要になる可能性。
+- 推奨対応候補: SDK 更新、callback ordering を明示した test、メインスレッド依存の削減。
+- 根拠: MessageQueue behavior change の公式説明と report の missing AOSP evidence。
+- Confidence（信頼度）: Low
+- 注意: 具体的な broken pattern は AOSP evidence と実機検証待ち。
+
+---
+
 # Required Actions
 
 ## Must

@@ -324,6 +324,36 @@ Conclusions:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: 連絡先同期 / CRM 連携
+
+- 対象サービス例: CRM、営業支援、顧客管理、連絡先 backup / restore。
+- 影響を受ける実装パターン: `ContactsContract.Data` query から `ACCOUNT_NAME` / `ACCOUNT_TYPE` を直接読み、同期元 account を識別する実装。
+- 発生条件: Android 17 / targetSdkVersion 37 で CP2 Data view から restricted columns が removed される場合。
+- ユーザーに見える症状: 連絡先の同期元表示、filtering、重複排除が不正確になる可能性。
+- 開発・運用への影響: RawContacts join、cursor handling、privacy review の見直しが必要になる可能性。
+- 推奨対応候補: `RAW_CONTACT_ID` で `ContactsContract.RawContacts` と join して account 情報を取得する。
+- 根拠: 公式 statement と report の expected behavior。
+- Confidence（信頼度）: Low
+- 注意: 実際の failure mode は AOSP tag / 実機検証待ち。
+
+## Example 2（例2）: 連絡先 picker / account filter UI
+
+- 対象サービス例: メール、電話帳、メッセージ、グループウェア。
+- 影響を受ける実装パターン: Data row と account type を同一 cursor で処理し、UI 上の account filter に使う実装。
+- 発生条件: Data view query の projection に restricted columns を含めている場合。
+- ユーザーに見える症状: account filter が空になる、表示分類が崩れる、cursor column lookup でクラッシュする可能性。
+- 開発・運用への影響: projection 修正、missing column 耐性、RawContacts query の performance 検証が必要になる可能性。
+- 推奨対応候補: Data view から account PII を取る前提をやめ、RawContacts 側の documented columns を使う。
+- 根拠: 公式 statement と report の action candidates。
+- Confidence（信頼度）: Low
+- 注意: ContactsProvider implementation evidence は未確認。
+
+---
+
 # Required Actions
 
 ## Must

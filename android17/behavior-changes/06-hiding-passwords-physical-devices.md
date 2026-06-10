@@ -325,6 +325,36 @@ Reason:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: 外部キーボード利用が多いログイン画面
+
+- 対象サービス例: tablet / Chromebook 向け業務アプリ、教育アプリ、金融・認証画面。
+- 影響を受ける実装パターン: password field で最後に入力した文字の一時表示をユーザー確認として期待している UI。
+- 発生条件: Android 17 / targetSdkVersion 37 で physical input device 使用中に `show_passwords_physical` が適用される場合。
+- ユーザーに見える症状: 外部キーボード入力時に password character が一切表示されず、入力ミス確認の体感が変わる可能性。
+- 開発・運用への影響: support 文言、ログイン失敗率、keyboard 利用 QA の確認が必要になる可能性。
+- 推奨対応候補: password visibility toggle、error feedback、physical keyboard / touchscreen 別テストを整備する。
+- 根拠: 公式 statement と report の missing AOSP evidence。
+- Confidence（信頼度）: Low
+- 注意: default setting と input device 判定は AOSP tag 待ち。
+
+## Example 2（例2）: Custom password field を持つアプリ
+
+- 対象サービス例: password manager、認証 SDK、独自 design system を持つアプリ。
+- 影響を受ける実装パターン: platform password field ではなく custom masking / reveal behavior を実装している UI。
+- 発生条件: platform setting と custom field の表示方針がずれる場合。
+- ユーザーに見える症状: 標準 password field と custom field で表示挙動が違い、ユーザーが混乱する可能性。
+- 開発・運用への影響: design system component の見直し、security review、UI test 更新が必要になる可能性。
+- 推奨対応候補: platform setting に合わせる、または custom reveal の security rationale を明確にする。
+- 根拠: 公式 statement と report の interpretation。
+- Confidence（信頼度）: Low
+- 注意: 実装適用範囲は未確認。
+
+---
+
 # Required Actions
 
 ## Must

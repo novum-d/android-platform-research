@@ -321,6 +321,36 @@ Conclusions:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: Portrait 固定のスマートフォン前提 UI
+
+- 対象サービス例: 決済、本人確認、縦長 feed、camera / scanner UI。
+- 影響を受ける実装パターン: `screenOrientation="portrait"`、固定 aspect ratio、non-resizable 前提の Activity。
+- 発生条件: Android 17 / targetSdkVersion 37、`sw >= 600dp` large screen で Android 16 opt-out が使えない場合。
+- ユーザーに見える症状: tablet / foldable で横向きや大きな window に広がり、UI が崩れる可能性。
+- 開発・運用への影響: large screen QA、adaptive layout、configuration change handling の見直しが必要になる可能性。
+- 推奨対応候補: fixed orientation 前提を減らし、responsive layout と state restoration を整備する。
+- 根拠: 公式 statement と report の expected behavior。
+- Confidence（信頼度）: Low
+- 注意: exact opt-out mechanism と large screen 判定は AOSP tag 待ち。
+
+## Example 2（例2）: Tablet / foldable で non-resizable を指定する業務アプリ
+
+- 対象サービス例: POS、医療業務、教育、店舗管理、在庫管理。
+- 影響を受ける実装パターン: `resizeableActivity=false` や固定 window size 前提で画面密度・サイズを決め打ちする UI。
+- 発生条件: targetSdkVersion 37 で large screen 制約無視が opt-out できない場合。
+- ユーザーに見える症状: split-screen / freeform resize でボタン重なり、入力欄切れ、操作不能が起きる可能性。
+- 開発・運用への影響: multi-window、fold / unfold、external display の test matrix 更新が必要になる可能性。
+- 推奨対応候補: window size に応じた layout 分岐、scrollable content、minimum touch target を整備する。
+- 根拠: 公式 statement と report の action candidates。
+- Confidence（信頼度）: Low
+- 注意: 実サービスでの発生確認ではない。
+
+---
+
 # Required Actions
 
 ## Must

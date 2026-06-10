@@ -328,6 +328,36 @@ Conclusions:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: 音楽 / ポッドキャスト再生アプリ
+
+- 対象サービス例: 音楽 streaming、podcast、radio、meditation audio。
+- 影響を受ける実装パターン: background から playback start / audio focus request を行うが、running FGS や WIU capability を満たさない実装。
+- 発生条件: Android 17 / targetSdkVersion 37 で background audio interaction が厳格化される場合。
+- ユーザーに見える症状: 再生開始に失敗する、通知操作後に音が出ない、focus が取れない可能性。
+- 開発・運用への影響: FGS type、user-initiated flow、audio focus handling、telemetry の見直しが必要になる可能性。
+- 推奨対応候補: background audio を適切な foreground service と user-visible control に紐づける。
+- 根拠: 公式 statement と report の expected behavior。
+- Confidence（信頼度）: Low
+- 注意: all apps 制限と targetSdkVersion 37 制限の境界は未確認。
+
+## Example 2（例2）: アラーム / リマインダーアプリ
+
+- 対象サービス例: アラーム、服薬リマインダー、タイマー、カレンダー通知。
+- 影響を受ける実装パターン: background で alarm sound を鳴らすが exact alarm permission や `USAGE_ALARM` を満たしていない実装。
+- 発生条件: targetSdkVersion 37 で exact alarm + `USAGE_ALARM` 条件が必要になる場合。
+- ユーザーに見える症状: アラーム音が鳴らない、volume change が効かない、通知だけ表示される可能性。
+- 開発・運用への影響: exact alarm permission UX、AudioAttributes、FGS / WIU capability の見直しが必要になる可能性。
+- 推奨対応候補: alarm use case を `USAGE_ALARM` と exact alarm permission に整合させる。
+- 根拠: 公式 statement と report の action candidates。
+- Confidence（信頼度）: Low
+- 注意: 実際の failure mode は AOSP tag / 実機検証待ち。
+
+---
+
 # Required Actions
 
 ## Must

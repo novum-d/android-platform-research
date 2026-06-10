@@ -330,6 +330,36 @@ Reason:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: 物理キーボードを使う業務入力アプリ
+
+- 対象サービス例: POS、倉庫管理、医療・金融の業務入力、Chromebook / tablet keyboard 利用アプリ。
+- 影響を受ける実装パターン: complex IME composition と physical keyboard input を前提にした text field / shortcut handling。
+- 発生条件: Android 17 / targetSdkVersion 37 で accessibility support と IME physical keyboard typing の挙動が変わる場合。
+- ユーザーに見える症状: 日本語入力、変換、候補選択、アクセシビリティ読み上げとの組み合わせで入力体験が変わる可能性。
+- 開発・運用への影響: 外部キーボード、IME、accessibility service を組み合わせた QA が必要になる可能性。
+- 推奨対応候補: key event を直接消費しすぎない、standard text input を利用する、IME composition test を追加する。
+- 根拠: 公式 Behavior Change statement と report の AOSP evidence limitation。
+- Confidence（信頼度）: Low
+- 注意: 具体的な IME / accessibility service 別の挙動は未検証。
+
+## Example 2（例2）: アクセシビリティ利用者向けの入力支援機能
+
+- 対象サービス例: メモ、チャット、文書編集、教育アプリ。
+- 影響を受ける実装パターン: accessibility focus、screen reader、hardware keyboard shortcut、IME composing text が同時に動く UI。
+- 発生条件: physical keyboard typing と accessibility support の platform behavior が Android 17 で変わる場合。
+- ユーザーに見える症状: 入力中の読み上げ、候補操作、カーソル移動の体感が変わる可能性。
+- 開発・運用への影響: TalkBack / physical keyboard / major IME の組み合わせ検証が必要になる可能性。
+- 推奨対応候補: accessibility node / text selection state を標準 API と整合させ、custom key handling を限定する。
+- 根拠: 公式 statement と report の source evidence 未確認事項。
+- Confidence（信頼度）: Low
+- 注意: 実利用者への影響度は human decision と実機評価が必要。
+
+---
+
 # Required Actions
 
 ## Must

@@ -323,6 +323,36 @@ Conclusions:
 
 ---
 
+# Service Impact Examples（サービス影響例）
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## Example 1（例1）: READ_CONTACTS なしの連絡先検索
+
+- 対象サービス例: 共有先候補、連絡先候補表示、電話番号 / メール補完。
+- 影響を受ける実装パターン: `READ_CONTACTS` なしで `ContactsContract.Data` を query し、selection / sortOrder に raw SQL fragment を含める実装。
+- 発生条件: Android 17 / targetSdkVersion 37 で strict columns / strict grammar と非互換の query を実行する場合。
+- ユーザーに見える症状: 候補が表示されない、検索が失敗する、query exception で feature が停止する可能性。
+- 開発・運用への影響: query grammar 修正、permission denied path の QA、exception handling の追加が必要になる可能性。
+- 推奨対応候補: documented columns と parameterized selection に寄せ、strict-compatible query に修正する。
+- 根拠: 公式 statement と report の expected behavior。
+- Confidence（信頼度）: Low
+- 注意: exception type と exact validation は AOSP tag 待ち。
+
+## Example 2（例2）: CRM / matching 機能の provider query
+
+- 対象サービス例: CRM 連携、名刺管理、営業支援、messaging matching。
+- 影響を受ける実装パターン: permission なしで Data table へ複雑な SQL expression / alias / function を投げる matching query。
+- 発生条件: strict grammar が有効になり、provider が query pattern を reject する場合。
+- ユーザーに見える症状: matching 精度低下、連絡先連携失敗、機能の一部が空表示になる可能性。
+- 開発・運用への影響: query simplification、local DB への同期設計、permission request の必要性再評価が必要になる可能性。
+- 推奨対応候補: provider query を単純化し、必要な処理は app 側で post-process する。
+- 根拠: 公式 statement と report の action candidates。
+- Confidence（信頼度）: Low
+- 注意: 実サービスでの発生確認ではない。
+
+---
+
 # Required Actions
 
 ## Must
