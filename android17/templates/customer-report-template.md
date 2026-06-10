@@ -235,6 +235,40 @@ targetSdkVersion、compat framework、OS version、device condition のいずれ
 
 ---
 
+# Service Impact Examples
+
+このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。
+特定サービスで実際に発生確認した事実ではない。
+
+実サービス名を出す場合は、repository owner または service owner が確認済みのものだけにする。
+それ以外は「ログイン OTP」「Bluetooth プリンター連携」「連絡先 CRM 同期」のような一般化した service / feature pattern として書く。
+
+## Example 1: <サービス / 機能パターン名>
+
+- 対象サービス例:
+- 影響を受ける実装パターン:
+- 発生条件:
+- ユーザーに見える症状:
+- 開発・運用への影響:
+- 推奨対応候補:
+- 根拠:
+- Confidence:
+- 注意:
+
+## Example 2: <サービス / 機能パターン名>
+
+- 対象サービス例:
+- 影響を受ける実装パターン:
+- 発生条件:
+- ユーザーに見える症状:
+- 開発・運用への影響:
+- 推奨対応候補:
+- 根拠:
+- Confidence:
+- 注意:
+
+---
+
 # Required Actions
 
 ## Must
