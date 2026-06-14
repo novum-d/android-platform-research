@@ -21,7 +21,7 @@ Target targetSdkVersion:
 - Primary classification: UNKNOWN_NEEDS_MORE_EVIDENCE
 - OS update / all apps: Unknown。原文は targetSdkVersion 37+ を明示しているが、AOSP gate 未確認。
 - targetSdkVersion 37+: 公式文書上は該当。AOSP gate 未確認。
-- Other required conditions: `READ_CONTACTS` permission なし、`ContactsContract.Data` table query、strict columns / strict grammar と互換性のない query pattern。
+- Other required conditions: `READ_CONTACTS` permission なし、`ContactsContract.Data` table query、strict columns / strict grammar と互換性のない query pattern。Contact Picker を使う場合は、Session URI に custom `selection` / `selectionArgs` を指定しないこと。
 - Compat Change ID: Unknown
 - Compat default state: Unknown
 
@@ -37,6 +37,8 @@ Target targetSdkVersion:
 
 Android 17 では、targetSdkVersion 37 以上のアプリが `READ_CONTACTS` なしで `ContactsContract.Data` table を query する場合、CP2 が strict SQL checks を強制する、と公式文書は説明している。
 
+Android 17 Contact Picker は、`READ_CONTACTS` permission で連絡先全体へアクセスする代わりに、ユーザーが選択した contact data だけを Session URI 経由で共有する仕組みである。Session URI は `ContactsContract.Data` schema の cursor として読めるが、custom `selection` / `selectionArgs` は support されない。
+
 ## Customer Impact
 
 - 要確認
@@ -44,14 +46,16 @@ Android 17 では、targetSdkVersion 37 以上のアプリが `READ_CONTACTS` �
 ## Who Is Affected
 
 - 対象アプリ: `READ_CONTACTS` permission なしで Contacts Provider の `ContactsContract.Data` を query しているアプリ。
-- 対象機能: contacts search、lookup、候補表示、matching、連携機能。
-- 対象条件: targetSdkVersion 37 以上、permission denied / not granted、strict SQL と互換性のない projection / selection / sort order。
+- 対象機能: contacts search、lookup、候補表示、matching、連携機能、Contact Picker へ移行する連絡先選択 UI。
+- 対象条件: targetSdkVersion 37 以上、permission denied / not granted、strict SQL と互換性のない projection / selection / sort order。Contact Picker では Session URI に custom `selection` / `selectionArgs` を指定する path。
 
 ## Required Action
 
 - 必須対応: `ContactsContract.Data` query と `READ_CONTACTS` permission なしで実行される path を棚卸しする。
+- 必須対応: Contact Picker の結果 Session URI を query する path は通常の `ContactsContract.Data.CONTENT_URI` query helper と分離し、custom `selection` / `selectionArgs` を指定しない。
 - 推奨対応: query を documented columns と parameterized selection に寄せ、strict columns / strict grammar と互換性のある形へ修正する。
-- 不要: Contacts Provider を使わないアプリ、または `ContactsContract.Data` を permission なしで query しないアプリでは直接影響は限定的。
+- 推奨対応: `READ_CONTACTS` permission なしでユーザー選択済み contact data だけが必要な機能は、Contact Picker の requested data fields と Session URI query へ移行できるか検討する。
+- 不要: Contacts Provider を使わないアプリ、または `ContactsContract.Data` を permission なしで query しないアプリでは直接影響は限定的。Contact Picker の Session URI を selection なしで読むだけの path も、通常の Data table strict SQL query とは分けて扱う。
 
 ## Test Matrix
 
@@ -65,12 +69,16 @@ Android 17 では、targetSdkVersion 37 以上のアプリが `READ_CONTACTS` �
 
 Android 17 では、targetSdkVersion 37 以上のアプリが `READ_CONTACTS` permission を持たずに `ContactsContract.Data` table を query する場合、CP2 が `StrictColumns` と `StrictGrammar` を有効にします。これにより、provider が許容しない column や SQL grammar に依存した query は拒否され、exception が発生します。
 
-Contacts Provider への query は documented columns と安全な selection pattern に寄せ、permission なしで動く path を targetSdkVersion 37 環境で検証してください。現時点では local AOSP checkout に Android 17 tag がないため、targetSdkVersion gate、実際の exception type、compat flag の有無は未確認です。
+Contact Picker を使う場合、picker が返す Session URI はユーザーが選択した data だけへの一時的な read access です。結果 cursor は `ContactsContract.Data` schema に従いますが、Session URI は custom `selection` / `selectionArgs` を support しないため、既存の Data query helper をそのまま流用しないでください。
+
+Contacts Provider への query は documented columns と安全な selection pattern に寄せ、permission なしで動く path と Contact Picker path を targetSdkVersion 37 環境で検証してください。現時点では local AOSP checkout に Android 17 tag がないため、targetSdkVersion gate、実際の exception type、compat flag の有無は未確認です。
 
 ## Evidence
 
 - Official documentation: https://developer.android.com/about/versions/17/behavior-changes-17
+- Related Contact Picker documentation: https://developer.android.com/about/versions/17/features/contact-picker
 - Original statement: targetSdkVersion 37 以上のアプリでは、`READ_CONTACTS` なしで `ContactsContract.Data` table にアクセスする場合、CP2 が strict SQL query validation を強制し、非互換 query は rejected され exception が throw される。
+- Contact Picker statement: Android 17 以上では Contact Picker が broad `READ_CONTACTS` permission の代替として利用でき、Session URI は selected data への temporary read access を与える。Session URI は `ContactsContract.Data` schema の cursor として読めるが、custom `selection` / `selectionArgs` は support しない。
 - AOSP files: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - AOSP source context: 未確認。tag 間 diff が実行できない。
 - Diff interpretation: 未分類。公式文書上は added behavior / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
