@@ -1,15 +1,20 @@
-# Lessons Learned
+# 学び（Lessons Learned）
 
 このファイルは、調査を通じて得た再利用可能な学びや、次回以降の調査改善点を残すためのものです。
 
 調査から得た学びを記録する。
 
-## Template
+## テンプレート（Template）
 
-### YYYY-MM-DD - Topic
+### YYYY-MM-DD - トピック（Topic）
 
-What happened:
+起きたこと（What happened）:
 
-What I learned:
+学び（What I learned）:
 
-What to improve next time:
+次回改善すること（What to improve next time）:
+
+記入例:
+- 起きたこと: 公式文書だけで targetSdkVersion 条件を確定しそうになった。
+- 学び: AOSP gate と compat default state を確認するまで High confidence にしない。
+- 次回改善すること: 調査開始時に `APPLICABILITY_CLASSIFICATION.md` を先に確認する。

@@ -1,6 +1,6 @@
-# ECH (Encrypted Client Hello) enabled - One Page Summary
+# ECH (Encrypted Client Hello) enabled - 1ページ要約（One Page Summary）
 
-## Target
+## 対象（Target）
 
 Android 17 Behavior Change
 
@@ -16,58 +16,58 @@ Previous targetSdkVersion:
 Target targetSdkVersion:
 - 37
 
-## Applicability
+## 適用条件（Applicability）
 
-- Primary classification: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS update / all apps: Unknown。公式ページは targetSdkVersion 37+ 向け。
-- targetSdkVersion 37+: 公式文書上は該当。AOSP gate 未確認。
-- Other required conditions: TLS connection、ECH 対応 networking library、ECH 対応 server、`<domainEncryption>` mode。
+- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
+- OS アップデート / 全アプリ（OS update / all apps）: Unknown。公式ページは targetSdkVersion 37+ 向け。
+- targetSdkVersion 37 以上: 公式文書上は該当。AOSP gate 未確認。
+- その他の必須条件（Other required conditions）: TLS connection、ECH 対応 networking library、ECH 対応 server、`<domainEncryption>` mode。
 - Compat Change ID: Unknown
 - Compat default state: Unknown
 
-## At-a-Glance Matrix
+## 早見マトリクス（At-a-Glance Matrix）
 
-| Scenario | Impact |
+| シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
 | Android 17 / targetSdkVersion 36 | Unknown。Network Security Configuration docs は API 37 未満で default disabled と示すが、AOSP gate 未確認。 |
 | Android 17 / targetSdkVersion 37 | 公式文書上は TLS connection に ECH が使われる。 |
-| Android 17 / targetSdkVersion 37 + required conditions | networking library と server が ECH 対応なら ECH が active。negotiated 不可なら ECH GREASE。 |
+| Android 17 / targetSdkVersion 37 + 必須条件 | networking library と server が ECH 対応なら ECH が active。negotiated 不可なら ECH GREASE。 |
 
-## Summary
+## 要約（Summary）
 
 Android 17 では、targetSdkVersion 37 以上のアプリに ECH support が導入され、TLS handshake の SNI を暗号化して接続先ドメインの露出を減らす、と公式文書は説明している。
 
-## Customer Impact
+## 顧客影響（Customer Impact）
 
 - 要確認
 
-## Who Is Affected
+## 影響対象（Who Is Affected）
 
 - 対象アプリ: targetSdkVersion 37 へ更新する、HTTPS / TLS connection を行うアプリ。
 - 対象機能: HttpEngine、WebView、OkHttp などの networking library、Network Security Configuration、enterprise network / TLS inspection / SNI-based filtering。
 - 対象条件: networking library と remote server が ECH をサポートし、`<domainEncryption>` が disabled ではない場合。
 
-## Required Action
+## 対応要否（Required Action）
 
 - 必須対応: 利用 networking library と接続先 server / CDN の ECH support を確認する。
 - 推奨対応: `<domainEncryption>` で global / per-domain の enabled / disabled 方針を決め、Android 17 / targetSdkVersion 37 で TLS 接続テストを行う。
 - 不要: TLS connection を行わない、または ECH 非対応 library のみを使うアプリでは直接影響は限定的。
 
-## Test Matrix
+## テストマトリクス（Test Matrix）
 
-| Device OS | targetSdkVersion | Expected behavior |
+| 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
 | --- | --- | --- |
 | Android 16 | 36 | 公式 docs では ECH は available ではない。AOSP baseline diff は未確認。 |
 | Android 17 | 36 | Unknown。default disabled と読めるが AOSP gate 未確認。 |
 | Android 17 | 37 | 公式文書上は TLS connection に ECH が使われ、条件未充足時は ECH GREASE が送信される。 |
 
-## Explanation for Customers
+## 顧客向け説明（Explanation for Customers）
 
 Android 17 では、targetSdkVersion 37 以上のアプリで TLS 接続時に ECH が使われるようになります。ECH は SNI を暗号化し、ネットワーク上の観測者がアプリの接続先ドメインを特定しにくくする privacy 機能です。ただし、実際に ECH が有効になるには、アプリの networking library と接続先 server の両方が ECH をサポートしている必要があります。
 
 互換性上の懸念がある場合、Android 17 の Network Security Configuration で `<domainEncryption mode="disabled"/>` を global または per-domain に設定できます。現時点では local AOSP checkout に Android 17 tag がないため、targetSdkVersion gate、parser diff、compat flag の有無は未確認です。
 
-## Evidence
+## 根拠（Evidence）
 
 - Official documentation: https://developer.android.com/about/versions/17/behavior-changes-17
 - Network Security Configuration: https://developer.android.com/privacy-and-security/security-config#domainEncryption
@@ -79,10 +79,10 @@ Android 17 では、targetSdkVersion 37 以上のアプリで TLS 接続時に E
 - Diff interpretation: 未分類。added behavior / changed condition / changed default の判定は Android 17 tag 待ち。
 - Gate conclusion: Unknown。公式文書は targetSdkVersion 37+ と runtime / config 条件を示すが、AOSP gate evidence は未取得。
 
-## Human Decision
+## 人間の判断欄（Human Decision）
 
-Final Priority:
+最終優先度（Final Priority）:
 - Human decision required
 
-Decision:
+判断（Decision）:
 - Further investigation required

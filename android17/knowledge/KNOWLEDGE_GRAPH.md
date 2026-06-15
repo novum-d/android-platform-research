@@ -1,18 +1,18 @@
-# Android 17 Knowledge Graph
+# Android 17 ナレッジグラフ（Knowledge Graph）
 
 ## Android 17
 
-### Core Functionality
+### 中核機能（Core Functionality）
 
-Related:
+関連（Related）:
 - MessageQueue
 - Looper
 - Reflection
 - static final fields
 
-### Security / Privacy
+### セキュリティ / プライバシー（Security / Privacy）
 
-Related:
+関連（Related）:
 - Certificate Transparency
 - Dynamic Code Loading
 - Android Keystore
@@ -20,25 +20,25 @@ Related:
 - Cross-profile networking
 - SMS / OTP protection
 
-### Audio / Media
+### 音声 / メディア（Audio / Media）
 
-Related:
+関連（Related）:
 - Audio focus
 - Background audio
 - Foreground service
 - Exact alarm permission
 
-### Connectivity
+### 接続性（Connectivity）
 
-Related:
+関連（Related）:
 - BluetoothSocket
 - RFCOMM
 - InputStream
 - Loopback traffic
 
-### Large Screen
+### 大画面（Large Screen）
 
-Related:
+関連（Related）:
 - orientation
 - resizability
 - aspect ratio constraints

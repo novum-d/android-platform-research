@@ -1,8 +1,8 @@
-# Review Checklist
+# レビューチェックリスト（Review Checklist）
 
 このファイルは、調査レポートと 1ページ要約が必要な根拠・分類・顧客説明を満たしているか確認するためのチェックリストです。
 
-## Customer Report
+## 顧客向け調査レポート（Customer Report）
 
 - [ ] Behavior Change の原文がある
 - [ ] 対象バージョンが明記されている
@@ -22,15 +22,15 @@
 - [ ] OSアップデートのみ、targetSdk変更のみ、compat flag 強制変更の検証マトリクスがある
 - [ ] 事実と推測が分離されている
 - [ ] アプリ開発者への影響が書かれている
-- [ ] Service Impact Examples（サービス影響例）がある場合、実発生確認済みの事実と起こりうる影響例が分離されている
+- [ ] サービス影響例（Service Impact Examples）がある場合、実発生確認済みの事実と起こりうる影響例が分離されている
 - [ ] 顧客説明用の結論がある
-- [ ] Required Actions がある
-- [ ] Confidence がある
-- [ ] Confidence の理由と不足証拠が書かれている
+- [ ] 対応候補（Required Actions）がある
+- [ ] 信頼度（Confidence）がある
+- [ ] 信頼度の理由と不足証拠が書かれている
 - [ ] 1ページ要約がある
 - [ ] 人間の最終判断が DECISION_LOG にある
 
-## Classification Review
+## 分類レビュー（Classification Review）
 
 High confidence にできる条件:
 
@@ -48,3 +48,7 @@ High confidence にしてはいけない条件:
 - [ ] targetSdkVersion 条件と OS version 条件が混在している
 - [ ] compat framework の default state が未確認
 - [ ] 追加条件、例外、opt-out を未確認
+
+記入例:
+- High confidence 可: 公式文書、AOSP gate、compat default state、targetSdkVersion 別の期待挙動がすべて一致している。
+- High confidence 不可: 公式文書はあるが AOSP gate が未確認、または Android 17 tag がなく diff を確認できない。

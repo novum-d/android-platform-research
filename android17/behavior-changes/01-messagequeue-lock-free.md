@@ -1,8 +1,8 @@
 # New lock-free implementation of MessageQueue
 
-## Metadata
+## 基本情報（Metadata）
 
-### Android Versions
+### 調査対象 Android バージョン（Android Versions）
 
 From:
 - android-16.0.0_r4
@@ -16,7 +16,7 @@ Previous targetSdkVersion:
 Target targetSdkVersion:
 - 37
 
-### Behavior Change Source
+### Behavior Change 文書（Behavior Change Source）
 
 Document:
 https://developer.android.com/about/versions/17/behavior-changes-17
@@ -31,35 +31,35 @@ New lock-free implementation of MessageQueue
 Page type:
 - Apps targeting Android 17 or higher
 
-### Classification Snapshot
+### 分類スナップショット（Classification Snapshot）
 
-Primary classification:
+主分類（Primary classification）:
 - UNKNOWN_NEEDS_MORE_EVIDENCE
 
-Initial applicability assumption from official documentation:
+公式文書からの初期適用条件判断:
 - targetSdkVersion 37 以上のアプリに適用される変更として扱うのが自然。
 - ただし、Android 17 AOSP tag が local `frameworks-base` に存在しないため、AOSP gate、Compat Change ID、default state を検証できていない。
 
-At-a-glance impact:
+早見表（At-a-glance impact）:
 
-| Question | Answer | Evidence |
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 17 OS update only? | Unknown | 公式文書は「apps targeting Android 17 (API level 37) or higher」と述べるが、AOSP gate 未確認。 |
-| targetSdkVersion 37 required? | Likely, but unverified | 公式文書ページ種別と原文は targetSdkVersion 37+ を示す。AOSP evidence は未取得。 |
-| Additional runtime conditions? | Unknown | 公式抜粋からは追加条件は確認できない。詳細 guidance と AOSP tag 確認が必要。 |
-| Compat Change ID involved? | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | Unknown | 公式文書は「apps targeting Android 17 (API level 37) or higher」と述べるが、AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | Likely, but unverified | 公式文書ページ種別と原文は targetSdkVersion 37+ を示す。AOSP evidence は未取得。 |
+| 追加の実行時条件があるか | Unknown | 公式抜粋からは追加条件は確認できない。詳細 guidance と AOSP tag 確認が必要。 |
+| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
 
-### Investigation Date
+### 調査日（Investigation Date）
 
 2026-06-10
 
-### Confidence
+### 信頼度（Confidence）
 
 - Low
 
-### Applicability Classification
+### 適用条件分類（Applicability Classification）
 
-Applies when:
+適用される条件（Applies when）:
 - [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
 - [ ] targetSdkVersion >= 37 on Android 17+
 - [ ] targetSdkVersion >= 37, with additional runtime conditions
@@ -67,7 +67,7 @@ Applies when:
 - [ ] API addition only, not a behavior change
 - [x] Unknown / needs more evidence
 
-Required runtime conditions:
+必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 であることが前提。ただし AOSP tag 未取得。
 - targetSdkVersion: 公式文書上は 37 以上が条件と読める。AOSP gate 未確認。
 - Device/form factor: 不明。
@@ -80,10 +80,10 @@ Compat framework:
 - Default state: Unknown
 - Toggleable for testing: Unknown
 
-Classification confidence:
+分類信頼度（Classification confidence）:
 - Low
 
-Classification evidence:
+分類根拠（Classification evidence）:
 - Official documentation page: `behavior-changes-17`
 - Original applicability statement: "apps targeting Android 17 (API level 37) or higher receive..."
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
@@ -91,7 +91,7 @@ Classification evidence:
 
 ---
 
-# Executive Summary
+# エグゼクティブサマリー（Executive Summary）
 
 Android 17 では、targetSdkVersion 37 以上のアプリに対して `android.os.MessageQueue` の新しい lock-free 実装が適用される、と公式 Behavior Change 文書は説明している。性能改善と missed frame 削減が目的だが、`MessageQueue` の private field / private method を reflection で参照しているアプリやライブラリは壊れる可能性がある。
 
@@ -99,9 +99,9 @@ Android 17 では、targetSdkVersion 37 以上のアプリに対して `android.
 
 ---
 
-# Original Documentation
+# 公式ドキュメント確認（Original Documentation）
 
-## Statement
+## 原文（Statement）
 
 Page title:
 - Behavior changes: Apps targeting Android 17 or higher
@@ -121,7 +121,7 @@ Original statement being verified:
 
 The same section states that the new `android.os.MessageQueue` implementation is intended to improve performance and reduce missed frames, and that clients reflecting on `MessageQueue` private fields or methods may break. It points readers to the MessageQueue behavior change guidance for mitigation strategies.
 
-## Interpretation
+## 解釈（Interpretation）
 
 公式文書は、この変更を「Android 17 以上を targetSdkVersion として指定するアプリ向けの Behavior Change」として掲載している。原文も `apps targeting Android 17 (API level 37) or higher` と述べているため、一次分類は targetSdkVersion 37 以上で有効になる変更と考えられる。
 
@@ -129,7 +129,7 @@ The same section states that the new `android.os.MessageQueue` implementation is
 
 ---
 
-# What Changed
+# 変更内容（What Changed）
 
 公式文書上の変更点:
 - Android 17 で `android.os.MessageQueue` に新しい lock-free 実装が導入される。
@@ -143,23 +143,23 @@ AOSP で未確認の点:
 - Compat Change ID と default state。
 - opt-out または temporary override の有無。
 
-## Applicability
+## 適用条件（Applicability）
 
 この変更の適用条件は、現時点では公式文書からの一次判断に留まる。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-### OS Update Behavior
+### OS アップデート時の挙動（OS Update Behavior）
 
 - Android 17 にアップデートしただけで適用されるか: Unknown
 - targetSdkVersion に依存しない根拠: なし。公式文書は targetSdkVersion 37 以上を示す。
 - Android 16 以前での挙動: AOSP tag 比較未実施。Android 16 baseline source は Android 17 tag との比較ができないため、この調査では platform evidence として採用していない。
 
-### targetSdkVersion 37 Behavior
+### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate 未確認。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式抜粋は「Beginning with Android 17」と述べるため、少なくとも Android 17 platform behavior として扱う。
 - opt-out / temporary override の有無: Unknown。compat framework evidence 未確認。
 
-### Other Conditions
+### その他の条件（Other Conditions）
 
 - device/form factor: 公式抜粋では条件なし。
 - permission: 公式抜粋では条件なし。
@@ -169,9 +169,9 @@ AOSP で未確認の点:
 
 ---
 
-# AOSP Investigation
+# AOSP 調査（AOSP Investigation）
 
-## Checkout Status
+## checkout 状態（Checkout Status）
 
 Commands checked before evidence use:
 
@@ -186,12 +186,12 @@ Result:
 - From tag: `android-16.0.0_r4` exists.
 - To tag: no local `android-17*` tag found.
 
-Evidence limitation:
+根拠上の制約（Evidence limitation）:
 - Android 17 AOSP tag が local `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的な tag 比較を実行できない。
 - Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
 - この制約により、AOSP-backed conclusion は High confidence にできない。
 
-## Related Files
+## 関連ファイル（Related Files）
 
 未確認。Android 17 AOSP tag 取得後に、少なくとも以下の候補を tag 比較で確認する必要がある。
 
@@ -201,7 +201,7 @@ Evidence limitation:
 - native peer が存在する場合の `android_os_MessageQueue` 関連実装
 - compat framework 定義ファイル内の `MessageQueue` / lock-free / targetSdkVersion 37 関連 Change ID
 
-## Source Context Reviewed
+## 確認したソース文脈（Source Context Reviewed）
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
@@ -215,7 +215,7 @@ Required context:
 - Runtime path from app API / system event to changed code: 未確認。
 - Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
-## Diff Interpretation
+## 差分解釈（Diff Interpretation）
 
 | Observed diff | Interpretation | Behavior Change relevance | Confidence |
 | --- | --- | --- | --- |
@@ -228,7 +228,7 @@ Required interpretation:
 - Changed default: 未確認。
 - No behavior change found: 未確認。tag 不在のため「no behavior change」とは判断しない。
 
-## Evidence
+## 事実（Evidence）
 
 Facts:
 - 公式 Behavior Change 文書は、Android 17 から targetSdkVersion 37 以上のアプリが新しい lock-free `MessageQueue` 実装を受け取ると述べている。
@@ -247,11 +247,11 @@ Hypotheses:
 - Android 17 上で targetSdkVersion 37 以上のアプリにのみ新実装が有効化され、targetSdkVersion 36 のアプリには旧挙動が維持される可能性がある。
 - private API reflection をしていない通常の `Handler` / `Looper` 利用アプリでは、互換性破壊より性能面の影響が中心になる可能性がある。
 
-Conclusions:
+結論:
 - 現時点で顧客向けに確定できるのは、「公式文書上は targetSdkVersion 37 以上で注意すべき MessageQueue 実装変更がある」という範囲まで。
 - AOSP gate と compat framework default state が未確認のため、適用分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-## Applicability Gate Evidence
+## 適用ゲート根拠（Applicability Gate Evidence）
 
 - targetSdkVersion gate: 未確認。Android 17 AOSP tag がないため、`targetSdkVersion` / `ApplicationInfo.targetSdkVersion` 検索は実施していない。
 - CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 AOSP tag がないため、`CompatChanges.isChangeEnabled` / `@ChangeId` / `@EnabledAfter` / `@EnabledSince` 検索は実施していない。
@@ -274,14 +274,14 @@ Not searched yet:
 - Android 17 compat framework definitions。
 - MessageQueue guidance page の詳細な mitigation strategy。
 
-Reason:
+理由（Reason）:
 - Android 17 target tag が local checkout に存在しないため、tag 間 diff による platform evidence が作れない。
 
 ---
 
-# Impact Analysis
+# 影響分析（Impact Analysis）
 
-## Affected Apps
+## 影響を受けるアプリ（Affected Apps）
 
 影響を受ける可能性があるアプリ:
 - targetSdkVersion 37 以上への更新を予定しているアプリ。
@@ -289,7 +289,7 @@ Reason:
 - メインスレッド監視、ANR 監視、フレーム落ち検知、message queue 計測などのために private implementation detail に依存しているアプリまたは SDK。
 - 古い performance monitoring SDK、diagnostics SDK、hooking / instrumentation 系 SDK を組み込んでいるアプリ。
 
-## Non-Affected Apps
+## 影響を受けないアプリ（Non-Affected Apps）
 
 影響が限定的と考えられるケース:
 - `Handler`、`Looper`、`MessageQueue` の public API のみを使っているアプリ。
@@ -298,15 +298,15 @@ Reason:
 
 ---
 
-# Customer Impact
+# 顧客影響（Customer Impact）
 
-## Impact Level
+## 影響度（Impact Level）
 
 - Human decision required
 
 ※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
-## Business Impact
+## ビジネス影響（Business Impact）
 
 - ユーザー影響: private API reflection が壊れる場合、起動時 crash、監視機能の停止、UI thread 計測の不整合が発生する可能性がある。
 - 運用影響: サードパーティ SDK が原因の場合、アプリ側では直接コードが見えにくく、SDK 更新や vendor 確認が必要になる可能性がある。
@@ -314,11 +314,11 @@ Reason:
 
 ---
 
-# Service Impact Examples（サービス影響例）
+# サービス影響例（Service Impact Examples）
 
 このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## Example 1（例1）: UI 操作が多い一般アプリ
+## 例1（Example 1）: UI 操作が多い一般アプリ
 
 - 対象サービス例: チャット、SNS、EC、ニュースなど、メインスレッドで UI 更新とイベント処理が多いアプリ。
 - 影響を受ける実装パターン: `Handler` / `Looper` / `MessageQueue` の待機・dispatch timing に暗黙依存している実装。
@@ -330,7 +330,7 @@ Reason:
 - Confidence（信頼度）: Low
 - 注意: 実サービスで発生確認した事実ではない。AOSP tag 入手後に MessageQueue diff と gate を再確認する。
 
-## Example 2（例2）: SDK / framework が Looper timing に依存するアプリ
+## 例2（Example 2）: SDK / framework が Looper timing に依存するアプリ
 
 - 対象サービス例: analytics SDK、広告 SDK、リアルタイム通信 SDK、独自 UI framework を組み込むアプリ。
 - 影響を受ける実装パターン: `postAtFrontOfQueue`、synchronous barrier、idle handler、message ordering に強く依存する処理。
@@ -344,31 +344,31 @@ Reason:
 
 ---
 
-# Required Actions
+# 対応候補（Required Actions）
 
-## Must
+## 必須対応（Must）
 
 - `android.os.MessageQueue` の private field / private method へ reflection している自社コードがないか確認する。
 - サードパーティ SDK に `MessageQueue` reflection、main thread hook、message queue instrumentation が含まれていないか確認する。
 - targetSdkVersion 37 更新前に Android 17 device / emulator で起動、画面遷移、メインスレッド監視、performance monitoring をテストする。
 
-## Recommended
+## 推奨対応（Recommended）
 
 - private implementation detail への依存を public API ベースの実装に置き換える。
 - Android 17 の MessageQueue behavior change guidance を確認し、公式 mitigation strategy に沿って修正する。
 - performance monitoring / diagnostics SDK を Android 17 対応版に更新する。
 - reflection failure を crash ではなく機能無効化として扱えるように defensive coding を入れる。
 
-## Optional
+## 任意対応（Optional）
 
 - Android 17 AOSP tag 公開後、`MessageQueue` 関連 diff と compat Change ID を再調査する。
 - UI jank / frame metrics の before / after を測定し、性能面の副作用がないか確認する。
 
 ---
 
-# Verification Method
+# 検証方法（Verification Method）
 
-## Matrix
+## 検証マトリクス（Matrix）
 
 | Device OS | targetSdkVersion | Compat flag | Expected behavior |
 | --- | --- | --- | --- |
@@ -378,7 +378,7 @@ Reason:
 | Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。 |
 | Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。 |
 
-## Steps
+## 手順（Steps）
 
 - targetSdk変更: test app を targetSdkVersion 36 と 37 で build し、Android 17 上の挙動差を確認する。
 - compat framework command: Change ID 未確認のため未定。Android 17 tag / compat page 確認後に追加する。
@@ -388,7 +388,7 @@ Reason:
 
 ---
 
-# Conclusion
+# 結論（Conclusion）
 
 公式文書は、Android 17 で targetSdkVersion 37 以上のアプリに新しい lock-free `android.os.MessageQueue` 実装が適用されると説明している。主な互換性リスクは、`MessageQueue` private field / private method への reflection に依存するコードである。
 

@@ -1,8 +1,8 @@
 # Enforce strict SQL checks in CP2
 
-## Metadata
+## 基本情報（Metadata）
 
-### Android Versions
+### 調査対象 Android バージョン（Android Versions）
 
 From:
 - android-16.0.0_r4
@@ -16,7 +16,7 @@ Previous targetSdkVersion:
 Target targetSdkVersion:
 - 37
 
-### Behavior Change Source
+### Behavior Change 文書（Behavior Change Source）
 
 Document:
 https://developer.android.com/about/versions/17/behavior-changes-17
@@ -34,38 +34,38 @@ Enforce strict SQL checks in CP2
 Page type:
 - Apps targeting Android 17 or higher
 
-### Classification Snapshot
+### 分類スナップショット（Classification Snapshot）
 
-Primary classification:
+主分類（Primary classification）:
 - UNKNOWN_NEEDS_MORE_EVIDENCE
 
-Initial applicability assumption from official documentation:
+公式文書からの初期適用条件判断:
 - 公式文書は、targetSdkVersion 37 以上のアプリが `READ_CONTACTS` permission なしで `ContactsContract.Data` table にアクセスする場合、Contacts Provider 2 (CP2) が strict SQL query validation を強制すると説明している。
 - 変更が有効な場合、`READ_CONTACTS` permission を持たないアプリの `ContactsContract.Data` query では `StrictColumns` と `StrictGrammar` options が set される。
 - query がこれらの strict options と互換性のない pattern を使うと、query は rejected され、exception が throw される。
 - Android 17 の Contact Picker は `READ_CONTACTS` permission の広範な付与を避ける privacy-preserving alternative として提供される。picker が返す Session URI は選択された data への一時的な read access を与え、`ContactsContract.Data` schema に従う cursor として query できる。ただし Session URI は custom `selection` / `selectionArgs` を support せず、これらを指定すると exception になる。
 - ただし、local `frameworks-base` に Android 17 AOSP tag がないため、CP2 query validation 実装、targetSdkVersion gate、permission gate、strict option 設定箇所、exception type、Compat Change ID、default state は未検証である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-At-a-glance impact:
+早見表（At-a-glance impact）:
 
-| Question | Answer | Evidence |
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 17 OS update only? | Unknown | 公式文書は apps targeting Android 17 / API level 37 and higher と述べるが、AOSP gate 未確認。 |
-| targetSdkVersion 37 required? | Likely, but unverified | 原文は targetSdkVersion 37 以上を明示している。 |
-| Additional runtime conditions? | Yes | `READ_CONTACTS` permission なしで `ContactsContract.Data` table を query し、strict SQL と互換性のない query pattern を使う場合。 |
-| Compat Change ID involved? | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | Unknown | 公式文書は apps targeting Android 17 / API level 37 and higher と述べるが、AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | Likely, but unverified | 原文は targetSdkVersion 37 以上を明示している。 |
+| 追加の実行時条件があるか | Yes | `READ_CONTACTS` permission なしで `ContactsContract.Data` table を query し、strict SQL と互換性のない query pattern を使う場合。 |
+| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
 
-### Investigation Date
+### 調査日（Investigation Date）
 
 2026-06-11
 
-### Confidence
+### 信頼度（Confidence）
 
 - Low
 
-### Applicability Classification
+### 適用条件分類（Applicability Classification）
 
-Applies when:
+適用される条件（Applies when）:
 - [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
 - [ ] targetSdkVersion >= 37 on Android 17+
 - [ ] targetSdkVersion >= 37, with additional runtime conditions
@@ -73,7 +73,7 @@ Applies when:
 - [ ] API addition only, not a behavior change
 - [x] Unknown / needs more evidence
 
-Required runtime conditions:
+必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
 - targetSdkVersion: 公式文書上は 37 以上。
 - Device/form factor: 公式抜粋では条件なし。
@@ -87,10 +87,10 @@ Compat framework:
 - Default state: Unknown
 - Toggleable for testing: Unknown
 
-Classification confidence:
+分類信頼度（Classification confidence）:
 - Low
 
-Classification evidence:
+分類根拠（Classification evidence）:
 - Official documentation page: `behavior-changes-17`
 - Original applicability statement: apps targeting Android 17 / API level 37 and higher, without `READ_CONTACTS`, CP2 enforces strict SQL checks on `ContactsContract.Data` access.
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
@@ -98,7 +98,7 @@ Classification evidence:
 
 ---
 
-# Executive Summary
+# エグゼクティブサマリー（Executive Summary）
 
 Android 17 では、targetSdkVersion 37 以上のアプリが `READ_CONTACTS` permission なしで `ContactsContract.Data` table を query する場合、CP2 が strict SQL query validation を強制する、と公式文書は説明している。`StrictColumns` と `StrictGrammar` が有効になり、互換性のない query pattern は rejected され、exception が throw される。
 
@@ -110,9 +110,9 @@ Android 17 では Contact Picker も追加され、アプリは `READ_CONTACTS` 
 
 ---
 
-# Original Documentation
+# 公式ドキュメント確認（Original Documentation）
 
-## Statement
+## 原文（Statement）
 
 Page title:
 - Behavior changes: Apps targeting Android 17 or higher
@@ -132,7 +132,7 @@ Original statement being verified:
 
 The supplied official text states that if an app doesn't have `READ_CONTACTS` permission, `StrictColumns` and `StrictGrammar` options are set when querying the `ContactsContract.Data` table. If a query uses a pattern that isn't compatible with these options, it is rejected and causes an exception.
 
-## Interpretation
+## 解釈（Interpretation）
 
 この変更は、Contacts Provider に対する SQL query surface を厳格化し、`READ_CONTACTS` permission を持たないアプリが `ContactsContract.Data` table へアクセスする際の query pattern を制限する privacy / security behavior change である。
 
@@ -140,7 +140,7 @@ The supplied official text states that if an app doesn't have `READ_CONTACTS` pe
 
 ---
 
-# What Changed
+# 変更内容（What Changed）
 
 公式文書上の変更点:
 - Android 17 / targetSdkVersion 37 以上のアプリでは、CP2 が `ContactsContract.Data` table access に strict SQL query validation を適用する。
@@ -159,23 +159,23 @@ AOSP で未確認の点:
 - Contacts Provider 実装が `frameworks-base` ではなく `packages/providers/ContactsProvider` に存在する場合の evidence boundary。
 - Compat Change ID と default state。
 
-## Applicability
+## 適用条件（Applicability）
 
 公式文書の一次判断では、Android 17 以上、targetSdkVersion 37 以上、`READ_CONTACTS` permission を持たずに `ContactsContract.Data` table を query するアプリに適用される。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-### OS Update Behavior
+### OS アップデート時の挙動（OS Update Behavior）
 
 - Android 17 にアップデートしただけで適用されるか: Unknown
 - targetSdkVersion に依存しない根拠: なし。原文は apps targeting Android 17 / API level 37 and higher と明示している。
 - Android 16 以前での挙動: 未確認。Android 17 tag との明示的な比較ができないため、Android 16 source だけから platform evidence として断定しない。
 
-### targetSdkVersion 37 Behavior
+### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate 未確認。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式文書は Android 17 Behavior Changes として説明しているため、Android 17 platform behavior として扱う。
 - opt-out / temporary override の有無: Unknown。公式抜粋には opt-out は示されていない。compat framework による force enable / disable は未確認。
 
-### Other Conditions
+### その他の条件（Other Conditions）
 
 - device/form factor: 公式抜粋では条件なし。
 - permission: `READ_CONTACTS` permission がないことが公式文書上の追加条件。
@@ -185,9 +185,9 @@ AOSP で未確認の点:
 
 ---
 
-# AOSP Investigation
+# AOSP 調査（AOSP Investigation）
 
-## Checkout Status
+## checkout 状態（Checkout Status）
 
 Commands checked before evidence use:
 
@@ -202,13 +202,13 @@ Result:
 - From tag: `android-16.0.0_r4` exists.
 - To tag: no local `android-17*` tag found.
 
-Evidence limitation:
+根拠上の制約（Evidence limitation）:
 - Android 17 AOSP tag が local `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的な tag 比較を実行できない。
 - Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
 - CP2 の実装本体は `frameworks-base` ではなく ContactsProvider project 側にある可能性が高いが、この mission は `frameworks-base` evidence を対象としているため、Android 17 tag 入手後も API surface / constants / compat framework の確認と、必要に応じた provider project evidence の追加が必要である。
 - この制約により、AOSP-backed conclusion は High confidence にできない。
 
-## Related Files
+## 関連ファイル（Related Files）
 
 未確認。Android 17 AOSP tag 取得後に、少なくとも以下の候補を tag 比較で確認する必要がある。
 
@@ -222,7 +222,7 @@ Evidence limitation:
 Note:
 - `frameworks-base` には `ContactsContract` constants、`SQLiteQueryBuilder` API、`READ_CONTACTS` permission definition が含まれる可能性がある。一方、`READ_CONTACTS` がない場合に CP2 query へ strict options を設定する実装は ContactsProvider 側にある可能性が高い。最終 confidence には provider implementation evidence が必要である。
 
-## Source Context Reviewed
+## 確認したソース文脈（Source Context Reviewed）
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
@@ -236,7 +236,7 @@ Required context:
 - Runtime path from app API / system event to changed code: 未確認。
 - Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
-## Diff Interpretation
+## 差分解釈（Diff Interpretation）
 
 | Observed diff | Interpretation | Behavior Change relevance | Confidence |
 | --- | --- | --- | --- |
@@ -249,7 +249,7 @@ Required interpretation:
 - Changed default: 未確認。
 - No behavior change found: 未確認。tag 不在のため「no behavior change」とは判断しない。
 
-## Evidence
+## 事実（Evidence）
 
 Facts:
 - 公式 Behavior Change 文書は、targetSdkVersion 37 以上のアプリに対し、`READ_CONTACTS` permission なしで `ContactsContract.Data` table にアクセスする場合に CP2 が strict SQL query validation を強制すると述べている。
@@ -279,12 +279,12 @@ Hypotheses:
 - `READ_CONTACTS` permission を持つアプリではこの strict setting が適用されない可能性があるが、permission grant state、provider policy、other access restrictions は未確認である。
 - Contact Picker へ移行するアプリでは、Session URI から選択済み data を読む設計にすれば broad `READ_CONTACTS` を避けられる可能性がある。ただし、既存の `ContactsContract.Data` query と同じ selection / selectionArgs / sortOrder 前提の helper を流用する場合は修正が必要になる可能性がある。
 
-Conclusions:
+結論:
 - 現時点で顧客向けに確定できるのは、「公式文書上は Android 17 / targetSdkVersion 37 以上のアプリが `READ_CONTACTS` なしで `ContactsContract.Data` を query する場合、strict SQL validation により互換性のない query が exception で失敗する」という範囲まで。
 - Contact Picker はこのリスクを避ける代替導線になり得るが、picker 結果の Session URI は selected data 専用の一時 access であり、custom selection / selectionArgs は使えない。通常の CP2 Data query 厳格化とは別に、picker result query の制約として説明する必要がある。
 - AOSP gate、ContactsProvider の permission / query validation 実装、exception type、compat framework default state が未確認のため、primary classification は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-## Applicability Gate Evidence
+## 適用ゲート根拠（Applicability Gate Evidence）
 
 - targetSdkVersion gate: 未確認。公式文書は targetSdkVersion 37 以上を示すが、AOSP gate evidence はない。
 - CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 tag がないため検索未実施。
@@ -299,9 +299,9 @@ Conclusions:
 
 ---
 
-# Impact Analysis
+# 影響分析（Impact Analysis）
 
-## Affected Apps
+## 影響を受けるアプリ（Affected Apps）
 
 影響を受ける可能性があるアプリ:
 - `READ_CONTACTS` permission なしで `ContactsContract.Data` table を query しているアプリ。
@@ -310,7 +310,7 @@ Conclusions:
 - Contact Picker へ移行する際に、picker が返す Session URI に対して既存の `ContactsContract.Data` query helper をそのまま流用し、custom `selection` / `selectionArgs` を指定するアプリ。
 - targetSdkVersion 37 への更新を予定しており、Contacts Provider query grammar をまだ棚卸ししていないアプリ。
 
-## Non-Affected Apps
+## 影響を受けないアプリ（Non-Affected Apps）
 
 影響が限定的または対象外と考えられるケース:
 - Contacts Provider を使わないアプリ。
@@ -322,17 +322,17 @@ Conclusions:
 
 ---
 
-# Customer Impact
+# 顧客影響（Customer Impact）
 
 顧客説明用。
 
-## Impact Level
+## 影響度（Impact Level）
 
 - Human decision required
 
 ※ 仮評価。最終判断は人間が行う。
 
-## Business Impact
+## ビジネス影響（Business Impact）
 
 - ユーザー影響: contacts search、lookup、候補表示、連携先 matching が query exception により失敗し、該当機能が動作しなくなる可能性がある。Contact Picker へ移行した場合でも、Session URI に非対応 query parameter を渡すと picker 後の data 取得が失敗する可能性がある。
 - 運用影響: Contacts Provider query の SQL pattern、permission model、Contact Picker 移行 path、exception handling、targetSdkVersion 37 テストを確認する必要がある可能性がある。
@@ -340,11 +340,11 @@ Conclusions:
 
 ---
 
-# Service Impact Examples（サービス影響例）
+# サービス影響例（Service Impact Examples）
 
 このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## Example 1（例1）: READ_CONTACTS なしの連絡先検索
+## 例1（Example 1）: READ_CONTACTS なしの連絡先検索
 
 - 対象サービス例: 共有先候補、連絡先候補表示、電話番号 / メール補完。
 - 影響を受ける実装パターン: `READ_CONTACTS` なしで `ContactsContract.Data` を query し、selection / sortOrder に raw SQL fragment を含める実装。
@@ -356,7 +356,7 @@ Conclusions:
 - Confidence（信頼度）: Low
 - 注意: exception type と exact validation は AOSP tag 待ち。
 
-## Example 2（例2）: Contact Picker へ移行する連絡先選択 UI
+## 例2（Example 2）: Contact Picker へ移行する連絡先選択 UI
 
 - 対象サービス例: メール宛先選択、SMS 送信先選択、共有先選択、招待先選択。
 - 影響を受ける実装パターン: `ACTION_PICK_CONTACTS` または Android 17 で自動 upgrade された `ACTION_PICK` の結果 Session URI に対し、既存の `ContactsContract.Data` query helper を流用して custom `selection` / `selectionArgs` を指定する実装。
@@ -368,7 +368,7 @@ Conclusions:
 - Confidence（信頼度）: Medium for documentation behavior / Low for AOSP implementation details
 - 注意: Contact Picker 自体は broad `READ_CONTACTS` permission の代替であり、通常の CP2 Data table query strict SQL change と同一の gate かは AOSP 未確認。
 
-## Example 3（例3）: CRM / matching 機能の provider query
+## 例3（Example 3）: CRM / matching 機能の provider query
 
 - 対象サービス例: CRM 連携、名刺管理、営業支援、messaging matching。
 - 影響を受ける実装パターン: permission なしで Data table へ複雑な SQL expression / alias / function を投げる matching query。
@@ -382,9 +382,9 @@ Conclusions:
 
 ---
 
-# Required Actions
+# 対応候補（Required Actions）
 
-## Must
+## 必須対応（Must）
 
 - `ContactsContract.Data` query を棚卸しし、`READ_CONTACTS` permission なしで実行される path を特定する。
 - projection、selection、selectionArgs、sortOrder に raw SQL fragment、関数、subquery、alias、未定義 column がないか確認する。
@@ -394,7 +394,7 @@ Conclusions:
 - Android 17 / targetSdkVersion 37 のテスト環境が利用可能になったら、`READ_CONTACTS` grant あり / なしの両方で query 結果を検証する。
 - Android 17 AOSP tag 入手後に、targetSdkVersion gate、permission gate、exception type、compat Change ID を再確認する。
 
-## Recommended
+## 推奨対応（Recommended）
 
 - contacts access が本当に `READ_CONTACTS` permission なしで成立する必要があるか、privacy / UX 観点で見直す。
 - ユーザーが選択した contact data だけで要件を満たせる機能は、Contact Picker への移行を検討する。
@@ -403,16 +403,16 @@ Conclusions:
 - test data と query test を追加し、targetSdkVersion 36 / 37、permission grant / denied の matrix を自動化する。
 - Contacts Provider query failure をログとメトリクスで検出できるようにする。
 
-## Optional
+## 任意対応（Optional）
 
 - `SQLiteQueryBuilder#setStrictColumns` / `setStrictGrammar` の既存仕様を参考に、アプリ内 query builder でも同等の validation を早期に走らせる。
 - contacts feature の fallback UX を用意し、permission なしで query が拒否された場合の表示を整理する。
 
 ---
 
-# Verification Method
+# 検証方法（Verification Method）
 
-## Matrix
+## 検証マトリクス（Matrix）
 
 | Device OS | targetSdkVersion | Compat flag | Expected behavior |
 | --- | --- | --- | --- |
@@ -422,7 +422,7 @@ Conclusions:
 | Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。 |
 | Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。 |
 
-## Steps
+## 手順（Steps）
 
 - targetSdk変更: targetSdkVersion 36 と 37 の test build を用意する。
 - compat framework command: 未確認。Android 17 compat framework entry / Change ID が判明後に記録する。
@@ -433,7 +433,7 @@ Conclusions:
 
 ---
 
-# Conclusion
+# 結論（Conclusion）
 
 公式文書上、Android 17 / targetSdkVersion 37 以上のアプリでは、`READ_CONTACTS` permission なしで `ContactsContract.Data` table を query する場合に CP2 が strict SQL checks を強制する。非互換 query は exception で失敗するため、permission なし Data query を持つアプリは SQL pattern と error handling の棚卸しが必要である。
 
@@ -443,9 +443,9 @@ Android 17 Contact Picker は、address book 全体への `READ_CONTACTS` access
 
 ---
 
-# Human Decision Placeholder
+# 人間の判断欄（Human Decision Placeholder）
 
-Final Priority:
+最終優先度（Final Priority）:
 - Human decision required
 
 Final Severity:
@@ -457,7 +457,7 @@ Release Readiness:
 Customer Communication Priority:
 - Human decision required
 
-Decision:
+判断（Decision）:
 - Further investigation required
 
 Decision notes:
@@ -465,9 +465,9 @@ Decision notes:
 
 ---
 
-# References
+# 参照（References）
 
-## Documentation
+## ドキュメント（Documentation）
 
 - https://developer.android.com/about/versions/17/behavior-changes-17
 - https://developer.android.com/reference/android/provider/ContactsContract.Data

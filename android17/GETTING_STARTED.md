@@ -1,4 +1,4 @@
-# Android 17 Getting Started
+# Android 17 はじめに（Getting Started）
 
 このファイルは、Android 17 調査を進める時に読む場所をまとめる。
 
@@ -14,20 +14,20 @@
 
 ## 公式ドキュメント
 
-Primary documentation:
+主要ドキュメント（Primary documentation）:
 
 - All apps: https://developer.android.com/about/versions/17/behavior-changes-all
 - Apps targeting Android 17+: https://developer.android.com/about/versions/17/behavior-changes-17
 - Android 17 overview: https://developer.android.com/about/versions/17
 
-Note:
+注意:
 - Android 17 is currently documented as Beta.
 - Local `frameworks-base` does not currently have an `android-17*` tag.
 - AOSP evidence should be completed after the target Android 17 AOSP tag is available.
 
 ## 計画とバックログ
 
-| Need | Link |
+| 確認したいこと（Need） | リンク（Link） |
 | --- | --- |
 | Android 17 planning | [planning/ROADMAP.md](planning/ROADMAP.md) |
 | Android 17 backlog | [planning/RESEARCH_BACKLOG.md](planning/RESEARCH_BACKLOG.md) |
@@ -40,7 +40,7 @@ Codex CLI で Android 17 調査を実行する場合は、共通手順書を読�
 ../docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md
 ```
 
-## Analysis Generation
+## analysis 生成（Analysis Generation）
 
 Android 17 の AOSP tag が利用可能になったら、analysis files を生成する。
 

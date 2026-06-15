@@ -1,8 +1,8 @@
 # Local network permission required for apps targeting Android 17
 
-## Metadata
+## 基本情報（Metadata）
 
-### Android Versions
+### 調査対象 Android バージョン（Android Versions）
 
 From:
 - android-16.0.0_r4
@@ -16,7 +16,7 @@ Previous targetSdkVersion:
 Target targetSdkVersion:
 - 37
 
-### Behavior Change Source
+### Behavior Change 文書（Behavior Change Source）
 
 Document:
 https://developer.android.com/about/versions/17/behavior-changes-17
@@ -31,36 +31,36 @@ Local network permission required for apps targeting Android 17
 Page type:
 - Apps targeting Android 17 or higher
 
-### Classification Snapshot
+### 分類スナップショット（Classification Snapshot）
 
-Primary classification:
+主分類（Primary classification）:
 - UNKNOWN_NEEDS_MORE_EVIDENCE
 
-Initial applicability assumption from official documentation:
+公式文書からの初期適用条件判断:
 - 公式文書は、Android 17 / targetSdkVersion 37 以上のアプリでは local network access に `ACCESS_LOCAL_NETWORK` runtime permission が必要になると説明している。
 - 追加条件として、LAN device discovery / connection、local network traffic、system-mediated picker を使わない direct local network communication が関係する。
 - ただし、local `frameworks-base` に Android 17 AOSP tag がないため、AOSP gate、permission enforcement path、Compat Change ID、default state は未検証である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-At-a-glance impact:
+早見表（At-a-glance impact）:
 
-| Question | Answer | Evidence |
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 17 OS update only? | Unknown | 公式文書は targetSdkVersion 37+ の mandatory enforcement を示すが、AOSP gate 未確認。 |
-| targetSdkVersion 37 required? | Likely, but unverified | 公式文書と local network permission docs は targetSdkVersion 37+ の default block / mandatory enforcement を示す。 |
-| Additional runtime conditions? | Yes | LAN device discovery / connection、local network traffic、permission grant state、system picker 利用有無。 |
-| Compat Change ID involved? | Unknown | Android 17 tag と compat framework evidence が未確認。Android 16 opt-in 用の `RESTRICT_LOCAL_NETWORK` は公式 docs に記載あり。 |
+| Android 17 に OS アップデートしただけで適用されるか | Unknown | 公式文書は targetSdkVersion 37+ の mandatory enforcement を示すが、AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | Likely, but unverified | 公式文書と local network permission docs は targetSdkVersion 37+ の default block / mandatory enforcement を示す。 |
+| 追加の実行時条件があるか | Yes | LAN device discovery / connection、local network traffic、permission grant state、system picker 利用有無。 |
+| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。Android 16 opt-in 用の `RESTRICT_LOCAL_NETWORK` は公式 docs に記載あり。 |
 
-### Investigation Date
+### 調査日（Investigation Date）
 
 2026-06-10
 
-### Confidence
+### 信頼度（Confidence）
 
 - Low
 
-### Applicability Classification
+### 適用条件分類（Applicability Classification）
 
-Applies when:
+適用される条件（Applies when）:
 - [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
 - [ ] targetSdkVersion >= 37 on Android 17+
 - [ ] targetSdkVersion >= 37, with additional runtime conditions
@@ -68,7 +68,7 @@ Applies when:
 - [ ] API addition only, not a behavior change
 - [x] Unknown / needs more evidence
 
-Required runtime conditions:
+必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
 - targetSdkVersion: 公式文書上は 37 以上。
 - Device/form factor: 公式抜粋では条件なし。LAN / Wi-Fi / Ethernet など local network interface が関係する。
@@ -81,10 +81,10 @@ Compat framework:
 - Default state: Unknown
 - Toggleable for testing: Unknown。Android 16 opt-in guidance では `RESTRICT_LOCAL_NETWORK` compat config が言及されているが、Android 17 default enforcement の compat entry は未確認。
 
-Classification confidence:
+分類信頼度（Classification confidence）:
 - Low
 
-Classification evidence:
+分類根拠（Classification evidence）:
 - Official documentation page: `behavior-changes-17`
 - Original applicability statement: apps targeting Android 17 / API level 37 or higher must use picker path or request `ACCESS_LOCAL_NETWORK` at runtime.
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
@@ -92,7 +92,7 @@ Classification evidence:
 
 ---
 
-# Executive Summary
+# エグゼクティブサマリー（Executive Summary）
 
 Android 17 では、targetSdkVersion 37 以上のアプリが LAN device を discover / connect するには、新しい `ACCESS_LOCAL_NETWORK` runtime permission、または system-mediated な privacy-preserving picker の利用が必要になる、と公式文書は説明している。目的は、 unrestricted local network access を使った covert tracking / fingerprinting を防ぐこと。
 
@@ -102,9 +102,9 @@ Android 17 では、targetSdkVersion 37 以上のアプリが LAN device を dis
 
 ---
 
-# Original Documentation
+# 公式ドキュメント確認（Original Documentation）
 
-## Statement
+## 原文（Statement）
 
 Page title:
 - Behavior changes: Apps targeting Android 17 or higher
@@ -124,7 +124,7 @@ Original statement being verified:
 
 The supplied official text states that Android 17 introduces `ACCESS_LOCAL_NETWORK` to protect users from unauthorized local network access. It also states that apps targeting Android 17 / API level 37 or higher must either use system-mediated privacy-preserving device pickers or explicitly request the runtime permission to maintain local network communication.
 
-## Interpretation
+## 解釈（Interpretation）
 
 この変更は、Android 17 / targetSdkVersion 37 以上のアプリに対し、LAN device discovery / connection を dangerous runtime permission または system-mediated picker の制御下に置く privacy behavior change である。
 
@@ -132,7 +132,7 @@ The supplied official text states that Android 17 introduces `ACCESS_LOCAL_NETWO
 
 ---
 
-# What Changed
+# 変更内容（What Changed）
 
 公式文書上の変更点:
 - Android 17 は `ACCESS_LOCAL_NETWORK` runtime permission を導入する。
@@ -153,23 +153,23 @@ AOSP で未確認の点:
 - `RESTRICT_LOCAL_NETWORK` または Android 17 対応 Change ID の default state。
 - WebView、NsdManager、socket、Cronet、OkHttp など API / library 別の enforcement boundary。
 
-## Applicability
+## 適用条件（Applicability）
 
 公式文書の一次判断では、Android 17 以上、targetSdkVersion 37 以上、local network access を行うアプリに適用される。system-mediated picker を使う場合は broad runtime permission を回避できる。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-### OS Update Behavior
+### OS アップデート時の挙動（OS Update Behavior）
 
 - Android 17 にアップデートしただけで適用されるか: Unknown
 - targetSdkVersion に依存しない根拠: なし。公式文書は targetSdkVersion 37 以上で mandatory enforcement と述べる。
 - Android 16 以前での挙動: 公式 docs は Android 16 では opt-in 可能、targetSdkVersion 36 では local network access が open と説明しているが、AOSP tag 比較は未実施。
 
-### targetSdkVersion 37 Behavior
+### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate 未確認。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。API reference は permission を API level 37 追加としているため、Android 17 platform behavior として扱う。
 - opt-out / temporary override の有無: system-mediated picker path により permission prompt を避ける option がある。compat framework による force enable / disable は未確認。
 
-### Other Conditions
+### その他の条件（Other Conditions）
 
 - device/form factor: 公式抜粋では条件なし。
 - permission: `ACCESS_LOCAL_NETWORK` runtime permission。`NEARBY_DEVICES` permission group。
@@ -179,9 +179,9 @@ AOSP で未確認の点:
 
 ---
 
-# AOSP Investigation
+# AOSP 調査（AOSP Investigation）
 
-## Checkout Status
+## checkout 状態（Checkout Status）
 
 Commands checked before evidence use:
 
@@ -196,12 +196,12 @@ Result:
 - From tag: `android-16.0.0_r4` exists.
 - To tag: no local `android-17*` tag found.
 
-Evidence limitation:
+根拠上の制約（Evidence limitation）:
 - Android 17 AOSP tag が local `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的な tag 比較を実行できない。
 - Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
 - この制約により、AOSP-backed conclusion は High confidence にできない。
 
-## Related Files
+## 関連ファイル（Related Files）
 
 未確認。Android 17 AOSP tag 取得後に、少なくとも以下の候補を tag 比較で確認する必要がある。
 
@@ -217,7 +217,7 @@ Evidence limitation:
 Note:
 - 公式 local network permission docs は enforcement が networking stack の深い層にあると説明している。実装本体は `frameworks-base` 以外の networking module にある可能性があるが、本 mission では `frameworks-base` evidence の有無を優先して記録する。
 
-## Source Context Reviewed
+## 確認したソース文脈（Source Context Reviewed）
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
@@ -231,7 +231,7 @@ Required context:
 - Runtime path from app API / system event to changed code: 未確認。
 - Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
-## Diff Interpretation
+## 差分解釈（Diff Interpretation）
 
 | Observed diff | Interpretation | Behavior Change relevance | Confidence |
 | --- | --- | --- | --- |
@@ -244,7 +244,7 @@ Required interpretation:
 - Changed default: 未確認。
 - No behavior change found: 未確認。tag 不在のため「no behavior change」とは判断しない。
 
-## Evidence
+## 事実（Evidence）
 
 Facts:
 - 公式 Behavior Change 文書は、Android 17 が `ACCESS_LOCAL_NETWORK` runtime permission を導入すると述べている。
@@ -271,11 +271,11 @@ Hypotheses:
 - targetSdkVersion 36 の legacy app は temporary implicit grant により従来通り access できる可能性が高いが、AOSP gate 未確認のため断定しない。
 - mDNS / `.local` resolution、casting、IoT device management、browser local network access は特に影響を受けやすい可能性がある。
 
-Conclusions:
+結論:
 - 現時点で顧客向けに確定できるのは、「公式文書上は Android 17 / targetSdkVersion 37 以上で local network access が default block になり、picker または `ACCESS_LOCAL_NETWORK` runtime permission が必要になる」という範囲まで。
 - AOSP gate、permission definition diff、networking stack enforcement、compat framework default state が未確認のため、primary classification は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-## Applicability Gate Evidence
+## 適用ゲート根拠（Applicability Gate Evidence）
 
 - targetSdkVersion gate: 未確認。Android 17 AOSP tag がないため、`targetSdkVersion` / `ApplicationInfo.targetSdkVersion` 検索は実施していない。
 - CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 AOSP tag がないため、`CompatChanges.isChangeEnabled` / `@ChangeId` / `@EnabledAfter` / `@EnabledSince` 検索は実施していない。
@@ -300,14 +300,14 @@ Not searched yet:
 - networking stack enforcement implementation。
 - permission controller / AppOps implementation。
 
-Reason:
+理由（Reason）:
 - Android 17 target tag が local checkout に存在しないため、tag 間 diff による platform evidence が作れない。
 
 ---
 
-# Impact Analysis
+# 影響分析（Impact Analysis）
 
-## Affected Apps
+## 影響を受けるアプリ（Affected Apps）
 
 影響を受ける可能性があるアプリ:
 - targetSdkVersion 37 以上への更新を予定しているアプリ。
@@ -317,7 +317,7 @@ Reason:
 - sockets、Cronet、OkHttp、WebView などを通じて local network endpoint に接続するアプリ。
 - browser / embedded browser 的に local network resources へアクセスするアプリ。
 
-## Non-Affected Apps
+## 影響を受けないアプリ（Non-Affected Apps）
 
 影響が限定的と考えられるケース:
 - local network access を行わないアプリ。
@@ -327,15 +327,15 @@ Reason:
 
 ---
 
-# Customer Impact
+# 顧客影響（Customer Impact）
 
-## Impact Level
+## 影響度（Impact Level）
 
 - Human decision required
 
 ※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
-## Business Impact
+## ビジネス影響（Business Impact）
 
 - ユーザー影響: permission 未対応のまま targetSdkVersion 37 に上げると、LAN device discovery / connection が失敗し、casting、smart home、IoT、local device setup が動かなくなる可能性がある。
 - 運用影響: `NEARBY_DEVICES` group の既存 grant がある場合とない場合で prompt 体験が異なるため、support 手順や permission rationale の整備が必要。
@@ -343,11 +343,11 @@ Reason:
 
 ---
 
-# Service Impact Examples（サービス影響例）
+# サービス影響例（Service Impact Examples）
 
 このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## Example 1（例1）: スマートホーム / IoT デバイス連携
+## 例1（Example 1）: スマートホーム / IoT デバイス連携
 
 - 対象サービス例: 家電操作、照明、カメラ、ハブ、Matter / local discovery 補助アプリ。
 - 影響を受ける実装パターン: LAN device discovery、mDNS / NSD、direct socket connection を permission なしで行う実装。
@@ -359,7 +359,7 @@ Reason:
 - Confidence（信頼度）: Low
 - 注意: Android 17 tag 未取得のため enforcement path は未確認。
 
-## Example 2（例2）: キャスト / プリンター / POS 連携
+## 例2（Example 2）: キャスト / プリンター / POS 連携
 
 - 対象サービス例: casting、LAN printer、payment terminal、店舗 POS 周辺機器連携。
 - 影響を受ける実装パターン: local IP scan、service discovery、persistent LAN socket に依存する機能。
@@ -373,16 +373,16 @@ Reason:
 
 ---
 
-# Required Actions
+# 対応候補（Required Actions）
 
-## Must
+## 必須対応（Must）
 
 - アプリが local network access を行う箇所を棚卸しする。
 - targetSdkVersion 37 更新対象アプリで `ACCESS_LOCAL_NETWORK` が必要な use case を特定する。
 - direct LAN access が必要な場合、manifest に `android.permission.ACCESS_LOCAL_NETWORK` を宣言し、runtime permission request と denial / revocation handling を実装する。
 - Android 17 / targetSdkVersion 37 で LAN device discovery / connection の回帰テストを行う。
 
-## Recommended
+## 推奨対応（Recommended）
 
 - casting や device selection では、system-mediated picker で broad permission を避けられないか検討する。
 - mDNS / NSD 利用箇所では `DiscoveryRequest.FLAG_SHOW_PICKER` など、permission 不要の picker path を検討する。
@@ -390,16 +390,16 @@ Reason:
 - WebView / embedded browser が local network endpoint にアクセスする場合、host app の permission state と failure handling を確認する。
 - UDP `EPERM`、TCP block reason、socket error、service discovery failure を区別できる telemetry / logging を検討する。
 
-## Optional
+## 任意対応（Optional）
 
 - Android 17 AOSP tag 公開後、permission definition、targetSdkVersion gate、networking stack enforcement、compat Change ID を再調査する。
 - Android 16 opt-in compat (`RESTRICT_LOCAL_NETWORK`) を使い、targetSdkVersion 37 移行前に影響範囲を先行確認する。
 
 ---
 
-# Verification Method
+# 検証方法（Verification Method）
 
-## Matrix
+## 検証マトリクス（Matrix）
 
 | Device OS | targetSdkVersion | Compat flag | Expected behavior |
 | --- | --- | --- | --- |
@@ -409,7 +409,7 @@ Reason:
 | Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。Android 16 guidance の `RESTRICT_LOCAL_NETWORK` と Android 17 default enforcement の対応は未確認。 |
 | Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。 |
 
-## Steps
+## 手順（Steps）
 
 - targetSdk変更: test app を targetSdkVersion 36 と 37 で build し、Android 17 上で同じ LAN endpoint に接続する。
 - compat framework command: Android 17 Change ID 未確認のため未定。Android 16 opt-in guidance では `adb shell am compat enable RESTRICT_LOCAL_NETWORK <package_name>` が記載されている。
@@ -419,7 +419,7 @@ Reason:
 
 ---
 
-# Conclusion
+# 結論（Conclusion）
 
 公式文書は、Android 17 で targetSdkVersion 37 以上のアプリに `ACCESS_LOCAL_NETWORK` runtime permission が必要になり、local network access が default block になると説明している。アプリは system-mediated picker を使って broad permission prompt を避けるか、manifest declaration と runtime permission request により direct LAN access を維持する必要がある。
 

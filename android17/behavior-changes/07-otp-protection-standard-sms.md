@@ -1,8 +1,8 @@
 # OTP protection for standard SMS messages
 
-## Metadata
+## 基本情報（Metadata）
 
-### Android Versions
+### 調査対象 Android バージョン（Android Versions）
 
 From:
 - android-16.0.0_r4
@@ -16,7 +16,7 @@ Previous targetSdkVersion:
 Target targetSdkVersion:
 - 37
 
-### Behavior Change Source
+### Behavior Change 文書（Behavior Change Source）
 
 Document:
 https://developer.android.com/about/versions/17/behavior-changes-17
@@ -35,37 +35,37 @@ OTP protection for standard SMS messages
 Page type:
 - Apps targeting Android 17 or higher
 
-### Classification Snapshot
+### 分類スナップショット（Classification Snapshot）
 
-Primary classification:
+主分類（Primary classification）:
 - UNKNOWN_NEEDS_MORE_EVIDENCE
 
-Initial applicability assumption from official documentation:
+公式文書からの初期適用条件判断:
 - 公式文書は、Android 17 以降で targetSdkVersion 37 以上の多くのアプリに対し、WebOTP / SMS Retriever format ではない標準 SMS のうち OTP を含むものを、受信後 3 時間は利用できないようにすると説明している。
 - 3 時間の遅延中は `SMS_RECEIVED_ACTION` broadcast が withheld され、SMS provider database query が filtered される。
 - 追加条件として、対象 SMS が OTP を含む standard SMS であること、アプリが exempted app ではないこと、WebOTP / SMS Retriever format ではないことがある。
 - ただし、local `frameworks-base` に Android 17 AOSP tag がないため、OTP 判定、broadcast 抑止、provider filtering、targetSdkVersion gate、exemption 条件、Compat Change ID、default state は未検証である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-At-a-glance impact:
+早見表（At-a-glance impact）:
 
-| Question | Answer | Evidence |
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 17 OS update only? | Unknown | 公式文書は apps targeting Android 17 / API level 37 or higher と述べるが、AOSP gate 未確認。 |
-| targetSdkVersion 37 required? | Likely, but unverified | 原文は most apps targeting Android 17 / API level 37 or higher と述べている。 |
-| Additional runtime conditions? | Yes | OTP を含む standard SMS、WebOTP / SMS Retriever format ではない SMS、exempted app ではないこと。 |
-| Compat Change ID involved? | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | Unknown | 公式文書は apps targeting Android 17 / API level 37 or higher と述べるが、AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | Likely, but unverified | 原文は most apps targeting Android 17 / API level 37 or higher と述べている。 |
+| 追加の実行時条件があるか | Yes | OTP を含む standard SMS、WebOTP / SMS Retriever format ではない SMS、exempted app ではないこと。 |
+| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
 
-### Investigation Date
+### 調査日（Investigation Date）
 
 2026-06-10
 
-### Confidence
+### 信頼度（Confidence）
 
 - Low
 
-### Applicability Classification
+### 適用条件分類（Applicability Classification）
 
-Applies when:
+適用される条件（Applies when）:
 - [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
 - [ ] targetSdkVersion >= 37 on Android 17+
 - [ ] targetSdkVersion >= 37, with additional runtime conditions
@@ -73,7 +73,7 @@ Applies when:
 - [ ] API addition only, not a behavior change
 - [x] Unknown / needs more evidence
 
-Required runtime conditions:
+必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
 - targetSdkVersion: 公式文書上は 37 以上。
 - Device/form factor: 公式抜粋では条件なし。
@@ -86,10 +86,10 @@ Compat framework:
 - Default state: Unknown
 - Toggleable for testing: Unknown
 
-Classification confidence:
+分類信頼度（Classification confidence）:
 - Low
 
-Classification evidence:
+分類根拠（Classification evidence）:
 - Official documentation page: `behavior-changes-17`
 - Original applicability statement: most apps targeting Android 17 / API level 37 or higher, standard SMS messages containing an OTP, three-hour delay, exempted appsあり。
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
@@ -97,7 +97,7 @@ Classification evidence:
 
 ---
 
-# Executive Summary
+# エグゼクティブサマリー（Executive Summary）
 
 Android 17 では、targetSdkVersion 37 以上の多くのアプリに対し、OTP を含む標準 SMS は受信から 3 時間経過するまで利用できない、と公式文書は説明している。遅延中は `SMS_RECEIVED_ACTION` broadcast が配信されず、SMS provider database query でも対象メッセージが filtered される。
 
@@ -107,9 +107,9 @@ Android 17 では、targetSdkVersion 37 以上の多くのアプリに対し、O
 
 ---
 
-# Original Documentation
+# 公式ドキュメント確認（Original Documentation）
 
-## Statement
+## 原文（Statement）
 
 Page title:
 - Behavior changes: Apps targeting Android 17 or higher
@@ -129,7 +129,7 @@ Original statement being verified:
 
 The supplied official text also states that during the three-hour delay, the `SMS_RECEIVED_ACTION` broadcast is withheld and SMS provider database queries are filtered. It lists exempted app categories such as the default SMS assistant app and connected device companion apps, and recommends SMS Retriever or SMS User Consent APIs for OTP extraction.
 
-## Interpretation
+## 解釈（Interpretation）
 
 この変更は、OTP を含む SMS をアプリが直接読む経路を制限する security / privacy behavior change である。従来、WebOTP / SMS Retriever format の OTP message に対して適用されていた保護を、Android 17 では標準 SMS にも広げる、と公式文書は説明している。
 
@@ -137,7 +137,7 @@ The supplied official text also states that during the three-hour delay, the `SM
 
 ---
 
-# What Changed
+# 変更内容（What Changed）
 
 公式文書上の変更点:
 - Android 17 は SMS OTP protection を standard SMS messages に拡張する。
@@ -161,23 +161,23 @@ AOSP で未確認の点:
 - WebOTP / SMS Retriever format と standard SMS の分岐条件。
 - Compat Change ID と default state。
 
-## Applicability
+## 適用条件（Applicability）
 
 公式文書の一次判断では、Android 17 以上、targetSdkVersion 37 以上、OTP を含む standard SMS、WebOTP / SMS Retriever format ではないこと、exempted app ではないことが条件になる。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-### OS Update Behavior
+### OS アップデート時の挙動（OS Update Behavior）
 
 - Android 17 にアップデートしただけで適用されるか: Unknown
 - targetSdkVersion に依存しない根拠: この section の原文は most apps targeting Android 17 / API level 37 or higher と述べるため、targetSdkVersion 37 条件があると読むのが自然。ただし AOSP gate は未確認。
 - Android 16 以前での挙動: 未確認。Android 17 tag との明示的な比較ができないため、Android 16 source だけから platform evidence として断定しない。
 
-### targetSdkVersion 37 Behavior
+### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate 未確認。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式文書は Android 17 Behavior Changes として説明しているため、Android 17 platform behavior として扱う。
 - opt-out / temporary override の有無: Unknown。公式文書は exempted app categories を示すが、app developer が任意に opt out できる仕組みは抜粋からは確認できない。compat framework による force enable / disable は未確認。
 
-### Other Conditions
+### その他の条件（Other Conditions）
 
 - device/form factor: 公式抜粋では条件なし。
 - permission: SMS read / receive 関連 permission を持つ、または SMS provider / broadcast 経路を使うアプリが関係する可能性がある。正確な permission / AppOps gate は AOSP 未確認。
@@ -187,9 +187,9 @@ AOSP で未確認の点:
 
 ---
 
-# AOSP Investigation
+# AOSP 調査（AOSP Investigation）
 
-## Checkout Status
+## checkout 状態（Checkout Status）
 
 Commands checked before evidence use:
 
@@ -204,12 +204,12 @@ Result:
 - From tag: `android-16.0.0_r4` exists.
 - To tag: no local `android-17*` tag found.
 
-Evidence limitation:
+根拠上の制約（Evidence limitation）:
 - Android 17 AOSP tag が local `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的な tag 比較を実行できない。
 - Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
 - この制約により、AOSP-backed conclusion は High confidence にできない。
 
-## Related Files
+## 関連ファイル（Related Files）
 
 未確認。Android 17 AOSP tag 取得後に、少なくとも以下の候補を tag 比較で確認する必要がある。
 
@@ -221,7 +221,7 @@ Evidence limitation:
 Note:
 - 実際の SMS 受信処理、SMS provider、telephony stack、OTP classifier は `frameworks-base` 以外の AOSP project にある可能性がある。ただし、この mission は `frameworks-base` evidence を対象としているため、Android 17 tag 入手後も `frameworks-base` 内で確認できる API surface、compat framework、broadcast / provider 関連定義を優先して記録する。
 
-## Source Context Reviewed
+## 確認したソース文脈（Source Context Reviewed）
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
@@ -235,7 +235,7 @@ Required context:
 - Runtime path from app API / system event to changed code: 未確認。
 - Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
-## Diff Interpretation
+## 差分解釈（Diff Interpretation）
 
 | Observed diff | Interpretation | Behavior Change relevance | Confidence |
 | --- | --- | --- | --- |
@@ -248,7 +248,7 @@ Required interpretation:
 - Changed default: 未確認。
 - No behavior change found: 未確認。tag 不在のため「no behavior change」とは判断しない。
 
-## Evidence
+## 事実（Evidence）
 
 Facts:
 - 公式 Behavior Change 文書は、Android 17 から SMS OTP protection を standard SMS messages に拡張すると述べている。
@@ -275,11 +275,11 @@ Hypotheses:
 - Android 17 / targetSdkVersion 36 のアプリでは、少なくともこの `behavior-changes-17` section の standard SMS delay は適用されない可能性があるが、AOSP gate 未確認のため断定しない。
 - WebOTP / SMS Retriever format messages は別の all-apps 保護が適用されるため、targetSdkVersion 36 でも追加制限を受ける可能性がある。ただし、このレポートの主対象は standard SMS messages である。
 
-Conclusions:
+結論:
 - 現時点で顧客向けに確定できるのは、「公式文書上は Android 17 / targetSdkVersion 37 以上の多くのアプリで、OTP を含む標準 SMS が受信後 3 時間まで broadcast / provider query 経由で利用できなくなる」という範囲まで。
 - AOSP gate、OTP 判定、broadcast withholding、provider filtering、exemption 条件、compat framework default state が未確認のため、primary classification は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-## Applicability Gate Evidence
+## 適用ゲート根拠（Applicability Gate Evidence）
 
 - targetSdkVersion gate: 未確認。公式文書は targetSdkVersion 37 以上を示すが、AOSP gate evidence はない。
 - CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 tag がないため検索未実施。
@@ -294,9 +294,9 @@ Conclusions:
 
 ---
 
-# Impact Analysis
+# 影響分析（Impact Analysis）
 
-## Affected Apps
+## 影響を受けるアプリ（Affected Apps）
 
 影響を受ける可能性があるアプリ:
 - SMS inbox、SMS provider、または `SMS_RECEIVED_ACTION` broadcast から OTP を直接抽出しているアプリ。
@@ -304,7 +304,7 @@ Conclusions:
 - SMS Retriever / SMS User Consent API ではなく、独自 parser で標準 SMS 本文から OTP を抽出しているアプリ。
 - targetSdkVersion 37 への更新を予定しており、OTP SMS 受信直後の処理に依存するアプリ。
 
-## Non-Affected Apps
+## 影響を受けないアプリ（Non-Affected Apps）
 
 影響が限定的または対象外と考えられるケース:
 - OTP SMS を読まないアプリ。
@@ -314,17 +314,17 @@ Conclusions:
 
 ---
 
-# Customer Impact
+# 顧客影響（Customer Impact）
 
 顧客説明用。
 
-## Impact Level
+## 影響度（Impact Level）
 
 - Human decision required
 
 ※ 仮評価。最終判断は人間が行う。
 
-## Business Impact
+## ビジネス影響（Business Impact）
 
 - ユーザー影響: OTP 自動入力が受信直後に動作せず、ログイン、サインアップ、本人確認、アカウント復旧の完了率が下がる可能性がある。
 - 運用影響: OTP 配信 SMS の format、認証フロー、サポート問い合わせ、障害時の切り分け手順を見直す必要がある可能性がある。
@@ -332,11 +332,11 @@ Conclusions:
 
 ---
 
-# Service Impact Examples（サービス影響例）
+# サービス影響例（Service Impact Examples）
 
 このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## Example 1（例1）: SMS OTP 自動入力ログイン
+## 例1（Example 1）: SMS OTP 自動入力ログイン
 
 - 対象サービス例: ログイン、サインアップ、本人確認、アカウント復旧。
 - 影響を受ける実装パターン: `SMS_RECEIVED_ACTION` や SMS provider query で標準 SMS 本文から OTP を直接抽出する実装。
@@ -348,7 +348,7 @@ Conclusions:
 - Confidence（信頼度）: Low
 - 注意: AOSP gate / exemption 条件は未確認。
 
-## Example 2（例2）: 決済 / 高リスク操作の SMS 確認
+## 例2（Example 2）: 決済 / 高リスク操作の SMS 確認
 
 - 対象サービス例: 決済承認、送金、端末変更、2段階認証。
 - 影響を受ける実装パターン: SMS inbox を直接読んで OTP を抽出し、短時間の transaction flow に組み込む実装。
@@ -362,32 +362,32 @@ Conclusions:
 
 ---
 
-# Required Actions
+# 対応候補（Required Actions）
 
-## Must
+## 必須対応（Must）
 
 - SMS inbox、SMS provider query、`SMS_RECEIVED_ACTION` broadcast を使って OTP を読む箇所を棚卸しする。
 - OTP 抽出に標準 SMS 本文の直接読み取りを使っている場合、SMS Retriever API または SMS User Consent API への移行計画を作る。
 - Android 17 / targetSdkVersion 37 のテスト環境が利用可能になったら、OTP SMS 受信直後、3 時間未満、3 時間後の挙動を検証する。
 - Android 17 AOSP tag 入手後に、targetSdkVersion gate、exemption 条件、compat Change ID を再確認する。
 
-## Recommended
+## 推奨対応（Recommended）
 
 - OTP SMS format が SMS Retriever / WebOTP の要件を満たせるか、認証基盤側と確認する。
 - OTP の有効期限が 3 時間 delay と整合しないことを前提に、直接 SMS 読み取りに依存しない fallback UX を設計する。
 - default SMS / companion app のような exemption に依存する設計を避け、一般アプリとして成立する認証経路を採用する。
 - Android 17 の all-apps SMS OTP protection と、この targetSdkVersion 37 向け standard SMS protection を別項目としてテストする。
 
-## Optional
+## 任意対応（Optional）
 
 - SMS 権限を削減できる場合は、認証用途のためだけに SMS permission を保持していないか見直す。
 - OTP 自動入力失敗時のログ、メトリクス、サポート文言を整備する。
 
 ---
 
-# Verification Method
+# 検証方法（Verification Method）
 
-## Matrix
+## 検証マトリクス（Matrix）
 
 | Device OS | targetSdkVersion | Compat flag | Expected behavior |
 | --- | --- | --- | --- |
@@ -397,7 +397,7 @@ Conclusions:
 | Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。 |
 | Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。 |
 
-## Steps
+## 手順（Steps）
 
 - targetSdk変更: targetSdkVersion 36 と 37 の test build を用意する。
 - compat framework command: 未確認。Android 17 compat framework entry / Change ID が判明後に記録する。
@@ -407,7 +407,7 @@ Conclusions:
 
 ---
 
-# Conclusion
+# 結論（Conclusion）
 
 公式文書上、Android 17 / targetSdkVersion 37 以上の多くのアプリでは、OTP を含む標準 SMS を直接読む OTP 自動抽出が受信後 3 時間遅延する可能性がある。SMS broadcast と SMS provider query の両方が制限対象として説明されているため、SMS Retriever API または SMS User Consent API への移行が主要な対応候補になる。
 
@@ -415,9 +415,9 @@ Conclusions:
 
 ---
 
-# Human Decision Placeholder
+# 人間の判断欄（Human Decision Placeholder）
 
-Final Priority:
+最終優先度（Final Priority）:
 - Human decision required
 
 Final Severity:
@@ -429,7 +429,7 @@ Release Readiness:
 Customer Communication Priority:
 - Human decision required
 
-Decision:
+判断（Decision）:
 - Further investigation required
 
 Decision notes:
@@ -437,9 +437,9 @@ Decision notes:
 
 ---
 
-# References
+# 参照（References）
 
-## Documentation
+## ドキュメント（Documentation）
 
 - https://developer.android.com/about/versions/17/behavior-changes-17
 - https://developer.android.com/reference/android/provider/Telephony.Sms.Intents#SMS_RECEIVED_ACTION

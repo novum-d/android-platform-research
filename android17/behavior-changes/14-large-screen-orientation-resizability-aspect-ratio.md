@@ -1,8 +1,8 @@
 # Platform API changes to ignore orientation, resizability and aspect ratio constraints on large screens (sw>=600dp)
 
-## Metadata
+## 基本情報（Metadata）
 
-### Android Versions
+### 調査対象 Android バージョン（Android Versions）
 
 From:
 - android-16.0.0_r4
@@ -16,7 +16,7 @@ Previous targetSdkVersion:
 Target targetSdkVersion:
 - 37
 
-### Behavior Change Source
+### Behavior Change 文書（Behavior Change Source）
 
 Document:
 https://developer.android.com/about/versions/17/behavior-changes-17
@@ -31,37 +31,37 @@ Platform API changes to ignore orientation, resizability and aspect ratio constr
 Page type:
 - Apps targeting Android 17 or higher
 
-### Classification Snapshot
+### 分類スナップショット（Classification Snapshot）
 
-Primary classification:
+主分類（Primary classification）:
 - UNKNOWN_NEEDS_MORE_EVIDENCE
 
-Initial applicability assumption from official documentation:
+公式文書からの初期適用条件判断:
 - 公式文書は、Android 16 で targetSdkVersion 36 以上のアプリに対し、large screens (`sw >= 600dp`) で orientation、aspect ratio、resizability restrictions を無視する Platform API changes が導入されたと説明している。
 - Android 16 / SDK 36 では developers が opt out できたが、Android 17 / API level 37 以上を target するアプリでは、この opt-out が利用できなくなると説明している。
 - 追加条件として、large screen (`sw >= 600dp`)、orientation / resizability / aspect ratio constraints、Android 16 の opt-out mechanism、Android 17 targetSdkVersion 37 が関係する。
 - ただし、local `frameworks-base` に Android 17 AOSP tag がないため、opt-out removal、targetSdkVersion 37 gate、large screen 判定、ActivityInfo / WindowManager / ActivityTaskManager の enforcement path、Compat Change ID、default state は未検証である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-At-a-glance impact:
+早見表（At-a-glance impact）:
 
-| Question | Answer | Evidence |
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 17 OS update only? | Unknown | Android 16 で targetSdkVersion 36+ 向けに導入済みだが、Android 17 の opt-out removal gate は AOSP 未確認。 |
-| targetSdkVersion 37 required? | Likely, but unverified | 原文は opt-out が apps that target Android 17 / API level 37 or higher では利用不可と述べている。 |
-| Additional runtime conditions? | Yes | large screens (`sw >= 600dp`) と orientation / resizability / aspect ratio constraints が関係する。 |
-| Compat Change ID involved? | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | Unknown | Android 16 で targetSdkVersion 36+ 向けに導入済みだが、Android 17 の opt-out removal gate は AOSP 未確認。 |
+| targetSdkVersion 37 以上が必要か | Likely, but unverified | 原文は opt-out が apps that target Android 17 / API level 37 or higher では利用不可と述べている。 |
+| 追加の実行時条件があるか | Yes | large screens (`sw >= 600dp`) と orientation / resizability / aspect ratio constraints が関係する。 |
+| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
 
-### Investigation Date
+### 調査日（Investigation Date）
 
 2026-06-11
 
-### Confidence
+### 信頼度（Confidence）
 
 - Low
 
-### Applicability Classification
+### 適用条件分類（Applicability Classification）
 
-Applies when:
+適用される条件（Applies when）:
 - [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
 - [ ] targetSdkVersion >= 37 on Android 17+
 - [ ] targetSdkVersion >= 37, with additional runtime conditions
@@ -69,7 +69,7 @@ Applies when:
 - [ ] API addition only, not a behavior change
 - [x] Unknown / needs more evidence
 
-Required runtime conditions:
+必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
 - targetSdkVersion: 公式文書上は 37 以上で opt-out unavailable。Android 16 では 36 以上で opt-out 可能だったと説明されている。
 - Device/form factor: large screens / `sw >= 600dp`。
@@ -82,10 +82,10 @@ Compat framework:
 - Default state: Unknown
 - Toggleable for testing: Unknown
 
-Classification confidence:
+分類信頼度（Classification confidence）:
 - Low
 
-Classification evidence:
+分類根拠（Classification evidence）:
 - Official documentation page: `behavior-changes-17`
 - Original applicability statement: Android 16 introduced ignoring orientation / aspect ratio / resizability restrictions on large screens for API 36+ with opt-out; Android 17 / API 37+ removes that opt-out.
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
@@ -93,7 +93,7 @@ Classification evidence:
 
 ---
 
-# Executive Summary
+# エグゼクティブサマリー（Executive Summary）
 
 Android 16 では、targetSdkVersion 36 以上のアプリについて、large screens (`sw >= 600dp`) で orientation、aspect ratio、resizability の制約を platform が無視する変更が導入された、と公式文書は説明している。Android 16 では opt-out が可能だったが、Android 17 / targetSdkVersion 37 以上ではその opt-out が利用できなくなる。
 
@@ -103,9 +103,9 @@ Android 16 では、targetSdkVersion 36 以上のアプリについて、large s
 
 ---
 
-# Original Documentation
+# 公式ドキュメント確認（Original Documentation）
 
-## Statement
+## 原文（Statement）
 
 Page title:
 - Behavior changes: Apps targeting Android 17 or higher
@@ -125,7 +125,7 @@ Original statement being verified:
 
 The supplied official text also states that developers had the option to opt out of these changes with SDK 36, but this opt-out is no longer available for apps that target Android 17 / API level 37 or higher.
 
-## Interpretation
+## 解釈（Interpretation）
 
 この変更は、large screen でアプリの orientation / resizability / aspect ratio 制約よりも platform の画面適応を優先する large-screen compatibility behavior change である。Android 17 では、Android 16 で許されていた SDK 36 向け opt-out が targetSdkVersion 37 以上では使えなくなる点が中心である。
 
@@ -133,7 +133,7 @@ The supplied official text also states that developers had the option to opt out
 
 ---
 
-# What Changed
+# 変更内容（What Changed）
 
 公式文書上の変更点:
 - Android 16 で、large screens (`sw >= 600dp`) において orientation、aspect ratio、resizability restrictions を無視する Platform API changes が導入された。
@@ -150,23 +150,23 @@ AOSP で未確認の点:
 - Android 16 opt-out property / manifest / compat framework と Android 17 removal の関係。
 - Compat Change ID と default state。
 
-## Applicability
+## 適用条件（Applicability）
 
 公式文書の一次判断では、Android 17 以上、targetSdkVersion 37 以上、large screens (`sw >= 600dp`) で orientation / resizability / aspect ratio constraints を指定しているアプリに適用される。Android 16 / targetSdkVersion 36 で存在した opt-out が Android 17 / targetSdkVersion 37 では使えないという変更である。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-### OS Update Behavior
+### OS アップデート時の挙動（OS Update Behavior）
 
 - Android 17 にアップデートしただけで適用されるか: Unknown
 - targetSdkVersion に依存しない根拠: なし。原文は Android 17 / API level 37 以上を target するアプリで opt-out unavailable と述べている。
 - Android 16 以前での挙動: 公式文書は Android 16 / API level 36+ で制約無視が導入され、SDK 36 では opt-out 可能だったと述べている。AOSP tag 比較は未実施。
 
-### targetSdkVersion 37 Behavior
+### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate 未確認。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式文書は Android 17 Behavior Changes として説明しているため、Android 17 platform behavior として扱う。
 - opt-out / temporary override の有無: 公式文書上、SDK 36 の opt-out は Android 17 / targetSdkVersion 37 以上では利用不可。AOSP による具体的 opt-out 名、manifest property、compat toggle は未確認。
 
-### Other Conditions
+### その他の条件（Other Conditions）
 
 - device/form factor: large screens / `sw >= 600dp`。tablet、foldable inner display、desktop / freeform windowing、large screen emulator などが関係する可能性。
 - permission: 公式抜粋では条件なし。
@@ -176,9 +176,9 @@ AOSP で未確認の点:
 
 ---
 
-# AOSP Investigation
+# AOSP 調査（AOSP Investigation）
 
-## Checkout Status
+## checkout 状態（Checkout Status）
 
 Commands checked before evidence use:
 
@@ -193,12 +193,12 @@ Result:
 - From tag: `android-16.0.0_r4` exists.
 - To tag: no local `android-17*` tag found.
 
-Evidence limitation:
+根拠上の制約（Evidence limitation）:
 - Android 17 AOSP tag が local `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的な tag 比較を実行できない。
 - Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
 - この制約により、AOSP-backed conclusion は High confidence にできない。
 
-## Related Files
+## 関連ファイル（Related Files）
 
 未確認。Android 17 AOSP tag 取得後に、少なくとも以下の候補を tag 比較で確認する必要がある。
 
@@ -212,7 +212,7 @@ Evidence limitation:
 - `services/core/java/com/android/server/wm/AspectRatioPolicy.java`
 - compat framework 定義ファイル内の orientation / resizability / aspect ratio / large screen / targetSdkVersion 37 関連 Change ID
 
-## Source Context Reviewed
+## 確認したソース文脈（Source Context Reviewed）
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
@@ -226,7 +226,7 @@ Required context:
 - Runtime path from app API / system event to changed code: 未確認。
 - Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
-## Diff Interpretation
+## 差分解釈（Diff Interpretation）
 
 | Observed diff | Interpretation | Behavior Change relevance | Confidence |
 | --- | --- | --- | --- |
@@ -239,7 +239,7 @@ Required interpretation:
 - Changed default: 未確認。
 - No behavior change found: 未確認。tag 不在のため「no behavior change」とは判断しない。
 
-## Evidence
+## 事実（Evidence）
 
 Facts:
 - 公式 Behavior Change 文書は、Android 16 で API level 36 以上を target するアプリに対し、large screens (`sw >= 600dp`) で orientation、aspect ratio、resizability restrictions を無視する Platform API changes が導入されたと述べている。
@@ -262,11 +262,11 @@ Hypotheses:
 - Android 17 / targetSdkVersion 36 のアプリでは Android 16 と同様に opt-out が有効な可能性があるが、AOSP gate 未確認のため断定しない。
 - `sw >= 600dp` の判定は display / window metrics / smallest width configuration に依存する可能性があるが、exact condition は未確認である。
 
-Conclusions:
+結論:
 - 現時点で顧客向けに確定できるのは、「公式文書上は Android 17 / targetSdkVersion 37 以上のアプリでは、large screen で orientation / resizability / aspect ratio restrictions を無視する Android 16 変更への opt-out が利用できなくなる」という範囲まで。
 - AOSP gate、large screen 判定、opt-out mechanism、compat framework default state が未確認のため、primary classification は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-## Applicability Gate Evidence
+## 適用ゲート根拠（Applicability Gate Evidence）
 
 - targetSdkVersion gate: 未確認。公式文書は targetSdkVersion 37 以上を示すが、AOSP gate evidence はない。
 - CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 tag がないため検索未実施。
@@ -281,9 +281,9 @@ Conclusions:
 
 ---
 
-# Impact Analysis
+# 影響分析（Impact Analysis）
 
-## Affected Apps
+## 影響を受けるアプリ（Affected Apps）
 
 影響を受ける可能性があるアプリ:
 - targetSdkVersion 37 へ更新し、large screens (`sw >= 600dp`) で動作するアプリ。
@@ -293,7 +293,7 @@ Conclusions:
 - Android 16 / SDK 36 で opt-out を利用して large screen 制約無視を回避していたアプリ。
 - tablet、foldable、desktop windowing、ChromeOS など large screen 展開があるアプリ。
 
-## Non-Affected Apps
+## 影響を受けないアプリ（Non-Affected Apps）
 
 影響が限定的または対象外と考えられるケース:
 - large screen (`sw >= 600dp`) で利用されないアプリ。
@@ -303,17 +303,17 @@ Conclusions:
 
 ---
 
-# Customer Impact
+# 顧客影響（Customer Impact）
 
 顧客説明用。
 
-## Impact Level
+## 影響度（Impact Level）
 
 - Human decision required
 
 ※ 仮評価。最終判断は人間が行う。
 
-## Business Impact
+## ビジネス影響（Business Impact）
 
 - ユーザー影響: large screen 上で固定向き / 固定比率前提の UI が広がる、回転する、リサイズされる、letterbox されないなどにより、表示崩れや操作不能が起きる可能性がある。
 - 運用影響: tablet / foldable / desktop windowing の QA matrix、Android 16 opt-out 利用状況、targetSdkVersion 37 移行計画を確認する必要がある可能性がある。
@@ -321,11 +321,11 @@ Conclusions:
 
 ---
 
-# Service Impact Examples（サービス影響例）
+# サービス影響例（Service Impact Examples）
 
 このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## Example 1（例1）: Portrait 固定のスマートフォン前提 UI
+## 例1（Example 1）: Portrait 固定のスマートフォン前提 UI
 
 - 対象サービス例: 決済、本人確認、縦長 feed、camera / scanner UI。
 - 影響を受ける実装パターン: `screenOrientation="portrait"`、固定 aspect ratio、non-resizable 前提の Activity。
@@ -337,7 +337,7 @@ Conclusions:
 - Confidence（信頼度）: Low
 - 注意: exact opt-out mechanism と large screen 判定は AOSP tag 待ち。
 
-## Example 2（例2）: Tablet / foldable で non-resizable を指定する業務アプリ
+## 例2（Example 2）: Tablet / foldable で non-resizable を指定する業務アプリ
 
 - 対象サービス例: POS、医療業務、教育、店舗管理、在庫管理。
 - 影響を受ける実装パターン: `resizeableActivity=false` や固定 window size 前提で画面密度・サイズを決め打ちする UI。
@@ -351,9 +351,9 @@ Conclusions:
 
 ---
 
-# Required Actions
+# 対応候補（Required Actions）
 
-## Must
+## 必須対応（Must）
 
 - Android 16 の opt-out mechanism を利用しているか確認する。
 - `screenOrientation`、`resizeableActivity`、`minAspectRatio`、`maxAspectRatio` など large screen 制約に関わる manifest / API usage を棚卸しする。
@@ -361,23 +361,23 @@ Conclusions:
 - orientation change、multi-window resize、split-screen、fold / unfold、freeform resize で UI が崩れないか確認する。
 - Android 17 AOSP tag 入手後に、targetSdkVersion gate、opt-out removal、compat Change ID を再確認する。
 
-## Recommended
+## 推奨対応（Recommended）
 
 - fixed orientation / fixed aspect ratio 前提を減らし、layout を adaptive / responsive にする。
 - state restoration と configuration change handling を確認し、回転やリサイズで入力中データが失われないようにする。
 - large screen 用 resource、navigation layout、two-pane / supporting pane、window size class 相当の layout 分岐を整備する。
 - Android 16 の関連 behavior change と Android 17 の opt-out removal を分けて、既存 opt-out 依存のリスクを管理する。
 
-## Optional
+## 任意対応（Optional）
 
 - foldable posture、external display、ChromeOS / desktop mode など、`sw >= 600dp` 以外の large screen 実利用条件もテストする。
 - UI screenshot / automated layout test を追加し、targetSdkVersion 37 移行時の表示崩れを検出する。
 
 ---
 
-# Verification Method
+# 検証方法（Verification Method）
 
-## Matrix
+## 検証マトリクス（Matrix）
 
 | Device OS | targetSdkVersion | Compat flag | Expected behavior |
 | --- | --- | --- | --- |
@@ -387,7 +387,7 @@ Conclusions:
 | Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。 |
 | Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。 |
 
-## Steps
+## 手順（Steps）
 
 - targetSdk変更: targetSdkVersion 36 と 37 の test build を用意する。
 - compat framework command: 未確認。Android 17 compat framework entry / Change ID が判明後に記録する。
@@ -397,7 +397,7 @@ Conclusions:
 
 ---
 
-# Conclusion
+# 結論（Conclusion）
 
 公式文書上、Android 17 / targetSdkVersion 37 以上のアプリでは、Android 16 で導入された large screen 上の orientation / resizability / aspect ratio constraints 無視に対する SDK 36 opt-out が利用できなくなる。large screen で固定向き・固定比率・非リサイズ前提の UI を持つアプリは、targetSdkVersion 37 移行前に adaptive UI と configuration change 対応を確認する必要がある。
 
@@ -405,9 +405,9 @@ Conclusions:
 
 ---
 
-# Human Decision Placeholder
+# 人間の判断欄（Human Decision Placeholder）
 
-Final Priority:
+最終優先度（Final Priority）:
 - Human decision required
 
 Final Severity:
@@ -419,7 +419,7 @@ Release Readiness:
 Customer Communication Priority:
 - Human decision required
 
-Decision:
+判断（Decision）:
 - Further investigation required
 
 Decision notes:
@@ -427,9 +427,9 @@ Decision notes:
 
 ---
 
-# References
+# 参照（References）
 
-## Documentation
+## ドキュメント（Documentation）
 
 - https://developer.android.com/about/versions/17/behavior-changes-17
 - https://developer.android.com/about/versions/16/behavior-changes-16#ignore-orientation

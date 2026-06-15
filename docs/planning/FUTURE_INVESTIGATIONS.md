@@ -1,4 +1,4 @@
-# Future Investigations
+# 将来調査候補（Future Investigations）
 
 このファイルは、現在の正式な調査バックログには入れないが、将来調査したい Android Platform テーマを退避するためのメモです。
 

@@ -1,8 +1,8 @@
 # ECH (Encrypted Client Hello) enabled
 
-## Metadata
+## 基本情報（Metadata）
 
-### Android Versions
+### 調査対象 Android バージョン（Android Versions）
 
 From:
 - android-16.0.0_r4
@@ -16,7 +16,7 @@ Previous targetSdkVersion:
 Target targetSdkVersion:
 - 37
 
-### Behavior Change Source
+### Behavior Change 文書（Behavior Change Source）
 
 Document:
 https://developer.android.com/about/versions/17/behavior-changes-17
@@ -32,37 +32,37 @@ ECH (Encrypted Client Hello) enabled
 Page type:
 - Apps targeting Android 17 or higher
 
-### Classification Snapshot
+### 分類スナップショット（Classification Snapshot）
 
-Primary classification:
+主分類（Primary classification）:
 - UNKNOWN_NEEDS_MORE_EVIDENCE
 
-Initial applicability assumption from official documentation:
+公式文書からの初期適用条件判断:
 - 公式 Behavior Change 文書は、targetSdkVersion 37 以上のアプリでは TLS connection に ECH が使われると説明している。
 - ただし ECH が実際に有効になるには、アプリが使う networking library が ECH を統合していること、remote server が ECH protocol をサポートしていることが必要。
 - Network Security Configuration の `<domainEncryption>` により、global または per-domain で ECH mode を `"enabled"` / `"disabled"` に設定できる。
 - local `frameworks-base` に Android 17 AOSP tag がないため、AOSP gate、Network Security Configuration parser diff、Compat Change ID、default state は未検証である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-At-a-glance impact:
+早見表（At-a-glance impact）:
 
-| Question | Answer | Evidence |
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 17 OS update only? | Unknown | 公式ページは targetSdkVersion 37+ 向け。AOSP gate 未確認。 |
-| targetSdkVersion 37 required? | Likely, but unverified | 公式文書と Network Security Configuration docs は API 37+ の default enabled を示す。AOSP evidence は未取得。 |
-| Additional runtime conditions? | Yes | networking library ECH support、remote server ECH support、TLS connection、`<domainEncryption>` mode が条件。 |
-| Compat Change ID involved? | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | Unknown | 公式ページは targetSdkVersion 37+ 向け。AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | Likely, but unverified | 公式文書と Network Security Configuration docs は API 37+ の default enabled を示す。AOSP evidence は未取得。 |
+| 追加の実行時条件があるか | Yes | networking library ECH support、remote server ECH support、TLS connection、`<domainEncryption>` mode が条件。 |
+| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
 
-### Investigation Date
+### 調査日（Investigation Date）
 
 2026-06-10
 
-### Confidence
+### 信頼度（Confidence）
 
 - Low
 
-### Applicability Classification
+### 適用条件分類（Applicability Classification）
 
-Applies when:
+適用される条件（Applies when）:
 - [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
 - [ ] targetSdkVersion >= 37 on Android 17+
 - [ ] targetSdkVersion >= 37, with additional runtime conditions
@@ -70,7 +70,7 @@ Applies when:
 - [ ] API addition only, not a behavior change
 - [x] Unknown / needs more evidence
 
-Required runtime conditions:
+必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
 - targetSdkVersion: 公式文書上は 37 以上。
 - Device/form factor: 公式抜粋では条件なし。
@@ -83,10 +83,10 @@ Compat framework:
 - Default state: Unknown
 - Toggleable for testing: Unknown
 
-Classification confidence:
+分類信頼度（Classification confidence）:
 - Low
 
-Classification evidence:
+分類根拠（Classification evidence）:
 - Official documentation page: `behavior-changes-17`
 - Original applicability statement: targetSdkVersion 37 以上のアプリでは TLS connection に ECH が使われる。
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
@@ -94,7 +94,7 @@ Classification evidence:
 
 ---
 
-# Executive Summary
+# エグゼクティブサマリー（Executive Summary）
 
 Android 17 では、targetSdkVersion 37 以上のアプリに対して Encrypted Client Hello (ECH) の platform support が導入される、と公式文書は説明している。ECH は TLS handshake の Server Name Indication (SNI) を暗号化し、ネットワーク観測者が接続先ドメインを特定しにくくするための privacy 機能である。
 
@@ -104,9 +104,9 @@ Android 17 では、targetSdkVersion 37 以上のアプリに対して Encrypted
 
 ---
 
-# Original Documentation
+# 公式ドキュメント確認（Original Documentation）
 
-## Statement
+## 原文（Statement）
 
 Page title:
 - Behavior changes: Apps targeting Android 17 or higher
@@ -126,7 +126,7 @@ Original statement being verified:
 
 The supplied official text states that for apps targeting Android 17 / API level 37 or higher, ECH is used for TLS connections. It also states that ECH only becomes active when both the app's networking library and the remote server support ECH, that failed negotiation results in ECH GREASE, and that `<domainEncryption>` can customize the behavior globally or per domain.
 
-## Interpretation
+## 解釈（Interpretation）
 
 この変更は、targetSdkVersion 37 以上のアプリにおける TLS 接続の privacy behavior を変更する。従来の TLS handshake では SNI により接続先ドメインが観測され得るが、ECH は SNI を含む ClientHello の機微情報を暗号化し、接続先ドメインの露出を減らす。
 
@@ -134,7 +134,7 @@ The supplied official text states that for apps targeting Android 17 / API level
 
 ---
 
-# What Changed
+# 変更内容（What Changed）
 
 公式文書上の変更点:
 - Android 17 は ECH の platform support を導入する。
@@ -153,23 +153,23 @@ AOSP で未確認の点:
 - HttpEngine、WebView、OkHttp など library integration との接続点。
 - Compat Change ID と default state。
 
-## Applicability
+## 適用条件（Applicability）
 
 公式文書の一次判断では、Android 17 以上、targetSdkVersion 37 以上、TLS connection、ECH 対応 networking library、ECH 対応 server、`<domainEncryption>` mode が条件となる。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-### OS Update Behavior
+### OS アップデート時の挙動（OS Update Behavior）
 
 - Android 17 にアップデートしただけで適用されるか: Unknown
 - targetSdkVersion に依存しない根拠: なし。公式文書は targetSdkVersion 37 以上を明示している。
 - Android 16 以前での挙動: Network Security Configuration docs は Android 16 以下では ECH は available ではないと説明しているが、AOSP tag 比較は未実施。
 
-### targetSdkVersion 37 Behavior
+### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate 未確認。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式文書と Network Security Configuration docs は Android 17 / API level 37 以上の機能として説明している。
 - opt-out / temporary override の有無: `<domainEncryption mode="disabled"/>` による opt-out が公式 docs で説明されている。compat framework による force enable / disable は未確認。
 
-### Other Conditions
+### その他の条件（Other Conditions）
 
 - device/form factor: 公式抜粋では条件なし。
 - permission: 公式抜粋では条件なし。
@@ -179,9 +179,9 @@ AOSP で未確認の点:
 
 ---
 
-# AOSP Investigation
+# AOSP 調査（AOSP Investigation）
 
-## Checkout Status
+## checkout 状態（Checkout Status）
 
 Commands checked before evidence use:
 
@@ -196,12 +196,12 @@ Result:
 - From tag: `android-16.0.0_r4` exists.
 - To tag: no local `android-17*` tag found.
 
-Evidence limitation:
+根拠上の制約（Evidence limitation）:
 - Android 17 AOSP tag が local `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的な tag 比較を実行できない。
 - Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
 - この制約により、AOSP-backed conclusion は High confidence にできない。
 
-## Related Files
+## 関連ファイル（Related Files）
 
 未確認。Android 17 AOSP tag 取得後に、少なくとも以下の候補を tag 比較で確認する必要がある。
 
@@ -216,7 +216,7 @@ Evidence limitation:
 Note:
 - 実際の ECH handshake implementation は networking library や TLS stack 側にある可能性がある。今回の mission は `frameworks-base` evidence に限定されているため、library / TLS stack 側は Android 17 tag 公開後の追加調査対象として扱う。
 
-## Source Context Reviewed
+## 確認したソース文脈（Source Context Reviewed）
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
@@ -230,7 +230,7 @@ Required context:
 - Runtime path from app API / system event to changed code: 未確認。
 - Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
-## Diff Interpretation
+## 差分解釈（Diff Interpretation）
 
 | Observed diff | Interpretation | Behavior Change relevance | Confidence |
 | --- | --- | --- | --- |
@@ -243,7 +243,7 @@ Required interpretation:
 - Changed default: 未確認。
 - No behavior change found: 未確認。tag 不在のため「no behavior change」とは判断しない。
 
-## Evidence
+## 事実（Evidence）
 
 Facts:
 - 公式 Behavior Change 文書は、Android 17 が ECH platform support を導入すると述べている。
@@ -270,11 +270,11 @@ Hypotheses:
 - targetSdkVersion 36 のアプリでは default mode が disabled の可能性が高いが、AOSP gate 未確認のため断定しない。
 - 一部の enterprise network、TLS inspection、domain-based filtering、allowlist / blocklist 運用では、SNI visibility 低下または GREASE extension により観測・制御の前提が変わる可能性がある。
 
-Conclusions:
+結論:
 - 現時点で顧客向けに確定できるのは、「公式文書上は Android 17 / targetSdkVersion 37 以上で ECH が default enabled になり、library / server support と `<domainEncryption>` 設定に依存する」という範囲まで。
 - AOSP gate、Network Security Configuration parser diff、compat framework default state が未確認のため、primary classification は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-## Applicability Gate Evidence
+## 適用ゲート根拠（Applicability Gate Evidence）
 
 - targetSdkVersion gate: 未確認。Android 17 AOSP tag がないため、`targetSdkVersion` / `ApplicationInfo.targetSdkVersion` 検索は実施していない。
 - CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 AOSP tag がないため、`CompatChanges.isChangeEnabled` / `@ChangeId` / `@EnabledAfter` / `@EnabledSince` 検索は実施していない。
@@ -298,14 +298,14 @@ Not searched yet:
 - Android 17 API surface files。
 - networking library / TLS stack integration points。
 
-Reason:
+理由（Reason）:
 - Android 17 target tag が local checkout に存在しないため、tag 間 diff による platform evidence が作れない。
 
 ---
 
-# Impact Analysis
+# 影響分析（Impact Analysis）
 
-## Affected Apps
+## 影響を受けるアプリ（Affected Apps）
 
 影響を受ける可能性があるアプリ:
 - targetSdkVersion 37 以上への更新を予定しているアプリ。
@@ -315,7 +315,7 @@ Reason:
 - Network Security Configuration を使い、domain ごとに通信ポリシーを制御しているアプリ。
 - enterprise network、TLS inspection、SNI ベースの allowlist / blocklist、通信監視環境で動作するアプリ。
 
-## Non-Affected Apps
+## 影響を受けないアプリ（Non-Affected Apps）
 
 影響が限定的と考えられるケース:
 - TLS connection を行わないアプリ。
@@ -326,15 +326,15 @@ Reason:
 
 ---
 
-# Customer Impact
+# 顧客影響（Customer Impact）
 
-## Impact Level
+## 影響度（Impact Level）
 
 - Human decision required
 
 ※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
-## Business Impact
+## ビジネス影響（Business Impact）
 
 - ユーザー影響: SNI が暗号化されることで、ユーザーの接続先ドメインがネットワーク観測者に見えにくくなり privacy が向上する可能性がある。
 - 運用影響: SNI を前提とする enterprise proxy、TLS inspection、domain filtering、traffic monitoring では、接続判定や可観測性の前提が変わる可能性がある。
@@ -342,11 +342,11 @@ Reason:
 
 ---
 
-# Service Impact Examples（サービス影響例）
+# サービス影響例（Service Impact Examples）
 
 このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## Example 1（例1）: 企業ネットワーク / TLS inspection 環境の業務アプリ
+## 例1（Example 1）: 企業ネットワーク / TLS inspection 環境の業務アプリ
 
 - 対象サービス例: 社内 SaaS、MDM 管理端末、社内 proxy 経由の業務アプリ。
 - 影響を受ける実装パターン: ClientHello / SNI を network appliance が観測する前提の TLS inspection / routing / policy enforcement。
@@ -358,7 +358,7 @@ Reason:
 - Confidence（信頼度）: Low
 - 注意: 実ネットワークでの発生確認ではない。ECH availability は DNS / server / network condition に依存する可能性がある。
 
-## Example 2（例2）: 独自ネットワーク診断 / SNI ベース制御を持つアプリ
+## 例2（Example 2）: 独自ネットワーク診断 / SNI ベース制御を持つアプリ
 
 - 対象サービス例: VPN app、network monitor、security app、developer diagnostics tool。
 - 影響を受ける実装パターン: TLS handshake metadata や SNI を前提に接続先分類・診断を行う実装。
@@ -372,32 +372,32 @@ Reason:
 
 ---
 
-# Required Actions
+# 対応候補（Required Actions）
 
-## Must
+## 必須対応（Must）
 
 - アプリが使う networking library が ECH をサポートしているか確認する。
 - 接続先 server / CDN / hosting provider が ECH をサポートしているか確認する。
 - enterprise network、TLS inspection、SNI ベース制御が関係する顧客環境があるか確認する。
 - targetSdkVersion 37 更新前に Android 17 上で主要 endpoint への TLS 接続テストを行う。
 
-## Recommended
+## 推奨対応（Recommended）
 
 - Network Security Configuration に `<domainEncryption>` を追加する必要がある domain がないか確認する。
 - ECH を許可したい domain と、互換性理由で一時的に disable したい domain を分ける。
 - failure 時の telemetry を用意し、ECH negotiation failure、ECH GREASE、TLS handshake failure、HTTP layer failure を区別できるようにする。
 - WebView / OkHttp / HttpEngine などの library version と Android 17 support note を確認する。
 
-## Optional
+## 任意対応（Optional）
 
 - Android 17 AOSP tag 公開後、`<domainEncryption>` parser / policy diff と compat Change ID を再調査する。
 - packet capture / TLS handshake logging が可能な検証環境で、ECH enabled / disabled の差分を観測する。
 
 ---
 
-# Verification Method
+# 検証方法（Verification Method）
 
-## Matrix
+## 検証マトリクス（Matrix）
 
 | Device OS | targetSdkVersion | Compat flag | Expected behavior |
 | --- | --- | --- | --- |
@@ -407,7 +407,7 @@ Reason:
 | Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。`<domainEncryption mode="enabled"/>` による config 明示は別途検証対象。 |
 | Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。`<domainEncryption mode="disabled"/>` による opt-out は公式 docs 上あり。 |
 
-## Steps
+## 手順（Steps）
 
 - targetSdk変更: test app を targetSdkVersion 36 と 37 で build し、Android 17 上で同じ endpoint へ TLS connection を行う。
 - compat framework command: Change ID 未確認のため未定。Android 17 tag / compat page 確認後に追加する。
@@ -417,7 +417,7 @@ Reason:
 
 ---
 
-# Conclusion
+# 結論（Conclusion）
 
 公式文書は、Android 17 で targetSdkVersion 37 以上のアプリに ECH support が導入され、TLS connection の SNI 露出を減らすと説明している。実際の効果は、networking library、server support、Network Security Configuration の `<domainEncryption>` mode に依存する。
 

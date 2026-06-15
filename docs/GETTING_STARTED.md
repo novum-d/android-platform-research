@@ -1,4 +1,4 @@
-# Getting Started
+# はじめに（Getting Started）
 
 このファイルは、初めてこのリポジトリを見る人向けの共通導線です。
 
@@ -47,12 +47,12 @@ Android の変更を全部調べる
 
 | 情報 | 置き場所 |
 | --- | --- |
-| version scope | `android<version>/README.md` |
-| AOSP tag pair | `android<version>/README.md` |
-| targetSdkVersion focus | `android<version>/README.md` |
-| applicability classification | `android<version>/behavior-changes/` |
-| report / summary template | `android<version>/templates/` |
-| release-specific backlog / roadmap | `android<version>/planning/` |
+| バージョンスコープ（version scope） | `android<version>/README.md` |
+| AOSP tag の組み合わせ（AOSP tag pair） | `android<version>/README.md` |
+| targetSdkVersion の焦点（targetSdkVersion focus） | `android<version>/README.md` |
+| 適用条件分類（applicability classification） | `android<version>/behavior-changes/` |
+| レポート / 要約テンプレート（report / summary template） | `android<version>/templates/` |
+| バージョン固有 backlog / roadmap | `android<version>/planning/` |
 
 ## 迷った時
 

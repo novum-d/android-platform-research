@@ -1,8 +1,8 @@
 # Enable CT by default
 
-## Metadata
+## 基本情報（Metadata）
 
-### Android Versions
+### 調査対象 Android バージョン（Android Versions）
 
 From:
 - android-16.0.0_r4
@@ -16,7 +16,7 @@ Previous targetSdkVersion:
 Target targetSdkVersion:
 - 37
 
-### Behavior Change Source
+### Behavior Change 文書（Behavior Change Source）
 
 Document:
 https://developer.android.com/about/versions/17/behavior-changes-17
@@ -31,37 +31,37 @@ Enable CT by default
 Page type:
 - Apps targeting Android 17 or higher
 
-### Classification Snapshot
+### 分類スナップショット（Classification Snapshot）
 
-Primary classification:
+主分類（Primary classification）:
 - UNKNOWN_NEEDS_MORE_EVIDENCE
 
-Initial applicability assumption from official documentation:
+公式文書からの初期適用条件判断:
 - 公式文書は、targetSdkVersion 37 以上のアプリでは certificate transparency (CT) が default で enabled になると説明している。
 - Android 16 では CT は利用可能だったが、アプリが opt in する必要があったと説明している。
 - 追加条件として、TLS / HTTPS 接続、証明書チェーン、CT log 証明、Network Security Config による opt-in / opt-out などが関係する可能性がある。
 - ただし、local `frameworks-base` に Android 17 AOSP tag がないため、CT default の実装差分、targetSdkVersion gate、Network Security Config の解釈、compat framework entry、default state は未検証である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-At-a-glance impact:
+早見表（At-a-glance impact）:
 
-| Question | Answer | Evidence |
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 17 OS update only? | Unknown | 公式文書は apps targeting Android 17 / API level 37 or higher と述べるが、AOSP gate 未確認。 |
-| targetSdkVersion 37 required? | Likely, but unverified | 原文は If an app targets Android 17 / API level 37 or higher と述べている。 |
-| Additional runtime conditions? | Yes | TLS / HTTPS 接続、証明書チェーン、CT policy、Network Security Config が関係する可能性。 |
-| Compat Change ID involved? | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | Unknown | 公式文書は apps targeting Android 17 / API level 37 or higher と述べるが、AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | Likely, but unverified | 原文は If an app targets Android 17 / API level 37 or higher と述べている。 |
+| 追加の実行時条件があるか | Yes | TLS / HTTPS 接続、証明書チェーン、CT policy、Network Security Config が関係する可能性。 |
+| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
 
-### Investigation Date
+### 調査日（Investigation Date）
 
 2026-06-10
 
-### Confidence
+### 信頼度（Confidence）
 
 - Low
 
-### Applicability Classification
+### 適用条件分類（Applicability Classification）
 
-Applies when:
+適用される条件（Applies when）:
 - [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
 - [ ] targetSdkVersion >= 37 on Android 17+
 - [ ] targetSdkVersion >= 37, with additional runtime conditions
@@ -69,7 +69,7 @@ Applies when:
 - [ ] API addition only, not a behavior change
 - [x] Unknown / needs more evidence
 
-Required runtime conditions:
+必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
 - targetSdkVersion: 公式文書上は 37 以上。
 - Device/form factor: 公式抜粋では条件なし。
@@ -82,10 +82,10 @@ Compat framework:
 - Default state: Unknown
 - Toggleable for testing: Unknown
 
-Classification confidence:
+分類信頼度（Classification confidence）:
 - Low
 
-Classification evidence:
+分類根拠（Classification evidence）:
 - Official documentation page: `behavior-changes-17`
 - Original applicability statement: apps targeting Android 17 / API level 37 or higher have CT enabled by default; Android 16 required opt-in.
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
@@ -93,7 +93,7 @@ Classification evidence:
 
 ---
 
-# Executive Summary
+# エグゼクティブサマリー（Executive Summary）
 
 Android 17 では、targetSdkVersion 37 以上のアプリで certificate transparency (CT) が default で enabled になる、と公式文書は説明している。Android 16 では CT は利用可能だったが、Network Security Config などでアプリが opt in する必要があった。
 
@@ -103,9 +103,9 @@ Android 17 では、targetSdkVersion 37 以上のアプリで certificate transp
 
 ---
 
-# Original Documentation
+# 公式ドキュメント確認（Original Documentation）
 
-## Statement
+## 原文（Statement）
 
 Page title:
 - Behavior changes: Apps targeting Android 17 or higher
@@ -123,7 +123,7 @@ Original statement being verified:
 
 > If an app targets Android 17 (API level 37) or higher, certificate transparency (CT) is enabled by default. (On Android 16, CT is available but apps had to opt in.)
 
-## Interpretation
+## 解釈（Interpretation）
 
 この変更は、Network Security Config / platform TLS validation における certificate transparency の default policy を、targetSdkVersion 37 以上のアプリで opt-in から default enabled に変える security behavior change である。
 
@@ -131,7 +131,7 @@ Original statement being verified:
 
 ---
 
-# What Changed
+# 変更内容（What Changed）
 
 公式文書上の変更点:
 - Android 17 / targetSdkVersion 37 以上のアプリでは certificate transparency (CT) が default で enabled になる。
@@ -147,23 +147,23 @@ AOSP で未確認の点:
 - Conscrypt / framework Network Security Config / platform trust manager の境界。
 - Compat Change ID と default state。
 
-## Applicability
+## 適用条件（Applicability）
 
 公式文書の一次判断では、Android 17 以上、targetSdkVersion 37 以上、platform の TLS / HTTPS 証明書検証を使う通信に適用される可能性がある。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-### OS Update Behavior
+### OS アップデート時の挙動（OS Update Behavior）
 
 - Android 17 にアップデートしただけで適用されるか: Unknown
 - targetSdkVersion に依存しない根拠: なし。原文は If an app targets Android 17 / API level 37 or higher と明示している。
 - Android 16 以前での挙動: 公式文書は、Android 16 では CT は available だが opt in が必要だったと述べている。AOSP tag 比較は未実施。
 
-### targetSdkVersion 37 Behavior
+### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate 未確認。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式文書は Android 17 Behavior Changes として説明しているため、Android 17 platform behavior として扱う。
 - opt-out / temporary override の有無: Unknown。Network Security Config に CT 関連設定があることは関連文書から分かるが、Android 17 default enabled に対する opt-out / domain override の詳細は AOSP 未確認。
 
-### Other Conditions
+### その他の条件（Other Conditions）
 
 - device/form factor: 公式抜粋では条件なし。
 - permission: 公式抜粋では条件なし。通常のネットワーク通信では `INTERNET` permission が関係するが、CT policy 自体の gate かは未確認。
@@ -173,9 +173,9 @@ AOSP で未確認の点:
 
 ---
 
-# AOSP Investigation
+# AOSP 調査（AOSP Investigation）
 
-## Checkout Status
+## checkout 状態（Checkout Status）
 
 Commands checked before evidence use:
 
@@ -190,12 +190,12 @@ Result:
 - From tag: `android-16.0.0_r4` exists.
 - To tag: no local `android-17*` tag found.
 
-Evidence limitation:
+根拠上の制約（Evidence limitation）:
 - Android 17 AOSP tag が local `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的な tag 比較を実行できない。
 - Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
 - この制約により、AOSP-backed conclusion は High confidence にできない。
 
-## Related Files
+## 関連ファイル（Related Files）
 
 未確認。Android 17 AOSP tag 取得後に、少なくとも以下の候補を tag 比較で確認する必要がある。
 
@@ -211,7 +211,7 @@ Evidence limitation:
 Note:
 - 実際の CT verification 実装は Conscrypt や別 project にある可能性がある。ただし、この mission は `frameworks-base` evidence を対象としているため、Android 17 tag 入手後は `frameworks-base` 内の Network Security Config、API surface、compat framework 定義を優先して確認する。
 
-## Source Context Reviewed
+## 確認したソース文脈（Source Context Reviewed）
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
@@ -225,7 +225,7 @@ Required context:
 - Runtime path from app API / system event to changed code: 未確認。
 - Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
-## Diff Interpretation
+## 差分解釈（Diff Interpretation）
 
 | Observed diff | Interpretation | Behavior Change relevance | Confidence |
 | --- | --- | --- | --- |
@@ -238,7 +238,7 @@ Required interpretation:
 - Changed default: 未確認。公式文書上は opt-in から default enabled への default change だが、AOSP diff 未確認。
 - No behavior change found: 未確認。tag 不在のため「no behavior change」とは判断しない。
 
-## Evidence
+## 事実（Evidence）
 
 Facts:
 - 公式 Behavior Change 文書は、targetSdkVersion 37 以上のアプリで certificate transparency (CT) が default で enabled になると述べている。
@@ -261,11 +261,11 @@ Hypotheses:
 - Android 17 / targetSdkVersion 36 のアプリでは Android 16 と同様に opt-in が必要な可能性があるが、AOSP gate 未確認のため断定しない。
 - CT に対応していない公開証明書チェーン、検証環境、独自 CA / private PKI を使う通信では、接続失敗または証明書検証エラーが起きる可能性がある。
 
-Conclusions:
+結論:
 - 現時点で顧客向けに確定できるのは、「公式文書上は Android 17 / targetSdkVersion 37 以上のアプリで CT が default enabled になり、Android 16 の opt-in から変わる」という範囲まで。
 - AOSP gate、Network Security Config の default 解釈、例外条件、compat framework default state が未確認のため、primary classification は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-## Applicability Gate Evidence
+## 適用ゲート根拠（Applicability Gate Evidence）
 
 - targetSdkVersion gate: 未確認。公式文書は targetSdkVersion 37 以上を示すが、AOSP gate evidence はない。
 - CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 tag がないため検索未実施。
@@ -280,9 +280,9 @@ Conclusions:
 
 ---
 
-# Impact Analysis
+# 影響分析（Impact Analysis）
 
-## Affected Apps
+## 影響を受けるアプリ（Affected Apps）
 
 影響を受ける可能性があるアプリ:
 - targetSdkVersion 37 へ更新し、platform TLS / HTTPS 通信を行うアプリ。
@@ -290,7 +290,7 @@ Conclusions:
 - 検証環境、社内環境、private PKI、独自 CA、証明書 pinning と CT policy の組み合わせを持つアプリ。
 - Network Security Config で CT に明示 opt-in していなかったが、Android 17 で default enabled の対象になるアプリ。
 
-## Non-Affected Apps
+## 影響を受けないアプリ（Non-Affected Apps）
 
 影響が限定的または対象外と考えられるケース:
 - ネットワーク通信を行わないアプリ。
@@ -301,17 +301,17 @@ Conclusions:
 
 ---
 
-# Customer Impact
+# 顧客影響（Customer Impact）
 
 顧客説明用。
 
-## Impact Level
+## 影響度（Impact Level）
 
 - Human decision required
 
 ※ 仮評価。最終判断は人間が行う。
 
-## Business Impact
+## ビジネス影響（Business Impact）
 
 - ユーザー影響: CT 要件を満たさない証明書を使う endpoint への接続が失敗すると、ログイン、API 通信、決済、コンテンツ取得などが利用できなくなる可能性がある。
 - 運用影響: backend 証明書の発行元、CT log inclusion、検証環境 / staging 環境の証明書運用を確認する必要がある可能性がある。
@@ -319,11 +319,11 @@ Conclusions:
 
 ---
 
-# Service Impact Examples（サービス影響例）
+# サービス影響例（Service Impact Examples）
 
 このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## Example 1（例1）: Public API backend への HTTPS 通信
+## 例1（Example 1）: Public API backend への HTTPS 通信
 
 - 対象サービス例: ログイン API、決済 API、コンテンツ配信 API。
 - 影響を受ける実装パターン: CT 要件を満たさない公開証明書チェーンを使う endpoint に platform TLS で接続する実装。
@@ -335,7 +335,7 @@ Conclusions:
 - Confidence（信頼度）: Low
 - 注意: AOSP gate / exception 条件は未確認。
 
-## Example 2（例2）: Staging / private PKI 環境
+## 例2（Example 2）: Staging / private PKI 環境
 
 - 対象サービス例: QA 環境、社内 API、private CA を使う検証環境。
 - 影響を受ける実装パターン: public CT log に載らない証明書や private trust anchor を使う接続。
@@ -349,31 +349,31 @@ Conclusions:
 
 ---
 
-# Required Actions
+# 対応候補（Required Actions）
 
-## Must
+## 必須対応（Must）
 
 - アプリの HTTPS / TLS 接続先を棚卸しし、公開証明書チェーンが CT 要件を満たしているか確認する。
 - Android 16 で CT に opt in していないアプリは、Android 17 / targetSdkVersion 37 で default enabled になった場合の接続テストを行う。
 - Network Security Config の CT 関連設定、debug-overrides、domain-config、certificate pinning の組み合わせを確認する。
 - Android 17 AOSP tag 入手後に、targetSdkVersion gate、default policy、opt-out / exception、compat Change ID を再確認する。
 
-## Recommended
+## 推奨対応（Recommended）
 
 - staging / QA / internal API endpoint も含め、証明書発行と CT log inclusion の運用を backend / infra owner と確認する。
 - CT 検証失敗時のエラーログ、メトリクス、ユーザー向け fallback を整備する。
 - Android 16 の opt-in 設定で事前に CT を有効化し、接続先の互換性を早期検証する。
 
-## Optional
+## 任意対応（Optional）
 
 - 証明書 pinning を利用している場合、pin 更新手順と CT policy の関係を security review で確認する。
 - 独自 TrustManager / TLS stack を使う箇所があれば、platform CT policy の適用有無を別途整理する。
 
 ---
 
-# Verification Method
+# 検証方法（Verification Method）
 
-## Matrix
+## 検証マトリクス（Matrix）
 
 | Device OS | targetSdkVersion | Compat flag | Expected behavior |
 | --- | --- | --- | --- |
@@ -383,7 +383,7 @@ Conclusions:
 | Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。 |
 | Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。 |
 
-## Steps
+## 手順（Steps）
 
 - targetSdk変更: targetSdkVersion 36 と 37 の test build を用意する。
 - compat framework command: 未確認。Android 17 compat framework entry / Change ID が判明後に記録する。
@@ -393,7 +393,7 @@ Conclusions:
 
 ---
 
-# Conclusion
+# 結論（Conclusion）
 
 公式文書上、Android 17 / targetSdkVersion 37 以上のアプリでは certificate transparency が default enabled になり、Android 16 の opt-in 方式から変わる。HTTPS 接続先の証明書が CT 要件を満たしていない場合、targetSdkVersion 37 更新後に通信互換性リスクがある。
 
@@ -401,9 +401,9 @@ Conclusions:
 
 ---
 
-# Human Decision Placeholder
+# 人間の判断欄（Human Decision Placeholder）
 
-Final Priority:
+最終優先度（Final Priority）:
 - Human decision required
 
 Final Severity:
@@ -415,7 +415,7 @@ Release Readiness:
 Customer Communication Priority:
 - Human decision required
 
-Decision:
+判断（Decision）:
 - Further investigation required
 
 Decision notes:
@@ -423,9 +423,9 @@ Decision notes:
 
 ---
 
-# References
+# 参照（References）
 
-## Documentation
+## ドキュメント（Documentation）
 
 - https://developer.android.com/about/versions/17/behavior-changes-17
 - https://developer.android.com/privacy-and-security/security-config#CertificateTransparencySummary

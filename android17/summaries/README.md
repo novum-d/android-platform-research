@@ -1,12 +1,12 @@
-# Android 17 One Page Summaries
+# Android 17 1ページ要約（One Page Summaries）
 
 顧客説明・社内共有に使える1ページ要約を配置する。
 
-## Classification Index
+## 分類別索引（Classification Index）
 
 1ページ要約は、分類ごとにここから辿れるようにする。
 
-| Classification | Summaries |
+| 分類（Classification） | 要約（Summaries） |
 | --- | --- |
 | [OS update / all apps](../behavior-changes/README.md#os-update--all-apps) | まだありません |
 | [targetSdkVersion 37](../behavior-changes/README.md#targetsdkversion-37) | まだありません |
@@ -15,7 +15,7 @@
 | [API addition only](../behavior-changes/README.md#api-addition-only) | まだありません |
 | [Unknown / needs evidence](../behavior-changes/README.md#unknown--needs-evidence) | 現在 tracked item はありません |
 
-## Naming
+## 命名規則（Naming）
 
 ```text
 01-messagequeue-lock-free.md
@@ -23,7 +23,7 @@
 03-background-audio-hardening.md
 ```
 
-## Template
+## テンプレート（Template）
 
 Use:
 

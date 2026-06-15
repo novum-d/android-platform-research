@@ -1,4 +1,4 @@
-# Android Platform Research
+# Android Platform Research（Android 挙動変更調査）
 
 このリポジトリは、Android Platform の Behavior Changes を、顧客や Android アプリ開発者に説明できる形で調査・整理するためのものです。
 
@@ -23,10 +23,10 @@
 
 ```text
 Behavior Change Documentation
-  -> AOSP Evidence
-  -> Customer-facing Investigation Report
-  -> One Page Summary
-  -> Human Decision
+  -> AOSP 根拠（AOSP Evidence）
+  -> 顧客向け調査レポート（Customer-facing Investigation Report）
+  -> 1ページ要約（One Page Summary）
+  -> 人間の判断（Human Decision）
 ```
 
 AOSP source は、公式文書の記述を裏取りするために使います。AOSP diff だけを起点に結論を作らないでください。
@@ -35,7 +35,7 @@ AOSP source は、公式文書の記述を裏取りするために使います�
 
 ルート直下のファイルは、原則として入口だけにします。
 
-| Path | Purpose |
+| パス（Path） | 目的（Purpose） |
 | --- | --- |
 | `README.md` | リポジトリ全体の入口 |
 | `AGENTS.md` | Codex / agent 向けの操作指示 |
@@ -78,15 +78,15 @@ android<version>/
 
 新しい Android バージョンを調査する場合は、既存バージョンの成果物を上書きせず、新しい `android<version>/` を作ります。詳しくは [docs/VERSIONING.md](docs/VERSIONING.md) を参照してください。
 
-## AOSP Checkout
+## AOSP checkout の扱い（AOSP Checkout）
 
 `frameworks-base/` は一時的な evidence workspace として扱い、Git 管理対象にしません。
 
 調査では local working tree の差分ではなく、必ず AOSP tag 間の明示的な比較を使います。詳しくは [docs/workflow/AOSP_CHECKOUT.md](docs/workflow/AOSP_CHECKOUT.md) を参照してください。
 
-## Docs Index
+## docs 索引（Docs Index）
 
-| Category | Purpose | Path |
+| カテゴリ（Category） | 目的（Purpose） | パス（Path） |
 | --- | --- | --- |
 | Getting Started | 初見向けの共通導線 | [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) |
 | Overview | 目的、情報源ポリシー、タイムライン、用語集 | [docs/overview/](docs/overview/) |

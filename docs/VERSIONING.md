@@ -1,12 +1,12 @@
-# Versioning
+# バージョニング（Versioning）
 
 このリポジトリでは、`docs/` と `android<version>/` の責務を分ける。
 
-## Rule
+## ルール（Rule）
 
 `docs/` はバージョン非依存の運用知識だけを置く。
 
-Examples:
+例:
 - 調査原則
 - 調査プレイブック
 - レビュー観点
@@ -17,7 +17,7 @@ Examples:
 
 Android バージョン固有のものは `android<version>/` に置く。
 
-Examples:
+例:
 - Behavior Change 一覧
 - applicability classification
 - report / summary templates
@@ -30,7 +30,7 @@ Examples:
 
 ## Android 16
 
-Current version-specific directory:
+現在のバージョン固有ディレクトリ:
 
 ```text
 android16/
@@ -43,7 +43,7 @@ android16/
   templates/
 ```
 
-Version scope:
+バージョンスコープ:
 
 ```text
 From: android-15.0.0_r36
@@ -58,7 +58,7 @@ targetSdkVersion 36
 
 ## Android 17
 
-Android 17 research directory:
+Android 17 調査ディレクトリ:
 
 ```text
 android17/
@@ -71,7 +71,7 @@ android17/
   templates/
 ```
 
-Current status:
+現在の状態:
 
 ```text
 From: android-16.0.0_r4
@@ -95,8 +95,12 @@ When the Android 17 AOSP tag is available, update all release-specific fields:
 - classification rules if Android 17 changes the wording or applicability model
 - templates and verification matrices
 
-## Practical Rule
+## 実用ルール（Practical Rule）
 
 If a file contains `Android 16`, `targetSdkVersion 36`, `android-16.0.0_r1`,
 or Android 16-specific topic prioritization, it should usually live under
 `android16/`, not `docs/`.
+
+例:
+- `targetSdkVersion 37` の検証マトリクスは `android17/templates/` または `android17/behavior-changes/` に置く。
+- すべての Android バージョンで使う「AOSP checkout の扱い」は `docs/workflow/` に置く。

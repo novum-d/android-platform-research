@@ -1,4 +1,4 @@
-# Docs
+# 共通ドキュメント（Docs）
 
 このディレクトリは、バージョン非依存の運用・知識を用途別に分類する場所です。
 
@@ -11,9 +11,9 @@ Android バージョン固有の調査成果物、テンプレート、バック
 docs/VERSIONING.md
 ```
 
-## Categories
+## カテゴリ（Categories）
 
-| Path | Purpose | Files |
+| パス（Path） | 目的（Purpose） | ファイル（Files） |
 | --- | --- | --- |
 | `GETTING_STARTED.md` | 初見向けの共通導線 | `GETTING_STARTED.md` |
 | `overview/` | リポジトリの目的、位置づけ、情報源、時系列、用語 | `WHY.md`, `META.md`, `SOURCES.md`, `TIMELINE.md`, `glossary.md` |
@@ -23,9 +23,9 @@ docs/VERSIONING.md
 | `knowledge/` | 複数 Android バージョンにまたがる仮説、未解決質問 | `hypotheses.md`, `questions.md` |
 | `notes/` | 正式成果物に入れる前の個人メモ | `PERSONAL_NOTES.md` |
 
-## Common Tasks
+## よくある作業（Common Tasks）
 
-| Task | Start here |
+| 作業（Task） | 最初に見る場所（Start here） |
 | --- | --- |
 | 初めて読む | `GETTING_STARTED.md` |
 | 調査手順を確認する | `workflow/INVESTIGATION_PLAYBOOK.md` |
@@ -38,7 +38,7 @@ docs/VERSIONING.md
 | 用語の意味を揃える | `overview/glossary.md` |
 | バージョニング方針を確認する | `VERSIONING.md` |
 
-## Root Policy
+## ルート配置方針（Root Policy）
 
 ルート直下に残す Markdown は、原則として入口になるものだけにします。
 

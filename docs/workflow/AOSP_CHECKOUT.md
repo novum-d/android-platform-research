@@ -1,4 +1,4 @@
-# AOSP Checkout
+# AOSP checkout の扱い（AOSP Checkout）
 
 このリポジトリでは、AOSP source checkout を調査根拠の確認に使います。
 
@@ -41,7 +41,7 @@ git -C frameworks-base diff <from-tag> <to-tag> -- <path>
 git -C frameworks-base grep -n "targetSdkVersion\|ApplicationInfo.targetSdkVersion\|CompatChanges.isChangeEnabled\|@ChangeId\|@EnabledAfter\|@EnabledSince" <to-tag> -- <file-or-dir>
 ```
 
-## Analysis Files
+## 分析補助ファイル（Analysis Files）
 
 候補ファイル一覧を生成する場合は、共通スクリプトに対象バージョンの値を渡します。
 
@@ -54,6 +54,10 @@ scripts/generate_target.sh
 ```
 
 生成物は `<android-version-dir>/analysis/` に出力します。
+
+記入例:
+- Android 17 調査では `VERSION_DIR=android17`、`OLD_TAG=android-16.0.0_r4`、`NEW_TAG=<android-17-aosp-tag>` を使う。
+- 生成された `analysis/*.txt` は候補一覧であり、最終的な根拠は tag diff と source context に記録する。
 
 ## 避けること
 

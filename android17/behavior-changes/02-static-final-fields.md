@@ -1,8 +1,8 @@
 # Static final fields are now unmodifiable
 
-## Metadata
+## 基本情報（Metadata）
 
-### Android Versions
+### 調査対象 Android バージョン（Android Versions）
 
 From:
 - android-16.0.0_r4
@@ -16,7 +16,7 @@ Previous targetSdkVersion:
 Target targetSdkVersion:
 - 37
 
-### Behavior Change Source
+### Behavior Change 文書（Behavior Change Source）
 
 Document:
 https://developer.android.com/about/versions/17/behavior-changes-17
@@ -27,36 +27,36 @@ Static final fields are now unmodifiable
 Page type:
 - Apps targeting Android 17 or higher
 
-### Classification Snapshot
+### 分類スナップショット（Classification Snapshot）
 
-Primary classification:
+主分類（Primary classification）:
 - UNKNOWN_NEEDS_MORE_EVIDENCE
 
-Initial applicability assumption from official documentation:
+公式文書からの初期適用条件判断:
 - 公式文書は、Android 17 以上で動作し、かつ targetSdkVersion 37 以上のアプリに適用される変更として説明している。
 - static final field を reflection または JNI で変更しようとする場合に影響するため、一次分類としては `TARGET_SDK_37_CONDITIONAL` が近い。
 - ただし、local `frameworks-base` に Android 17 AOSP tag がないため、AOSP gate、Compat Change ID、default state を検証できていない。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-At-a-glance impact:
+早見表（At-a-glance impact）:
 
-| Question | Answer | Evidence |
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 17 OS update only? | Unknown | 原文は Android 17+ と targetSdkVersion 37+ の両方を条件としているが、AOSP gate 未確認。 |
-| targetSdkVersion 37 required? | Likely, but unverified | 原文は target Android 17 / API level 37 以上を明示している。AOSP evidence は未取得。 |
-| Additional runtime conditions? | Yes, from documentation | static final field を reflection または JNI で変更しようとする場合に問題化する。 |
-| Compat Change ID involved? | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | Unknown | 原文は Android 17+ と targetSdkVersion 37+ の両方を条件としているが、AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | Likely, but unverified | 原文は target Android 17 / API level 37 以上を明示している。AOSP evidence は未取得。 |
+| 追加の実行時条件があるか | Yes, from documentation | static final field を reflection または JNI で変更しようとする場合に問題化する。 |
+| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
 
-### Investigation Date
+### 調査日（Investigation Date）
 
 2026-06-10
 
-### Confidence
+### 信頼度（Confidence）
 
 - Low
 
-### Applicability Classification
+### 適用条件分類（Applicability Classification）
 
-Applies when:
+適用される条件（Applies when）:
 - [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
 - [ ] targetSdkVersion >= 37 on Android 17+
 - [ ] targetSdkVersion >= 37, with additional runtime conditions
@@ -64,7 +64,7 @@ Applies when:
 - [ ] API addition only, not a behavior change
 - [x] Unknown / needs more evidence
 
-Required runtime conditions:
+必要な実行時条件（Required runtime conditions）:
 - Android version: 公式文書上は Android 17 以上。
 - targetSdkVersion: 公式文書上は 37 以上。
 - Device/form factor: 公式抜粋では条件なし。
@@ -77,10 +77,10 @@ Compat framework:
 - Default state: Unknown
 - Toggleable for testing: Unknown
 
-Classification confidence:
+分類信頼度（Classification confidence）:
 - Low
 
-Classification evidence:
+分類根拠（Classification evidence）:
 - Official documentation page: `behavior-changes-17`
 - Original applicability statement: Android 17+ で動作し、targetSdkVersion 37+ のアプリが対象。
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
@@ -88,7 +88,7 @@ Classification evidence:
 
 ---
 
-# Executive Summary
+# エグゼクティブサマリー（Executive Summary）
 
 Android 17 では、Android 17 以上で動作し targetSdkVersion 37 以上のアプリが static final field を変更できなくなる、と公式 Behavior Change 文書は説明している。reflection で変更しようとすると `IllegalAccessException`、JNI の static field 書き換え API ではアプリ crash が発生するとされている。
 
@@ -96,9 +96,9 @@ Android 17 では、Android 17 以上で動作し targetSdkVersion 37 以上の�
 
 ---
 
-# Original Documentation
+# 公式ドキュメント確認（Original Documentation）
 
-## Statement
+## 原文（Statement）
 
 Page title:
 - Behavior changes: Apps targeting Android 17 or higher
@@ -118,7 +118,7 @@ Original statement being verified:
 
 The supplied official text states that apps running on Android 17 or higher and targeting API level 37 or higher cannot modify static final fields. It also states that reflection attempts throw `IllegalAccessException`, while JNI attempts such as `SetStaticLongField()` crash the app.
 
-## Interpretation
+## 解釈（Interpretation）
 
 この変更は、static final field を実行時に変更する実装パターンを禁止する互換性変更である。公式文書は OS 条件として Android 17 以上、targetSdkVersion 条件として 37 以上を明示している。
 
@@ -126,7 +126,7 @@ The supplied official text states that apps running on Android 17 or higher and 
 
 ---
 
-# What Changed
+# 変更内容（What Changed）
 
 公式文書上の変更点:
 - Android 17 以上で動作し、targetSdkVersion 37 以上のアプリは static final field を変更できない。
@@ -140,23 +140,23 @@ AOSP で未確認の点:
 - Compat Change ID と default state。
 - opt-out または temporary override の有無。
 
-## Applicability
+## 適用条件（Applicability）
 
 公式文書の一次判断では、Android 17 以上、targetSdkVersion 37 以上、かつ static final field を変更しようとする場合に影響する。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-### OS Update Behavior
+### OS アップデート時の挙動（OS Update Behavior）
 
 - Android 17 にアップデートしただけで適用されるか: Unknown
 - targetSdkVersion に依存しない根拠: なし。公式文書は targetSdkVersion 37 以上を明示している。
 - Android 16 以前での挙動: AOSP tag 比較未実施。Android 16 baseline source は Android 17 tag との比較ができないため、この調査では platform evidence として採用していない。
 
-### targetSdkVersion 37 Behavior
+### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate 未確認。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式文書は Apps running on Android 17 or higher を条件にしているため、Android 17 platform behavior として扱う。
 - opt-out / temporary override の有無: Unknown。compat framework evidence 未確認。
 
-### Other Conditions
+### その他の条件（Other Conditions）
 
 - device/form factor: 公式抜粋では条件なし。
 - permission: 公式抜粋では条件なし。
@@ -166,9 +166,9 @@ AOSP で未確認の点:
 
 ---
 
-# AOSP Investigation
+# AOSP 調査（AOSP Investigation）
 
-## Checkout Status
+## checkout 状態（Checkout Status）
 
 Commands checked before evidence use:
 
@@ -183,12 +183,12 @@ Result:
 - From tag: `android-16.0.0_r4` exists.
 - To tag: no local `android-17*` tag found.
 
-Evidence limitation:
+根拠上の制約（Evidence limitation）:
 - Android 17 AOSP tag が local `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的な tag 比較を実行できない。
 - Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
 - この制約により、AOSP-backed conclusion は High confidence にできない。
 
-## Related Files
+## 関連ファイル（Related Files）
 
 未確認。Android 17 AOSP tag 取得後に、少なくとも以下の候補を確認する必要がある。
 
@@ -196,7 +196,7 @@ Evidence limitation:
 - `frameworks-base` 内に runtime behavior を参照する framework-side gate があるか。
 - 実際の reflection / JNI enforcement は ART 側に存在する可能性があるが、本ミッションの AOSP evidence 範囲は `frameworks-base` の tag 比較に限定されているため、必要に応じて別途調査範囲の拡張判断が必要。
 
-## Source Context Reviewed
+## 確認したソース文脈（Source Context Reviewed）
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
@@ -210,7 +210,7 @@ Required context:
 - Runtime path from app API / system event to changed code: 未確認。
 - Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
-## Diff Interpretation
+## 差分解釈（Diff Interpretation）
 
 | Observed diff | Interpretation | Behavior Change relevance | Confidence |
 | --- | --- | --- | --- |
@@ -223,7 +223,7 @@ Required interpretation:
 - Changed default: 未確認。
 - No behavior change found: 未確認。tag 不在のため「no behavior change」とは判断しない。
 
-## Evidence
+## 事実（Evidence）
 
 Facts:
 - 公式 Behavior Change 文書は、Android 17 以上で動作し targetSdkVersion 37 以上のアプリが static final field を変更できないと述べている。
@@ -245,11 +245,11 @@ Hypotheses:
 - targetSdkVersion 36 のアプリでは互換性維持のため旧挙動が残る可能性があるが、AOSP gate 未確認のため断定しない。
 - 実装本体は `frameworks-base` ではなく ART / runtime 側にある可能性がある。
 
-Conclusions:
+結論:
 - 現時点で顧客向けに確定できるのは、「公式文書上は Android 17 以上かつ targetSdkVersion 37 以上で static final field 書き換えが禁止される」という範囲まで。
 - AOSP gate と compat framework default state が未確認のため、primary classification は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-## Applicability Gate Evidence
+## 適用ゲート根拠（Applicability Gate Evidence）
 
 - targetSdkVersion gate: 未確認。Android 17 AOSP tag がないため、`targetSdkVersion` / `ApplicationInfo.targetSdkVersion` 検索は実施していない。
 - CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 AOSP tag がないため、`CompatChanges.isChangeEnabled` / `@ChangeId` / `@EnabledAfter` / `@EnabledSince` 検索は実施していない。
@@ -272,14 +272,14 @@ Not searched yet:
 - Android 17 compat framework definitions。
 - ART / runtime 側の reflection / JNI enforcement 実装。
 
-Reason:
+理由（Reason）:
 - Android 17 target tag が local checkout に存在しないため、tag 間 diff による platform evidence が作れない。
 
 ---
 
-# Impact Analysis
+# 影響分析（Impact Analysis）
 
-## Affected Apps
+## 影響を受けるアプリ（Affected Apps）
 
 影響を受ける可能性があるアプリ:
 - targetSdkVersion 37 以上への更新を予定しているアプリ。
@@ -288,7 +288,7 @@ Reason:
 - feature flag、SDK 内部定数、build-time constant、テスト用 override、互換性回避のために static final field を実行時に変更しているアプリまたは SDK。
 - 古い instrumentation、hot patch、mocking、hooking、diagnostics 系 SDK を組み込んでいるアプリ。
 
-## Non-Affected Apps
+## 影響を受けないアプリ（Non-Affected Apps）
 
 影響が限定的と考えられるケース:
 - static final field を読み取るだけで変更しないアプリ。
@@ -297,15 +297,15 @@ Reason:
 
 ---
 
-# Customer Impact
+# 顧客影響（Customer Impact）
 
-## Impact Level
+## 影響度（Impact Level）
 
 - Human decision required
 
 ※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
-## Business Impact
+## ビジネス影響（Business Impact）
 
 - ユーザー影響: 該当コードパスが実行されると、reflection では例外処理漏れによる機能停止や crash、JNI では直接 crash が発生する可能性がある。
 - 運用影響: サードパーティ SDK や native library が原因の場合、アプリ側で検出しにくく、SDK vendor への確認や更新が必要になる可能性がある。
@@ -313,11 +313,11 @@ Reason:
 
 ---
 
-# Service Impact Examples（サービス影響例）
+# サービス影響例（Service Impact Examples）
 
 このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## Example 1（例1）: 設定値を reflection で差し替えるアプリ / SDK
+## 例1（Example 1）: 設定値を reflection で差し替えるアプリ / SDK
 
 - 対象サービス例: A/B test SDK、feature flag framework、社内 debug tool。
 - 影響を受ける実装パターン: `static final` fields を reflection / Unsafe / instrumentation で書き換える実装。
@@ -329,7 +329,7 @@ Reason:
 - Confidence（信頼度）: Low
 - 注意: どの API path で例外または no-op になるかは Android 17 AOSP tag 待ち。
 
-## Example 2（例2）: テスト / mocking framework に依存するアプリ
+## 例2（Example 2）: テスト / mocking framework に依存するアプリ
 
 - 対象サービス例: 大規模 Android app の instrumented test、E2E test、SDK integration test。
 - 影響を受ける実装パターン: production code の `static final` constant を test runtime で書き換える test utility。
@@ -343,32 +343,32 @@ Reason:
 
 ---
 
-# Required Actions
+# 対応候補（Required Actions）
 
-## Must
+## 必須対応（Must）
 
 - static final field を reflection で変更している自社コードがないか確認する。
 - JNI API で static final field を変更している native code がないか確認する。
 - サードパーティ SDK に static final field の runtime override、hot patch、mocking、hooking が含まれていないか確認する。
 - targetSdkVersion 37 更新前に Android 17 device / emulator で該当機能をテストする。
 
-## Recommended
+## 推奨対応（Recommended）
 
 - static final field の実行時変更に依存しない設計へ移行する。
 - 設定値や feature flag は mutable な設定 API、dependency injection、設定ファイル、server-side config などに移す。
 - reflection failure を crash にしないため、例外処理と fallback を確認する。
 - native library / SDK を Android 17 対応版に更新する。
 
-## Optional
+## 任意対応（Optional）
 
 - Android 17 AOSP tag 公開後、static final field enforcement の diff と compat Change ID を再調査する。
 - テスト用の static final override がある場合、test-only mechanism と production code を分離する。
 
 ---
 
-# Verification Method
+# 検証方法（Verification Method）
 
-## Matrix
+## 検証マトリクス（Matrix）
 
 | Device OS | targetSdkVersion | Compat flag | Expected behavior |
 | --- | --- | --- | --- |
@@ -378,7 +378,7 @@ Reason:
 | Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。 |
 | Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。 |
 
-## Steps
+## 手順（Steps）
 
 - targetSdk変更: test app を targetSdkVersion 36 と 37 で build し、Android 17 上の挙動差を確認する。
 - compat framework command: Change ID 未確認のため未定。Android 17 tag / compat page 確認後に追加する。
@@ -388,7 +388,7 @@ Reason:
 
 ---
 
-# Conclusion
+# 結論（Conclusion）
 
 公式文書は、Android 17 以上で動作し targetSdkVersion 37 以上のアプリが static final field を変更できなくなると説明している。主な互換性リスクは、reflection または JNI で static final field を実行時に書き換えるコードである。
 

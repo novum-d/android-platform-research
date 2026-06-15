@@ -1,17 +1,22 @@
-# Decisions
+# 判断記録（Decisions）
 
 このファイルは、調査方針・スコープ・分類に関する人間の判断を後から追跡できるように残すためのものです。
 
 調査方針・スコープ判断を記録する。
 
-## Template
+## テンプレート（Template）
 
-### YYYY-MM-DD - Title
+### YYYY-MM-DD - タイトル（Title）
 
-Decision:
+判断（Decision）:
 
-Reason:
+理由（Reason）:
 
-Impact:
+影響（Impact）:
 
-Related Files:
+関連ファイル（Related Files）:
+
+記入例:
+- 判断: Android 17 tag 公開までは `UNKNOWN_NEEDS_MORE_EVIDENCE` のまま維持する。
+- 理由: AOSP gate と compat default state が未確認のため。
+- 影響: 顧客向け確定結論には使わず、暫定調査として扱う。

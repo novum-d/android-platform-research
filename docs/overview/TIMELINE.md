@@ -1,4 +1,4 @@
-# Android Platform Timeline
+# Android Platform 時系列（Timeline）
 
 このファイルは、Android バージョンごとの主要な Behavior Change や注目トピックを時系列で整理するためのものです。
 

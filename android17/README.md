@@ -1,8 +1,8 @@
-# Android 17 Research
+# Android 17 調査（Android 17 Research）
 
 このディレクトリは Android 17 固有の Behavior Change 調査を管理する。
 
-## Version Scope
+## バージョンスコープ（Version Scope）
 
 Current status:
 - Android 17 Beta documentation is available.
@@ -32,9 +32,9 @@ Codex / agent 向けの Android 17 固有指示は以下を参照する。
 android17/AGENTS.md
 ```
 
-## Layout
+## ディレクトリ構成（Layout）
 
-| Directory | Purpose |
+| ディレクトリ（Directory） | 目的（Purpose） |
 | --- | --- |
 | `analysis/` | AOSP diff から生成した候補ファイル、分類補助ファイル |
 | `behavior-changes/` | Behavior Change セクションごとの調査レポートと applicability classification |
@@ -44,7 +44,7 @@ android17/AGENTS.md
 | `summaries/` | 顧客説明・社内共有用の 1ページ要約 |
 | `templates/` | Android 17 用 report / summary templates |
 
-## Versioning
+## バージョニング（Versioning）
 
 Android 16 調査結果は上書きしない。
 
