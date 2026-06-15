@@ -53,7 +53,10 @@ Android 17 へ OS アップデートすると、targetSdkVersion を変更して
 
 | レポート（Report） | 要約（Summary） | 根拠セクション（Evidence section） | 1ページ要約 | 状態（Status） |
 | --- | --- | --- | --- | --- |
-| まだありません |  |  |  |  |
+| [App memory limits](16-app-memory-limits.md) | Android 17 で device total RAM に基づく app memory limits が導入される。 | [AOSP 調査](16-app-memory-limits.md#aosp-調査aosp-investigation) | [summary](../summaries/16-app-memory-limits-summary.md) | AOSP tag 待ち / Low confidence |
+| [SMS OTP protection](17-sms-otp-protection.md) | Android 17 で WebOTP format messages にも SMS OTP protection が適用される。 | [AOSP 調査](17-sms-otp-protection.md#aosp-調査aosp-investigation) | [summary](../summaries/17-sms-otp-protection-summary.md) | AOSP tag 待ち / Low confidence |
+| [Block cross profile loopback traffic](21-block-cross-profile-loopback-traffic.md) | Android 17 で cross-profile loopback traffic が default block される。 | [AOSP 調査](21-block-cross-profile-loopback-traffic.md#aosp-調査aosp-investigation) | [summary](../summaries/21-block-cross-profile-loopback-traffic-summary.md) | AOSP tag 待ち / Low confidence |
+| [Restoring default IME visibility after rotation](22-restoring-default-ime-visibility-after-rotation.md) | Android 17 で unhandled configuration change 後に previous IME visibility が自動復元されない。 | [AOSP 調査](22-restoring-default-ime-visibility-after-rotation.md#aosp-調査aosp-investigation) | [summary](../summaries/22-restoring-default-ime-visibility-after-rotation-summary.md) | AOSP tag 待ち / Low confidence |
 
 <a id="targetsdkversion-37"></a>
 
@@ -103,4 +106,6 @@ Mainline module または Google Play system update の配信状態に依存す�
 
 | レポート（Report） | 不足根拠（Missing evidence） | 次の確認（Next check） | 状態（Status） |
 | --- | --- | --- | --- |
-| 現在 tracked item はありません |  |  |  |
+| [usesClearTraffic deprecation plan](18-usescleartexttraffic-deprecation-plan.md) | Android 17 で即時 runtime behavior change があるか、future deprecation plan のみかを AOSP で未確認 | `usesCleartextTraffic` parsing / cleartext policy / deprecation annotation / compat framework を Android 17 tag で確認 | AOSP tag 待ち / Low confidence |
+| [Restrict implicit URI grants](19-restrict-implicit-uri-grants.md) | Android 17 で即時 enforcement があるか、Android 18 advance warning / detection guidance のみかを AOSP で未確認 | URI grant path / StrictMode detection / log emission / compat framework を Android 17 tag で確認 | AOSP tag 待ち / Low confidence |
+| [Per-app keystore limits](20-per-app-keystore-limits.md) | OS update 側の per-app limit introduction と targetSdkVersion 37 側の stricter limit / error code 分岐を AOSP で未確認 | Keystore enforcement path / targetSdkVersion gate / system app 判定 / exception mapping / compat framework を Android 17 tag で確認 | AOSP tag 待ち / Low confidence |
