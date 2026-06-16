@@ -1,5 +1,10 @@
 # Background audio hardening
 
+> 役割メモ:
+> このファイルは Background audio hardening のうち、targetSdkVersion 37 以上で強まる追加条件を中心に扱う。
+> Android 17 上の全アプリに関係する共通制限は [all/media/background-audio-hardening.md](../../all/media/background-audio-hardening.md) を参照する。
+> 公式詳細ページ `changes/bg-audio` には all apps 共通制限と targetSdkVersion 37 追加条件の両方が記載されているため、13 と 24 は相互補完の関係として扱う。
+
 ## 基本情報（Metadata）
 
 ### 調査対象 Android バージョン（Android Versions）
@@ -21,6 +26,10 @@ Target targetSdkVersion:
 Document:
 https://developer.android.com/about/versions/17/behavior-changes-17
 
+Related current official documents:
+- https://developer.android.com/about/versions/17/behavior-changes-all
+- https://developer.android.com/about/versions/17/changes/bg-audio
+
 Related documents:
 - https://developer.android.com/develop/background-work/services/alarms#exact
 - https://developer.android.com/reference/android/media/AudioAttributes#USAGE_ALARM
@@ -32,12 +41,17 @@ Background audio hardening
 Page type:
 - Apps targeting Android 17 or higher
 
+Current source split:
+- `behavior-changes-all`: Android 17 上の全アプリに関係する共通制限。
+- `changes/bg-audio`: 共通制限に加え、targetSdkVersion 37 以上で強まる WIU capability 条件を説明。
+
 ### 分類スナップショット（Classification Snapshot）
 
 主分類（Primary classification）:
 - UNKNOWN_NEEDS_MORE_EVIDENCE
 
 公式文書からの初期適用条件判断:
+- このファイルでは、Background audio hardening のうち targetSdkVersion 37 以上で強まる追加条件を中心に整理する。Android 17 上の全アプリに関係する共通制限は [all/media/background-audio-hardening.md](../../all/media/background-audio-hardening.md) に整理している。
 - 公式文書は、Android 17 以降、audio playback、audio focus requests、volume change APIs などの background audio interactions に制限を適用し、ユーザーが意図して開始した変更であることを保証すると説明している。
 - 一部の audio restrictions は all apps に適用される一方、targetSdkVersion 37 以上のアプリではより厳格になると説明している。
 - targetSdkVersion 37 以上のアプリが background で audio と interaction する場合、foreground service が running である必要があり、さらに foreground service が while-in-use (WIU) capabilities を持つか、exact alarm permission を持ち `USAGE_ALARM` audio streams と interaction している必要がある。

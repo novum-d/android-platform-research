@@ -141,11 +141,15 @@ The supplied official text also states that developers had the option to opt out
 - SDK 36 では developers が opt out できた。
 - Android 17 / API level 37 以上を target するアプリでは、この opt-out が利用できなくなる。
 - 詳細は Android 16 の behavior change と Android 17 の `Restrictions on orientation and resizability are ignored` 関連ページに誘導されている。
+- 詳細ページでは、targetSdkVersion 37 以上の app について、smallest width が 600dp より大きい display では orientation、resizability、aspect ratio restrictions が適用されず、apps は aspect ratio や user preferred orientation に関係なく display window 全体を fill し、pillarboxing は使われないと説明されている。
+- 詳細ページでは、`screenOrientation`、`resizableActivity`、`minAspectRatio`、`maxAspectRatio`、`setRequestedOrientation()`、`getRequestedOrientation()` が large screen devices の full-screen / multi-window modes で ignored と説明されている。
+- 詳細ページでは、games、device の aspect ratio settings で users が app default behavior に明示 opt-in した場合、smallest width が `sw600dp` より小さい screens は例外と説明されている。
+- 詳細ページでは、`UNIVERSAL_RESIZABLE_BY_DEFAULT` compat flag で test できると説明されている。
 
 AOSP で未確認の点:
 - Android 16 baseline で orientation / aspect ratio / resizability restrictions を無視する実装と opt-out mechanism。
 - Android 17 で targetSdkVersion 37 以上の opt-out を無効化する実装箇所。
-- `sw >= 600dp` 判定の exact condition。
+- `sw > 600dp` / `sw >= 600dp` の exact condition。詳細ページは "smallest width is greater than 600dp" と説明している一方、関連文書や Android 16 文脈では `sw >= 600dp` と表現されることがある。
 - Activity requested orientation、`resizeableActivity`、min / max aspect ratio、letterbox / compatibility mode、multi-window mode の扱い。
 - Android 16 opt-out property / manifest / compat framework と Android 17 removal の関係。
 - Compat Change ID と default state。
@@ -168,10 +172,11 @@ AOSP で未確認の点:
 
 ### その他の条件（Other Conditions）
 
-- device/form factor: large screens / `sw >= 600dp`。tablet、foldable inner display、desktop / freeform windowing、large screen emulator などが関係する可能性。
+- device/form factor: large screens。詳細ページは smallest width が 600dp より大きい display と説明している。tablet、foldable inner display、desktop / freeform windowing、large screen emulator などが関係する可能性。
 - permission: 公式抜粋では条件なし。
 - API usage: requested orientation、resizability、aspect ratio constraints、Activity manifest attributes、WindowManager / ActivityTaskManager behavior。
-- manifest attribute: `screenOrientation`、`resizeableActivity`、`minAspectRatio` / `maxAspectRatio`、Android 16 opt-out property が関係する可能性。
+- manifest attribute / runtime API: `screenOrientation`、`resizeableActivity`、`minAspectRatio` / `maxAspectRatio`、`setRequestedOrientation()`、`getRequestedOrientation()`、Android 16 opt-out property が関係する可能性。
+- exceptions: games based on `android:appCategory`、device aspect ratio settings で user が app default behavior に明示 opt-in した場合、smallest width が `sw600dp` より小さい screens。
 - component boundary: Activity launch、task / windowing mode、display metrics、configuration changes、letterbox / compatibility handling にまたがる。
 
 ---
@@ -211,6 +216,7 @@ Result:
 - `services/core/java/com/android/server/wm/SizeCompatPolicy.java`
 - `services/core/java/com/android/server/wm/AspectRatioPolicy.java`
 - compat framework 定義ファイル内の orientation / resizability / aspect ratio / large screen / targetSdkVersion 37 関連 Change ID
+- `UNIVERSAL_RESIZABLE_BY_DEFAULT` compat flag definition / default state
 
 ## 確認したソース文脈（Source Context Reviewed）
 
@@ -357,6 +363,8 @@ Hypotheses:
 
 - Android 16 の opt-out mechanism を利用しているか確認する。
 - `screenOrientation`、`resizeableActivity`、`minAspectRatio`、`maxAspectRatio` など large screen 制約に関わる manifest / API usage を棚卸しする。
+- `setRequestedOrientation()` / `getRequestedOrientation()` に依存している runtime logic を棚卸しする。
+- `android:appCategory="game"` の対象可否、device aspect ratio settings で user opt-in された場合の扱い、`sw600dp` 未満 screen の例外を test plan に含める。
 - `sw >= 600dp` 相当の tablet / foldable / desktop windowing 環境で、targetSdkVersion 37 build を検証する。
 - orientation change、multi-window resize、split-screen、fold / unfold、freeform resize で UI が崩れないか確認する。
 - Android 17 AOSP tag 入手後に、targetSdkVersion gate、opt-out removal、compat Change ID を再確認する。
@@ -390,7 +398,7 @@ Hypotheses:
 ## 手順（Steps）
 
 - targetSdk変更: targetSdkVersion 36 と 37 の test build を用意する。
-- compat framework command: 未確認。Android 17 compat framework entry / Change ID が判明後に記録する。
+- compat framework command: 公式詳細ページは `UNIVERSAL_RESIZABLE_BY_DEFAULT` compat flag を enable して test できると説明している。具体的な command / package scope は Android 17 tag または compat framework page で再確認する。
 - テスト方法: `sw >= 600dp` の emulator / tablet / foldable で、orientation fixed / resizable false / fixed aspect ratio の Activity を起動し、Android 16 opt-out あり / なし、targetSdkVersion 36 / 37 を比較する。
 - 再現手順: Android 17 device / emulator で対象アプリを install し、portrait / landscape、split-screen、freeform resize、fold / unfold を実施する。requested orientation、actual orientation、window bounds、configuration changes、layout breakage を記録する。
 - 期待結果: targetSdkVersion 37 のアプリでは、Android 16 で使えた opt-out が効かず、large screen 上で orientation / aspect ratio / resizability restrictions が platform により無視される。具体的な opt-out failure mode は AOSP tag と実機検証待ち。

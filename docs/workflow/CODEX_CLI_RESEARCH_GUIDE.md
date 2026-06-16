@@ -46,6 +46,7 @@ docs/workflow/AOSP_CHECKOUT.md
 | Target targetSdkVersion | 調査対象の targetSdkVersion / API level |
 | Behavior Change section title | 調査する Behavior Change セクション名 |
 | Official documentation URL | 公式 Behavior Change 文書の URL |
+| Official documentation category | 公式 Behavior Change 文書上のカテゴリ。例: Core functionality / Accessibility / Privacy / Security / Media |
 | Report output file | 作成する調査レポートの path |
 | Summary output file | 作成する 1ページ要約の path |
 | Official documentation excerpt | 公式文書の該当セクション原文 |
@@ -74,6 +75,7 @@ Research target:
 - Target targetSdkVersion: <target-api>
 - Behavior Change section title: <section-title>
 - Official documentation URL: <behavior-change-url>
+- Official documentation category: <official-category>
 - Report output file: <report-file>
 - Summary output file: <summary-file>
 
@@ -81,6 +83,7 @@ Official documentation excerpt:
 Page title: <page-title>
 Page URL: <behavior-change-url>
 Page type: all apps / apps targeting Android <version> / compat framework changes
+Page category: <official-category>
 Section title: <section-title>
 
 Original text:
@@ -115,6 +118,7 @@ Codex は最小入力フォーマットを受け取ったら、このセクシ�
 - report は `<version-dir>/templates/customer-report-template.md` を使う。
 - summary は `<version-dir>/templates/one-page-summary-template.md` を使う。
 - version-specific output は `<version-dir>/` 配下に置く。
+- Android 17 の report / summary は、公式文書のページ種別とカテゴリに合わせて `<version-dir>/behavior-changes/<all-or-target>/<official-category-slug>/<topic-slug>.md` と `<version-dir>/summaries/<all-or-target>/<official-category-slug>/<topic-slug>-summary.md` に置く。ファイル名の先頭に連番は付けない。
 - unrelated file を上書きしない。
 - `docs/notes/PERSONAL_NOTES.md` は編集しない。
 - final priority、final severity、release readiness、customer communication priority は決めない。人間の判断欄として残す。

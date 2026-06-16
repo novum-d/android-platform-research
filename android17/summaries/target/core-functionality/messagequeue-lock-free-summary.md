@@ -50,7 +50,7 @@ Android 17 では、targetSdkVersion 37 以上のアプリに新しい lock-free
 ## 対応要否（Required Action）
 
 - 必須対応: `MessageQueue` private field / private method への reflection 利用を棚卸しする。
-- 推奨対応: 該当箇所を public API ベースに移行し、SDK を Android 17 対応版に更新する。
+- 推奨対応: 該当箇所を public API ベースに移行し、SDK を Android 17 対応版に更新する。Espresso は 3.7.0 以上、Robolectric は 4.17 以上に更新し、`@LooperMode(LEGACY)` は `@LooperMode(PAUSED)` へ移行する。
 - 不要: public API のみを使っており、関連 SDK も private reflection していないことを確認できる場合は、互換性対応は限定的。
 
 ## テストマトリクス（Test Matrix）
@@ -60,10 +60,13 @@ Android 17 では、targetSdkVersion 37 以上のアプリに新しい lock-free
 | Android 16 | 36 | Android 16 baseline。Android 17 の lock-free implementation は対象外。 |
 | Android 17 | 36 | Unknown。公式文書上は旧挙動維持が期待されるが、AOSP gate 未確認。 |
 | Android 17 | 37 | 公式文書上は新しい lock-free `MessageQueue` 実装が適用される。 |
+| Android 17 | 36 / debuggable | `adb am compat enable USE_NEW_MESSAGEQUEUE <package>` で新実装を test できると公式 guidance は説明。 |
 
 ## 顧客向け説明（Explanation for Customers）
 
 Android 17 では、targetSdkVersion 37 以上のアプリに対して `MessageQueue` の内部実装が変わる予定です。性能改善が目的の変更ですが、`MessageQueue` の private field や private method を reflection で参照しているコードは、内部構造の変更により壊れる可能性があります。まず自社コードと組み込み SDK の reflection 利用を確認し、targetSdkVersion 37 更新前に Android 17 で実機または emulator テストを行う必要があります。
+
+詳細 guidance では、新実装でも binary compatibility のため `mMessages` field は残るが常に `null` になると説明されています。`USE_NEW_MESSAGEQUEUE` compat flag を使って enable / disable し、原因切り分けを行えます。
 
 ただし、現時点では local AOSP checkout に Android 17 tag がないため、targetSdkVersion gate や compat flag の有無は未確認です。最終的な適用分類は Android 17 AOSP tag 公開後に再確認が必要です。
 

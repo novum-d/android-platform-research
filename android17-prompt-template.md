@@ -12,14 +12,16 @@
 - Target targetSdkVersion: 37
 - Behavior Change section title: <公式ドキュメント上のセクション名>
 - Official documentation URL: <公式ドキュメントURL>
-- Report output file: android17/behavior-changes/<nn>-<topic-slug>.md
-- Summary output file: android17/summaries/<nn>-<topic-slug>-summary.md
+- Official documentation category: <Core functionality / Accessibility / Privacy / Security / Media / ...>
+- Report output file: android17/behavior-changes/<all-or-target>/<official-category-slug>/<topic-slug>.md
+- Summary output file: android17/summaries/<all-or-target>/<official-category-slug>/<topic-slug>-summary.md
 
 ## 公式ドキュメント抜粋
 
 - Page title: <ページタイトル>
 - Page URL: <公式ドキュメントURL>
 - Page type: all apps / apps targeting Android 17 / compat framework changes
+- Page category: <公式ドキュメント上のカテゴリ名>
 - Section title: <セクション名>
 
 Original text:

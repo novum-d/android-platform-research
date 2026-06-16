@@ -143,6 +143,14 @@ AOSP で未確認の点:
 - Compat Change ID と default state。
 - opt-out または temporary override の有無。
 
+詳細 guidance で追加確認した点:
+- legacy implementation では `MessageQueue.mMessages` などの private field を reflection で参照する実装が存在したが、新しい lock-free implementation では internal data structure が変わる。
+- binary compatibility のため `mMessages` field は残るが、新実装では queue に message があるかどうかに関係なく常に `null` と説明されている。
+- Espresso は 3.7.0 以上へ更新することが推奨されている。
+- Robolectric は 4.17 以上へ更新し、`@LooperMode(LEGACY)` を使っている場合は `@LooperMode(PAUSED)` へ移行することが推奨されている。
+- debuggable build では `adb am compat enable USE_NEW_MESSAGEQUEUE <package>` で targetSdkVersion を上げずに挙動を test できる。
+- targetSdkVersion 37 以上では default enabled と説明されており、原因切り分けのため `adb am compat disable USE_NEW_MESSAGEQUEUE <package>` で一時的に legacy lock-based implementation へ戻せる。
+
 ## 適用条件（Applicability）
 
 この変更の適用条件は、現時点では公式文書からの一次判断に留まる。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
@@ -199,7 +207,7 @@ Result:
 - `core/java/android/os/Looper.java`
 - `core/java/android/os/Handler.java`
 - native peer が存在する場合の `android_os_MessageQueue` 関連実装
-- compat framework 定義ファイル内の `MessageQueue` / lock-free / targetSdkVersion 37 関連 Change ID
+- compat framework 定義ファイル内の `USE_NEW_MESSAGEQUEUE` / `MessageQueue` / lock-free / targetSdkVersion 37 関連 Change ID
 
 ## 確認したソース文脈（Source Context Reviewed）
 
@@ -272,7 +280,7 @@ Searched:
 Not searched yet:
 - Android 17 implementation files。
 - Android 17 compat framework definitions。
-- MessageQueue guidance page の詳細な mitigation strategy。
+- `USE_NEW_MESSAGEQUEUE` の AOSP compat definition / default state。
 
 理由（Reason）:
 - Android 17 target tag が local checkout に存在しないため、tag 間 diff による platform evidence が作れない。
@@ -351,6 +359,8 @@ Not searched yet:
 - `android.os.MessageQueue` の private field / private method へ reflection している自社コードがないか確認する。
 - サードパーティ SDK に `MessageQueue` reflection、main thread hook、message queue instrumentation が含まれていないか確認する。
 - targetSdkVersion 37 更新前に Android 17 device / emulator で起動、画面遷移、メインスレッド監視、performance monitoring をテストする。
+- Espresso を使う場合は 3.7.0 以上へ更新する。
+- Robolectric を使う場合は 4.17 以上へ更新し、`@LooperMode(LEGACY)` 依存があれば `@LooperMode(PAUSED)` へ移行する。
 
 ## 推奨対応（Recommended）
 
@@ -381,7 +391,13 @@ Not searched yet:
 ## 手順（Steps）
 
 - targetSdk変更: test app を targetSdkVersion 36 と 37 で build し、Android 17 上の挙動差を確認する。
-- compat framework command: Change ID 未確認のため未定。Android 17 tag / compat page 確認後に追加する。
+- compat framework command: 公式 guidance 上は debuggable build で次の command を使える。
+
+```bash
+adb am compat enable USE_NEW_MESSAGEQUEUE <your-package-name>
+adb am compat disable USE_NEW_MESSAGEQUEUE <your-package-name>
+```
+
 - テスト方法: `MessageQueue` private reflection を行う最小再現コードと、public API のみを使う control app を比較する。
 - 再現手順: Android 17 上で targetSdkVersion 36 / 37 の両 APK を実行し、reflection 成否、crash、main thread monitoring の結果を比較する。
 - 期待結果: targetSdkVersion 37 で新実装により private field / method の reflection 前提が崩れる可能性がある。targetSdkVersion 36 の結果は AOSP gate 確認待ち。

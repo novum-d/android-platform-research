@@ -2,25 +2,40 @@
 
 顧客説明・社内共有に使える1ページ要約を配置する。
 
-## 分類別索引（Classification Index）
+## 公式カテゴリ別索引（Official Category Index）
 
-1ページ要約は、分類ごとにここから辿れるようにする。
+1ページ要約は、公式 Behavior Change 文書のページ種別（All apps / Apps targeting Android 17）とカテゴリに合わせて配置する。
 
-| 分類（Classification） | 要約（Summaries） |
+### All apps
+
+| カテゴリ（Category） | 要約（Summaries） |
 | --- | --- |
-| [OS update / all apps](../behavior-changes/README.md#os-update--all-apps) | [App memory limits](16-app-memory-limits-summary.md), [SMS OTP protection](17-sms-otp-protection-summary.md), [Block cross profile loopback traffic](21-block-cross-profile-loopback-traffic-summary.md), [Restoring default IME visibility after rotation](22-restoring-default-ime-visibility-after-rotation-summary.md) |
-| [targetSdkVersion 37](../behavior-changes/README.md#targetsdkversion-37) | まだありません |
-| [targetSdkVersion 37 + conditions](../behavior-changes/README.md#targetsdkversion-37--conditions) | まだありません |
-| [Mainline / Play system update](../behavior-changes/README.md#mainline--play-system-update) | まだありません |
-| [API addition only](../behavior-changes/README.md#api-addition-only) | まだありません |
-| [Unknown / needs evidence](../behavior-changes/README.md#unknown--needs-evidence) | [usesClearTraffic deprecation plan](18-usescleartexttraffic-deprecation-plan-summary.md), [Restrict implicit URI grants](19-restrict-implicit-uri-grants-summary.md), [Per-app keystore limits](20-per-app-keystore-limits-summary.md) |
+| Core functionality | [App memory limits](all/core-functionality/app-memory-limits-summary.md) |
+| Privacy | [SMS OTP protection](all/privacy/sms-otp-protection-summary.md) |
+| Security | [usesClearTraffic deprecation plan](all/security/usescleartexttraffic-deprecation-plan-summary.md), [Restrict implicit URI grants](all/security/restrict-implicit-uri-grants-summary.md), [Per-app keystore limits](all/security/per-app-keystore-limits-summary.md), [Block cross profile loopback traffic](all/security/block-cross-profile-loopback-traffic-summary.md) |
+| User experience and system UI | [Restoring default IME visibility after rotation](all/user-experience-and-system-ui/restoring-default-ime-visibility-after-rotation-summary.md) |
+| Human input | [Touchpads deliver relative events by default during pointer capture](all/human-input/touchpads-relative-events-pointer-capture-summary.md) |
+| Media | [Background audio hardening](all/media/background-audio-hardening-summary.md) |
+| Connectivity | [Autonomous re-pairing for Bluetooth bond losses](all/connectivity/autonomous-repairing-bluetooth-bond-losses-summary.md) |
+
+### Apps targeting Android 17
+
+| カテゴリ（Category） | 要約（Summaries） |
+| --- | --- |
+| Core functionality | [New lock-free implementation of MessageQueue](target/core-functionality/messagequeue-lock-free-summary.md), [Static final fields are now unmodifiable](target/core-functionality/static-final-fields-summary.md) |
+| Accessibility | [Accessibility support of complex IME physical keyboard typing](target/accessibility/accessibility-ime-physical-keyboard-summary.md) |
+| Privacy | [ECH enabled](target/privacy/ech-encrypted-client-hello-summary.md), [Local network permission required for apps targeting Android 17](target/privacy/local-network-permission-summary.md), [Hiding passwords from physical devices](target/privacy/hiding-passwords-physical-devices-summary.md), [OTP protection for standard SMS messages](target/privacy/otp-protection-standard-sms-summary.md) |
+| Security | [Activity Security](target/security/activity-security-summary.md), [Enable CT by default](target/security/enable-ct-by-default-summary.md), [Safer Native DCL-C](target/security/safer-native-dcl-c-summary.md), [Restrict PII fields in CP2 data view](target/security/restrict-pii-fields-cp2-data-view-summary.md), [Enforce strict SQL checks in CP2](target/security/enforce-strict-sql-checks-cp2-summary.md) |
+| Media | [Background audio hardening - targetSdkVersion 37 additional restrictions](target/media/background-audio-hardening-summary.md) |
+| Device form factors | [Platform API changes to ignore orientation, resizability and aspect ratio constraints on large screens](target/device-form-factors/large-screen-orientation-resizability-aspect-ratio-summary.md) |
+| Connectivity | [Consistent BluetoothSocket read() behavior for RFCOMM](target/connectivity/consistent-bluetoothsocket-read-rfcomm-summary.md) |
 
 ## 命名規則（Naming）
 
 ```text
-01-messagequeue-lock-free.md
-02-static-final-fields.md
-03-background-audio-hardening.md
+target/core-functionality/messagequeue-lock-free-summary.md
+all/core-functionality/app-memory-limits-summary.md
+all/media/background-audio-hardening-summary.md
 ```
 
 ## テンプレート（Template）

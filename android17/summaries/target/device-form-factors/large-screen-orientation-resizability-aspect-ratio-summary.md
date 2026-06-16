@@ -21,7 +21,7 @@ Target targetSdkVersion:
 - 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
 - OS アップデート / 全アプリ（OS update / all apps）: Unknown。原文は Android 17 / targetSdkVersion 37+ で opt-out unavailable と述べるが、AOSP gate 未確認。
 - targetSdkVersion 37 以上: 公式文書上は該当。AOSP gate 未確認。
-- その他の必須条件（Other required conditions）: large screens (`sw >= 600dp`)、orientation / resizability / aspect ratio constraints、Android 16 opt-out 利用。
+- その他の必須条件（Other required conditions）: large screens、orientation / resizability / aspect ratio constraints、Android 16 opt-out 利用。詳細ページは smallest width が 600dp より大きい display と説明している。
 - Compat Change ID: Unknown
 - Compat default state: Unknown
 
@@ -50,7 +50,7 @@ Android 17 では、targetSdkVersion 37 以上のアプリで、Android 16 / SDK
 ## 対応要否（Required Action）
 
 - 必須対応: Android 16 opt-out 利用状況と manifest の orientation / resizability / aspect ratio 制約を棚卸しする。
-- 推奨対応: large screen で adaptive layout、configuration change、multi-window resize、fold / unfold を検証する。
+- 推奨対応: large screen で adaptive layout、configuration change、multi-window resize、fold / unfold を検証する。`setRequestedOrientation()` / `getRequestedOrientation()` 依存、games 例外、user aspect ratio setting opt-in、`sw600dp` 未満 screen 例外も確認する。
 - 不要: large screen で利用されず、固定向き・固定比率・非リサイズ制約に依存しないアプリでは直接影響は限定的。
 
 ## テストマトリクス（Test Matrix）
@@ -64,6 +64,8 @@ Android 17 では、targetSdkVersion 37 以上のアプリで、Android 16 / SDK
 ## 顧客向け説明（Explanation for Customers）
 
 Android 16 では、targetSdkVersion 36 以上のアプリについて、`sw >= 600dp` の large screen で orientation、resizability、aspect ratio constraints を platform が無視する変更が導入されました。SDK 36 では opt-out が可能でしたが、Android 17 / targetSdkVersion 37 以上ではその opt-out が利用できなくなります。
+
+詳細ページでは、`screenOrientation`、`resizableActivity`、`minAspectRatio`、`maxAspectRatio`、`setRequestedOrientation()`、`getRequestedOrientation()` が large screen の full-screen / multi-window modes で ignored と説明されています。`UNIVERSAL_RESIZABLE_BY_DEFAULT` compat flag で test できる点も確認対象です。
 
 固定 portrait、non-resizable、固定 aspect ratio を前提にした UI は、tablet、foldable、desktop windowing で表示崩れや想定外のリサイズが起きる可能性があります。現時点では local AOSP checkout に Android 17 tag がないため、targetSdkVersion gate、opt-out removal の実装、compat flag の有無は未確認です。
 

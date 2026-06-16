@@ -1,5 +1,9 @@
 # Background audio hardening - 1ページ要約（One Page Summary）
 
+> 役割メモ:
+> この要約は Background audio hardening の targetSdkVersion 37 追加条件を中心に扱う。
+> Android 17 上の全アプリに関係する共通制限は [all/media/background-audio-hardening-summary.md](../../all/media/background-audio-hardening-summary.md) を参照する。
+
 ## 対象（Target）
 
 Android 17 Behavior Change
@@ -19,7 +23,7 @@ Target targetSdkVersion:
 ## 適用条件（Applicability）
 
 - 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: Conditional / Unknown。一部制限は all apps と公式文書は述べるが、範囲と AOSP gate 未確認。
+- OS アップデート / 全アプリ（OS update / all apps）: 共通制限は [all/media/background-audio-hardening-summary.md](../../all/media/background-audio-hardening-summary.md) 側で扱う。
 - targetSdkVersion 37 以上: 公式文書上は、より厳格な制限が該当。AOSP gate 未確認。
 - その他の必須条件（Other required conditions）: background audio interaction、foreground service running、WIU capabilities、exact alarm permission、`USAGE_ALARM` audio stream。
 - Compat Change ID: Unknown
