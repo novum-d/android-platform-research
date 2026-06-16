@@ -1,35 +1,35 @@
-# Restrict PII fields in CP2 data view - 1ページ要約（One Page Summary）
+# CP2 data view における PII fields の制限 - 1ページ要約
 
 ## 対象（Target）
 
 Android 17 Behavior Change
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ## 適用条件（Applicability）
 
 - 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: Unknown。原文は targetSdkVersion 37+ を明示しているが、AOSP gate 未確認。
+- OS アップデート / 全アプリ（OS update / all apps）: 未確認。原文は targetSdkVersion 37 以上を明示しているが、AOSP gate 未確認。
 - targetSdkVersion 37 以上: 公式文書上は該当。AOSP gate 未確認。
 - その他の必須条件（Other required conditions）: `ContactsContract.Data` data view query、`ACCOUNT_NAME`、`ACCOUNT_TYPE`、`ACCOUNT_TYPE_AND_DATA_SET` の利用。
-- Compat Change ID: Unknown
-- Compat default state: Unknown
+- Compat Change ID: 未確認
+- Compat default state: 未確認
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | Unknown。この section は targetSdkVersion 37+ 向けだが、AOSP gate 未確認。 |
+| Android 17 / targetSdkVersion 36 | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
 | Android 17 / targetSdkVersion 37 | 公式文書上、CP2 Data view から account PII columns が removed。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | `ContactsContract.Data` から restricted columns を読めなくなり、`RawContacts` + `RAW_CONTACT_ID` join が必要になる可能性。 |
 
@@ -58,7 +58,7 @@ Android 17 では、targetSdkVersion 37 以上のアプリで、CP2 `ContactsCon
 | 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
 | --- | --- | --- |
 | Android 16 | 36 | Android 16 baseline。具体挙動は Android 17 tag 比較待ち。 |
-| Android 17 | 36 | Unknown。この section は targetSdkVersion 37+ 向けだが、AOSP gate 未確認。 |
+| Android 17 | 36 | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
 | Android 17 | 37 | CP2 Data view から restricted columns が removed と公式文書は説明。 |
 
 ## 顧客向け説明（Explanation for Customers）
@@ -69,17 +69,17 @@ account 情報が必要な場合は、`ContactsContract.DataColumns.RAW_CONTACT_
 
 ## 根拠（Evidence）
 
-- Official documentation: https://developer.android.com/about/versions/17/behavior-changes-17
-- Original statement: targetSdkVersion 37 以上のアプリでは、CP2 Data view から PII を含む `ACCOUNT_NAME`、`ACCOUNT_TYPE`、`ACCOUNT_TYPE_AND_DATA_SET` が removed。必要な場合は `RAW_CONTACT_ID` で `RawContacts` から取得する。
-- AOSP files: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP source context: 未確認。tag 間 diff が実行できない。
-- Diff interpretation: 未分類。公式文書上は removed behavior / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: Unknown。公式文書は targetSdkVersion 37+ を示すが、AOSP gate evidence は未取得。
+- 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-17
+- 検証対象の原文: targetSdkVersion 37 以上のアプリでは、CP2 Data view から PII を含む `ACCOUNT_NAME`、`ACCOUNT_TYPE`、`ACCOUNT_TYPE_AND_DATA_SET` が removed。必要な場合は `RAW_CONTACT_ID` で `RawContacts` から取得する。
+- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
+- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
+- 差分解釈: 未分類。公式文書上は removed behavior / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
+- Gate conclusion: 未確認。公式文書は targetSdkVersion 37 以上を示すが、AOSP gate evidence は未取得。
 
 ## 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required
+- 追加調査が必要

@@ -1,19 +1,19 @@
-# Restrict implicit URI grants - 1ページ要約（One Page Summary）
+# Implicit URI grants の制限 - 1ページ要約
 
 ## 対象（Target）
 
 Android 17 Behavior Change
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ## 適用条件（Applicability）
@@ -22,8 +22,8 @@ Target targetSdkVersion:
 - OS アップデート / 全アプリ（OS update / all apps）: All apps ページに掲載。ただし本文の enforcement は Android 18 starting と説明されており、Android 17 では検出 / migration guidance と読める。
 - targetSdkVersion 37 以上: 公式文書上、この項目に targetSdkVersion 37 条件はない。AOSP gate 未確認。
 - その他の必須条件（Other required conditions）: URI を含む `ACTION_SEND`、`ACTION_SEND_MULTIPLE`、`ACTION_IMAGE_CAPTURE` intent を使い、system の implicit URI grant に依存していること。
-- Compat Change ID: Unknown
-- Compat default state: Unknown
+- Compat Change ID: 未確認
+- Compat default state: 未確認
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
@@ -69,17 +69,17 @@ Android 17 の文書では、URI を含む `ACTION_SEND`、`ACTION_SEND_MULTIPLE
 
 ## 根拠（Evidence）
 
-- Official documentation: https://developer.android.com/about/versions/17/behavior-changes-all
-- Original statement: Android 18 starting で system は URI 付き `ACTION_SEND` / `ACTION_SEND_MULTIPLE` / `ACTION_IMAGE_CAPTURE` に対する read / write URI permissions を自動 grant しなくなる。Android 17 では StrictMode / logcat による検出と explicit grant flag への移行が案内されている。
-- AOSP files: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP source context: 未確認。tag 間 diff が実行できない。
-- Diff interpretation: 未分類。公式文書上は Android 17 immediate enforcement ではなく Android 18 advance warning / migration guidance と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: Unknown。公式文書上は targetSdkVersion 37 gate なし、Android 18 enforcement + Android 17 detection guidance。runtime gate / compat framework evidence は未取得。
+- 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
+- 検証対象の原文: Android 18 starting で system は URI 付き `ACTION_SEND` / `ACTION_SEND_MULTIPLE` / `ACTION_IMAGE_CAPTURE` に対する read / write URI permissions を自動 grant しなくなる。Android 17 では StrictMode / logcat による検出と explicit grant flag への移行が案内されている。
+- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
+- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
+- 差分解釈: 未分類。公式文書上は Android 17 immediate enforcement ではなく Android 18 advance warning / migration guidance と読めるが、AOSP diff による確認は Android 17 tag 待ち。
+- Gate conclusion: 未確認。公式文書上は targetSdkVersion 37 gate なし、Android 18 enforcement + Android 17 detection guidance。runtime gate / compat framework evidence は未取得。
 
-## 人間の判断欄（Human Decision）
+## 人間の判断欄
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required after Android 17 AOSP tag is available
+- Android 17 AOSP tag 公開後に追加調査が必要

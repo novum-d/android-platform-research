@@ -1,36 +1,36 @@
-# Restoring default IME visibility after rotation
+# Rotation 後の default IME visibility 復元
 
 ## 基本情報（Metadata）
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Related documents:
+関連文書:
 - https://developer.android.com/guide/topics/manifest/activity-element#wsoft
 - https://developer.android.com/reference/android/app/Activity#onCreate(android.os.Bundle)
 - https://developer.android.com/reference/android/app/Activity#onConfigurationChanged(android.content.res.Configuration)
 - https://developer.android.com/reference/android/view/WindowInsetsController#show(int)
 
-Section:
+セクション:
 - Restoring default IME visibility after rotation
 
-Page type:
+ページ種別:
 - Behavior changes: all apps
 
 ### 分類スナップショット（Classification Snapshot）
@@ -46,12 +46,12 @@ Page type:
 
 早見表（At-a-glance impact）:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Likely Yes / Conditional, but unverified | 公式文書は all apps ページに掲載し、targetSdkVersion 条件を示していない。AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | Likely No, but unverified | 原文に targetSdkVersion 条件はない。AOSP targetSdkVersion gate 未確認。 |
-| 追加の実行時条件があるか | Yes | configuration change が発生し、app がそれを自身で処理せず、以前の IME visibility の自動復元を期待している場合。 |
-| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 可能性は高いが条件付き、かつ未検証 | 公式文書は all apps ページに掲載し、targetSdkVersion 条件を示していない。AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | 不要と考えられるが未検証 | 原文に targetSdkVersion 条件はない。AOSP targetSdkVersion gate 未確認。 |
+| 追加の実行時条件があるか | ある | configuration change が発生し、app がそれを自身で処理せず、以前の IME visibility の自動復元を期待している場合。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
 
 ### 調査日（Investigation Date）
 
@@ -69,7 +69,7 @@ Page type:
 - [ ] targetSdkVersion >= 37, with additional runtime conditions
 - [ ] Mainline / Google Play system update dependent
 - [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [x] Unknown / 追加根拠が必要
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上。AOSP tag 未取得のため実装上の OS gate は未確認。
@@ -79,17 +79,17 @@ Page type:
 - App state/process condition: app が configuration change を自身で処理せず、Activity recreation 後に以前の IME visibility が自動復元されることを期待している場合。
 
 Compat framework:
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: Unknown
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時の切り替え可否: 未確認
 
 分類信頼度（Classification confidence）:
 - Low
 
 分類根拠（Classification evidence）:
-- Official documentation page: `behavior-changes-all`
-- Original applicability statement: Android 17 から、app が処理しない configuration change 後に previous IME visibility は復元されない。
+- 公式ドキュメントページ: `behavior-changes-all`
+- 検証対象の適用条件文: Android 17 から、app が処理しない configuration change 後に previous IME visibility は復元されない。
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
 
@@ -105,7 +105,7 @@ Android 17 では、rotation などの configuration change が発生し、そ�
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
@@ -115,13 +115,13 @@ Page title:
 Page URL:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Page type:
+ページ種別:
 - all apps
 
 Section title:
 - Restoring default IME visibility after rotation
 
-Original statement being verified:
+検証対象の原文:
 - Beginning with Android 17, when the device's configuration changes, for example through rotation, and this is not handled by the app itself, the previous IME visibility is not restored.
 - If the app needs the keyboard to be visible after an unhandled configuration change, the app must explicitly request it.
 - Mitigation options are setting `android:windowSoftInputMode` to `stateAlwaysVisible`, requesting the soft keyboard in `Activity.onCreate()`, or adding / using `onConfigurationChanged()`.
@@ -163,7 +163,7 @@ AOSP で未確認の点:
 ### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上、targetSdkVersion 37 は必要条件ではない。
-- Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式文書は Android 17 platform behavior として説明している。
+- Android 17 以外で targetSdkVersion 37 にした場合の挙動: 未確認。公式文書は Android 17 platform behavior として説明している。
 - opt-out / temporary override の有無: 未確認。公式文書には opt-out は記載されていない。
 
 ### その他の条件（Other Conditions）
@@ -193,7 +193,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `android-16.0.0_r4` tag は存在する。
 - `android-17*` tag は local checkout に存在しない。
 
-Evidence limitation:
+根拠上の制約:
 - Android 17 AOSP tag が local `frameworks-base` にないため、`android-16.0.0_r4` と Android 17 tag の明示的な source diff は実行できない。
 - そのため、local working tree や未確定 branch を platform evidence として扱わない。
 - 本レポートの AOSP-backed conclusion は Low confidence に留める。
@@ -223,7 +223,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | `android:windowSoftInputMode` / `stateAlwaysVisible` handling | 未確認 | manifest attribute による明示要求が mitigation とされている | declarative mitigation の適用条件と timing を確認するため |
 | compat framework entry | 未確認 | targetSdkVersion gate の有無は不明 | all apps 型か targetSdkVersion gate 型かの確定に必要なため |
 
-必須記入項目（Required context）:
+必須記入項目:
 - Entry point / caller: 未確認。想定される entry point は device rotation / configuration change -> Activity recreation or `onConfigurationChanged()` -> window focus / insets state -> IME visibility decision。
 - Relevant class or service responsibility: Activity lifecycle、configuration change dispatch、Window / Insets state、IME show / hide control。
 - Runtime path from app API / system event to changed code: rotation などで configuration change 発生 -> app が change を処理しない場合 Activity recreation -> Android 17 は previous IME visibility を自動復元しない -> app が必要なら `stateAlwaysVisible` または programmatic show で表示要求、という path が想定される。AOSP evidence としては未確認。
@@ -235,7 +235,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | --- | --- | --- | --- |
 | Android 17 tag 未取得のため source diff 未確認 | 公式文書上は changed default / changed condition と読める | unhandled configuration change 後に previous IME visibility が復元されないと説明されている | Low |
 
-必須分類（Required interpretation）:
+必須分類:
 - Added behavior: 未確認。previous IME visibility restoration を抑止する条件が追加された可能性がある。
 - Removed behavior: 未確認。rotation 後の implicit IME restoration が削除または限定された可能性がある。
 - Changed condition: 未確認。configuration change handling 状態によって restoration が分岐する可能性がある。
@@ -318,13 +318,13 @@ Android 17 では、画面回転などで app が処理しない configuration c
 # 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
-最終影響度（Final Severity）:
-- Human decision required
+最終影響度:
+- 人間による判断が必要
 
 顧客通知要否（Customer Communication Required）:
-- Human decision required
+- 人間による判断が必要
 
-リリース判断（Release Readiness）:
-- Human decision required
+リリース判断:
+- 人間による判断が必要

@@ -4,32 +4,32 @@
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Related documents:
+関連文書:
 - https://developer.android.com/work/managed-profiles
 - https://developer.android.com/work/dpc/build-dpc
 - https://developer.android.com/reference/android/app/admin/DevicePolicyManager
 
-Section:
+セクション:
 - Block cross profile loopback traffic
 
-Page type:
+ページ種別:
 - Behavior changes: all apps
 
 ### 分類スナップショット（Classification Snapshot）
@@ -46,12 +46,12 @@ Page type:
 
 早見表（At-a-glance impact）:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Likely Yes / Conditional, but unverified | 公式文書は Android 17 以上の全アプリに target API level に関係なく適用と説明。AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | Likely No, but unverified | 原文は regardless of target API level と明記。AOSP targetSdkVersion gate 未確認。 |
-| 追加の実行時条件があるか | Yes | multiple profiles があり、loopback traffic が profile boundary を跨ぐ場合。same-profile loopback は対象外。 |
-| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 可能性は高いが条件付き、かつ未検証 | 公式文書は Android 17 以上の全アプリに target API level に関係なく適用と説明。AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | 不要と考えられるが未検証 | 原文は regardless of target API level と明記。AOSP targetSdkVersion gate 未確認。 |
+| 追加の実行時条件があるか | ある | multiple profiles があり、loopback traffic が profile boundary を跨ぐ場合。same-profile loopback は対象外。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
 
 ### 調査日（Investigation Date）
 
@@ -64,12 +64,12 @@ Page type:
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
-- [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
-- [ ] targetSdkVersion >= 37 on Android 17+
-- [ ] targetSdkVersion >= 37, with additional runtime conditions
-- [ ] Mainline / Google Play system update dependent
-- [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
+- [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
+- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [ ] Mainline / Google Play system update に依存
+- [ ] API 追加のみであり、挙動変更ではない
+- [x] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上。AOSP tag 未取得のため実装上の OS gate は未確認。
@@ -79,17 +79,17 @@ Page type:
 - App state/process condition: app または component が profile boundary を跨いで loopback address 経由で通信しようとする場合。
 
 Compat framework:
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: Unknown
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時に切り替え可能か: 未確認
 
 分類信頼度（Classification confidence）:
 - Low
 
 分類根拠（Classification evidence）:
-- Official documentation page: `behavior-changes-all`
-- Original applicability statement: Android 17 から cross-profile loopback traffic は default で許可されず、same-profile loopback は影響なし。Android 17 以上の全アプリに target API level に関係なく適用。
+- 公式ドキュメントページ: `behavior-changes-all`
+- 検証対象の適用条件文: Android 17 から cross-profile loopback traffic は default で許可されず、same-profile loopback は影響なし。Android 17 以上の全アプリに target API level に関係なく適用。
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
 
@@ -105,23 +105,23 @@ Android 17 では、profile boundary を跨ぐ loopback traffic が default で�
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
-Page title:
+ページタイトル:
 - Behavior changes: all apps
 
-Page URL:
+ページ URL:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Page type:
+ページ種別:
 - all apps
 
-Section title:
+セクションタイトル:
 - Block cross profile loopback traffic
 
-Original statement being verified:
+検証対象の原文:
 - Beginning with Android 17, cross-profile loopback traffic is no longer permitted by default.
 - Loopback traffic within the same profile is not affected.
 - This change applies to all apps running on Android 17 or higher, regardless of what API level the app targets.
@@ -193,7 +193,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `android-16.0.0_r4` tag は存在する。
 - `android-17*` tag は local checkout に存在しない。
 
-Evidence limitation:
+根拠上の制約:
 - Android 17 AOSP tag が local `frameworks-base` にないため、`android-16.0.0_r4` と Android 17 tag の明示的な source diff は実行できない。
 - そのため、local working tree や未確定 branch を platform evidence として扱わない。
 - 本レポートの AOSP-backed conclusion は Low confidence に留める。
@@ -224,7 +224,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | loopback address routing / socket path | 未確認 | loopback traffic のうち cross-profile のみ制限されると公式文書が説明 | localhost / `127.0.0.1` / `::1` の扱いを確認するため |
 | DevicePolicy / enterprise exception path | 未確認 | 公式文書には exception 記載なし | DPC / managed profile 環境で例外や policy override があるか確認するため |
 
-必須記入項目（Required context）:
+必須記入項目:
 - Entry point / caller: 未確認。想定される entry point は app socket connect / bind -> network stack / netd / firewall -> user/profile boundary policy -> allow / block。
 - Relevant class or service responsibility: loopback routing、profile boundary isolation、network policy / firewall enforcement、DevicePolicy exception。
 - Runtime path from app API / system event to changed code: app が localhost / loopback へ connect -> system が source profile と destination profile を判定 -> same-profile なら許可、cross-profile なら default block、という path が想定される。AOSP evidence としては未確認。
@@ -236,7 +236,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | --- | --- | --- | --- |
 | Android 17 tag 未取得のため source diff 未確認 | 公式文書上は changed default / changed condition と読める | cross-profile loopback traffic が default block になり、same-profile loopback は維持されると説明されている | Low |
 
-必須分類（Required interpretation）:
+必須分類:
 - Added behavior: 未確認。cross-profile loopback block enforcement が追加された可能性がある。
 - Removed behavior: 未確認。
 - Changed condition / gate: 公式文書上、same-profile は許可、cross-profile は default block という条件差分がある。AOSP gate 未確認。
@@ -301,13 +301,11 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 
 # 顧客影響（Customer Impact）
 
-顧客説明用。
-
 ## 影響度（Impact Level）
 
 - 要確認
 
-※ 仮評価。最終判断は人間が行う。
+※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
 ## ビジネス影響（Business Impact）
 
@@ -420,13 +418,13 @@ Android app developer は、localhost / loopback を cross-profile communication
 
 ---
 
-# 人間の判断欄（Human Decision Placeholder）
+# 人間の判断欄
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required after Android 17 AOSP tag is available
+- Android 17 AOSP tag 公開後に追加調査が必要
 
 判断理由候補:
 - 公式文書上は all apps / regardless of target API level と明確だが、AOSP gate、DevicePolicy exception、enforcement layer が未確認である。

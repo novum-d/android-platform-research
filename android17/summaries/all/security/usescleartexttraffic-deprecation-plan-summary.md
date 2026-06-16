@@ -1,19 +1,19 @@
-# usesClearTraffic deprecation plan - 1ページ要約（One Page Summary）
+# usesCleartextTraffic の deprecation plan - 1ページ要約
 
 ## 対象（Target）
 
 Android 17 Behavior Change
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ## 適用条件（Applicability）
@@ -22,8 +22,8 @@ Target targetSdkVersion:
 - OS アップデート / 全アプリ（OS update / all apps）: All apps ページに掲載。ただし本文は future release の deprecation plan であり、Android 17 で即時 runtime behavior change があるとは明記していない。
 - targetSdkVersion 37 以上: 公式文書上、この項目に targetSdkVersion 37 条件はない。AOSP gate 未確認。
 - その他の必須条件（Other required conditions）: unencrypted HTTP connection が必要なアプリ、`android:usesCleartextTraffic` 利用、Network Security Configuration 移行状況、`minSdkVersion` が 24 未満か以上か。
-- Compat Change ID: Unknown
-- Compat default state: Unknown
+- Compat Change ID: 未確認
+- Compat default state: 未確認
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
@@ -69,17 +69,17 @@ Android 17 の文書では、将来 release で `usesCleartextTraffic` element �
 
 ## 根拠（Evidence）
 
-- Official documentation: https://developer.android.com/about/versions/17/behavior-changes-all
-- Original statement: future release で `usesCleartextTraffic` element を deprecate する計画があり、unencrypted HTTP connection が必要なアプリは Network Security Configuration file へ移行すべき。
-- AOSP files: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP source context: 未確認。tag 間 diff が実行できない。
-- Diff interpretation: 未分類。公式文書上は immediate behavior change ではなく future deprecation plan / migration guidance と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: Unknown。公式文書上は targetSdkVersion 37 gate なし、`minSdkVersion` と Network Security Configuration support が migration condition。runtime gate / compat framework evidence は未取得。
+- 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
+- 検証対象の原文: future release で `usesCleartextTraffic` element を deprecate する計画があり、unencrypted HTTP connection が必要なアプリは Network Security Configuration file へ移行すべき。
+- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
+- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
+- 差分解釈: 未分類。公式文書上は immediate behavior change ではなく future deprecation plan / migration guidance と読めるが、AOSP diff による確認は Android 17 tag 待ち。
+- Gate conclusion: 未確認。公式文書上は targetSdkVersion 37 gate なし、`minSdkVersion` と Network Security Configuration support が migration condition。runtime gate / compat framework evidence は未取得。
 
-## 人間の判断欄（Human Decision）
+## 人間の判断欄
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required after Android 17 AOSP tag is available
+- Android 17 AOSP tag 公開後に追加調査が必要

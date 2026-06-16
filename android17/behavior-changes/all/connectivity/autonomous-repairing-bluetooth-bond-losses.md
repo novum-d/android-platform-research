@@ -4,34 +4,34 @@
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Related documents:
+関連文書:
 - https://developer.android.com/reference/android/bluetooth/BluetoothDevice#ACTION_PAIRING_REQUEST
 - https://developer.android.com/reference/android/bluetooth/BluetoothDevice#EXTRA_PAIRING_CONTEXT
 - https://developer.android.com/reference/android/bluetooth/BluetoothDevice#ACTION_KEY_MISSING
 - https://developer.android.com/guide/topics/connectivity/bluetooth
 - https://developer.android.com/develop/connectivity/bluetooth
 
-Section:
+セクション:
 - Autonomous re-pairing for Bluetooth bond losses
 
-Page type:
+ページ種別:
 - Behavior changes: all apps
 
 ### 分類スナップショット（Classification Snapshot）
@@ -48,12 +48,12 @@ Page type:
 
 早見表（At-a-glance impact）:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Likely Yes / Conditional, but unverified | 公式文書は all apps ページに掲載し、targetSdkVersion 条件を示していない。AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | Likely No, but unverified | 原文に targetSdkVersion 条件はない。AOSP targetSdkVersion gate 未確認。 |
-| 追加の実行時条件があるか | Yes | Bluetooth peripheral bond loss が発生し、system が autonomous re-pairing を試行する場合。companion app が pairing / key missing broadcast を扱う場合は特に確認が必要。 |
-| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 可能性は高いが条件付き、かつ未検証 | 公式文書は all apps ページに掲載し、targetSdkVersion 条件を示していない。AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | 不要と考えられるが未検証 | 原文に targetSdkVersion 条件はない。AOSP targetSdkVersion gate 未確認。 |
+| 追加の実行時条件があるか | ある | Bluetooth peripheral bond loss が発生し、system が autonomous re-pairing を試行する場合。companion app が pairing / key missing broadcast を扱う場合は特に確認が必要。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
 
 ### 調査日（Investigation Date）
 
@@ -66,12 +66,12 @@ Page type:
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
-- [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
-- [ ] targetSdkVersion >= 37 on Android 17+
-- [ ] targetSdkVersion >= 37, with additional runtime conditions
-- [ ] Mainline / Google Play system update dependent
-- [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
+- [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
+- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [ ] Mainline / Google Play system update に依存
+- [ ] API 追加のみであり、挙動変更ではない
+- [x] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上。AOSP tag 未取得のため実装上の OS gate は未確認。
@@ -81,17 +81,17 @@ Page type:
 - App state/process condition: companion app または peripheral app が pairing / key-missing broadcast を監視する、または manual unpair / re-pair recovery flow を案内している場合。
 
 Compat framework:
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: Unknown
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時に切り替え可能か: 未確認
 
 分類信頼度（Classification confidence）:
 - Low
 
 分類根拠（Classification evidence）:
-- Official documentation page: `behavior-changes-all`
-- Original applicability statement: Android 17 は autonomous re-pairing を導入し、bond loss 時に system が background で bond を再確立できる。Bluetooth stack の intent / key update / UI timing に変更がある。
+- 公式ドキュメントページ: `behavior-changes-all`
+- 検証対象の適用条件文: Android 17 は autonomous re-pairing を導入し、bond loss 時に system が background で bond を再確立できる。Bluetooth stack の intent / key update / UI timing に変更がある。
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
 
@@ -107,23 +107,23 @@ Android 17 では、Bluetooth bond loss を system が自動的に回復する a
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
-Page title:
+ページタイトル:
 - Behavior changes: all apps
 
-Page URL:
+ページ URL:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Page type:
+ページ種別:
 - all apps
 
-Section title:
+セクションタイトル:
 - Autonomous re-pairing for Bluetooth bond losses
 
-Original statement being verified:
+検証対象の原文:
 - Android 17 は Bluetooth bond loss を自動的に解決する system-level enhancement として autonomous re-pairing を導入する。
 - 以前は bond loss 時に users が Settings で peripheral を手動 unpair / re-pair する必要があった。
 - Android 17 では system が background で bond を再確立できる。
@@ -203,7 +203,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `android-16.0.0_r4` tag は存在する。
 - `android-17*` tag は local checkout に存在しない。
 
-Evidence limitation:
+根拠上の制約:
 - Android 17 AOSP tag が local `frameworks-base` にないため、`android-16.0.0_r4` と Android 17 tag の明示的な source diff は実行できない。
 - Bluetooth stack は `frameworks-base` 以外の `packages/modules/Bluetooth` などに実装がある可能性が高いため、Android 17 tag 入手後は該当 project も確認する必要がある。
 - そのため、local working tree や未確定 branch を platform evidence として扱わない。
@@ -236,7 +236,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | system pairing UI / notification path | 未確認 | system が notifications / dialogs で user confirmation を扱う | user-visible flow と app-guided recovery flow の衝突確認に必要なため |
 | compat framework entry | 未確認 | targetSdkVersion gate の有無は不明 | all apps 型か targetSdkVersion gate 型かの確定に必要なため |
 
-必須記入項目（Required context）:
+必須記入項目:
 - Entry point / caller: 未確認。想定される entry point は Bluetooth stack が bond / key missing condition を検出 -> autonomous re-pairing attempt -> pairing request broadcast / system UI -> key update or `ACTION_KEY_MISSING` failure broadcast。
 - Relevant class or service responsibility: bond state management、pairing request context、security key update、failure notification、system pairing UI。
 - Runtime path from app API / system event to changed code: peripheral bond loss -> system が autonomous re-pairing を開始 -> user confirmation UI / pairing context を含む broadcast -> success なら security keys を条件付き更新、failure なら `ACTION_KEY_MISSING` を broadcast、という path が想定される。AOSP evidence としては未確認。
@@ -248,7 +248,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | --- | --- | --- | --- |
 | Android 17 tag 未取得のため source diff 未確認 | 公式文書上は added behavior / changed broadcast timing / API surface addition と読める | autonomous re-pairing、`EXTRA_PAIRING_CONTEXT`、`ACTION_KEY_MISSING` timing change が説明されている | Low |
 
-必須分類（Required interpretation）:
+必須分類:
 - Added behavior: 公式文書上は該当候補。autonomous re-pairing と `EXTRA_PAIRING_CONTEXT` が追加される。
 - Removed behavior: 未確認。manual recovery が不要になるケースがあるが、manual unpair / re-pair 自体が削除されるとは説明されていない。
 - Changed condition: 公式文書上は該当候補。security key replacement と `ACTION_KEY_MISSING` broadcast が re-pairing success / failure 条件に依存する。
@@ -341,13 +341,13 @@ Android 17 では、Bluetooth peripheral の bond が失われた場合、system
 # 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
-最終影響度（Final Severity）:
-- Human decision required
+最終影響度:
+- 人間による判断が必要
 
 顧客通知要否（Customer Communication Required）:
-- Human decision required
+- 人間による判断が必要
 
-リリース判断（Release Readiness）:
-- Human decision required
+リリース判断:
+- 人間による判断が必要

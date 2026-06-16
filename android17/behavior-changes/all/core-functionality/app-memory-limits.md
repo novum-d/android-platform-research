@@ -4,24 +4,24 @@
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Related documents:
+関連文書:
 - https://developer.android.com/topic/performance/memory
 - https://developer.android.com/tools/adb
 - https://developer.android.com/tools/dumpsys#uid_stats
@@ -31,10 +31,10 @@ Related documents:
 - https://developer.android.com/topic/performance/tracing/profiling-manager/trigger-based-capture
 - https://developer.android.com/about/versions/17/features#anomaly-profiling-trigger
 
-Section:
+セクション:
 - App memory limits
 
-Page type:
+ページ種別:
 - Behavior changes: all apps
 
 ### 分類スナップショット（Classification Snapshot）
@@ -49,12 +49,12 @@ Page type:
 
 早見表（At-a-glance impact）:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Likely / Conditional, but unverified | `behavior-changes-all` ページに掲載。公式文書は all apps 対象ページであるが、AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | Likely No, but unverified | all apps ページの説明から targetSdkVersion 非依存と読むのが自然。ただし AOSP targetSdkVersion gate 未確認。 |
-| 追加の実行時条件があるか | Yes | 公式文書は memory limits が一部の Android devices のみに課されると説明している。 |
-| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 可能性は高いが条件付き、かつ未検証 | `behavior-changes-all` ページに掲載。公式文書は all apps 対象ページであるが、AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | 不要と考えられるが未検証 | all apps ページの説明から targetSdkVersion 非依存と読むのが自然。ただし AOSP targetSdkVersion gate 未確認。 |
+| 追加の実行時条件があるか | ある | 公式文書は memory limits が一部の Android devices のみに課されると説明している。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
 
 ### 調査日（Investigation Date）
 
@@ -67,12 +67,12 @@ Page type:
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
-- [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
-- [ ] targetSdkVersion >= 37 on Android 17+
-- [ ] targetSdkVersion >= 37, with additional runtime conditions
-- [ ] Mainline / Google Play system update dependent
-- [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
+- [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
+- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [ ] Mainline / Google Play system update に依存
+- [ ] API 追加のみであり、挙動変更ではない
+- [x] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 であることが前提。Android 17 AOSP tag 未取得のため実装上の OS gate は未確認。
@@ -82,17 +82,17 @@ Page type:
 - App state/process condition: visible / non-visible process 別の limit が存在する可能性があると公式 test command の `status` 説明から読めるが、実装未確認。
 
 Compat framework:
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: 公式文書は compat flag ではなく `am memory-limiter` command による test controls を説明している。compat framework entry は未確認。
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時の切り替え可否: 公式文書は compat flag ではなく `am memory-limiter` command による test controls を説明している。compat framework entry は未確認。
 
 分類信頼度（Classification confidence）:
 - Low
 
 分類根拠（Classification evidence）:
-- Official documentation page: `behavior-changes-all`
-- Original applicability statement: Android 17 all-apps page states that its changes apply to all apps running on Android 17 regardless of targetSdkVersion.
+- 公式ドキュメントページ: `behavior-changes-all`
+- 検証対象の適用条件文: Android 17 all-apps page states that its changes apply to all apps running on Android 17 regardless of targetSdkVersion.
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
 
@@ -108,23 +108,23 @@ Android 17 では、device total RAM に基づく app memory limits が導入さ
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
-Page title:
+ページタイトル:
 - Behavior changes: all apps
 
-Page URL:
+ページ URL:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Page type:
+ページ種別:
 - all apps
 
-Section title:
+セクションタイトル:
 - App memory limits
 
-Original statement being verified:
+検証対象の原文:
 - Android 17 introduces app memory limits based on device total RAM.
 - The limits are intended to make the environment more stable and deterministic for apps and users.
 - The limits target extreme memory leaks and outliers before they cause system-wide instability.
@@ -132,7 +132,7 @@ Original statement being verified:
 - Affected sessions can be diagnosed through `ApplicationExitInfo.getDescription()` containing `MemoryLimiter:AnonSwap`, with exit reason `REASON_OTHER`.
 - Trigger-based profiling with `TRIGGER_TYPE_ANOMALY` can collect heap dumps when the limit is hit.
 
-Subsection statement being verified:
+検証対象のサブセクション:
 - `Test your app's behavior under the memory constraints` is a verification subsection under `App memory limits`, not a separate Behavior Change.
 - Developers can use ADB and the shell command `am` to adjust or disable memory limits on devices that impose memory limits.
 - The `am memory-limiter` subcommands are `ignore <uid>|none|all`, `manual <pid> <limit>|max|none`, and `status`.
@@ -219,7 +219,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `android-16.0.0_r4` tag は存在する。
 - `android-17*` tag は local checkout に存在しない。
 
-Evidence limitation:
+根拠上の制約:
 - Android 17 AOSP tag が local `frameworks-base` にないため、`android-16.0.0_r4` と Android 17 tag の明示的な source diff は実行できない。
 - そのため、local working tree や未確定 branch を platform evidence として扱わない。
 - 本レポートの AOSP-backed conclusion は Low confidence に留める。
@@ -250,7 +250,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | `ApplicationExitInfo.getDescription()` / `REASON_OTHER` | 未確認 | memory limiter 影響時に `MemoryLimiter:AnonSwap` を含む description を返すと公式文書が説明 | app developer が影響を観測する public API |
 | trigger-based profiling / `TRIGGER_TYPE_ANOMALY` | 未確認 | memory limit hit 時に heap dump collection に使えると公式文書が説明 | memory limit hit の診断 path |
 
-必須記入項目（Required context）:
+必須記入項目:
 - Entry point / caller: 未確認。Android 17 tag 公開後に `adb shell am memory-limiter ...` -> ActivityManager shell command -> memory limiter service / controller の command path、process memory accounting / kill path、`ApplicationExitInfo` recording path を確認する。
 - Relevant class or service responsibility: process memory limit enforcement、exit reason / description recording、developer diagnostics。
 - Runtime path from app API / system event to changed code: アプリ process の memory usage が limit を超える -> system memory limiter が enforcement -> process exit / record -> app が後続起動時に `ApplicationExitInfo` から診断、という path が想定される。検証 path としては、`adb shell am memory-limiter status` で対象 device / current limits を確認し、`adb shell am memory-limiter manual <pid> <limit>` で process 単位の manual limit を設定する。
@@ -262,7 +262,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | --- | --- | --- | --- |
 | Android 17 tag 未取得のため source diff 未確認 | 公式文書上は added behavior / changed condition と読める | app memory limits の新規導入、device subset condition、diagnostic signal が説明されている | Low |
 
-必須分類（Required interpretation）:
+必須分類:
 - Added behavior: 公式文書上、Android 17 で app memory limits が導入される。
 - Removed behavior: 未確認。
 - Changed condition / gate: 公式文書上、一部 devices でのみ imposed。AOSP gate 未確認。
@@ -339,13 +339,11 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 
 # 顧客影響（Customer Impact）
 
-顧客説明用。
-
 ## 影響度（Impact Level）
 
 - 要確認
 
-※ 仮評価。最終判断は人間が行う。
+※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
 ## ビジネス影響（Business Impact）
 
@@ -471,13 +469,13 @@ Android app developer は、Android 17 対応の一環として memory baseline�
 
 ---
 
-# 人間の判断欄（Human Decision Placeholder）
+# 人間の判断欄
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required after Android 17 AOSP tag is available
+- Android 17 AOSP tag 公開後に追加調査が必要
 
 判断理由候補:
 - 公式文書上は all apps change だが、device subset condition と AOSP gate 未確認が残っている。

@@ -1,38 +1,38 @@
-# Enforce strict SQL checks in CP2
+# CP2 での strict SQL checks の強制
 
 ## 基本情報（Metadata）
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 https://developer.android.com/about/versions/17/behavior-changes-17
 
-Related documents:
+関連文書:
 - https://developer.android.com/reference/android/provider/ContactsContract.Data
 - https://developer.android.com/reference/android/Manifest.permission#READ_CONTACTS
 - https://developer.android.com/reference/android/database/sqlite/SQLiteQueryBuilder#setStrictColumns(boolean)
 - https://developer.android.com/reference/android/database/sqlite/SQLiteQueryBuilder#setStrictGrammar(boolean)
 - https://developer.android.com/about/versions/17/features/contact-picker
 
-Section:
+セクション:
 Enforce strict SQL checks in CP2
 
-Page type:
-- Apps targeting Android 17 or higher
+ページ種別:
+- Android 17 以上をターゲットにするアプリ
 
 ### 分類スナップショット（Classification Snapshot）
 
@@ -48,12 +48,12 @@ Page type:
 
 早見表（At-a-glance impact）:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Unknown | 公式文書は apps targeting Android 17 / API level 37 and higher と述べるが、AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | Likely, but unverified | 原文は targetSdkVersion 37 以上を明示している。 |
-| 追加の実行時条件があるか | Yes | `READ_CONTACTS` permission なしで `ContactsContract.Data` table を query し、strict SQL と互換性のない query pattern を使う場合。 |
-| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 未確認 | 公式文書は Android 17 / API level 37 以上をターゲットにするアプリと述べるが、AOSP gate は未確認。 |
+| targetSdkVersion 37 以上が必要か | 可能性は高いが未検証 | 原文は targetSdkVersion 37 以上を明示している。 |
+| 追加の実行時条件があるか | ある | `READ_CONTACTS` permission なしで `ContactsContract.Data` table を query し、strict SQL と互換性のない query pattern を使う場合。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
 
 ### 調査日（Investigation Date）
 
@@ -66,12 +66,12 @@ Page type:
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
-- [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
-- [ ] targetSdkVersion >= 37 on Android 17+
-- [ ] targetSdkVersion >= 37, with additional runtime conditions
-- [ ] Mainline / Google Play system update dependent
-- [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
+- [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
+- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [ ] Mainline / Google Play system update に依存
+- [ ] API 追加のみであり、挙動変更ではない
+- [x] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
@@ -82,17 +82,17 @@ Page type:
 - App state/process condition: アプリが CP2 の `ContactsContract.Data` query を実行する時点。
 
 Compat framework:
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: Unknown
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時に切り替え可能か: 未確認
 
 分類信頼度（Classification confidence）:
 - Low
 
 分類根拠（Classification evidence）:
-- Official documentation page: `behavior-changes-17`
-- Original applicability statement: apps targeting Android 17 / API level 37 and higher, without `READ_CONTACTS`, CP2 enforces strict SQL checks on `ContactsContract.Data` access.
+- 公式ドキュメントページ: `behavior-changes-17`
+- 検証対象の適用条件文: apps targeting Android 17 / API level 37 and higher, without `READ_CONTACTS`, CP2 enforces strict SQL checks on `ContactsContract.Data` access.
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
 
@@ -110,27 +110,27 @@ Android 17 では Contact Picker も追加され、アプリは `READ_CONTACTS` 
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
-Page title:
+ページタイトル:
 - Behavior changes: Apps targeting Android 17 or higher
 
-Page URL:
+ページ URL:
 - https://developer.android.com/about/versions/17/behavior-changes-17
 
-Page type:
-- apps targeting Android 17
+ページ種別:
+- Android 17 をターゲットにするアプリ
 
-Section title:
+セクションタイトル:
 - Enforce strict SQL checks in CP2
 
-Original statement being verified:
+検証対象の原文:
 
 > For apps targeting Android 17 (API level Android 17 (API level 37)) and higher, Contacts Provider 2 (CP2) enforces strict SQL query validation when the ContactsContract.Data table is accessed without READ_CONTACTS permission.
 
-The supplied official text states that if an app doesn't have `READ_CONTACTS` permission, `StrictColumns` and `StrictGrammar` options are set when querying the `ContactsContract.Data` table. If a query uses a pattern that isn't compatible with these options, it is rejected and causes an exception.
+公式文書は、アプリが `READ_CONTACTS` permission を持たない場合、`ContactsContract.Data` table を query するときに `StrictColumns` と `StrictGrammar` options が set されると説明している。query がこれらの options と互換性のない pattern を使う場合、その query は rejected され、exception が発生する。
 
 ## 解釈（Interpretation）
 
@@ -226,23 +226,23 @@ Note:
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
-| File / symbol | Android 16 baseline | Android 17 behavior | Why this code path matters |
+| File / symbol | Android 16 baseline | Android 17 behavior | 関連性 |
 | --- | --- | --- | --- |
-| Not reviewed | Not reviewed | Not reviewed | Android 17 tag がないため、公式文書の記述を AOSP diff で検証できない。 |
+| 未レビュー | 未レビュー | 未レビュー | Android 17 tag がないため、公式文書の記述を AOSP diff で検証できない。 |
 
-Required context:
+必要な context:
 - Entry point / caller: 未確認。想定される entry point は app の `ContentResolver.query(ContactsContract.Data.CONTENT_URI, ...)`、ContactsProvider query routing、`READ_CONTACTS` permission check、`SQLiteQueryBuilder` strict options だが、AOSP evidence としては未採用。
-- Relevant class or service responsibility: 未確認。
-- Runtime path from app API / system event to changed code: 未確認。
-- Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
+- 関連 class / service の責務: 未確認。
+- app API / system event から変更箇所までの runtime path: 未確認。
+- 関係しない code path を除外した理由: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
 ## 差分解釈（Diff Interpretation）
 
-| Observed diff | Interpretation | Behavior Change relevance | Confidence |
+| 観測した diff | 解釈 | Behavior Change との関連 | 信頼度 |
 | --- | --- | --- | --- |
-| No Android 17 tag diff available | Source diff type cannot be classified yet | 公式文書の strict SQL validation、permission condition、targetSdkVersion gate、exception behavior を source diff で裏取りできていない | Low |
+| Android 17 tag diff なし | Source diff type はまだ分類できない | 公式文書の strict SQL validation、permission condition、targetSdkVersion gate、exception behavior を source diff で裏取りできていない | Low |
 
-Required interpretation:
+必要な解釈:
 - Added behavior: 未確認。公式文書上は strict validation の追加または適用拡大の可能性がある。
 - Removed behavior: 未確認。
 - Changed condition / gate: 未確認。targetSdkVersion 37 と `READ_CONTACTS` permission gate がある可能性は高いが、AOSP 未確認。
@@ -251,7 +251,7 @@ Required interpretation:
 
 ## 事実（Evidence）
 
-Facts:
+事実:
 - 公式 Behavior Change 文書は、targetSdkVersion 37 以上のアプリに対し、`READ_CONTACTS` permission なしで `ContactsContract.Data` table にアクセスする場合に CP2 が strict SQL query validation を強制すると述べている。
 - 公式文書は、`READ_CONTACTS` permission がない場合に `StrictColumns` と `StrictGrammar` options が set されると述べている。
 - 公式文書は、query がこれらと互換性のない pattern を使う場合、query が rejected され exception が throw されると述べている。
@@ -263,7 +263,7 @@ Facts:
 - local `frameworks-base` には `android-17*` tag がない。
 - 調査時点で `frameworks-base` working tree は clean。
 
-Observations:
+観察:
 - 公式ページ種別は targetSdkVersion 37 以上向けである。
 - 原文は targetSdkVersion 37 以上を明示しており、targetSdkVersion 37 gate がある可能性が高い。
 - この項目は targetSdkVersion 37 条件に加えて、`READ_CONTACTS` permission がないこと、`ContactsContract.Data` table access、SQL query pattern という runtime / API usage condition を含む。
@@ -273,7 +273,7 @@ Observations:
 - AOSP tag がないため、実装が本当に targetSdkVersion 37 gate で制御されているかは未確認。
 - Compat framework entry の有無も未確認。
 
-Hypotheses:
+仮説:
 - Android 17 / targetSdkVersion 37 以上で `READ_CONTACTS` を持たないアプリは、`ContactsContract.Data` query の projection / selection / sort order に strict validation と互換性のない SQL fragment を含めると exception を受ける可能性が高い。
 - Android 17 / targetSdkVersion 36 のアプリでは旧 query behavior が維持される可能性があるが、AOSP gate 未確認のため断定しない。
 - `READ_CONTACTS` permission を持つアプリではこの strict setting が適用されない可能性があるが、permission grant state、provider policy、other access restrictions は未確認である。
@@ -294,7 +294,7 @@ Hypotheses:
 - Permission/AppOps gate: 未確認。公式文書上は `READ_CONTACTS` permission なしが条件だが、AOSP の permission / AppOps path は未確認。
 - Manifest/property gate: `READ_CONTACTS` permission declaration / runtime grant state が関係するが、AOSP gate evidence は未確認。
 - No gate found: 未確認。Android 17 tag がないため「gate がない」とは判断しない。
-- Gate conclusion: Unknown。公式文書の wording から targetSdkVersion 37 + no `READ_CONTACTS` + `ContactsContract.Data` query condition と推定されるが、AOSP で検証できていない。
+- Gate conclusion: 未確認。公式文書の wording から targetSdkVersion 37 + no `READ_CONTACTS` + `ContactsContract.Data` query condition と推定されるが、AOSP で検証できていない。
 - Reasoning from source context: source context 未レビューのため未確定。
 
 ---
@@ -324,13 +324,11 @@ Hypotheses:
 
 # 顧客影響（Customer Impact）
 
-顧客説明用。
+## 影響度
 
-## 影響度（Impact Level）
+- 人間による判断が必要
 
-- Human decision required
-
-※ 仮評価。最終判断は人間が行う。
+※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
 ## ビジネス影響（Business Impact）
 
@@ -353,7 +351,7 @@ Hypotheses:
 - 開発・運用への影響: query grammar 修正、permission denied path の QA、exception handling の追加が必要になる可能性。
 - 推奨対応候補: documented columns と parameterized selection に寄せ、strict-compatible query に修正する。
 - 根拠: 公式 statement と report の expected behavior。
-- Confidence（信頼度）: Low
+- 信頼度: Low
 - 注意: exception type と exact validation は AOSP tag 待ち。
 
 ## 例2（Example 2）: Contact Picker へ移行する連絡先選択 UI
@@ -365,7 +363,7 @@ Hypotheses:
 - 開発・運用への影響: picker result 用の query path を通常の `ContactsContract.Data.CONTENT_URI` query と分離し、Session URI は projection のみで直接 query する設計へ修正する必要がある可能性。
 - 推奨対応候補: Contact Picker では requested data fields を intent extra で指定し、返された Session URI に対して custom selection を使わず、cursor の `LOOKUP_KEY` / `MIMETYPE` / `DATA1` などを app 側で group / filter する。
 - 根拠: 公式 Contact Picker 文書と report の expected behavior。
-- Confidence（信頼度）: Medium for documentation behavior / Low for AOSP implementation details
+- 信頼度: documentation behavior は Medium / AOSP implementation details は Low
 - 注意: Contact Picker 自体は broad `READ_CONTACTS` permission の代替であり、通常の CP2 Data table query strict SQL change と同一の gate かは AOSP 未確認。
 
 ## 例3（Example 3）: CRM / matching 機能の provider query
@@ -377,7 +375,7 @@ Hypotheses:
 - 開発・運用への影響: query simplification、local DB への同期設計、permission request の必要性再評価が必要になる可能性。
 - 推奨対応候補: provider query を単純化し、必要な処理は app 側で post-process する。
 - 根拠: 公式 statement と report の action candidates。
-- Confidence（信頼度）: Low
+- 信頼度: Low
 - 注意: 実サービスでの発生確認ではない。
 
 ---
@@ -414,13 +412,13 @@ Hypotheses:
 
 ## 検証マトリクス（Matrix）
 
-| Device OS | targetSdkVersion | Compat flag | Expected behavior |
+| 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | default | Android 16 baseline。`READ_CONTACTS` なし Data query の strict validation は Android 17 tag 比較待ち。 |
-| Android 17 | 36 | default | Unknown。この section は targetSdkVersion 37+ 向けだが、AOSP gate 未確認。 |
+| Android 17 | 36 | default | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
 | Android 17 | 37 | default | 公式文書上、`READ_CONTACTS` なしで `ContactsContract.Data` を query すると strict columns / grammar が適用され、非互換 query は exception。 |
-| Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。 |
-| Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。 |
+| Android 17 | 36 | force-enabled if available | 未確認。Compat Change ID 未確認。 |
+| Android 17 | 37 | force-disabled if available | 未確認。Compat Change ID 未確認。 |
 
 ## 手順（Steps）
 
@@ -443,24 +441,24 @@ Android 17 Contact Picker は、address book 全体への `READ_CONTACTS` access
 
 ---
 
-# 人間の判断欄（Human Decision Placeholder）
+# 人間の判断欄
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
-Final Severity:
-- Human decision required
+最終影響度:
+- 人間による判断が必要
 
-Release Readiness:
-- Human decision required
+リリース判断:
+- 人間による判断が必要
 
-Customer Communication Priority:
-- Human decision required
+顧客連絡の優先度:
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required
+- 追加調査が必要
 
-Decision notes:
+判断メモ:
 - Android 17 AOSP tag 入手後に、AOSP evidence と compat framework evidence を確認してから最終判断する。
 
 ---
@@ -478,6 +476,6 @@ Decision notes:
 
 ## AOSP
 
-- Not available for Android 17 in local `frameworks-base`.
-- From tag checked: `android-16.0.0_r4`
-- To tag checked: no local `android-17*` tag found.
+- local `frameworks-base` では Android 17 は利用不可。
+- 確認済みの比較元 tag: `android-16.0.0_r4`
+- 確認済みの比較先 tag: local `android-17*` tag なし。

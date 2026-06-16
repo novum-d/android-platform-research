@@ -1,19 +1,19 @@
-# Per-app keystore limits - 1ページ要約（One Page Summary）
+# Per-app keystore limits - 1ページ要約
 
 ## 対象（Target）
 
 Android 17 Behavior Change
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ## 適用条件（Applicability）
@@ -22,8 +22,8 @@ Target targetSdkVersion:
 - OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。Android 17 で per-app keystore key ownership limit を enforce すると説明されている。
 - targetSdkVersion 37 以上: non-system app では stricter 50,000 key limit と `ERROR_TOO_MANY_KEYS` numeric error code が関係する。AOSP gate 未確認。
 - その他の必須条件（Other required conditions）: Android Keystore keys を作成し、app-owned key count が limit に達する / 超えること。system / non-system app 判定も関係する。
-- Compat Change ID: Unknown
-- Compat default state: Unknown
+- Compat Change ID: 未確認
+- Compat default state: 未確認
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
@@ -69,17 +69,17 @@ Android 17 では、Android Keystore に app ごとの key ownership limit が�
 
 ## 根拠（Evidence）
 
-- Official documentation: https://developer.android.com/about/versions/17/behavior-changes-all
-- Original statement: Android 17 から app-owned Keystore keys に limit が enforce され、non-system target 37+ は 50,000 keys、all other apps は 200,000 keys、system apps は target API level に関係なく 200,000 keys。limit 超過時は `KeyStoreException` で失敗する。
-- AOSP files: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP source context: 未確認。tag 間 diff が実行できない。
-- Diff interpretation: 未分類。公式文書上は added behavior / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: Unknown。公式文書上は Android 17 all apps + app type + targetSdkVersion + key count condition。targetSdkVersion gate / compat framework evidence は未取得。
+- 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
+- 検証対象の原文: Android 17 から app-owned Keystore keys に limit が enforce され、non-system target 37+ は 50,000 keys、all other apps は 200,000 keys、system apps は target API level に関係なく 200,000 keys。limit 超過時は `KeyStoreException` で失敗する。
+- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
+- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
+- 差分解釈: 未分類。公式文書上は added behavior / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
+- Gate conclusion: 未確認。公式文書上は Android 17 all apps + app type + targetSdkVersion + key count condition。targetSdkVersion gate / compat framework evidence は未取得。
 
 ## 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required after Android 17 AOSP tag is available
+- Android 17 AOSP tag 公開後に追加調査が必要

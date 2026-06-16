@@ -1,4 +1,4 @@
-# Background audio hardening - 1ページ要約（One Page Summary）
+# Background audio hardening - 1ページ要約
 
 > 役割メモ:
 > この要約は Background audio hardening の Android 17 全アプリ共通制限を中心に扱う。
@@ -8,16 +8,16 @@
 
 Android 17 Behavior Change
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ## 適用条件（Applicability）
@@ -26,8 +26,8 @@ Target targetSdkVersion:
 - OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。Android 17 上で対象 background audio interaction を行う all apps に適用され、target API level 37 かどうかに関係ないと詳細ページが説明している。
 - targetSdkVersion 37 以上: 追加条件あり。targetSdkVersion 37 以上では、background で動作する foreground service に while-in-use (WIU) capability が必要になる。
 - その他の必須条件（Other required conditions）: app が visible activity または適切な foreground service なしに、background で audio playback、audio focus request、volume / ringer mode API を使うこと。
-- Compat Change ID: Unknown
-- Compat default state: Unknown
+- Compat Change ID: 未確認
+- Compat default state: 未確認
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
@@ -73,18 +73,18 @@ targetSdkVersion 37 以上では、background foreground service に while-in-us
 
 ## 根拠（Evidence）
 
-- Official documentation: https://developer.android.com/about/versions/17/behavior-changes-all
+- 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
 - Detail documentation: https://developer.android.com/about/versions/17/changes/bg-audio
-- Original statement: Android 17 から background audio interaction に制限がかかり、playback / volume API は silently fail、audio focus は `AUDIOFOCUS_REQUEST_FAILED` を返す。targetSdkVersion 37 以上では WIU capability requirement が追加される。
-- AOSP files: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP source context: 未確認。tag 間 diff が実行できない。
-- Diff interpretation: 未分類。公式文書上は changed condition / added enforcement と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: Unknown。公式文書上は Android 17 all apps 共通制限 + targetSdkVersion 37 追加 WIU 条件。targetSdkVersion gate / compat framework evidence は未取得。
+- 検証対象の原文: Android 17 から background audio interaction に制限がかかり、playback / volume API は silently fail、audio focus は `AUDIOFOCUS_REQUEST_FAILED` を返す。targetSdkVersion 37 以上では WIU capability requirement が追加される。
+- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
+- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
+- 差分解釈: 未分類。公式文書上は changed condition / added enforcement と読めるが、AOSP diff による確認は Android 17 tag 待ち。
+- Gate conclusion: 未確認。公式文書上は Android 17 all apps 共通制限 + targetSdkVersion 37 追加 WIU 条件。targetSdkVersion gate / compat framework evidence は未取得。
 
 ## 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required after Android 17 AOSP tag is available
+- Android 17 AOSP tag 公開後に追加調査が必要

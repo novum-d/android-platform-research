@@ -4,24 +4,24 @@
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Related documents:
+関連文書:
 - https://developer.android.com/reference/android/view/View#requestPointerCapture()
 - https://developer.android.com/reference/android/view/View#requestPointerCapture(int)
 - https://developer.android.com/reference/android/view/View#onCapturedPointerEvent(android.view.MotionEvent)
@@ -30,10 +30,10 @@ Related documents:
 - https://developer.android.com/reference/android/view/MotionEvent
 - https://developer.android.com/reference/android/view/InputDevice
 
-Section:
+セクション:
 - Touchpads deliver relative events by default during pointer capture
 
-Page type:
+ページ種別:
 - Behavior changes: all apps
 
 ### 分類スナップショット（Classification Snapshot）
@@ -50,12 +50,12 @@ Page type:
 
 早見表（At-a-glance impact）:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Likely Yes / Conditional, but unverified | 公式文書は all apps ページに掲載し、targetSdkVersion 条件を示していない。AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | Likely No, but unverified | 原文に targetSdkVersion 条件はない。AOSP targetSdkVersion gate 未確認。 |
-| 追加の実行時条件があるか | Yes | app が pointer capture を使い、input device が touchpad で、captured event の座標解釈に依存している場合。 |
-| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 可能性は高いが条件付き、かつ未検証 | 公式文書は all apps ページに掲載し、targetSdkVersion 条件を示していない。AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | 不要と考えられるが未検証 | 原文に targetSdkVersion 条件はない。AOSP targetSdkVersion gate 未確認。 |
+| 追加の実行時条件があるか | ある | app が pointer capture を使い、input device が touchpad で、captured event の座標解釈に依存している場合。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
 
 ### 調査日（Investigation Date）
 
@@ -68,12 +68,12 @@ Page type:
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
-- [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
-- [ ] targetSdkVersion >= 37 on Android 17+
-- [ ] targetSdkVersion >= 37, with additional runtime conditions
-- [ ] Mainline / Google Play system update dependent
-- [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
+- [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
+- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [ ] Mainline / Google Play system update に依存
+- [ ] API 追加のみであり、挙動変更ではない
+- [x] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上。AOSP tag 未取得のため実装上の OS gate は未確認。
@@ -83,17 +83,17 @@ Page type:
 - App state/process condition: app が pointer capture 中の touchpad event を処理し、absolute coordinate を前提にしている場合。
 
 Compat framework:
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: Unknown
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時に切り替え可能か: 未確認
 
 分類信頼度（Classification confidence）:
 - Low
 
 分類根拠（Classification evidence）:
-- Official documentation page: `behavior-changes-all`
-- Original applicability statement: Android 17 から touchpad は pointer capture 中に default で relative motion event を deliver する。
+- 公式ドキュメントページ: `behavior-changes-all`
+- 検証対象の適用条件文: Android 17 から touchpad は pointer capture 中に default で relative motion event を deliver する。
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
 
@@ -109,23 +109,23 @@ Android 17 では、touchpad input が pointer capture 中に default で relati
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
-Page title:
+ページタイトル:
 - Behavior changes: all apps
 
-Page URL:
+ページ URL:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Page type:
+ページ種別:
 - all apps
 
-Section title:
+セクションタイトル:
 - Touchpads deliver relative events by default during pointer capture
 
-Original statement being verified:
+検証対象の原文:
 - Android 17 から、touchpad は pointer capture 中に absolute coordinates ではなく relative motion events を default で deliver する。
 - 既存の absolute coordinate behavior が必要な app は、Android 17 で導入された `requestPointerCapture(int)` API を使い、`View.POINTER_CAPTURE_MODE_ABSOLUTE` を渡して request する。
 
@@ -196,7 +196,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `android-16.0.0_r4` tag は存在する。
 - `android-17*` tag は local checkout に存在しない。
 
-Evidence limitation:
+根拠上の制約:
 - Android 17 AOSP tag が local `frameworks-base` にないため、`android-16.0.0_r4` と Android 17 tag の明示的な source diff は実行できない。
 - そのため、local working tree や未確定 branch を platform evidence として扱わない。
 - 本レポートの AOSP-backed conclusion は Low confidence に留める。
@@ -231,7 +231,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | input device classification path | 未確認 | touchpad のみが対象と公式文書が説明 | mouse / stylus / touchscreen との切り分けに必要なため |
 | compat framework entry | 未確認 | targetSdkVersion gate の有無は不明 | all apps 型か targetSdkVersion gate 型かの確定に必要なため |
 
-必須記入項目（Required context）:
+必須記入項目:
 - Entry point / caller: 未確認。想定される entry point は app の `requestPointerCapture()` / `requestPointerCapture(int)` -> ViewRoot / Window / input dispatcher -> captured `MotionEvent` delivery -> `onCapturedPointerEvent(MotionEvent)`。
 - Relevant class or service responsibility: pointer capture request、input device classification、motion event coordinate mode、captured event dispatch。
 - Runtime path from app API / system event to changed code: app が pointer capture を request -> touchpad event が発生 -> Android 17 は default relative mode で captured motion event を deliver -> app が absolute coordinate を必要とする場合は `POINTER_CAPTURE_MODE_ABSOLUTE` を指定、という path が想定される。AOSP evidence としては未確認。
@@ -243,7 +243,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | --- | --- | --- | --- |
 | Android 17 tag 未取得のため source diff 未確認 | 公式文書上は changed default / API addition with behavior mitigation と読める | touchpad pointer capture default が relative event に変わり、static mode を明示 request できると説明されている | Low |
 
-必須分類（Required interpretation）:
+必須分類:
 - Added behavior: 未確認。`requestPointerCapture(int)` と pointer capture mode constants が追加された可能性がある。
 - Removed behavior: 未確認。touchpad pointer capture の implicit absolute default が削除または限定された可能性がある。
 - Changed condition: 未確認。touchpad device かつ pointer capture 中という条件で event mode が変わる可能性がある。
@@ -329,13 +329,13 @@ Android 17 では、touchpad を pointer capture 中に使った場合、default
 # 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
-最終影響度（Final Severity）:
-- Human decision required
+最終影響度:
+- 人間による判断が必要
 
 顧客通知要否（Customer Communication Required）:
-- Human decision required
+- 人間による判断が必要
 
-リリース判断（Release Readiness）:
-- Human decision required
+リリース判断:
+- 人間による判断が必要

@@ -1,35 +1,35 @@
-# Hiding passwords from physical devices - 1ページ要約（One Page Summary）
+# 物理デバイス入力時のパスワード非表示 - 1ページ要約
 
 ## 対象（Target）
 
 Android 17 Behavior Change
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ## 適用条件（Applicability）
 
 - 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: Unknown。公式ページは targetSdkVersion 37+ 向け。
+- OS アップデート / 全アプリ（OS update / all apps）: 未確認。公式ページは targetSdkVersion 37 以上向け。
 - targetSdkVersion 37 以上: 公式文書上は該当。AOSP gate 未確認。
 - その他の必須条件（Other required conditions）: password field、physical input device、touchscreen input の setting 分岐。
-- Compat Change ID: Unknown
-- Compat default state: Unknown
+- Compat Change ID: 未確認
+- Compat default state: 未確認
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | Unknown。公式文書上は targetSdkVersion 37+ 向けだが、AOSP gate 未確認。 |
+| Android 17 / targetSdkVersion 36 | 未確認。公式文書上は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
 | Android 17 / targetSdkVersion 37 | physical input device 使用時に `show_passwords_physical` が適用されると公式文書は説明。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | password field への external keyboard 等の入力で、default では全 password characters が hidden。 |
 
@@ -58,7 +58,7 @@ Android 17 では、targetSdkVersion 37 以上のアプリで physical input dev
 | 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
 | --- | --- | --- |
 | Android 16 | 36 | Android 16 baseline。具体挙動は Android 17 tag 比較待ち。 |
-| Android 17 | 36 | Unknown。公式文書上は targetSdkVersion 37+ 向けだが、AOSP gate 未確認。 |
+| Android 17 | 36 | 未確認。公式文書上は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
 | Android 17 | 37 | physical input device 使用時、default では全 password characters が hidden。 |
 
 ## 顧客向け説明（Explanation for Customers）
@@ -69,17 +69,17 @@ Android 17 では、targetSdkVersion 37 以上のアプリで外部キーボー�
 
 ## 根拠（Evidence）
 
-- Official documentation: https://developer.android.com/about/versions/17/behavior-changes-17
-- Original statement: targetSdkVersion 37+ のアプリで physical input device 使用中は `show_passwords_physical` が password field の全 characters に適用され、default では全 characters が hidden。touchscreen では `show_passwords_touch` が適用される。
-- AOSP files: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP source context: 未確認。tag 間 diff が実行できない。
-- Diff interpretation: 未分類。added behavior / changed condition / changed default の判定は Android 17 tag 待ち。
-- Gate conclusion: Unknown。公式文書は targetSdkVersion 37+ と physical input device / password field 条件を示すが、AOSP gate evidence は未取得。
+- 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-17
+- 検証対象の原文: targetSdkVersion 37 以上のアプリで physical input device 使用中は `show_passwords_physical` が password field の全 characters に適用され、default では全 characters が hidden。touchscreen では `show_passwords_touch` が適用される。
+- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
+- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
+- 差分解釈: 未分類。added behavior / changed condition / changed default の判定は Android 17 tag 待ち。
+- Gate conclusion: 未確認。公式文書は targetSdkVersion 37 以上と physical input device / password field 条件を示すが、AOSP gate evidence は未取得。
 
 ## 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required
+- 追加調査が必要

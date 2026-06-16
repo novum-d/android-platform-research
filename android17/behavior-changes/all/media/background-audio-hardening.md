@@ -8,34 +8,34 @@
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Related documents:
+関連文書:
 - https://developer.android.com/about/versions/17/changes/bg-audio
 - https://developer.android.com/reference/android/media/AudioManager
 - https://developer.android.com/media/optimize/audio-focus
 - https://developer.android.com/develop/background-work/services/fgs
 - https://developer.android.com/reference/android/media/AudioAttributes#USAGE_ALARM
 
-Section:
+セクション:
 - Background audio hardening
 
-Page type:
+ページ種別:
 - Behavior changes: all apps
 
 ### 分類スナップショット（Classification Snapshot）
@@ -52,12 +52,12 @@ Page type:
 
 早見表（At-a-glance impact）:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Likely Yes / Conditional, but unverified | 詳細ページは all apps running on Android 17 に適用され、target API level 37 かどうかに関係ないと説明。AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | Partially | 共通制限は targetSdkVersion に依存しない。WIU capability requirement は targetSdkVersion 37 以上の追加制限。AOSP gate 未確認。 |
-| 追加の実行時条件があるか | Yes | app が background audio interaction を行い、valid lifecycle / visible activity / foreground service 条件を満たさない場合。target 37+ では WIU capability 条件も加わる。 |
-| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 可能性は高いが条件付き、かつ未検証 | 詳細ページは all apps running on Android 17 に適用され、target API level 37 かどうかに関係ないと説明。AOSP gate 未確認。 |
+| targetSdkVersion 37 以上が必要か | 一部で必要 | 共通制限は targetSdkVersion に依存しない。WIU capability requirement は targetSdkVersion 37 以上の追加制限。AOSP gate 未確認。 |
+| 追加の実行時条件があるか | ある | app が background audio interaction を行い、valid lifecycle / visible activity / foreground service 条件を満たさない場合。target 37+ では WIU capability 条件も加わる。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
 
 ### 調査日（Investigation Date）
 
@@ -70,12 +70,12 @@ Page type:
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
-- [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
-- [ ] targetSdkVersion >= 37 on Android 17+
-- [ ] targetSdkVersion >= 37, with additional runtime conditions
-- [ ] Mainline / Google Play system update dependent
-- [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
+- [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
+- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [ ] Mainline / Google Play system update に依存
+- [ ] API 追加のみであり、挙動変更ではない
+- [x] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上。AOSP tag 未取得のため実装上の OS gate は未確認。
@@ -85,17 +85,17 @@ Page type:
 - App state/process condition: app が visible activity を持たない、または適切な foreground service / WIU capability を持たない状態で background audio interaction を行う場合。
 
 Compat framework:
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: Unknown
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時に切り替え可能か: 未確認
 
 分類信頼度（Classification confidence）:
 - Low
 
 分類根拠（Classification evidence）:
-- Official documentation page: `behavior-changes-all`
-- Original applicability statement: Android 17 から background audio interaction に制限がかかる。Android 17 上の all apps に target API level 37 かどうかに関係なく適用される共通条件と、targetSdkVersion 37 以上向けの追加 WIU 条件がある。
+- 公式ドキュメントページ: `behavior-changes-all`
+- 検証対象の適用条件文: Android 17 から background audio interaction に制限がかかる。Android 17 上の all apps に target API level 37 かどうかに関係なく適用される共通条件と、targetSdkVersion 37 以上向けの追加 WIU 条件がある。
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
 
@@ -111,29 +111,29 @@ Android 17 では、background からの audio playback、audio focus request、
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
-Page title:
+ページタイトル:
 - Behavior changes: all apps
 
-Page URL:
+ページ URL:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Page type:
+ページ種別:
 - all apps
 
-Section title:
+セクションタイトル:
 - Background audio hardening
 
-Original statement being verified:
+検証対象の原文:
 - Android 17 から、audio framework は audio playback、audio focus request、volume change API を含む background audio interaction を制限する。
 - app が valid lifecycle ではない状態で対象 audio API を呼ぶと、audio playback と volume change API は例外や failure message なしで silently fail する。
 - audio focus API は `AUDIOFOCUS_REQUEST_FAILED` を返す。
 - targetSdkVersion 37 以上の app では制限がより厳しく、background で動作する場合は foreground service が WIU capability を持つ必要がある。ただし exact alarm permission があり、`USAGE_ALARM` audio stream を扱う場合は例外である。
 
-Related detail page statement:
+関連する詳細ページの記述:
 - Android 17 上で対象の background audio interaction を行うすべての app は、visible activity を持つか、`SHORT_SERVICE` ではない foreground service を実行している必要がある。
 - この共通条件は target API level 37 かどうかに関係なく適用される。
 - targetSdkVersion 37 以上の app には、foreground service の WIU capability requirement が追加される。
@@ -208,7 +208,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `android-16.0.0_r4` tag は存在する。
 - `android-17*` tag は local checkout に存在しない。
 
-Evidence limitation:
+根拠上の制約:
 - Android 17 AOSP tag が local `frameworks-base` にないため、`android-16.0.0_r4` と Android 17 tag の明示的な source diff は実行できない。
 - そのため、local working tree や未確定 branch を platform evidence として扱わない。
 - 本レポートの AOSP-backed conclusion は Low confidence に留める。
@@ -245,7 +245,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | Exact alarm + `USAGE_ALARM` exception path | 未確認 | exact alarm permission + alarm stream は WIU requirement 免除と公式文書が説明 | app impact を絞る exception 条件であるため |
 | compat framework entry | 未確認 | targetSdkVersion gate / testing toggle の有無は不明 | primary classification と confidence 確定に必要なため |
 
-必須記入項目（Required context）:
+必須記入項目:
 - Entry point / caller: 未確認。想定される entry point は `AudioTrack.write()` / AAudio / OpenSL ES playback write、`AudioManager.requestAudioFocus()`、`AudioManager.setStreamVolume()` / `adjustStreamVolume()` / `setRingerMode()`。
 - Relevant class or service responsibility: audio playback enforcement、audio focus policy、volume / ringer mode policy、foreground service state / WIU capability 判定、exact alarm / audio usage exception。
 - Runtime path from app API / system event to changed code: app が background で audio API を呼ぶ -> system が visible activity / foreground service / targetSdkVersion / WIU capability / exact alarm + `USAGE_ALARM` を判定 -> invalid lifecycle なら playback / volume API は silent suppression、audio focus は `AUDIOFOCUS_REQUEST_FAILED`、という path が想定される。AOSP evidence としては未確認。
@@ -257,7 +257,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | --- | --- | --- | --- |
 | Android 17 tag 未取得のため source diff 未確認 | 公式文書上は changed condition / added enforcement と読める | background audio interaction が lifecycle / FGS / WIU 条件で制限されると説明されている | Low |
 
-必須分類（Required interpretation）:
+必須分類:
 - Added behavior: 未確認。audio hardening enforcement が追加された可能性がある。
 - Removed behavior: 未確認。background からの自由な playback / focus / volume operation が制限された可能性がある。
 - Changed condition: 公式文書上は該当候補。valid lifecycle、visible activity、foreground service、WIU capability、exact alarm + `USAGE_ALARM` によって許可 / 抑制が分岐すると読める。
@@ -355,13 +355,13 @@ Android 17 では、ユーザーが意図していない background audio operat
 # 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
-最終影響度（Final Severity）:
-- Human decision required
+最終影響度:
+- 人間による判断が必要
 
 顧客通知要否（Customer Communication Required）:
-- Human decision required
+- 人間による判断が必要
 
-リリース判断（Release Readiness）:
-- Human decision required
+リリース判断:
+- 人間による判断が必要

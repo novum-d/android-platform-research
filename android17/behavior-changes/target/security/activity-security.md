@@ -1,36 +1,36 @@
-# Activity Security
+# Activity 起動のセキュリティ強化
 
 ## 基本情報（Metadata）
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 https://developer.android.com/about/versions/17/behavior-changes-17
 
-Related documents:
+関連文書:
 - https://developer.android.com/reference/android/content/IntentSender
 - https://developer.android.com/reference/android/app/ActivityOptions#MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 - https://developer.android.com/reference/android/app/ActivityOptions#MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE
 
-Section:
+セクション:
 Activity Security
 
-Page type:
-- Apps targeting Android 17 or higher
+ページ種別:
+- Android 17 以上をターゲットにするアプリ
 
 ### 分類スナップショット（Classification Snapshot）
 
@@ -45,12 +45,12 @@ Page type:
 
 早見表（At-a-glance impact）:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Unknown | 公式ページは apps targeting Android 17 向けだが、AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | Likely, but unverified | ページ種別は Android 17 / API level 37 以上を target としているが、原文は gate の詳細を示していない。 |
-| 追加の実行時条件があるか | Yes | BAL、IntentSender、ActivityOptions BAL mode、calling app visibility が関係する。 |
-| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 未確認 | 公式ページは Android 17 をターゲットにするアプリ向けだが、AOSP gate は未確認。 |
+| targetSdkVersion 37 以上が必要か | 可能性は高いが未検証 | ページ種別は Android 17 / API level 37 以上を target としているが、原文は gate の詳細を示していない。 |
+| 追加の実行時条件があるか | ある | BAL、IntentSender、ActivityOptions BAL mode、calling app visibility が関係する。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
 
 ### 調査日（Investigation Date）
 
@@ -63,12 +63,12 @@ Page type:
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
-- [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
-- [ ] targetSdkVersion >= 37 on Android 17+
-- [ ] targetSdkVersion >= 37, with additional runtime conditions
-- [ ] Mainline / Google Play system update dependent
-- [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
+- [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
+- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [ ] Mainline / Google Play system update に依存
+- [ ] API 追加のみであり、挙動変更ではない
+- [x] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
@@ -78,17 +78,17 @@ Page type:
 - App state/process condition: app が background / visible か、呼び出し元または送信元が Activity 起動を許可できる状態か。
 
 Compat framework:
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: Unknown
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時に切り替え可能か: 未確認
 
 分類信頼度（Classification confidence）:
 - Low
 
 分類根拠（Classification evidence）:
-- Official documentation page: `behavior-changes-17`
-- Original applicability statement: Activity Security、BAL hardening、IntentSender への保護拡張、legacy BAL opt-in constant から granular controls への移行。
+- 公式ドキュメントページ: `behavior-changes-17`
+- 検証対象の適用条件文: Activity Security、BAL hardening、IntentSender への保護拡張、legacy BAL opt-in constant から granular controls への移行。
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
 
@@ -104,27 +104,27 @@ Android 17 では、Activity 起動まわりの security hardening として、B
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
-Page title:
+ページタイトル:
 - Behavior changes: Apps targeting Android 17 or higher
 
-Page URL:
+ページ URL:
 - https://developer.android.com/about/versions/17/behavior-changes-17
 
-Page type:
-- apps targeting Android 17
+ページ種別:
+- Android 17 をターゲットにするアプリ
 
-Section title:
+セクションタイトル:
 - Activity Security
 
-Original statement being verified:
+検証対象の原文:
 
 > In Android 17, the platform continues its shift toward a "secure-by-default" architecture, introducing a suite of enhancements designed to mitigate high-severity exploits such as phishing, interaction hijacking, and confused deputy attacks.
 
-The supplied official text states that BAL restrictions are refined by extending protections to `IntentSender`. It also states that developers must migrate away from the legacy `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` constant and adopt granular controls such as `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE`, which restricts activity starts to cases where the calling app is visible.
+公式文書は、BAL restrictions を refined し、protections を `IntentSender` に拡張すると説明している。また、開発者は legacy `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` constant から移行し、calling app が visible な場合に activity start を制限する `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` などの granular controls を採用する必要があるとも説明している。
 
 ## 解釈（Interpretation）
 
@@ -218,23 +218,23 @@ Result:
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
-| File / symbol | Android 16 baseline | Android 17 behavior | Why this code path matters |
+| File / symbol | Android 16 baseline | Android 17 behavior | 関連性 |
 | --- | --- | --- | --- |
-| Not reviewed | Not reviewed | Not reviewed | Android 17 tag がないため、公式文書の記述を AOSP diff で検証できない。 |
+| 未レビュー | 未レビュー | 未レビュー | Android 17 tag がないため、公式文書の記述を AOSP diff で検証できない。 |
 
-Required context:
+必要な context:
 - Entry point / caller: 未確認。想定される entry point は `IntentSender.sendIntent()`、`PendingIntent.send()`、`ActivityOptions` による BAL mode 指定、ActivityTaskManager の activity start 判定だが、AOSP evidence としては未採用。
-- Relevant class or service responsibility: 未確認。
-- Runtime path from app API / system event to changed code: 未確認。
-- Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
+- 関連 class / service の責務: 未確認。
+- app API / system event から変更箇所までの runtime path: 未確認。
+- 関係しない code path を除外した理由: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
 ## 差分解釈（Diff Interpretation）
 
-| Observed diff | Interpretation | Behavior Change relevance | Confidence |
+| 観測した diff | 解釈 | Behavior Change との関連 | 信頼度 |
 | --- | --- | --- | --- |
-| No Android 17 tag diff available | Source diff type cannot be classified yet | 公式文書の BAL hardening、IntentSender protection extension、legacy mode migration、visible-only opt-in、targetSdkVersion gate を source diff で裏取りできていない | Low |
+| Android 17 tag diff なし | Source diff type はまだ分類できない | 公式文書の BAL hardening、IntentSender protection extension、legacy mode migration、visible-only opt-in、targetSdkVersion gate を source diff で裏取りできていない | Low |
 
-Required interpretation:
+必要な解釈:
 - Added behavior: 未確認。
 - Removed behavior: 未確認。
 - Changed condition / gate: 未確認。
@@ -243,7 +243,7 @@ Required interpretation:
 
 ## 事実（Evidence）
 
-Facts:
+事実:
 - 公式 Behavior Change 文書は、Android 17 が Activity 起動まわりを secure-by-default architecture へ近づけると述べている。
 - 公式文書は、phishing、interaction hijacking、confused deputy attacks のような high-severity exploits の緩和を目的としていると述べている。
 - 公式文書は、BAL restrictions を refining し、protections を `IntentSender` に拡張すると述べている。
@@ -254,7 +254,7 @@ Facts:
 - local `frameworks-base` には `android-17*` tag がない。
 - 調査時点で `frameworks-base` working tree は clean。
 
-Observations:
+観察:
 - 公式ページ種別は targetSdkVersion 37 以上向けである。
 - この項目は targetSdkVersion 37 条件に加えて、IntentSender 経由の Activity 起動、ActivityOptions BAL mode、呼び出し元 visibility という runtime / API usage condition を含む。
 - `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` は broad opt-in と読める一方、`MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` は visible state に限定するため、バックグラウンドからの予期しない画面起動を減らす方向の変更である。
@@ -262,7 +262,7 @@ Observations:
 - AOSP tag がないため、実装が本当に targetSdkVersion 37 gate で制御されているかは未確認。
 - Compat framework entry の有無も未確認。
 
-Hypotheses:
+仮説:
 - Android 17 / targetSdkVersion 37 以上では、IntentSender / PendingIntent 経由で Activity を起動する場合、従来の broad BAL opt-in ではなく visible state などのより限定的な条件が必要になる可能性が高い。
 - Android 17 / targetSdkVersion 36 のアプリでは旧挙動が維持される可能性があるが、AOSP gate 未確認のため断定しない。
 - lint / strict mode により、`MODE_BACKGROUND_ACTIVITY_START_ALLOWED` の利用や broad BAL opt-in が検出対象になる可能性があるが、具体的な check name と default behavior は未確認。
@@ -281,7 +281,7 @@ Hypotheses:
 - Permission/AppOps gate: 未確認。BAL policy、system privilege、visibility state、PendingIntent sender / creator relationship が関係する可能性はあるが、AOSP evidence はない。
 - Manifest/property gate: 未確認。
 - No gate found: 未確認。Android 17 tag がないため「gate がない」とは判断しない。
-- Gate conclusion: Unknown。公式ページ種別と原文から targetSdkVersion 37 + API usage conditions と推定されるが、AOSP で検証できていない。
+- Gate conclusion: 未確認。公式ページ種別と原文から targetSdkVersion 37 + API usage conditions と推定されるが、AOSP で検証できていない。
 - Reasoning from source context: source context 未レビューのため未確定。
 
 ---
@@ -310,13 +310,11 @@ Hypotheses:
 
 # 顧客影響（Customer Impact）
 
-顧客説明用。
+## 影響度
 
-## 影響度（Impact Level）
+- 人間による判断が必要
 
-- Human decision required
-
-※ 仮評価。最終判断は人間が行う。
+※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
 ## ビジネス影響（Business Impact）
 
@@ -339,7 +337,7 @@ Hypotheses:
 - 開発・運用への影響: notification flow、PendingIntent sender / creator 責務、foreground visibility 条件の見直しが必要になる可能性。
 - 推奨対応候補: `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` など granular controls へ移行する。
 - 根拠: 公式 statement と report の missing AOSP evidence。
-- Confidence（信頼度）: Low
+- 信頼度: Low
 - 注意: failure mode と compat toggle は未確認。
 
 ## 例2（Example 2）: SDK が Activity 起動を委譲する連携機能
@@ -351,7 +349,7 @@ Hypotheses:
 - 開発・運用への影響: SDK version 更新、integration guide 変更、strict mode / lint 対応が必要になる可能性。
 - 推奨対応候補: Activity 起動を user-initiated / visible context に寄せ、legacy constant 利用を棚卸しする。
 - 根拠: 公式 statement と report の action candidates。
-- Confidence（信頼度）: Low
+- 信頼度: Low
 - 注意: 実サービス名を出す場合は owner 確認が必要。
 
 ---
@@ -383,13 +381,13 @@ Hypotheses:
 
 ## 検証マトリクス（Matrix）
 
-| Device OS | targetSdkVersion | Compat flag | Expected behavior |
+| 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | default | Android 16 baseline。BAL / IntentSender の具体挙動は Android 17 tag 比較待ち。 |
-| Android 17 | 36 | default | Unknown。この section は targetSdkVersion 37+ 向けだが、AOSP gate 未確認。 |
+| Android 17 | 36 | default | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
 | Android 17 | 37 | default | 公式文書上は、IntentSender へ BAL protections が拡張され、legacy `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` から granular controls への移行が必要。 |
-| Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。 |
-| Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。 |
+| Android 17 | 36 | force-enabled if available | 未確認。Compat Change ID 未確認。 |
+| Android 17 | 37 | force-disabled if available | 未確認。Compat Change ID 未確認。 |
 
 ## 手順（Steps）
 
@@ -409,24 +407,24 @@ Hypotheses:
 
 ---
 
-# 人間の判断欄（Human Decision Placeholder）
+# 人間の判断欄
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
-Final Severity:
-- Human decision required
+最終影響度:
+- 人間による判断が必要
 
-Release Readiness:
-- Human decision required
+リリース判断:
+- 人間による判断が必要
 
-Customer Communication Priority:
-- Human decision required
+顧客連絡の優先度:
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required
+- 追加調査が必要
 
-Decision notes:
+判断メモ:
 - Android 17 AOSP tag 入手後に、AOSP evidence と compat framework evidence を確認してから最終判断する。
 
 ---
@@ -442,6 +440,6 @@ Decision notes:
 
 ## AOSP
 
-- Not available for Android 17 in local `frameworks-base`.
-- From tag checked: `android-16.0.0_r4`
-- To tag checked: no local `android-17*` tag found.
+- local `frameworks-base` では Android 17 は利用不可。
+- 確認済みの比較元 tag: `android-16.0.0_r4`
+- 確認済みの比較先 tag: local `android-17*` tag なし。

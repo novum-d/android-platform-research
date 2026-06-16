@@ -1,37 +1,37 @@
-# Accessibility support of complex IME physical keyboard typing
+# 複雑な IME 物理キーボード入力のアクセシビリティ対応
 
-## 基本情報（Metadata）
+## 基本情報
 
-### 調査対象 Android バージョン（Android Versions）
+### 調査対象 Android バージョン
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
-- TBD: Android 17 AOSP tag
+比較先:
+- TBD: Android 17 AOSP タグ
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
-### Behavior Change 文書（Behavior Change Source）
+### Behavior Change 文書
 
-Document:
+文書:
 https://developer.android.com/about/versions/17/behavior-changes-17
 
-Related documents:
+関連文書:
 - https://developer.android.com/reference/android/view/accessibility/AccessibilityEvent
 - https://developer.android.com/reference/android/view/inputmethod/TextAttribute
 
-Section:
+セクション:
 Accessibility support of complex IME physical keyboard typing
 
-Page type:
+ページ種別:
 - Apps targeting Android 17 or higher
 
-### 分類スナップショット（Classification Snapshot）
+### 分類スナップショット
 
 主分類（Primary classification）:
 - UNKNOWN_NEEDS_MORE_EVIDENCE
@@ -41,35 +41,35 @@ Page type:
 - `TextView` を使用する `targetSdkVersion 37` 以上のアプリでは、IME から candidate selection data を取得し、アクセシビリティイベントの text change type を設定する動作がデフォルトで有効になると記載されている。
 - ただし、手元の `frameworks-base` には Android 17 の AOSP タグが存在しないため、AOSP 上での実装有無、API surface、Compat Change ID、およびデフォルト状態は未確認である。そのため、現時点での分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-早見表（At-a-glance impact）:
+早見表:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Unknown | 公式ドキュメントでは `targetSdkVersion 37` 以上を対象としているが、IME・AccessibilityService・独自実装の `InputConnection` などの利用条件も関係するため、現時点では断定できない。AOSP 上での適用条件は未確認。 |
-| `targetSdkVersion 37` 以上が必要か | Conditional, unverified | 公式ドキュメントでは、標準の `TextView` について Android 17 をターゲットとするアプリで既定有効になると説明されている。ただし、AOSP 上の実装根拠は未確認である。 |
-| 追加の実行時条件があるか | Yes | CJKV 系 IME、編集可能なテキストフィールド、独自の `InputConnection` 実装、`TYPE_VIEW_TEXT_CHANGED` を処理する AccessibilityService など、関連 API や実装条件が存在する。 |
-| Compat Change ID が関係するか | Unknown | Android 17 の AOSP タグおよび Compat Framework 上の根拠を確認できていないため、現時点では不明である。 |
+| Android 17 に OS アップデートしただけで適用されるか | 未確認 | 公式ドキュメントでは `targetSdkVersion 37` 以上を対象としているが、IME・AccessibilityService・独自実装の `InputConnection` などの利用条件も関係するため、現時点では断定できない。AOSP 上での適用条件は未確認。 |
+| `targetSdkVersion 37` 以上が必要か | 条件付きと考えられるが未確認 | 公式ドキュメントでは、標準の `TextView` について Android 17 をターゲットとするアプリで既定有効になると説明されている。ただし、AOSP 上の実装根拠は未確認である。 |
+| 追加の実行時条件があるか | ある | CJKV 系 IME、編集可能なテキストフィールド、独自の `InputConnection` 実装、`TYPE_VIEW_TEXT_CHANGED` を処理する AccessibilityService など、関連 API や実装条件が存在する。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 の AOSP タグおよび Compat Framework 上の根拠を確認できていないため、現時点では不明である。 |
 
-### 調査日（Investigation Date）
+### 調査日
 
 2026-06-10
 
-### 信頼度（Confidence）
+### 信頼度
 
-- Low
+- 低
 
-### 適用条件分類（Applicability Classification）
+### 適用条件分類
 
-適用される条件（Applies when）:
+適用される条件:
 
-- [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
-- [ ] targetSdkVersion >= 37 on Android 17+
-- [ ] targetSdkVersion >= 37, with additional runtime conditions
-- [ ] Mainline / Google Play system update dependent
-- [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [ ] Android 17 上の全アプリ（targetSdkVersion に依存しない）
+- [ ] Android 17 以上で targetSdkVersion >= 37
+- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [ ] Mainline / Google Play system update に依存
+- [ ] API 追加のみであり、挙動変更ではない
+- [x] 未確認 / 追加根拠が必要
 
-必要な実行時条件（Required runtime conditions）:
+必要な実行時条件:
 
 - Android version: Android 17 以上が前提と考えられるが、AOSP タグ未取得のため未確認。
 - targetSdkVersion: 標準 `TextView` の既定有効化については、公式ドキュメント上 `targetSdkVersion 37` 以上が対象とされている。
@@ -79,25 +79,25 @@ Page type:
 
 Compat framework:
 
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: Unknown
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時の切り替え可否: 未確認
 
-分類信頼度（Classification confidence）:
+分類信頼度:
 
-- Low
+- 低
 
-分類根拠（Classification evidence）:
+分類根拠:
 
-- Official documentation page: `behavior-changes-17`
-- Original applicability statement: 標準 `TextView` を使用する `targetSdkVersion 37` 以上のアプリでは既定で有効になると記載されている。
+- 公式ドキュメントページ: `behavior-changes-17`
+- 検証対象の適用条件文: 標準 `TextView` を使用する `targetSdkVersion 37` 以上のアプリでは既定で有効になると記載されている。
 - AOSP targetSdk gate: 未確認。手元の `frameworks-base` に `android-17*` タグが存在しない。
 - Compat framework entry: 未確認。Android 17 の Compat Framework に関する根拠は取得できていない。
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、CJKV 言語向け IME の入力中に、変換候補の選択や composition と commit の違いをアクセシビリティサービスへ伝えるための `AccessibilityEvent` および `TextAttribute` API が追加されると、公式ドキュメントで説明されている。これにより、スクリーンリーダーは IME を利用した複雑な物理キーボード入力に対して、より正確な読み上げフィードバックを提供できるようになる。
 
@@ -107,7 +107,7 @@ Android 17 では、CJKV 言語向け IME の入力中に、変換候補の選�
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
@@ -119,7 +119,7 @@ Page URL:
 
 - https://developer.android.com/about/versions/17/behavior-changes-17
 
-Page type:
+ページ種別:
 
 - Apps targeting Android 17
 
@@ -127,21 +127,21 @@ Section title:
 
 - Accessibility support of complex IME physical keyboard typing
 
-Original statement being verified:
+検証対象の原文:
 
 > new AccessibilityEvent and TextAttribute APIs
 
-The supplied official text states that these APIs enhance screen reader feedback for CJKV language input. It also states that CJKV IMEs can signal candidate selection, apps with edit fields can specify text change types, and targetSdkVersion 37 apps using standard `TextView` have this behavior enabled by default.
+提供された公式文書の抜粋は、これらの API により CJKV 言語入力時のスクリーンリーダーのフィードバックが改善されると説明している。また、CJKV IME は候補選択状態を通知でき、編集フィールドを持つアプリは text change type を指定でき、標準 `TextView` を使用する targetSdkVersion 37 以上のアプリではこの挙動が既定で有効になると説明している。
 
-## 解釈（Interpretation）
+## 解釈
 
 この変更は、CJKV 入力の composition 中に「変換候補が選択されたか」「変更が composition 中か commit か」といった意味情報を、IME、edit field、AccessibilityService の間で受け渡すための変更である。
 
-互換性リスクというより、アクセシビリティ品質向上のための behavior / API adoption 項目である。ただし、standard `TextView` を使う targetSdkVersion 37 以上のアプリでは既定でイベント内容が変わるため、スクリーンリーダー連携や独自アクセシビリティイベント送信を持つアプリでは確認が必要になる。
+互換性リスクというより、アクセシビリティ品質向上のための behavior / API adoption 項目である。ただし、標準 `TextView` を使う targetSdkVersion 37 以上のアプリでは既定でイベント内容が変わるため、スクリーンリーダー連携や独自アクセシビリティイベント送信を持つアプリでは確認が必要になる。
 
 ---
 
-# 変更内容（What Changed）
+# 変更内容
 
 公式ドキュメント上の変更点:
 
@@ -166,19 +166,19 @@ AOSP で未確認の点:
 
 ただし、Android 17 の AOSP タグを確認できていないため、現時点での確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-### OS アップデート時の挙動（OS Update Behavior）
+### OS アップデート時の挙動
 
-- Android 17 にアップデートしただけで適用されるか: Unknown
+- Android 17 にアップデートしただけで適用されるか: 未確認
 - targetSdkVersion に依存しない根拠: なし。公式ドキュメントは `targetSdkVersion 37` 以上を対象としたページであり、標準 `TextView` の既定有効化についても `targetSdkVersion 37` 以上が条件と記載されている。
 - Android 16 以前での挙動: AOSP タグ間の比較を実施できていない。Android 16 のソースのみでは Android 17 との差分を確認できないため、本調査ではプラットフォーム根拠として採用していない。
 
 ### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - `targetSdkVersion 37` 以上で適用されるか: 標準 `TextView` については、公式ドキュメントの記載から Yes と解釈できるが、AOSP 上の適用条件は未確認。
-- Android 17 以外で `targetSdkVersion 37` を指定した場合の挙動: Unknown。公式ドキュメントでは Android 17 の Behavior Changes として説明されているため、Android 17 のプラットフォーム変更として扱う。
-- Opt-out / temporary override の有無: Unknown。Compat Framework に関する根拠を確認できていない。
+- Android 17 以外で `targetSdkVersion 37` を指定した場合の挙動: 未確認。公式ドキュメントでは Android 17 の Behavior Changes として説明されているため、Android 17 のプラットフォーム変更として扱う。
+- opt-out / temporary override の有無: 未確認。Compat Framework に関する根拠を確認できていない。
 
-### その他の条件（Other Conditions）
+### その他の条件
 
 - Device/form factor: 物理キーボード入力との関連はあるが、特定のフォームファクタに限定されるという記載はない。
 - Permission: 公式ドキュメントの抜粋では特別な権限要件は示されていない。
@@ -188,16 +188,16 @@ AOSP で未確認の点:
   - `AccessibilityEvent.setTextChangeTypes()`
   - `AccessibilityEvent.getTextChangeTypes()`
   - `TYPE_VIEW_TEXT_CHANGED`
-- Manifest attribute: Unknown
+- Manifest attribute: 未確認
 - Component boundary: IME アプリ、編集フィールドを持つアプリ、AccessibilityService の三者にまたがる変更である。
 
 ---
 
-# AOSP 調査（AOSP Investigation）
+# AOSP 調査
 
-## checkout 状態（Checkout Status）
+## checkout 状態
 
-Evidence を採用する前に確認したコマンド:
+根拠を採用する前に確認したコマンド:
 
 ```bash
 git -C frameworks-base status --short
@@ -205,7 +205,7 @@ git -C frameworks-base tag --list android-16.0.0_r4
 git -C frameworks-base tag --list 'android-17*'
 ```
 
-Result:
+結果:
 
 - `frameworks-base` のワーキングツリーは、調査時点でクリーンな状態だった。
 
@@ -214,7 +214,7 @@ Result:
 - ローカル環境には `android-17*` に一致するタグが存在しなかった。
 
 
-根拠上の制約（Evidence limitation）:
+根拠上の制約:
 
 - Android 17 の AOSP タグがローカルの `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` のような明示的なタグ比較を実施できない。
 
@@ -223,7 +223,7 @@ Result:
 - この制約により、AOSP に基づく結論の信頼度を High とすることはできない。
 
 
-関連ファイル（Related Files）
+## 関連ファイル
 
 未確認。Android 17 の AOSP タグ取得後、少なくとも以下のファイルについてタグ間比較を実施する必要がある。
 
@@ -234,28 +234,28 @@ Result:
 - `core/java/android/view/inputmethod/BaseInputConnection.java`
 - Compat Framework 定義ファイル内の TextView、AccessibilityEvent、TextAttribute、text change type 関連の Change ID 定義
 
-## 確認したソース文脈（Source Context Reviewed）
+## 確認したソース文脈
 
 Android 17 の AOSP タグが存在しないため、ソースコード上の文脈確認は未実施。
 
-| File / symbol | Android 16 baseline | Android 17 behavior | Why this code path matters |
+| ファイル / シンボル | Android 16 基準挙動 | Android 17 挙動 | このコードパスを根拠にする理由 |
 | --- | --- | --- | --- |
-| Not reviewed | Not reviewed | Not reviewed | Android 17 のタグが存在しないため、公式ドキュメントの記載内容を AOSP の差分で検証できていない。 |
+| 未レビュー | 未レビュー | 未レビュー | Android 17 のタグが存在しないため、公式ドキュメントの記載内容を AOSP の差分で検証できていない。 |
 
-Required context:
+必須記入項目:
 
 - Entry point / caller: 未確認。想定されるエントリポイントとしては、IME から編集フィールドへの composing text 設定、`TextView` によるアクセシビリティイベント送出、および AccessibilityService における `TYPE_VIEW_TEXT_CHANGED` の処理が考えられるが、AOSP による裏付けは取得できていない。
 - Relevant class or service responsibility: 未確認。
 - Runtime path from app API / system event to changed code: 未確認。
-- Why unrelated code paths were excluded: Android 17 のタグが存在しないため、どのソースパスを採用・除外すべきかの判断自体を保留している。
+- 除外した無関係なコードパス: Android 17 のタグが存在しないため、どのソースパスを採用・除外すべきかの判断自体を保留している。
 
-## 差分解釈（Diff Interpretation）
+## 差分解釈
 
-| Observed diff | Interpretation | Behavior Change relevance | Confidence |
+| 確認した差分 | 解釈 | 挙動変更との関係 | 信頼度 |
 | --- | --- | --- | --- |
-| Android 17 のタグ差分を取得できていない | ソースコード差分の種類を現時点では分類できない | 公式ドキュメントで説明されている API 追加および `TextView` の既定処理をソースコード差分で裏付けできていない | Low |
+| Android 17 のタグ差分を取得できていない | ソースコード差分の種類を現時点では分類できない | 公式ドキュメントで説明されている API 追加および `TextView` の既定処理をソースコード差分で裏付けできていない | 低 |
 
-Required interpretation:
+必須分類:
 
 - Added behavior: 未確認。
 - Removed behavior: 未確認。
@@ -263,9 +263,9 @@ Required interpretation:
 - Changed default: 未確認。
 - No behavior change found: 未確認。Android 17 のタグが存在しないため、「Behavior Change ではない」と結論付けることはできない。
 
-## 事実（Evidence）
+## 事実
 
-Facts:
+事実:
 
 - 公式ドキュメントでは、CJKV 言語入力時のスクリーンリーダーによる読み上げ品質を向上させるため、`AccessibilityEvent` および `TextAttribute` に関する API が導入されると説明されている。
 - 公式ドキュメントでは、CJKV IME が `TextAttribute.Builder.setTextSuggestionSelected()` を利用して、変換候補の選択状態を示せると説明されている。
@@ -276,7 +276,7 @@ Facts:
 - ローカルの `frameworks-base` には `android-17*` タグが存在しない。
 - 調査時点で `frameworks-base` のワーキングツリーはクリーンな状態だった。
 
-Observations:
+観察:
 
 - 対象の公式ページは `targetSdkVersion 37` 以上のアプリ向け Behavior Changes ページである。
 - この変更は API の追加とフレームワーク側の既定動作変更の両方を含んでいる。
@@ -285,7 +285,7 @@ Observations:
 - Android 17 の AOSP タグが存在しないため、実際に `targetSdkVersion 37` による制御が行われているかは確認できていない。
 - Compat Framework による制御が存在するかどうかも未確認である。
 
-Hypotheses:
+仮説:
 
 - Android 17 かつ `targetSdkVersion 37` の標準 `TextView` では、IME から渡された `TextAttribute` を解釈し、`TYPE_VIEW_TEXT_CHANGED` イベントへ適切な text change type を設定する可能性が高い。
 - `targetSdkVersion 36` 以下の標準 `TextView` では従来のイベント形式が維持される可能性があるが、AOSP 上の適用条件を確認できていないため断定はできない。
@@ -298,40 +298,40 @@ Hypotheses:
 - 現時点で顧客向けに確定して説明できるのは、「公式ドキュメント上では、Android 17 かつ `targetSdkVersion 37` 以上の標準 `TextView` において、CJKV IME 入力時のアクセシビリティイベント処理が改善される」とされている点までである。
 - AOSP 上での適用条件、API surface の差分、Compat Framework におけるデフォルト状態を確認できていないため、最終的な分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
 
-## 適用ゲート根拠（Applicability Gate Evidence）
+## 適用ゲート根拠
 
-- targetSdkVersion gate: 未確認。Android 17 の AOSP タグが存在しないため、`targetSdkVersion` や `ApplicationInfo.targetSdkVersion` に関する検索は実施していない。
+- targetSdkVersion 適用ゲート: 未確認。Android 17 の AOSP タグが存在しないため、`targetSdkVersion` や `ApplicationInfo.targetSdkVersion` に関する検索は実施していない。
 - CompatChanges.isChangeEnabled / Change ID: 未確認。Android 17 の AOSP タグが存在しないため、`CompatChanges.isChangeEnabled`、`@ChangeId`、`@EnabledAfter`、`@EnabledSince` に関する検索は実施していない。
 - @EnabledAfter / @EnabledSince / default state: 未確認。
-- Build.VERSION / SDK_INT gate: 未確認。
+- Build.VERSION / SDK_INT 適用ゲート: 未確認。
 - DeviceConfig / resources config: 未確認。
-- Permission/AppOps gate: 未確認。
-- Manifest/property gate: 未確認。
-- No gate found: 未判断。必要な検索を実施できていないため、「ゲートが存在しない」とは判断しない。
-- Gate conclusion: Unknown。公式ドキュメント上は `targetSdkVersion 37` 条件および API 利用条件が示されているが、AOSP による裏付けは取得できていない。
-- Reasoning from source context: ソースコード上の文脈を確認できていないため評価不可。
+- Permission/AppOps 適用ゲート: 未確認。
+- Manifest/property 適用ゲート: 未確認。
+- 適用ゲート未検出: 未判断。必要な検索を実施できていないため、「ゲートが存在しない」とは判断しない。
+- 適用ゲートの結論: 未確認。公式ドキュメント上は `targetSdkVersion 37` 条件および API 利用条件が示されているが、AOSP による裏付けは取得できていない。
+- ソース文脈からの推論: ソースコード上の文脈を確認できていないため評価不可。
 
-Searched:
+確認済み:
 
 - `frameworks-base` の checkout 状態
 - `android-16.0.0_r4` タグの存在
 - `android-17*` タグの存在
 
-Not searched yet:
+未確認:
 
 - Android 17 の実装ファイル
 - Android 17 の Compat Framework 定義
 - Android 17 の API surface 定義ファイル
 
-理由（Reason）:
+理由:
 
 - ローカル環境に Android 17 のターゲットタグが存在しないため、タグ間差分によるプラットフォーム根拠を取得できない。
 
 ---
 
-# 影響分析（Impact Analysis）
+# 影響分析
 
-## 影響を受けるアプリ（Affected Apps）
+## 影響を受けるアプリ
 
 影響または対応機会があるアプリ:
 
@@ -342,7 +342,7 @@ Not searched yet:
 - `TYPE_VIEW_TEXT_CHANGED` を処理し、読み上げや入力フィードバックを調整する AccessibilityService。
 - `targetSdkVersion 37` 以上で標準 `TextView` を利用するアプリ。
 
-## 影響を受けないアプリ（Non-Affected Apps）
+## 影響を受けにくいアプリ
 
 影響が限定的と考えられるケース:
 
@@ -353,16 +353,16 @@ Not searched yet:
 
 ---
 
-# 顧客影響（Customer Impact）
+# 顧客影響
 
-## 影響度（Impact Level）
+## 影響度
 
-- Human decision required
+- 人間による判断が必要
 
 ※ 最終的な Severity や Priority は人間による判断が必要であり、本レポートでは確定しない。
 
 
-## ビジネス影響（Business Impact）
+## ビジネス影響
 
 - ユーザー影響: CJKV 言語入力時のスクリーンリーダーによる読み上げ精度が向上し、変換候補の選択状態、composition 中の変更、確定入力による変更の違いがより適切に伝わる可能性がある。
 - 運用影響: IME、独自エディタ、AccessibilityService を提供している場合は、Android 17 対応の一環として新 API の採用可否や読み上げ挙動の検証が必要になる可能性がある。
@@ -370,11 +370,11 @@ Not searched yet:
 
 ---
 
-# サービス影響例（Service Impact Examples）
+# サービス影響例
 
 このセクションは、公式ドキュメントおよび確認できた根拠から推測される影響例を示すものであり、特定サービスで実際に発生した事象を示すものではない。
 
-## 例1（Example 1）: 物理キーボードを利用する業務入力アプリ
+## 例1: 物理キーボードを利用する業務入力アプリ
 
 - 対象サービス例: POS システム、倉庫管理システム、医療・金融系業務システム、Chromebook やタブレット用キーボードを利用するアプリ。
 - 影響を受ける実装パターン: IME による複雑な文字変換処理や物理キーボード入力を前提としたテキスト入力機能、ショートカットキー制御など。
@@ -386,10 +386,10 @@ Not searched yet:
   - 可能な限り標準のテキスト入力コンポーネントを利用する。
   - IME の変換処理を含む入力テストケースを追加する。
 - 根拠: 公式 Behavior Change の記載および、本レポートで整理した AOSP 調査上の制約事項。
-- Confidence（信頼度）: Low
+- 信頼度: 低
 - 注意: IME や AccessibilityService ごとの具体的な挙動差異については未検証である。
 
-## 例2（Example 2）: アクセシビリティ利用者向けの入力支援機能
+## 例2: アクセシビリティ利用者向けの入力支援機能
 
 - 対象サービス例: メモアプリ、チャットアプリ、文書編集アプリ、教育系アプリ。
 - 影響を受ける実装パターン: Accessibility Focus、スクリーンリーダー、ハードウェアキーボードショートカット、IME の composing text が同時に動作する UI。
@@ -400,12 +400,12 @@ Not searched yet:
   - Accessibility Node やテキスト選択状態を標準 API と整合させる。
   - 独自のキー入力処理は必要最小限に留める。
 - 根拠: 公式ドキュメントの記載および、本レポートで整理した未確認事項。
-- Confidence（信頼度）: Low
+- 信頼度: 低
 - 注意: 実際の利用者への影響度は、個別の評価と実機検証による確認が必要である。
 
 ---
 
-# 対応候補（Required Actions）
+# 対応候補
 
 ## 必須対応（Must）
 
@@ -427,19 +427,19 @@ Not searched yet:
 
 ---
 
-# 検証方法（Verification Method）
+# 検証方法
 
-## 検証マトリクス（Matrix）
+## 検証マトリクス
 
-| Device OS | targetSdkVersion | Compat flag | Expected behavior |
+| 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | default | Android 16 のベースライン挙動。新 API や `TextView` の既定処理の有無は Android 17 とのタグ比較待ち。 |
-| Android 17 | 36 | default | Unknown。標準 `TextView` の既定有効化は `targetSdkVersion 37` 条件と解釈できるが、AOSP 上の適用条件は未確認。 |
+| Android 17 | 36 | default | 未確認。標準 `TextView` の既定有効化は `targetSdkVersion 37` 条件と解釈できるが、AOSP 上の適用条件は未確認。 |
 | Android 17 | 37 | default | 公式ドキュメント上では、標準 `TextView` が IME からのデータ取得および text change type の設定を既定で処理する。 |
-| Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID が未確認。 |
-| Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID が未確認。 |
+| Android 17 | 36 | force-enabled（利用可能な場合） | 未確認。Compat Change ID が未確認。 |
+| Android 17 | 37 | force-disabled（利用可能な場合） | 未確認。Compat Change ID が未確認。 |
 
-## 手順（Steps）
+## 手順
 
 - targetSdk の変更:
   - テストアプリを `targetSdkVersion 36` と `targetSdkVersion 37` の両方でビルドする。
@@ -470,7 +470,7 @@ Not searched yet:
 
 ---
 
-# 結論（Conclusion）
+# 結論
 
 公式ドキュメントでは、Android 17 において CJKV IME の複雑な物理キーボード入力に対するアクセシビリティフィードバックを改善するため、`AccessibilityEvent` および `TextAttribute` に関する API と、標準 `TextView` の既定処理が導入されると説明されている。
 
@@ -489,13 +489,22 @@ Not searched yet:
 - Compat Change ID
 - デフォルト状態（default state）
 
-そのため、本調査時点での分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とし、信頼度は Low とする。
+そのため、本調査時点での分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とし、信頼度は低とする。
 
-人による判断が必要な項目:
-- 最終優先度（Final priority）: 人による判断が必要
-- 最終重要度（Final severity）: 人による判断が必要
-- リリース可否判断（Release readiness）: 人による判断が必要
-- 顧客向け周知の優先度（Customer communication priority）: 人による判断が必要
-- 次に必要な判断（Next required human decision）:
-  - Android 17 の AOSP タグ公開後に再調査を行うか。
-  - もしくは、公式ドキュメントを根拠とした暫定的な導入ガイダンスとして扱うかを判断する。
+# 人間の判断欄
+
+最終優先度（Final Priority）:
+- 人間による判断が必要
+
+最終影響度:
+- 人間による判断が必要
+
+リリース判断:
+- 人間による判断が必要
+
+顧客通知優先度:
+- 人間による判断が必要
+
+次に必要な人間の判断:
+- Android 17 の AOSP タグ公開後に再調査を行うか。
+- 公式ドキュメントを根拠とした暫定的な導入ガイダンスとして扱うかを判断する。

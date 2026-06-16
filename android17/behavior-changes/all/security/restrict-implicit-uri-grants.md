@@ -1,27 +1,27 @@
-# Restrict implicit URI grants
+# Implicit URI grants の制限
 
 ## 基本情報（Metadata）
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Related documents:
+関連文書:
 - https://developer.android.com/reference/android/content/Intent#ACTION_SEND
 - https://developer.android.com/reference/android/content/Intent#ACTION_SEND_MULTIPLE
 - https://developer.android.com/reference/android/provider/MediaStore#ACTION_IMAGE_CAPTURE
@@ -29,10 +29,10 @@ Related documents:
 - https://developer.android.com/reference/android/content/Intent#FLAG_GRANT_WRITE_URI_PERMISSION
 - https://developer.android.com/reference/android/os/StrictMode.VmPolicy.Builder#detectImplicitUriPermissionGrant()
 
-Section:
+セクション:
 - Restrict implicit URI grants
 
-Page type:
+ページ種別:
 - Behavior changes: all apps
 
 ### 分類スナップショット（Classification Snapshot）
@@ -49,12 +49,12 @@ Page type:
 
 早見表（At-a-glance impact）:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Likely No immediate enforcement, but unverified | 公式文書は enforcement を Android 18 starting と説明。Android 17 では検出・移行 guidance と読める。 |
-| targetSdkVersion 37 以上が必要か | Likely No for this guidance, but unverified | All apps ページ掲載。本文に targetSdkVersion 37 gate は示されていない。 |
-| 追加の実行時条件があるか | Yes, for relevance | URI を含む `ACTION_SEND` / `ACTION_SEND_MULTIPLE` / `ACTION_IMAGE_CAPTURE` intent を起動し、implicit grant に依存している場合。 |
-| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 即時 enforcement はない可能性が高いが未検証 | 公式文書は enforcement を Android 18 starting と説明。Android 17 では検出・移行 guidance と読める。 |
+| targetSdkVersion 37 以上が必要か | この guidance では不要と考えられるが未検証 | All apps ページ掲載。本文に targetSdkVersion 37 gate は示されていない。 |
+| 追加の実行時条件があるか | 関連条件としてある | URI を含む `ACTION_SEND` / `ACTION_SEND_MULTIPLE` / `ACTION_IMAGE_CAPTURE` intent を起動し、implicit grant に依存している場合。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
 
 ### 調査日（Investigation Date）
 
@@ -72,7 +72,7 @@ Page type:
 - [ ] targetSdkVersion >= 37, with additional runtime conditions
 - [ ] Mainline / Google Play system update dependent
 - [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [x] Unknown / 追加根拠が必要
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 文書上の guidance。自動 grant 停止は Android 18 starting と説明されており、Android 17 での enforcement gate は未確認。
@@ -82,17 +82,17 @@ Page type:
 - App state/process condition: app が target app に URI を渡し、system の implicit URI permission grant に依存している場合。
 
 Compat framework:
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: Unknown
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時の切り替え可否: 未確認
 
 分類信頼度（Classification confidence）:
 - Low
 
 分類根拠（Classification evidence）:
-- Official documentation page: `behavior-changes-all`
-- Original applicability statement: all apps page に掲載されているが、本文は Android 18 から自動 grant を停止すると説明しており、Android 17 では explicit grant への移行と StrictMode / logcat による検出を案内している。
+- 公式ドキュメントページ: `behavior-changes-all`
+- 検証対象の適用条件文: all apps page に掲載されているが、本文は Android 18 から自動 grant を停止すると説明しており、Android 17 では explicit grant への移行と StrictMode / logcat による検出を案内している。
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
 
@@ -108,7 +108,7 @@ Android 17 では、`StrictMode.VmPolicy.Builder.detectImplicitUriPermissionGran
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
@@ -118,13 +118,13 @@ Page title:
 Page URL:
 - https://developer.android.com/about/versions/17/behavior-changes-all
 
-Page type:
+ページ種別:
 - all apps
 
 Section title:
 - Restrict implicit URI grants
 
-Original statement being verified:
+検証対象の原文:
 - Currently, if an app launches an intent with a URI and action `ACTION_SEND`, `ACTION_SEND_MULTIPLE`, or `ACTION_IMAGE_CAPTURE`, the system automatically grants read and write URI permissions to the target app.
 - Starting in Android 18, the system will no longer automatically grant these permissions.
 - Apps should explicitly grant the relevant URI permissions instead of relying on system implicit grants.
@@ -173,7 +173,7 @@ AOSP で未確認の点:
 ### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上、この項目に targetSdkVersion 37 条件は示されていない。AOSP gate 未確認。
-- Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式文書は Android 17 all apps page 上の guidance として説明している。
+- Android 17 以外で targetSdkVersion 37 にした場合の挙動: 未確認。公式文書は Android 17 all apps page 上の guidance として説明している。
 - opt-out / temporary override の有無: 未確認。公式文書は opt-out ではなく explicit grant への移行を示している。
 
 ### その他の条件（Other Conditions）
@@ -203,7 +203,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `android-16.0.0_r4` tag は存在する。
 - `android-17*` tag は local checkout に存在しない。
 
-Evidence limitation:
+根拠上の制約:
 - Android 17 AOSP tag が local `frameworks-base` にないため、`android-16.0.0_r4` と Android 17 tag の明示的な source diff は実行できない。
 - そのため、local working tree や未確定 branch を platform evidence として扱わない。
 - 本レポートの AOSP-backed conclusion は Low confidence に留める。
@@ -232,7 +232,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | log emission path | 未確認 | `Please set the grant explicitly in the app` message を監視できると公式文書が説明 | 既存 app が implicit grant に依存している箇所を運用検出できる |
 | `Intent.FLAG_GRANT_READ_URI_PERMISSION` / `FLAG_GRANT_WRITE_URI_PERMISSION` | explicit grant flag として既存 | Android 18 に備え明示指定が推奨される | mitigation の正当性を確認する public API |
 
-必須記入項目（Required context）:
+必須記入項目:
 - Entry point / caller: 未確認。想定される entry point は app の `startActivity()` / `sendIntent` -> activity start / intent dispatch -> URI grant manager -> target app の content URI access。
 - Relevant class or service responsibility: intent action 判定、URI permission grant、StrictMode violation、log emission。
 - Runtime path from app API / system event to changed code: app が URI 付き `ACTION_SEND` / `ACTION_SEND_MULTIPLE` / `ACTION_IMAGE_CAPTURE` intent を起動 -> system が implicit grant を付与するか判定 -> Android 17 では検出 / log、Android 18 では自動付与停止、という path が想定される。AOSP evidence としては未確認。
@@ -244,7 +244,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | --- | --- | --- | --- |
 | Android 17 tag 未取得のため source diff 未確認 | 公式文書上は Android 17 immediate enforcement ではなく Android 18 migration guidance / detection と読める | implicit URI grant の将来制限、StrictMode detection、explicit grant migration が説明されている | Low |
 
-必須分類（Required interpretation）:
+必須分類:
 - Added behavior: 未確認。公式文書上、Android 17 で `detectImplicitUriPermissionGrant()` / log detection が利用できると説明されているが、AOSP diff 未確認。
 - Removed behavior: 未確認。公式文書上、自動 grant の停止は Android 18 starting と説明されており、Android 17 で削除されたとは説明されていない。
 - Changed condition / gate: 未確認。Android 18 enforcement gate、targetSdkVersion gate、compat gate は AOSP tag 待ち。
@@ -314,13 +314,11 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 
 # 顧客影響（Customer Impact）
 
-顧客説明用。
-
 ## 影響度（Impact Level）
 
 - 要確認
 
-※ 仮評価。最終判断は人間が行う。
+※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
 ## ビジネス影響（Business Impact）
 
@@ -434,13 +432,13 @@ Android app developer は、URI を含む share / capture intent を棚卸しし
 
 ---
 
-# 人間の判断欄（Human Decision Placeholder）
+# 人間の判断欄
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required after Android 17 AOSP tag is available
+- Android 17 AOSP tag 公開後に追加調査が必要
 
 判断理由候補:
 - 公式文書上は Android 18 enforcement の advance warning であり、Android 17 即時の runtime behavior change とは断定できない。

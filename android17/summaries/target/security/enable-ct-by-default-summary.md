@@ -1,35 +1,35 @@
-# Enable CT by default - 1ページ要約（One Page Summary）
+# CT のデフォルト有効化 - 1ページ要約
 
 ## 対象（Target）
 
 Android 17 Behavior Change
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ## 適用条件（Applicability）
 
 - 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: Unknown。原文は targetSdkVersion 37+ を明示しているが、AOSP gate 未確認。
+- OS アップデート / 全アプリ（OS update / all apps）: 未確認。原文は targetSdkVersion 37 以上を明示しているが、AOSP gate 未確認。
 - targetSdkVersion 37 以上: 公式文書上は該当。AOSP gate 未確認。
 - その他の必須条件（Other required conditions）: TLS / HTTPS 通信、certificate transparency policy、Network Security Config、証明書チェーン。
-- Compat Change ID: Unknown
-- Compat default state: Unknown
+- Compat Change ID: 未確認
+- Compat default state: 未確認
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | Unknown。この section は targetSdkVersion 37+ 向けだが、AOSP gate 未確認。 |
+| Android 17 / targetSdkVersion 36 | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
 | Android 17 / targetSdkVersion 37 | 公式文書上は CT が default enabled。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | CT 要件を満たさない証明書チェーンを使う HTTPS 接続で失敗する可能性。 |
 
@@ -58,7 +58,7 @@ Android 17 では、targetSdkVersion 37 以上のアプリで certificate transp
 | 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
 | --- | --- | --- |
 | Android 16 | 36 | 公式文書上、CT は available だが app opt-in が必要。 |
-| Android 17 | 36 | Unknown。この section は targetSdkVersion 37+ 向けだが、AOSP gate 未確認。 |
+| Android 17 | 36 | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
 | Android 17 | 37 | CT が default enabled。CT 要件を満たさない証明書チェーンでは接続影響の可能性。 |
 
 ## 顧客向け説明（Explanation for Customers）
@@ -69,17 +69,17 @@ Android 17 では、targetSdkVersion 37 以上のアプリで certificate transp
 
 ## 根拠（Evidence）
 
-- Official documentation: https://developer.android.com/about/versions/17/behavior-changes-17
-- Original statement: targetSdkVersion 37 以上のアプリでは certificate transparency が default enabled。Android 16 では CT は available だが opt in が必要。
-- AOSP files: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP source context: 未確認。tag 間 diff が実行できない。
-- Diff interpretation: 未分類。公式文書上は changed default と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: Unknown。公式文書は targetSdkVersion 37+ を示すが、AOSP gate evidence は未取得。
+- 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-17
+- 検証対象の原文: targetSdkVersion 37 以上のアプリでは certificate transparency が default enabled。Android 16 では CT は available だが opt in が必要。
+- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
+- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
+- 差分解釈: 未分類。公式文書上は changed default と読めるが、AOSP diff による確認は Android 17 tag 待ち。
+- Gate conclusion: 未確認。公式文書は targetSdkVersion 37 以上を示すが、AOSP gate evidence は未取得。
 
 ## 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required
+- 追加調査が必要

@@ -1,19 +1,19 @@
-# Autonomous re-pairing for Bluetooth bond losses - 1ページ要約（One Page Summary）
+# Bluetooth bond loss に対する autonomous re-pairing - 1ページ要約
 
 ## 対象（Target）
 
 Android 17 Behavior Change
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ## 適用条件（Applicability）
@@ -22,8 +22,8 @@ Target targetSdkVersion:
 - OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。Android 17 の all apps ページに掲載され、targetSdkVersion 条件は示されていない。
 - targetSdkVersion 37 以上: 公式文書上は不要。AOSP gate 未確認。
 - その他の必須条件（Other required conditions）: Bluetooth peripheral bond loss が発生し、system が autonomous re-pairing を試行すること。companion app が pairing / key missing broadcast を扱う場合は特に確認が必要。
-- Compat Change ID: Unknown
-- Compat default state: Unknown
+- Compat Change ID: 未確認
+- Compat default state: 未確認
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
@@ -69,17 +69,17 @@ Android 17 では、Bluetooth peripheral の bond が失われた場合、system
 
 ## 根拠（Evidence）
 
-- Official documentation: https://developer.android.com/about/versions/17/behavior-changes-all
-- Original statement: Android 17 は Bluetooth bond loss を自動的に解決する autonomous re-pairing を導入する。`ACTION_PAIRING_REQUEST` に `EXTRA_PAIRING_CONTEXT` が追加され、`ACTION_KEY_MISSING` は autonomous re-pairing failure 時だけ broadcast される。
-- AOSP files: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP source context: 未確認。tag 間 diff が実行できない。Bluetooth stack は `packages/modules/Bluetooth` など `frameworks-base` 外も確認対象になる可能性が高い。
-- Diff interpretation: 未分類。公式文書上は added behavior / changed broadcast timing / API surface addition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: Unknown。公式文書上は Android 17 all apps + Bluetooth bond loss condition。targetSdkVersion gate / compat framework evidence は未取得。
+- 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
+- 検証対象の原文: Android 17 は Bluetooth bond loss を自動的に解決する autonomous re-pairing を導入する。`ACTION_PAIRING_REQUEST` に `EXTRA_PAIRING_CONTEXT` が追加され、`ACTION_KEY_MISSING` は autonomous re-pairing failure 時だけ broadcast される。
+- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
+- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。Bluetooth stack は `packages/modules/Bluetooth` など `frameworks-base` 外も確認対象になる可能性が高い。
+- 差分解釈: 未分類。公式文書上は added behavior / changed broadcast timing / API surface addition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
+- Gate conclusion: 未確認。公式文書上は Android 17 all apps + Bluetooth bond loss condition。targetSdkVersion gate / compat framework evidence は未取得。
 
 ## 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required after Android 17 AOSP tag is available
+- Android 17 AOSP tag 公開後に追加調査が必要

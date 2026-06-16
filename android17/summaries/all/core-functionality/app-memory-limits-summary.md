@@ -1,19 +1,19 @@
-# App memory limits - 1ページ要約（One Page Summary）
+# App memory limits - 1ページ要約
 
 ## 対象（Target）
 
 Android 17 Behavior Change
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ## 適用条件（Applicability）
@@ -22,8 +22,8 @@ Target targetSdkVersion:
 - OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。`behavior-changes-all` ページに掲載されている。
 - targetSdkVersion 37 以上: 公式文書上は不要と読める。ただし AOSP gate 未確認。
 - その他の必須条件（Other required conditions）: 一部の Android devices のみ。device total RAM、memory usage、process state、memory limiter 対象 device 条件が関係する可能性。
-- Compat Change ID: Unknown
-- Compat default state: Unknown
+- Compat Change ID: 未確認
+- Compat default state: 未確認
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
@@ -81,18 +81,18 @@ Android 17 では、一部の端末でアプリごとの memory limit が導入�
 
 ## 根拠（Evidence）
 
-- Official documentation: https://developer.android.com/about/versions/17/behavior-changes-all
-- Original statement: Android 17 introduces app memory limits based on device total RAM, and memory limits are imposed only on a subset of Android devices.
-- Verification subsection: `am memory-limiter ignore` / `manual` / `status` are official test controls, and they have no effect on devices that do not impose memory limits.
-- AOSP files: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP source context: 未確認。tag 間 diff が実行できない。
-- Diff interpretation: 未分類。公式文書上は added behavior / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: Unknown。公式文書上は Android 17 all apps + device subset condition。targetSdkVersion gate / compat framework evidence は未取得。
+- 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
+- 検証対象の原文: Android 17 introduces app memory limits based on device total RAM, and memory limits are imposed only on a subset of Android devices.
+- 検証サブセクション: `am memory-limiter ignore` / `manual` / `status` are official test controls, and they have no effect on devices that do not impose memory limits.
+- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
+- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
+- 差分解釈: 未分類。公式文書上は added behavior / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
+- Gate conclusion: 未確認。公式文書上は Android 17 all apps + device subset condition。targetSdkVersion gate / compat framework evidence は未取得。
 
 ## 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required after Android 17 AOSP tag is available
+- Android 17 AOSP tag 公開後に追加調査が必要

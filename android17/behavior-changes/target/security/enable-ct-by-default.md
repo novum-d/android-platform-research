@@ -1,35 +1,35 @@
-# Enable CT by default
+# CT のデフォルト有効化
 
 ## 基本情報（Metadata）
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
+比較先:
 - TBD: Android 17 AOSP tag
 
-Previous targetSdkVersion:
+以前の targetSdkVersion:
 - 36
 
-Target targetSdkVersion:
+対象 targetSdkVersion:
 - 37
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 https://developer.android.com/about/versions/17/behavior-changes-17
 
-Related documents:
+関連文書:
 - https://developer.android.com/privacy-and-security/security-config#CertificateTransparencySummary
 - https://developer.android.com/privacy-and-security/security-config#certificateTransparency
 
-Section:
+セクション:
 Enable CT by default
 
-Page type:
-- Apps targeting Android 17 or higher
+ページ種別:
+- Android 17 以上をターゲットにするアプリ
 
 ### 分類スナップショット（Classification Snapshot）
 
@@ -44,12 +44,12 @@ Page type:
 
 早見表（At-a-glance impact）:
 
-| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Unknown | 公式文書は apps targeting Android 17 / API level 37 or higher と述べるが、AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | Likely, but unverified | 原文は If an app targets Android 17 / API level 37 or higher と述べている。 |
-| 追加の実行時条件があるか | Yes | TLS / HTTPS 接続、証明書チェーン、CT policy、Network Security Config が関係する可能性。 |
-| Compat Change ID が関係するか | Unknown | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 未確認 | 公式文書は Android 17 / API level 37 以上をターゲットにするアプリと述べるが、AOSP gate は未確認。 |
+| targetSdkVersion 37 以上が必要か | 可能性は高いが未検証 | 原文は Android 17 / API level 37 以上をターゲットにする場合と述べている。 |
+| 追加の実行時条件があるか | ある | TLS / HTTPS 接続、証明書チェーン、CT policy、Network Security Config が関係する可能性。 |
+| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
 
 ### 調査日（Investigation Date）
 
@@ -62,12 +62,12 @@ Page type:
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
-- [ ] OS update / all apps on Android 17 regardless of targetSdkVersion
-- [ ] targetSdkVersion >= 37 on Android 17+
-- [ ] targetSdkVersion >= 37, with additional runtime conditions
-- [ ] Mainline / Google Play system update dependent
-- [ ] API addition only, not a behavior change
-- [x] Unknown / needs more evidence
+- [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
+- [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
+- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [ ] Mainline / Google Play system update に依存
+- [ ] API 追加のみであり、挙動変更ではない
+- [x] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
@@ -77,17 +77,17 @@ Page type:
 - App state/process condition: アプリがサーバー証明書を検証するネットワーク接続を行う時点。
 
 Compat framework:
-- Change ID: Unknown
-- Change name: Unknown
-- Default state: Unknown
-- Toggleable for testing: Unknown
+- Change ID: 未確認
+- 変更名: 未確認
+- 既定状態: 未確認
+- テスト時に切り替え可能か: 未確認
 
 分類信頼度（Classification confidence）:
 - Low
 
 分類根拠（Classification evidence）:
-- Official documentation page: `behavior-changes-17`
-- Original applicability statement: apps targeting Android 17 / API level 37 or higher have CT enabled by default; Android 16 required opt-in.
+- 公式ドキュメントページ: `behavior-changes-17`
+- 検証対象の適用条件文: apps targeting Android 17 / API level 37 or higher have CT enabled by default; Android 16 required opt-in.
 - AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
 - Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
 
@@ -103,23 +103,23 @@ Android 17 では、targetSdkVersion 37 以上のアプリで certificate transp
 
 ---
 
-# 公式ドキュメント確認（Original Documentation）
+# 公式ドキュメント確認
 
 ## 原文（Statement）
 
-Page title:
+ページタイトル:
 - Behavior changes: Apps targeting Android 17 or higher
 
-Page URL:
+ページ URL:
 - https://developer.android.com/about/versions/17/behavior-changes-17
 
-Page type:
-- apps targeting Android 17
+ページ種別:
+- Android 17 をターゲットにするアプリ
 
-Section title:
+セクションタイトル:
 - Enable CT by default
 
-Original statement being verified:
+検証対象の原文:
 
 > If an app targets Android 17 (API level 37) or higher, certificate transparency (CT) is enabled by default. (On Android 16, CT is available but apps had to opt in.)
 
@@ -215,23 +215,23 @@ Note:
 
 Android 17 AOSP tag がないため、source context は未レビュー。
 
-| File / symbol | Android 16 baseline | Android 17 behavior | Why this code path matters |
+| File / symbol | Android 16 baseline | Android 17 behavior | 関連性 |
 | --- | --- | --- | --- |
-| Not reviewed | Not reviewed | Not reviewed | Android 17 tag がないため、公式文書の記述を AOSP diff で検証できない。 |
+| 未レビュー | 未レビュー | 未レビュー | Android 17 tag がないため、公式文書の記述を AOSP diff で検証できない。 |
 
-Required context:
+必要な context:
 - Entry point / caller: 未確認。想定される entry point は app の TLS / HTTPS 接続、platform TrustManager、Network Security Config parsing、certificate chain validation だが、AOSP evidence としては未採用。
-- Relevant class or service responsibility: 未確認。
-- Runtime path from app API / system event to changed code: 未確認。
-- Why unrelated code paths were excluded: Android 17 tag 不在のため、source path の採否判断自体を保留。
+- 関連 class / service の責務: 未確認。
+- app API / system event から変更箇所までの runtime path: 未確認。
+- 関係しない code path を除外した理由: Android 17 tag 不在のため、source path の採否判断自体を保留。
 
 ## 差分解釈（Diff Interpretation）
 
-| Observed diff | Interpretation | Behavior Change relevance | Confidence |
+| 観測した diff | 解釈 | Behavior Change との関連 | 信頼度 |
 | --- | --- | --- | --- |
-| No Android 17 tag diff available | Source diff type cannot be classified yet | 公式文書の CT default enabled、Android 16 opt-in baseline、targetSdkVersion gate、Network Security Config behavior を source diff で裏取りできていない | Low |
+| Android 17 tag diff なし | Source diff type はまだ分類できない | 公式文書の CT default enabled、Android 16 opt-in baseline、targetSdkVersion gate、Network Security Config behavior を source diff で裏取りできていない | Low |
 
-Required interpretation:
+必要な解釈:
 - Added behavior: 未確認。
 - Removed behavior: 未確認。
 - Changed condition / gate: 未確認。
@@ -240,7 +240,7 @@ Required interpretation:
 
 ## 事実（Evidence）
 
-Facts:
+事実:
 - 公式 Behavior Change 文書は、targetSdkVersion 37 以上のアプリで certificate transparency (CT) が default で enabled になると述べている。
 - 公式文書は、Android 16 では CT は available だが、アプリが opt in する必要があったと述べている。
 - 公式文書は、Network Security Config の CT summary と CT 設定に関する documentation を参照している。
@@ -248,7 +248,7 @@ Facts:
 - local `frameworks-base` には `android-17*` tag がない。
 - 調査時点で `frameworks-base` working tree は clean。
 
-Observations:
+観察:
 - 公式ページ種別は targetSdkVersion 37 以上向けである。
 - 原文は `If an app targets Android 17 (API level 37) or higher` と明示しており、targetSdkVersion 37 gate がある可能性が高い。
 - この項目は targetSdkVersion 37 条件に加えて、TLS / HTTPS 証明書検証、CT 対応証明書、Network Security Config の設定という runtime / deployment condition を含む。
@@ -256,7 +256,7 @@ Observations:
 - AOSP tag がないため、実装が本当に targetSdkVersion 37 gate で制御されているかは未確認。
 - Compat framework entry の有無も未確認。
 
-Hypotheses:
+仮説:
 - Android 17 / targetSdkVersion 37 以上では、Network Security Config で明示 opt-in していないアプリでも、platform TLS validation に CT policy が適用される可能性が高い。
 - Android 17 / targetSdkVersion 36 のアプリでは Android 16 と同様に opt-in が必要な可能性があるが、AOSP gate 未確認のため断定しない。
 - CT に対応していない公開証明書チェーン、検証環境、独自 CA / private PKI を使う通信では、接続失敗または証明書検証エラーが起きる可能性がある。
@@ -275,7 +275,7 @@ Hypotheses:
 - Permission/AppOps gate: 未確認。
 - Manifest/property gate: 未確認。Network Security Config の CT 設定が関係する可能性はあるが、Android 17 tag で未確認。
 - No gate found: 未確認。Android 17 tag がないため「gate がない」とは判断しない。
-- Gate conclusion: Unknown。公式文書の wording から targetSdkVersion 37 + TLS / CT conditions と推定されるが、AOSP で検証できていない。
+- Gate conclusion: 未確認。公式文書の wording から targetSdkVersion 37 + TLS / CT conditions と推定されるが、AOSP で検証できていない。
 - Reasoning from source context: source context 未レビューのため未確定。
 
 ---
@@ -303,13 +303,11 @@ Hypotheses:
 
 # 顧客影響（Customer Impact）
 
-顧客説明用。
+## 影響度
 
-## 影響度（Impact Level）
+- 人間による判断が必要
 
-- Human decision required
-
-※ 仮評価。最終判断は人間が行う。
+※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
 ## ビジネス影響（Business Impact）
 
@@ -332,7 +330,7 @@ Hypotheses:
 - 開発・運用への影響: certificate issuance、CT log inclusion、証明書更新手順の確認が必要になる可能性。
 - 推奨対応候補: 接続先証明書の CT 対応を棚卸しし、Android 16 opt-in または Android 17 環境で事前検証する。
 - 根拠: 公式 statement と report の expected behavior。
-- Confidence（信頼度）: Low
+- 信頼度: Low
 - 注意: AOSP gate / exception 条件は未確認。
 
 ## 例2（Example 2）: Staging / private PKI 環境
@@ -344,7 +342,7 @@ Hypotheses:
 - 開発・運用への影響: Network Security Config、debug overrides、private PKI 例外条件の確認が必要になる可能性。
 - 推奨対応候補: staging 証明書運用を見直し、CT policy 対象外条件があるか Android 17 AOSP tag 後に確認する。
 - 根拠: 公式 statement と report の missing evidence。
-- Confidence（信頼度）: Low
+- 信頼度: Low
 - 注意: private CA の扱いは未確認であり、断定しない。
 
 ---
@@ -375,13 +373,13 @@ Hypotheses:
 
 ## 検証マトリクス（Matrix）
 
-| Device OS | targetSdkVersion | Compat flag | Expected behavior |
+| 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | default | 公式文書上、CT は available だが app opt-in が必要。 |
-| Android 17 | 36 | default | Unknown。この section は targetSdkVersion 37+ 向けだが、AOSP gate 未確認。 |
+| Android 17 | 36 | default | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
 | Android 17 | 37 | default | 公式文書上、CT が default enabled。CT 要件を満たさない証明書チェーンでは接続影響の可能性。 |
-| Android 17 | 36 | force-enabled if available | Unknown。Compat Change ID 未確認。 |
-| Android 17 | 37 | force-disabled if available | Unknown。Compat Change ID 未確認。 |
+| Android 17 | 36 | force-enabled if available | 未確認。Compat Change ID 未確認。 |
+| Android 17 | 37 | force-disabled if available | 未確認。Compat Change ID 未確認。 |
 
 ## 手順（Steps）
 
@@ -401,24 +399,24 @@ Hypotheses:
 
 ---
 
-# 人間の判断欄（Human Decision Placeholder）
+# 人間の判断欄
 
 最終優先度（Final Priority）:
-- Human decision required
+- 人間による判断が必要
 
-Final Severity:
-- Human decision required
+最終影響度:
+- 人間による判断が必要
 
-Release Readiness:
-- Human decision required
+リリース判断:
+- 人間による判断が必要
 
-Customer Communication Priority:
-- Human decision required
+顧客連絡の優先度:
+- 人間による判断が必要
 
 判断（Decision）:
-- Further investigation required
+- 追加調査が必要
 
-Decision notes:
+判断メモ:
 - Android 17 AOSP tag 入手後に、AOSP evidence と compat framework evidence を確認してから最終判断する。
 
 ---
@@ -433,6 +431,6 @@ Decision notes:
 
 ## AOSP
 
-- Not available for Android 17 in local `frameworks-base`.
-- From tag checked: `android-16.0.0_r4`
-- To tag checked: no local `android-17*` tag found.
+- local `frameworks-base` では Android 17 は利用不可。
+- 確認済みの比較元 tag: `android-16.0.0_r4`
+- 確認済みの比較先 tag: local `android-17*` tag なし。
