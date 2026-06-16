@@ -10,6 +10,19 @@ Source code analysis is used only to verify and explain Behavior Changes.
 Human-facing reports, summaries, and explanations must be written in Japanese.
 Codex-facing instructions, headings, and checklist item names may be written in English.
 
+## Translation and Japanese Rewrite Rules
+
+When translating or rewriting reports and summaries into natural Japanese:
+
+- Work one file at a time.
+- Read the full target file before editing it.
+- Translate and rewrite by understanding the file's context, not by applying mechanical string substitutions.
+- Do not use bulk replacement, global search-and-replace, regex replacement, or scripted mass translation for prose.
+- Do not translate API names, command names, classification labels, file paths, URLs, code identifiers, or quoted source labels unless the surrounding document already defines a Japanese form.
+- Keep the report structure, traceability fields, evidence, classifications, and confidence levels intact unless the user explicitly asks to change the analysis.
+- For a Behavior Change report and its corresponding one-page summary, translate both so that terminology and customer-facing wording are consistent.
+- Fix unnatural mixed English/Japanese phrasing manually in the edited file, such as broken word order, stray English verbs, unnecessary spaces around Japanese particles, and duplicated heading labels.
+
 ## Research Scope
 
 The primary unit of investigation is a Behavior Change section.
