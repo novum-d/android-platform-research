@@ -1,8 +1,8 @@
-# バージョニング（Versioning）
+# バージョニング
 
 このリポジトリでは、`docs/` と `android<version>/` の責務を分ける。
 
-## ルール（Rule）
+## ルール
 
 `docs/` はバージョン非依存の運用知識だけを置く。
 
@@ -13,20 +13,20 @@
 - confidence の考え方
 - 情報源の優先順位
 - 用語集
-- cross-version の未解決質問や仮説
+- バージョン横断の未解決質問や仮説
 
 Android バージョン固有のものは `android<version>/` に置く。
 
 例:
 - Behavior Change 一覧
-- applicability classification
-- report / summary templates
+- 適用条件分類
+- レポート / Summary テンプレート
 - targetSdkVersion 固有のチェック項目
-- AOSP tag pair
-- analysis outputs
-- release-specific backlog / roadmap
-- release-specific knowledge graph
-- decision log
+- AOSP タグの組み合わせ
+- 分析出力
+- リリース固有のバックログ / ロードマップ
+- リリース固有のナレッジグラフ
+- 判断ログ
 
 ## Android 16
 
@@ -46,11 +46,11 @@ android16/
 バージョンスコープ:
 
 ```text
-From: android-15.0.0_r36
-To:   android-16.0.0_r1
+比較元: android-15.0.0_r36
+比較先: android-16.0.0_r1
 ```
 
-Target SDK focus:
+主な targetSdkVersion:
 
 ```text
 targetSdkVersion 36
@@ -74,32 +74,29 @@ android17/
 現在の状態:
 
 ```text
-From: android-16.0.0_r4
-To:   TBD: Android 17 AOSP tag
+比較元: android-16.0.0_r4
+比較先: 未定: Android 17 AOSP タグ
 ```
 
-Android 17 official Behavior Change documentation is available, but the local
-`frameworks-base` checkout currently has no `android-17*` tag.
+Android 17 の公式 Behavior Change ドキュメントは公開済み。ただし、ローカルの
+`frameworks-base` checkout には、現時点で `android-17*` タグが存在しない。
 
-Until the target Android 17 AOSP tag is available, do not assign High confidence
-to AOSP-backed conclusions.
+対象となる Android 17 AOSP タグを利用できるようになるまでは、AOSP 根拠に基づく結論に High confidence を付けない。
 
-When the Android 17 AOSP tag is available, update all release-specific fields:
+Android 17 AOSP タグが利用可能になったら、リリース固有の以下の項目を更新する。
 
 - Android version name
 - API level / targetSdkVersion
 - AOSP `From` tag
 - AOSP `To` tag
-- official Behavior Change URLs
-- compat framework links
-- classification rules if Android 17 changes the wording or applicability model
-- templates and verification matrices
+- 公式 Behavior Change URL
+- compat framework link
+- Android 17 で文言や適用条件モデルが変わる場合は、分類ルール
+- テンプレートと検証マトリクス
 
-## 実用ルール（Practical Rule）
+## 実用ルール
 
-If a file contains `Android 16`, `targetSdkVersion 36`, `android-16.0.0_r1`,
-or Android 16-specific topic prioritization, it should usually live under
-`android16/`, not `docs/`.
+ファイルに `Android 16`、`targetSdkVersion 36`、`android-16.0.0_r1`、または Android 16 固有の調査優先度が含まれる場合、そのファイルは通常 `docs/` ではなく `android16/` 配下に置く。
 
 例:
 - `targetSdkVersion 37` の検証マトリクスは `android17/templates/` または `android17/behavior-changes/` に置く。

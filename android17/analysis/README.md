@@ -1,23 +1,23 @@
-# Android 17 分析補助ファイル（Analysis Files）
+# Android 17 分析補助ファイル
 
-このディレクトリは、AOSP tag 間の差分から生成した調査候補ファイルを置く場所です。
+このディレクトリは、AOSP タグ間の差分から生成した調査候補ファイルを置く場所です。
 
-## 現在の状態（Current Status）
+## 現在の状態
 
-Android 17 AOSP tag is not currently available in the local `frameworks-base` checkout.
+現時点では、ローカルの `frameworks-base` checkout に Android 17 AOSP タグは存在しません。
 
-Do not create High confidence AOSP-backed conclusions until the target Android 17 tag is available and analysis files are generated.
+対象となる Android 17 タグが利用可能になり、分析補助ファイルを生成するまでは、AOSP 根拠に基づく High confidence の結論は作成しないでください。
 
-## 生成元予定（Planned Source）
+## 生成元
 
-Generated from:
+生成元:
 
 ```text
-From: android-16.0.0_r4
-To:   TBD: Android 17 AOSP tag
+比較元: android-16.0.0_r4
+比較先: 未定: Android 17 AOSP タグ
 ```
 
-Using:
+使用するコマンド:
 
 ```bash
 VERSION_DIR=android17 \
@@ -27,22 +27,22 @@ TARGET_CODENAME=<android-17-codename> \
 scripts/generate_target.sh
 ```
 
-## 取り扱いルール（Rule）
+## 取り扱いルール
 
-Files in this directory are generated analysis aids.
+このディレクトリのファイルは、生成された分析補助資料です。
 
-Do not treat them as final findings.
-Do not hand-edit generated `.txt` files as research conclusions.
+最終的な調査結果として扱わないでください。
+生成された `.txt` ファイルを、調査結論として手作業で編集しないでください。
 
-If the AOSP checkout or tag pair changes, regenerate these files instead of manually patching them.
+AOSP checkout や比較するタグの組み合わせが変わった場合は、手作業で修正するのではなく、ファイルを再生成してください。
 
-## 使い方（How To Use）
+## 使い方
 
-Use these files to narrow investigation candidates before reading AOSP source.
+これらのファイルは、AOSP source を読む前に調査候補を絞り込むために使います。
 
-The investigation still must start from official Behavior Change documentation.
+ただし、調査は必ず公式 Behavior Change ドキュメントから開始してください。
 
 利用例:
 - 公式 Behavior Change の該当セクションを先に読む。
-- その section に関係しそうな package / API 名を `analysis/` の候補ファイルで探す。
-- 候補ファイルは入口に留め、最終根拠は AOSP source diff と source context に記録する。
+- そのセクションに関係しそうな package / API 名を `analysis/` の候補ファイルで探す。
+- 候補ファイルは入口として使うに留め、最終根拠は AOSP source diff と source context に記録する。

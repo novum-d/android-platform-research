@@ -1,36 +1,36 @@
-# Android 17 適用条件分類（Applicability Classification）
+# Android 17 適用条件分類
 
-このファイルは、Android 17 Behavior Changes を「OSアップデート時に自動的に適用される差分」と「targetSdkVersion 37 を上げた時に適用される差分」に分類するための基準を定義する。
+このファイルは、Android 17 Behavior Changes を「OS アップデート時に自動的に適用される差分」と「targetSdkVersion 37 以上に上げたときに適用される差分」に分類するための基準を定義する。
 
-## バージョンスコープ（Version Scope）
+## バージョンスコープ
 
-From:
+比較元:
 - android-16.0.0_r4
 
-To:
-- TBD: Android 17 AOSP tag
+比較先:
+- 未定: Android 17 AOSP タグ
 
-## 公式ドキュメント参照元（Official Documentation Sources）
+## 公式ドキュメント参照元
 
-Primary documentation:
-- OS update / all apps: https://developer.android.com/about/versions/17/behavior-changes-all
-- targetSdkVersion 37+: https://developer.android.com/about/versions/17/behavior-changes-17
+主な参照元:
+- OS アップデート / 全アプリ: https://developer.android.com/about/versions/17/behavior-changes-all
+- targetSdkVersion 37 以上: https://developer.android.com/about/versions/17/behavior-changes-17
 
 Compat framework:
-- TBD: Android 17 compatibility framework page, if published
+- 未定: Android 17 compatibility framework ページが公開された場合に参照する
 
-## 分類ラベル（Classification Labels）
+## 分類ラベル
 
-Use exactly one primary label per finding.
+各 finding には、primary label を必ず 1 つだけ付ける。
 
 ### OS_UPDATE_ALL_APPS
 
 公式文書が「targetSdkVersion に関係なく Android 17 上の全アプリに適用される」と説明している場合に使う。
 
 必要な根拠:
-- Behavior Change source is `behavior-changes-all`, or equivalent official statement exists.
-- AOSP evidence does not show a targetSdkVersion 37 gate, once Android 17 AOSP tag evidence is available.
-- If implementation is gated, the gate is OS version, device capability, module version, permission state, app state, API usage, or another non-targetSdk condition.
+- Behavior Change の参照元が `behavior-changes-all` である、または同等の公式記述が存在する。
+- Android 17 AOSP タグの根拠を確認できる状態で、AOSP evidence に targetSdkVersion 37 gate が見つからない。
+- 実装に gate がある場合、その gate が OS version、device capability、module version、permission state、app state、API usage、または targetSdkVersion 以外の条件である。
 
 顧客向け表現:
 - Android 17 へ OS アップデートすると、targetSdkVersion を変更していないアプリにも影響する可能性がある。
@@ -44,9 +44,9 @@ Use exactly one primary label per finding.
 Android 17 / API level 37 以上を target にするアプリへ適用される場合に使う。
 
 必要な根拠:
-- Behavior Change source is `behavior-changes-17`, or equivalent official statement exists.
-- AOSP evidence shows a targetSdkVersion 37 gate, compat ChangeId default-enabled for API 37+, or an API 37 condition, once Android 17 AOSP tag evidence is available.
-- Android 17 / targetSdkVersion 36 and Android 17 / targetSdkVersion 37 have different expected behavior.
+- Behavior Change の参照元が `behavior-changes-17` である、または同等の公式記述が存在する。
+- Android 17 AOSP タグの根拠を確認できる状態で、AOSP evidence に targetSdkVersion 37 gate、API 37 以上で default-enabled になる compat ChangeId、または API 37 条件が確認できる。
+- Android 17 / targetSdkVersion 36 と Android 17 / targetSdkVersion 37 で、期待される挙動が異なる。
 
 顧客向け表現:
 - targetSdkVersion を 37 以上に上げると有効になるため、OS アップデートだけでは原則として発生しない。
@@ -60,17 +60,17 @@ Android 17 / API level 37 以上を target にするアプリへ適用される�
 targetSdkVersion 37 以上が必要だが、それだけでは適用されない場合に使う。
 
 追加条件の例:
-- large screen or `sw600dp`
-- specific permission group
-- specific API usage
-- cross-app or cross-profile boundary
-- manifest property or opt-out state
+- large screen または `sw600dp`
+- 特定の permission group
+- 特定の API usage
+- cross-app または cross-profile boundary
+- manifest property または opt-out state
 - process lifecycle state
 - foreground service state
 
 必要な根拠:
-- Same evidence as `TARGET_SDK_37`.
-- Additional runtime condition is documented and verified in AOSP or official docs.
+- `TARGET_SDK_37` と同じ根拠。
+- 追加の実行時条件が公式ドキュメントに記載され、AOSP または公式ドキュメントで確認できる。
 
 顧客向け表現:
 - targetSdkVersion 37 以上に加えて、特定の端末条件、API 利用、権限、manifest 設定などを満たす場合に影響する。
@@ -84,9 +84,9 @@ targetSdkVersion 37 以上が必要だが、それだけでは適用されない
 Mainline module または Google Play system update で配信され、Android 17 platform image だけでは適用可否が決まらない場合に使う。
 
 必要な根拠:
-- Official documentation states module or Google Play system update delivery.
-- AOSP evidence identifies the module or package boundary where possible.
-- Impact description separates platform version from module version.
+- 公式ドキュメントが、module または Google Play system update による配信であると説明している。
+- 可能な範囲で、AOSP evidence により module または package boundary を特定している。
+- 影響説明で platform version と module version を分けている。
 
 顧客向け表現:
 - Android 17 端末だけでなく、対象モジュールが更新された過去 OS の端末にも影響する可能性がある。
@@ -99,9 +99,9 @@ Mainline module または Google Play system update で配信され、Android 17
 新 API の追加・公開であり、既存アプリの実行時挙動変更ではない場合に使う。
 
 必要な根拠:
-- API surface change is present.
-- No Behavior Change statement or no changed behavior for existing apps is identified.
-- Developer action is adoption opportunity, not compatibility mitigation.
+- API surface change が存在する。
+- Behavior Change としての記述がない、または既存アプリの挙動変更が確認されない。
+- 開発者対応は互換性回避ではなく、新 API 採用の機会として説明できる。
 
 顧客向け表現:
 - 既存アプリの互換性リスクではなく、新 API の利用機会として扱う。
@@ -114,53 +114,53 @@ Mainline module または Google Play system update で配信され、Android 17
 分類を根拠付きで説明できない場合に使う。
 
 必要な対応:
-- Do not assign High confidence.
-- Record missing evidence.
-- Continue investigation before customer-facing conclusion.
+- High confidence を付けない。
+- 不足している根拠を記録する。
+- 顧客向けの結論を出す前に調査を継続する。
 
 記入例:
 - 公式文書は targetSdkVersion 37 以上と読めるが、Android 17 AOSP tag がなく gate を確認できない。
 - AOSP 差分候補はあるが、公式 Behavior Change の該当文言と結びついていない。
 
-## High confidence の条件（High Confidence Requirements）
+## High confidence の条件
 
-A classification can be High confidence only when all of the following are true:
+分類を High confidence とできるのは、以下をすべて満たす場合のみ。
 
-- Original official statement is quoted or paraphrased with source URL.
-- The page category and the original statement agree.
-- AOSP evidence confirms the applicable gate, or confirms that no targetSdkVersion gate exists.
-- Compat framework entry is checked when a Change ID exists.
-- Android 17 / targetSdkVersion 36 and Android 17 / targetSdkVersion 37 expected behavior are both stated.
-- Additional conditions and exceptions are stated.
-- Customer-facing wording does not mix OS update impact with targetSdkVersion impact.
+- 公式ドキュメントの原文または要約を、出典 URL とともに記録している。
+- ページ種別と原文の内容が一致している。
+- AOSP evidence により適用 gate を確認している、または targetSdkVersion gate が存在しないことを確認している。
+- Change ID が存在する場合は、compat framework entry を確認している。
+- Android 17 / targetSdkVersion 36 と Android 17 / targetSdkVersion 37 の期待挙動をどちらも記載している。
+- 追加条件と例外を記載している。
+- 顧客向け表現で、OS アップデートによる影響と targetSdkVersion 変更による影響を混同していない。
 
-Until an Android 17 AOSP tag is available locally, do not mark AOSP-backed conclusions as High confidence.
+Android 17 AOSP タグをローカルで利用できるようになるまでは、AOSP 根拠に基づく結論に High confidence を付けない。
 
-## 根拠の記録順（Evidence Pattern）
+## 根拠の記録順
 
-Record facts in this order:
+事実は以下の順序で記録する。
 
-1. Official documentation page and section.
-2. Original applicability statement.
-3. AOSP source context reviewed:
+1. 公式ドキュメントのページとセクション。
+2. 検証対象の適用条件文。
+3. 確認した AOSP source context:
    - file / symbol / entry point / caller
-   - why this code path is relevant to the Behavior Change
-   - Android 16 baseline and Android 17 behavior
-   - unrelated code paths excluded, when relevant
+   - その code path が Behavior Change に関係する理由
+   - Android 16 baseline と Android 17 behavior
+   - 関連しない code path を除外した場合は、その内容
 4. Diff interpretation:
-   - observed source diff
-   - whether it adds, removes, gates, or changes default behavior
-   - how the diff supports the applicability classification
-5. Exact gate evidence.
-6. Compat framework Change ID and default state, if any.
-7. Expected behavior matrix.
-8. Developer impact and action candidates.
-9. Confidence and missing evidence.
+   - 確認した source diff
+   - 挙動の追加、削除、gate 追加、default behavior 変更のどれに該当するか
+   - その diff が適用条件分類をどのように支えるか
+5. 正確な gate evidence。
+6. Compat framework Change ID と default state。存在する場合のみ。
+7. 期待挙動の matrix。
+8. 開発者への影響と対応候補。
+9. confidence と不足している根拠。
 
-## よくある誤分類（Common Misclassifications）
+## よくある誤分類
 
-- Do not classify an item as `TARGET_SDK_37` only because it appears on Android 17 pages. Confirm the specific page and wording.
-- Do not classify an item as `OS_UPDATE_ALL_APPS` only because the implementation changed in AOSP. Check whether the implementation is behind a targetSdkVersion or compat gate.
-- Do not treat a new API as a Behavior Change unless existing behavior changes.
-- Do not ignore opt-out, exception, device form factor, or permission conditions.
-- Do not use High confidence when the Android 17 AOSP tag is unavailable.
+- Android 17 ページに掲載されているという理由だけで `TARGET_SDK_37` に分類しない。掲載ページと文言を確認する。
+- AOSP 実装が変わっているという理由だけで `OS_UPDATE_ALL_APPS` に分類しない。実装が targetSdkVersion gate または compat gate の内側にないか確認する。
+- 既存挙動が変わらない限り、新 API 追加だけを Behavior Change として扱わない。
+- opt-out、例外、device form factor、permission 条件を無視しない。
+- Android 17 AOSP タグを利用できない状態で High confidence を使わない。
