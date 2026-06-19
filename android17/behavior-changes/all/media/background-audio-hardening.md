@@ -12,7 +12,7 @@
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -41,73 +41,73 @@
 ### 分類スナップショット（Classification Snapshot）
 
 主分類（Primary classification）:
-- UNKNOWN_NEEDS_MORE_EVIDENCE
+- OS_UPDATE_ALL_APPS
 
 公式文書からの初期適用条件判断:
 - 公式文書は Android 17 の `Behavior changes: all apps` ページにこの項目を掲載している。
-- all apps ページと詳細ページは、Android 17 から audio playback、audio focus request、volume change API を含む background audio interaction に制限がかかると説明している。
 - 詳細ページは、Android 17 上で対象の background audio interaction を行うすべての app は、visible activity を持つか、`SHORT_SERVICE` ではない foreground service を実行している必要があり、これは target API level 37 かどうかに関係なく適用されると説明している。
-- 詳細ページは、targetSdkVersion 37 以上の app には追加制限があり、background で動作する場合、foreground service が while-in-use (WIU) capability を持つ必要があると説明している。ただし exact alarm permission が付与され、`USAGE_ALARM` audio stream を扱う場合は WIU requirement が免除される。
-- ただし、local `frameworks-base` に Android 17 AOSP tag がないため、AudioService / AudioManager / audio focus / volume policy / foreground service WIU gate / compat framework entry は未確認である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
+- targetSdkVersion 37 以上で強まる追加条件は別項目として [target/media/background-audio-hardening.md](../../target/media/background-audio-hardening.md) に整理する。
 
 早見表（At-a-glance impact）:
 
 | 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | 可能性は高いが条件付き、かつ未検証 | 詳細ページは all apps running on Android 17 に適用され、target API level 37 かどうかに関係ないと説明。AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | 一部で必要 | 共通制限は targetSdkVersion に依存しない。WIU capability requirement は targetSdkVersion 37 以上の追加制限。AOSP gate 未確認。 |
-| 追加の実行時条件があるか | ある | app が background audio interaction を行い、valid lifecycle / visible activity / foreground service 条件を満たさない場合。target 37+ では WIU capability 条件も加わる。 |
-| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | Yes / Conditional | all apps 文書に掲載。AOSP では AppOps と process capability に基づく audio hardening path が Android 17 tag に存在する。 |
+| targetSdkVersion 37 以上が必要か | 共通制限には不要 | Android 17 の `HardeningEnforcer` は pre-CINNAMON_BUN に partial level の緩和を残す一方、background audio interaction の AppOps 判定自体は targetSdkVersion だけで無効化されない。 |
+| 追加の実行時条件があるか | ある | background audio interaction、AppOps の audio restriction、visible / FGS / process capability、privileged caller、alarm exception、feature flag / override に依存する。 |
+| Compat Change ID が関係するか | 未確認 | `frameworks-base` では compat ChangeId ではなく audio flags、AppOps、process capability、AudioPolicy hardening override が主要 gate として確認された。 |
 
 ### 調査日（Investigation Date）
 
-2026-06-15
+2026-06-18
 
 ### 信頼度（Confidence）
 
-- Low
+- Medium
 
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
-- [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
+- [x] targetSdkVersion に関係なく Android 17 の全アプリへ適用
 - [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
 - [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
 - [ ] Mainline / Google Play system update に依存
 - [ ] API 追加のみであり、挙動変更ではない
-- [x] 未確認 / 追加 evidence が必要
+- [ ] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
-- Android version: Android 17 以上。AOSP tag 未取得のため実装上の OS gate は未確認。
-- targetSdkVersion: 共通制限は公式文書上 targetSdkVersion に依存しない。targetSdkVersion 37 以上では WIU capability requirement が追加される。
-- Device/form factor: audio framework が動作する Android 17 device。
-- Permission/API/component condition: audio playback、audio focus request、volume change API、`AudioManager.requestAudioFocus()`、`AudioTrack.write()`、AAudio / OpenSL ES、`AudioManager.setStreamVolume()`、`adjustStreamVolume()`、foreground service、`mediaPlayback` FGS、WIU capability、exact alarm permission、`USAGE_ALARM`。
-- App state/process condition: app が visible activity を持たない、または適切な foreground service / WIU capability を持たない状態で background audio interaction を行う場合。
+- Android version: Android 17 (`android-17.0.0_r1`)。
+- targetSdkVersion: 共通制限は targetSdkVersion 37 を必須条件にしない。ただし targetSdkVersion 37 以上では strict level へ進む追加条件がある。
+- Device/form factor: Android audio framework / audioserver が動作する端末。Automotive では volume API hardening が別途 `autoPublicVolumeApiHardening()` と privileged permission に依存する。
+- Permission/API/component condition: audio playback、`AudioManager.requestAudioFocus()`、`AudioManager.setStreamVolume()`、`adjustStreamVolume()`、`adjustVolume()`、`adjustSuggestedStreamVolume()`、`setRingerMode()`、AppOps `OP_PLAY_AUDIO` / `OP_TAKE_AUDIO_FOCUS` / `OP_CONTROL_AUDIO` / `OP_CONTROL_AUDIO_PARTIAL`。
+- App state/process condition: app が background audio interaction を行い、AppOps / process state / FGS capability により audio operation が許可されない場合。
 
 Compat framework:
-- Change ID: 未確認
-- 変更名: 未確認
-- 既定状態: 未確認
-- テスト時に切り替え可能か: 未確認
+- Change ID: 確認できず
+- 変更名: 確認できず
+- 既定状態: audio flags / AppOps / native AudioPolicy 側の default に依存
+- テスト時に切り替え可能か: `AudioManager.setHardeningOverride()` / `cmd audio set-hardening` 相当の privileged override path は存在する
 
 分類信頼度（Classification confidence）:
-- Low
+- Medium
 
 分類根拠（Classification evidence）:
-- 公式ドキュメントページ: `behavior-changes-all`
-- 検証対象の適用条件文: Android 17 から background audio interaction に制限がかかる。Android 17 上の all apps に target API level 37 かどうかに関係なく適用される共通条件と、targetSdkVersion 37 以上向けの追加 WIU 条件がある。
-- AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
+- `services/core/java/com/android/server/audio/HardeningEnforcer.java`
+- `services/core/java/com/android/server/audio/AudioService.java`
+- `services/core/java/com/android/server/am/psc/OomAdjusterImpl.java`
+- `services/core/java/com/android/server/am/psc/CapabilityController.java`
+- `core/java/android/app/ActivityManager.java`
+- `core/java/android/app/AppOpsManager.java`
 
 ---
 
 # エグゼクティブサマリー（Executive Summary）
 
-Android 17 では、background からの audio playback、audio focus request、volume change API などの background audio interaction に対して、audio framework が制限をかける。目的は、ユーザーが意図していない background audio operation を抑制することである。
+Android 17 では、background からの audio playback、audio focus request、volume / ringer mode API に対して audio hardening が強化される。AOSP では、`HardeningEnforcer` が AppOps の audio restriction を見て、volume API を no-op 化し、audio focus request を `AUDIOFOCUS_REQUEST_FAILED` にする経路が確認できた。playback については audioserver から `AudioService` へ `playbackHardeningEvent()` が通知され、`AudioHardening background playback ... muted` として記録される。
 
-公式詳細ページは、Android 17 上で対象の background audio interaction を行う app は、visible activity を持つか、`SHORT_SERVICE` ではない foreground service を実行している必要があると説明している。この条件は target API level 37 かどうかに関係なく適用される。一方、targetSdkVersion 37 以上の app では追加制限として、background で動作する foreground service に while-in-use (WIU) capability が必要になる。ただし exact alarm permission があり、`USAGE_ALARM` stream を扱う場合は免除される。
+全アプリ共通の観点では、targetSdkVersion 37 は必須条件ではない。Android 17 の実装は、pre-CINNAMON_BUN app には partial level の緩和を残しつつ、background audio interaction が AppOps / process capability で制限される構造になっている。targetSdkVersion 37 以上で strict level へ進む追加条件は target 側レポートで扱う。
 
-無効な lifecycle 状態で対象 API を呼ぶと、playback と volume change API は例外や failure message なしで silently fail し、audio focus request は `AUDIOFOCUS_REQUEST_FAILED` を返す。現時点では local `frameworks-base` に Android 17 AOSP tag がないため、実装上の gate、compat Change ID、targetSdkVersion 分岐は未確認である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE`、信頼度は Low とする。
+信頼度は Medium とする。Java framework 側では focus / volume / logging / process capability の証跡を確認できたが、actual playback mute の最終判定は native AudioPolicy / audioserver 側にもまたがるため、この checkout だけでは全条件を完全には閉じられない。
 
 ---
 
@@ -133,61 +133,40 @@ Android 17 では、background からの audio playback、audio focus request、
 - audio focus API は `AUDIOFOCUS_REQUEST_FAILED` を返す。
 - targetSdkVersion 37 以上の app では制限がより厳しく、background で動作する場合は foreground service が WIU capability を持つ必要がある。ただし exact alarm permission があり、`USAGE_ALARM` audio stream を扱う場合は例外である。
 
-関連する詳細ページの記述:
-- Android 17 上で対象の background audio interaction を行うすべての app は、visible activity を持つか、`SHORT_SERVICE` ではない foreground service を実行している必要がある。
-- この共通条件は target API level 37 かどうかに関係なく適用される。
-- targetSdkVersion 37 以上の app には、foreground service の WIU capability requirement が追加される。
-
 ## 解釈（Interpretation）
 
-この変更は単一の targetSdkVersion gate ではなく、二層の適用条件を持つ可能性がある。第一層は Android 17 上の all apps に対する background audio hardening で、visible activity または適切な foreground service が必要になる。第二層は targetSdkVersion 37 以上の app に対する追加制限で、background foreground service が WIU capability を持つ必要がある。
-
-顧客向けには、OS update だけで発生しうる共通制限と、targetSdkVersion 37 化で強まる追加条件を分けて説明する必要がある。特に silent failure は検知しづらいため、`AudioHardening` log、`dumpsys audio`、audio focus result code を使った検証が重要になる。
+この変更は単一の targetSdkVersion gate ではなく、二層の適用条件を持つ。第一層は Android 17 上の all apps に対する background audio hardening で、AppOps / process state / foreground service capability により audio interaction が許可されない場合に制限される。第二層は targetSdkVersion 37 以上の app に対する追加制限で、CINNAMON_BUN 以降の targetSdkVersion が strict level の判定に使われる。
 
 ---
 
 # 変更内容（What Changed）
 
-公式文書上の変更点:
-- Android 17 から background audio interaction に audio framework level の制限がかかる。
-- 対象は audio playback、audio focus request、volume change API。
-- all apps running on Android 17 では、visible activity または `SHORT_SERVICE` ではない foreground service が必要。
-- targetSdkVersion 37 以上では、background で動作する foreground service に WIU capability が必要。
-- exact alarm permission があり `USAGE_ALARM` stream を扱う場合は WIU capability requirement が免除される。
-- invalid lifecycle で対象 API を呼ぶと、playback / volume change は silently fail し、audio focus は `AUDIOFOCUS_REQUEST_FAILED` を返す。
-
-AOSP で未確認の点:
-- AudioService / AudioManager / AudioFocus / volume API の enforcement point。
-- visible activity、foreground service、`SHORT_SERVICE` 除外、WIU capability の判定 path。
-- targetSdkVersion 37 gate の実装箇所。
-- exact alarm permission + `USAGE_ALARM` exception の判定 path。
-- silent failure、`AUDIOFOCUS_REQUEST_FAILED`、`AudioHardening` log / dumpsys 出力の実装。
-- compat framework Change ID と default state。
+AOSP で確認した変更点:
+- `HardeningEnforcer` が Android 17 で `mShouldEnableAllHardening` から `mHardeningOverride` に変わり、default / enable / disable / throw の hardening override を扱う。
+- Volume API では `OP_CONTROL_AUDIO_PARTIAL` と `OP_CONTROL_AUDIO` を確認し、許可されない場合は `setStreamVolume()` / `adjustStreamVolume()` などを return で no-op 化する。
+- Audio focus では `OP_TAKE_AUDIO_FOCUS` と `OP_CONTROL_AUDIO` を確認し、hardening により block される場合は `AudioService.requestAudioFocus()` が `AUDIOFOCUS_REQUEST_FAILED` を返す。
+- Playback では audioserver から `AudioService.playbackHardeningEvent()` へ hardening event が通知され、partial / full、reason、usage が `AudioHardening background playback ... muted` としてログ・metrics に記録される。
+- ActivityManager の process capability に `PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL` が使われ、`OomAdjusterImpl` は process state が `PROCESS_STATE_BOUND_FOREGROUND_SERVICE` より低い場合に `hardeningBfgs()` 条件で foreground audio control capability を落とす。
 
 ## 適用条件（Applicability）
 
-この変更がいつ適用されるかを OS 条件と targetSdkVersion 条件に分けて説明する。
-
 ### OS アップデート時の挙動（OS Update Behavior）
 
-- Android 17 に OS アップデートしただけで適用されるか: 公式文書上は Yes / Conditional。Android 17 上で対象 background audio interaction を行う all apps に適用され、target API level 37 かどうかに関係ないと詳細ページが説明している。ただし AOSP gate 未確認。
-- targetSdkVersion に依存しない根拠: 詳細ページは共通条件について、whether or not the app targets API level 37 と説明している。
-- Android 16 以前での挙動: background audio interaction に同じ hardening があったかは AOSP diff 未確認。公式文書は Android 17 から enforcement されると説明している。
+- Android 17 に OS アップデートしただけで適用されるか: Yes / Conditional。
+- targetSdkVersion に依存しない根拠: `HardeningEnforcer` は AppOps の partial / full restriction を先に判定し、pre-CINNAMON_BUN でも partial level までの enforcement は残す。公式詳細ページも共通制限は target API level 37 に依存しないと説明している。
+- Android 16 以前での挙動: Android 16 tag にも `HardeningEnforcer` は存在するが、Android 17 では alarm exception、usage/reason logging、hardening override、CINNAMON_BUN 分岐、foreground audio control capability との結合が強化されている。
 
 ### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
-- targetSdkVersion 37 以上で適用されるか: Yes / Conditional candidate。targetSdkVersion 37 以上では、background で動作する foreground service に WIU capability が必要になると公式文書が説明している。
-- Android 17 / targetSdkVersion 36 と Android 17 / targetSdkVersion 37 の差分: targetSdkVersion 36 でも共通制限は対象候補。targetSdkVersion 37 では WIU capability requirement が追加される候補。
-- opt-out / exception: exact alarm permission が付与され、`USAGE_ALARM` audio stream を扱う場合は WIU capability requirement が免除される。compat opt-out の有無は未確認。
+- targetSdkVersion 37 以上で適用されるか: 共通制限は targetSdkVersion 37 を必須にしない。
+- Android 17 / targetSdkVersion 36 と Android 17 / targetSdkVersion 37 の差分: targetSdkVersion 36 では partial level の緩和が残る。targetSdkVersion 37 以上では strict level の制限へ進みうる。詳細は target 側レポートを参照。
+- opt-out / exception: privileged audio permission、hardening override、feature flag、exact alarm / `USAGE_ALARM` exception がある。
 
 ### その他の条件（Other Conditions）
 
-- app lifecycle: visible activity がある場合は影響を受けにくい。PiP を含む visible-to-user 状態で audio API を使う場合は詳細ページ上、対象外と説明されている。
-- foreground service: background audio を継続する場合は `mediaPlayback` FGS など、`SHORT_SERVICE` ではない foreground service が必要。
-- WIU capability: targetSdkVersion 37 以上では、user-initiated operation または app visible 中に開始された FGS など、WIU capability を持つ foreground service が必要。
-- exceptions: exact alarm permission + `USAGE_ALARM` stream。
-- impacted use cases: app open 中または explicit user trigger に基づく audio interaction continuation model に従わない場合、silent suppression の可能性が高い。`BOOT_COMPLETE` に応答して FGS を開始し audio interaction する例は suppression 候補として公式文書に挙げられている。
-- lower risk: Media3 `MediaSessionService` を使う background playback、Telecom API を使う VOIP、visible activity / PiP 中の audio operation。
+- privileged caller: `MODIFY_AUDIO_SETTINGS_PRIVILEGED`、`MODIFY_AUDIO_ROUTING`、`MODIFY_PHONE_STATE`、または app UID 未満の system UID は許可される。
+- alarm exception: exact alarm permission または cached exact alarm eligibility があり、focus では `USAGE_ALARM` の場合に partial level まで緩和される。volume では exact alarm eligibility が partial level 緩和に使われる。
+- foreground state: `PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL` は FGS / process state と結びつき、BFGS より下の procstate では `hardeningBfgs()` により落とされる。
 
 ---
 
@@ -200,168 +179,120 @@ AOSP で未確認の点:
 ```bash
 git -C frameworks-base status --short
 git -C frameworks-base tag --list android-16.0.0_r4
-git -C frameworks-base tag --list 'android-17*'
+git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
 結果:
 - `frameworks-base` の `status --short` は空で、dirty working tree は確認されなかった。
 - `android-16.0.0_r4` tag は存在する。
-- `android-17*` tag は local checkout に存在しない。
-
-根拠上の制約:
-- Android 17 AOSP tag が local `frameworks-base` にないため、`android-16.0.0_r4` と Android 17 tag の明示的な source diff は実行できない。
-- そのため、local working tree や未確定 branch を platform evidence として扱わない。
-- 本レポートの AOSP-backed conclusion は Low confidence に留める。
+- `android-17.0.0_r1` tag は存在する。
 
 ## 関連ファイル（Related Files）
 
-Android 17 AOSP tag 未取得のため、tag diff に基づく related files は未確定。
-
-Android 17 tag 公開後に確認すべき候補:
-- `media/java/android/media/AudioManager.java`
-- `media/java/android/media/AudioTrack.java`
+- `services/core/java/com/android/server/audio/HardeningEnforcer.java`
 - `services/core/java/com/android/server/audio/AudioService.java`
-- `services/core/java/com/android/server/audio/MediaFocusControl.java`
-- `services/core/java/com/android/server/am/ActiveServices.java`
-- `services/core/java/com/android/server/am/ActivityManagerService.java`
-- `services/core/java/com/android/server/pm/permission/` または exact alarm / app-op 判定 path
-- API / constants for `AUDIOFOCUS_REQUEST_FAILED`
-- dumpsys / logcat の `AudioHardening` 出力 path
-- compat framework 定義ファイル内の background audio hardening 関連 Change ID
-
-Note:
-- 実際の playback write enforcement は framework Java 層だけでなく native audio path、AAudio、OpenSL ES、media server / AudioFlinger 側にある可能性がある。Android 17 tag 入手後は該当 project も evidence 対象として確認する必要がある。
+- `services/core/java/com/android/server/audio/PlaybackActivityMonitor.java`
+- `services/core/java/com/android/server/am/psc/OomAdjusterImpl.java`
+- `services/core/java/com/android/server/am/psc/CapabilityController.java`
+- `core/java/android/app/ActivityManager.java`
+- `core/java/android/app/AppOpsManager.java`
+- `media/java/android/media/AudioManager.java`
+- `media/java/android/media/AudioPlaybackConfiguration.java`
 
 ## 確認したソース文脈（Source Context Reviewed）
 
-AOSP tag diff は未実行。以下は公式文書から見た確認予定の source context であり、AOSP evidence ではない。
-
-| ファイル / シンボル（File / symbol） | Android 16 の基準挙動（baseline） | Android 17 の挙動 | このコードパスを根拠にする理由 |
+| ファイル / シンボル | Android 16 の基準挙動 | Android 17 の挙動 | このコードパスを根拠にする理由 |
 | --- | --- | --- | --- |
-| Audio playback enforcement path | 未確認 | invalid lifecycle では playback が silenced / fail すると公式文書が説明 | `AudioTrack.write()`、AAudio、OpenSL ES、Media3 / ExoPlayer への影響確認に必要なため |
-| Audio focus request path | 未確認 | `AUDIOFOCUS_REQUEST_FAILED` を返すと公式文書が説明 | developer-visible failure signal がある API であり、検証と mitigation に直結するため |
-| Volume / ringer mode API path | 未確認 | volume change / ringer mode calls が silently ignored と詳細ページが説明 | silent failure の主要対象であり、customer impact が大きいため |
-| Foreground service / WIU capability gate | 未確認 | targetSdkVersion 37 以上では WIU capability が必要と公式文書が説明 | targetSdkVersion impact と exception 判定の根拠になるため |
-| Exact alarm + `USAGE_ALARM` exception path | 未確認 | exact alarm permission + alarm stream は WIU requirement 免除と公式文書が説明 | app impact を絞る exception 条件であるため |
-| compat framework entry | 未確認 | targetSdkVersion gate / testing toggle の有無は不明 | primary classification と confidence 確定に必要なため |
+| `HardeningEnforcer.blockVolumeMethod()` | AppOps による partial / full 判定と global enable 相当の制御 | `mHardeningOverride`、CINNAMON_BUN target check、exact alarm cache、reason / metrics logging を使って block level を決める | volume API が silent no-op になる直接の Java framework gate |
+| `AudioService.setStreamVolumeWithAttribution()` / `adjustStreamVolumeWithAttribution()` | volume path から hardening check | hardening block 時は `return` し、volume 変更を行わない | 公式文書の volume change API silently fail に対応 |
+| `HardeningEnforcer.blockFocusMethod()` | pre-VIC などの緩和を持つ focus hardening | `OP_TAKE_AUDIO_FOCUS` / `OP_CONTROL_AUDIO`、usage、alarm exception、CINNAMON_BUN target check、strict flag で block を決める | audio focus request の failure mode を決める gate |
+| `AudioService.requestAudioFocus()` | focus hardening block 時に failure | Android 17 でも block 時に `AUDIOFOCUS_REQUEST_FAILED` を返す | developer-visible result code の根拠 |
+| `AudioService.playbackHardeningEvent()` | playback hardening event を受ける | Android 17 では reason と usage を受け取り、AudioAtomsLog にも記録する | playback mute は native 側判定を含むが、framework 側で公式挙動のイベントが確認できる |
+| `OomAdjusterImpl` / `CapabilityController` | 従来の OOM adjuster path | `PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL` を FGS / process state と結びつけ、BFGS より下では capability を落とす | background / foreground service state と audio control permission の接続点 |
+| `AppOpsManager` | audio appops は存在 | `OP_PLAY_AUDIO` / `OP_TAKE_AUDIO_FOCUS` / `OP_CONTROL_AUDIO` / `OP_CONTROL_AUDIO_PARTIAL` が audio restriction の key として使われる | audio operation ごとの許可判定の基礎 |
 
 必須記入項目:
-- Entry point / caller: 未確認。想定される entry point は `AudioTrack.write()` / AAudio / OpenSL ES playback write、`AudioManager.requestAudioFocus()`、`AudioManager.setStreamVolume()` / `adjustStreamVolume()` / `setRingerMode()`。
-- Relevant class or service responsibility: audio playback enforcement、audio focus policy、volume / ringer mode policy、foreground service state / WIU capability 判定、exact alarm / audio usage exception。
-- Runtime path from app API / system event to changed code: app が background で audio API を呼ぶ -> system が visible activity / foreground service / targetSdkVersion / WIU capability / exact alarm + `USAGE_ALARM` を判定 -> invalid lifecycle なら playback / volume API は silent suppression、audio focus は `AUDIOFOCUS_REQUEST_FAILED`、という path が想定される。AOSP evidence としては未確認。
-- Why unrelated code paths were excluded: tag diff 未実行のため、除外判断は未完了。
+- Entry point / caller: `AudioManager.setStreamVolume()` / `adjustStreamVolume()` -> `AudioService` -> `HardeningEnforcer.blockVolumeMethod()`、`AudioManager.requestAudioFocus()` -> `AudioService.requestAudioFocus()` -> `HardeningEnforcer.blockFocusMethod()`、playback native path -> `IAudioManagerNative.playbackHardeningEvent()` -> `AudioService`。
+- Relevant class or service responsibility: `AudioService` は public audio API の service-side enforcement、`HardeningEnforcer` は AppOps / targetSdk / exception 判定、ActivityManager PSC は foreground audio control capability の付与・剥奪を担当する。
+- Runtime path from app API / system event to changed code: app が background で audio API を呼ぶ -> AppOps / process capability により operation が disallowed になる -> volume は no-op、focus は failure、playback は native AudioPolicy 側で mute され framework event が記録される。
+- Why unrelated code paths were excluded: audio route / Bluetooth / mixer / TV extension / media metadata の差分は background audio hardening の適用条件や developer-visible failure mode を直接説明しないため除外した。
 
 ## 差分解釈（Diff Interpretation）
 
 | 確認した差分（Observed diff） | 解釈（Interpretation） | Behavior Change との関係 | 信頼度（Confidence） |
 | --- | --- | --- | --- |
-| Android 17 tag 未取得のため source diff 未確認 | 公式文書上は changed condition / added enforcement と読める | background audio interaction が lifecycle / FGS / WIU 条件で制限されると説明されている | Low |
-
-必須分類:
-- Added behavior: 未確認。audio hardening enforcement が追加された可能性がある。
-- Removed behavior: 未確認。background からの自由な playback / focus / volume operation が制限された可能性がある。
-- Changed condition: 公式文書上は該当候補。valid lifecycle、visible activity、foreground service、WIU capability、exact alarm + `USAGE_ALARM` によって許可 / 抑制が分岐すると読める。
-- Changed default: 未確認。background audio operation の default allow / suppress 条件が変わった可能性がある。
-- No behavior change: 現時点では公式文書上の説明と矛盾するため候補ではないが、AOSP tag diff で確認が必要。
+| `HardeningEnforcer` が `mShouldEnableAllHardening` から `mHardeningOverride` と feature flags / targetSdk / exceptions に再構成 | changed condition / changed default control | enforcement の段階的適用、override、target 37 追加条件の根拠 | Medium |
+| Volume API path が hardening block 時に return | added / changed enforcement | volume change API の silent failure に対応 | High |
+| Focus path が hardening block 時に `AUDIOFOCUS_REQUEST_FAILED` | changed condition | audio focus request failure の根拠 | High |
+| Playback hardening event が reason / usage 付きで framework に通知 | changed condition / observability improvement | playback mute の framework-visible 証跡 | Medium |
+| foreground audio control capability が process state / FGS と結合 | changed condition | visible / FGS lifecycle 条件の実装側根拠 | Medium |
 
 ---
 
-# 影響分析（Impact Analysis）
+# 事実 / 観察 / 仮説 / 結論
 
-## 影響を受ける可能性があるアプリ（Potentially Affected Apps）
+## 事実（Facts）
 
-- music streaming、radio、podcast、audiobook app。
-- video streaming app で screen off / background playback を user affordance として提供する app。
-- background service から short sound、notification-like sound、volume change、ringer mode change を行う app。
-- alarm、timer、reminder app。特に `USAGE_ALARM` と exact alarm permission の条件確認が必要。
-- game / communication / productivity app で background component が audio focus や volume API を呼ぶ実装。
-- boot receiver や scheduled job から foreground service を開始し、user-visible trigger なしに audio interaction を行う app。
+- `android-17.0.0_r1` の `HardeningEnforcer.blockVolumeMethod()` は `OP_CONTROL_AUDIO_PARTIAL` と `OP_CONTROL_AUDIO` を確認する。
+- `AudioService.setStreamVolumeWithAttribution()` と `adjustStreamVolumeWithAttribution()` は `blockVolumeMethod()` が true の場合に `return` する。
+- `AudioService.requestAudioFocus()` は `blockFocusMethod()` が true の場合に `AudioManager.AUDIOFOCUS_REQUEST_FAILED` を返す。
+- `AudioService.playbackHardeningEvent()` は audioserver UID からの event のみを受け、partial / full、reason、usage をログ・metrics に記録する。
+- `OomAdjusterImpl` は `procState > PROCESS_STATE_BOUND_FOREGROUND_SERVICE` で `PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL` を落とす path を持つ。
 
-## 影響を受けにくいアプリ（Less Likely Affected）
+## 観察（Observations）
 
-- visible activity 中だけ audio API を使う app。
-- PiP 中など user-visible 状態で audio を使う app。
-- Media3 `MediaSessionService` で background playback lifecycle を管理している app。
-- Telecom API を適切に使う VOIP / video calling app。
-- audio playback、audio focus request、volume / ringer mode API を使わない app。
+- Android 16 にも hardening の土台はあるが、Android 17 では targetSdkVersion 37、exact alarm exception、usage/reason logging、foreground audio control capability との結合が強化されている。
+- Compat framework ChangeId はこの checkout では主要 gate として確認できない。
+- Playback の実際の mute 判定は native AudioPolicy / audioserver 側にもあるため、`frameworks-base` だけでは mute 条件を完全には説明できない。
 
-## 顧客向けリスク（Customer-facing Risk）
+## 仮説（Hypotheses）
 
-- background playback が silent に抑制され、例外や明示的 failure message が出ない。
-- audio focus request が `AUDIOFOCUS_REQUEST_FAILED` になり、playback coordination が崩れる。
-- volume / ringer mode changes が無視され、ユーザーの期待する音量変更が起きない。
-- boot / alarm / scheduled work / background-started FGS からの audio interaction が Android 17 で動作しない可能性。
-- silent failure のため、logcat / dumpsys / explicit result code check を入れていないと検知が遅れる。
+- all apps 共通制限は AppOps / process capability / audio policy の default policy により有効化され、targetSdkVersion 37 は strict level の追加条件に使われる。
+- Media3 `MediaSessionService` や適切な `mediaPlayback` FGS は foreground audio control capability を得ることで、通常の継続再生を維持できる可能性が高い。
 
----
+## 結論（Conclusions）
 
-# 対応候補（Recommended Action Candidates）
-
-## 実装対応（Implementation）
-
-- background audio interaction を行う箇所を棚卸しする。playback、audio focus、volume / ringer mode API を別々に確認する。
-- background playback は Media3 `MediaSessionService` の利用を優先する。
-- Media3 を使わない場合は、background audio が発生しうる user flow で、app が foreground にいる間に `mediaPlayback` foreground service を開始する。
-- targetSdkVersion 37 以上では、foreground service が WIU capability を持つよう、user-initiated operation または visible state から開始する。
-- transient buffering や `AUDIOFOCUS_LOSS_TRANSIENT` など 10 分未満の一時中断では、再開意図があるなら `mediaPlayback` FGS を維持する。
-- playback 完了、`AUDIOFOCUS_LOSS`、UMO pause、media key pause、recover 不可能な failure では、audio interaction、foreground service、media session を終了し、再開は明示的な user action から行う。
-- alarm use case は exact alarm permission と `USAGE_ALARM` stream の条件を明示的に確認する。
-
-## 検証対応（Testing）
-
-- Android 16 / targetSdkVersion 36 で background audio baseline を確認する。
-- Android 17 / targetSdkVersion 36 と Android 17 / targetSdkVersion 37 の両方で、playback、audio focus、volume / ringer mode API を確認する。
-- 詳細ページの ADB command を使って hardening を切り替えて確認する。
-
-```bash
-adb shell cmd audio set-enable-hardening <enable|disable|throw>
-```
-
-- `enable`: all apps に制限を有効化し、WIU FGS requirement も targetSdkVersion に関係なく適用する。exact alarm + alarm stream exception も無効化される。
-- `disable`: audio hardening restrictions を無効化する。
-- `throw`: `enable` と同様に制限を有効化し、volume / focus interaction では `IllegalStateException`、playback write では error / crash により loud failure を発生させる。
-- `adb dumpsys audio` と `logcat` で `AudioHardening` prefix の記録を確認する。`level: full` は FGS はあるが WIU capability がない状態、`level: partial` は FGS がない状態を示す。
-
-## 顧客説明候補（Customer Explanation）
-
-Android 17 では、ユーザーが意図していない background audio operation を抑制するため、background audio interaction に制限が加わります。background で音声再生、audio focus request、volume / ringer mode change を行う app は、visible activity または適切な foreground service を持つ必要があります。targetSdkVersion 37 以上では、background foreground service に while-in-use capability が必要になるため、user-initiated flow から foreground service を開始する設計にしてください。
+- この all-apps 項目は `OS_UPDATE_ALL_APPS` と分類する。
+- ただし実際の影響は「Android 17 上で background audio interaction を行い、AppOps / lifecycle / FGS capability 条件を満たせない場合」に限定される。
+- targetSdkVersion 37 以上での追加 strict 条件は target 側レポートで扱う。
 
 ---
 
-# 検証マトリクス（Verification Matrix）
+# 顧客影響（Customer Impact）
 
-| Device OS | targetSdkVersion | App condition | Expected behavior |
-| --- | --- | --- | --- |
-| Android 16 | 36 | background audio interaction | baseline。playback / focus / volume API の現行挙動を確認。 |
-| Android 17 | 36 | visible activity または non-`SHORT_SERVICE` FGS なし | playback / volume は silent suppression、focus は `AUDIOFOCUS_REQUEST_FAILED` の可能性。AOSP gate 未確認。 |
-| Android 17 | 36 | visible activity または non-`SHORT_SERVICE` FGS あり | 共通条件を満たす候補。実際の許可条件は AOSP tag で確認が必要。 |
-| Android 17 | 37 | background FGS あり、WIU capability なし | target 37 追加制限により suppression の可能性。 |
-| Android 17 | 37 | user-initiated / visible state から started FGS with WIU capability | background audio continuation が許可される候補。 |
-| Android 17 | 37 | exact alarm permission + `USAGE_ALARM` stream | WIU capability requirement 免除候補。 |
+影響しやすいアプリ:
+- 音楽、podcast、radio、audiobook、video streaming、alarm、timer、reminder、background sound、通話・ナビゲーションなど、background で audio interaction を行うアプリ。
 
----
+影響しやすい実装:
+- background worker / receiver / boot flow から audio focus を取得する。
+- visible activity や適切な FGS なしに playback を開始または継続する。
+- background から volume / ringer mode を変更する。
 
-# 未解決事項（Open Questions）
-
-- Android 17 AOSP tag 上で、audio hardening enforcement はどの service / native path で実装されているか。
-- 共通制限と targetSdkVersion 37 追加制限が compat framework Change ID で管理されているか。
-- visible activity / PiP / foreground service / `SHORT_SERVICE` / WIU capability の判定順序。
-- exact alarm permission + `USAGE_ALARM` exception の実装条件。
-- AudioTrack、AAudio、OpenSL ES、Media3、ExoPlayer、Oboe で failure signal に差があるか。
-- `cmd audio set-enable-hardening` の availability、Beta 3 以降の挙動、release build での扱い。
+想定される症状:
+- audio focus request が `AUDIOFOCUS_REQUEST_FAILED` を返す。
+- volume / ringer mode API が例外なしで効かない。
+- playback が mute / silent suppression され、`AudioHardening` log に記録される。
 
 ---
 
-# 人間の判断欄（Human Decision）
+# 推奨アクション候補（Recommended Action Candidates）
+
+- background audio API 呼び出し箇所を棚卸しし、呼び出し時点の visible / FGS / process state をテストする。
+- 継続再生は Media3 `MediaSessionService` または user-initiated な `mediaPlayback` foreground service flow に寄せる。
+- audio focus request の戻り値を必ず確認し、`AUDIOFOCUS_REQUEST_FAILED` 時に再試行・UI 誘導・silent fallback を設計する。
+- volume / ringer mode 変更は background で成功すると仮定しない。
+- alarm use case では exact alarm permission と `AudioAttributes.USAGE_ALARM` の利用条件を target 37 側の追加条件と合わせて確認する。
+
+---
+
+# One Page Summary
+
+- [summary](../../../summaries/all/media/background-audio-hardening-summary.md)
+
+# Human Decision
 
 最終優先度（Final Priority）:
 - 人間による判断が必要
 
-最終影響度:
-- 人間による判断が必要
-
-顧客通知要否（Customer Communication Required）:
-- 人間による判断が必要
-
-リリース判断:
-- 人間による判断が必要
+判断（Decision）:
+- 未判断

@@ -21,6 +21,7 @@ docs/VERSIONING.md
 | `planning/` | 複数 Android バージョンにまたがる将来テーマ | `FUTURE_INVESTIGATIONS.md` |
 | `records/` | 完了 findings、人間の判断、学び | `FINDINGS.md`, `DECISIONS.md`, `LESSONS_LEARNED.md` |
 | `knowledge/` | 複数 Android バージョンにまたがる仮説、未解決質問 | `hypotheses.md`, `questions.md` |
+| `translation/` | 調査レポートを日本語化するときの用語、文体、翻訳メモリ | `GLOSSARY.md`, `STYLE_GUIDE.md`, `TRANSLATION_MEMORY.md` |
 | `notes/` | 正式成果物に入れる前の個人メモ | `PERSONAL_NOTES.md` |
 
 ## よくある作業（Common Tasks）
@@ -36,6 +37,7 @@ docs/VERSIONING.md
 | やってはいけない進め方を確認する | `workflow/ANTI_PATTERNS.md` |
 | 情報源の優先順位を確認する | `overview/SOURCES.md` |
 | 用語の意味を揃える | `overview/glossary.md` |
+| 日本語翻訳の用語・文体を確認する | `translation/GLOSSARY.md`, `translation/STYLE_GUIDE.md` |
 | バージョニング方針を確認する | `VERSIONING.md` |
 
 ## ルート配置方針（Root Policy）

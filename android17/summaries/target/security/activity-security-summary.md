@@ -8,7 +8,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -18,63 +18,48 @@ Android 17 Behavior Change
 
 ## 適用条件（Applicability）
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: 未確認。この section は targetSdkVersion 37 以上向けページにあるが、AOSP gate 未確認。
-- targetSdkVersion 37 以上: 公式ページ種別上は該当と推定。AOSP gate 未確認。
-- その他の必須条件（Other required conditions）: background activity launch、IntentSender / PendingIntent 経由の Activity 起動、ActivityOptions BAL mode、calling app visibility。
-- Compat Change ID: 未確認
-- Compat default state: 未確認
+- 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
+- OS アップデート / 全アプリ（OS update / all apps）: 主条件ではない。`ASM_RESTRICTIONS` は targetSdkVersion 37 以上で enabled。
+- targetSdkVersion 37 以上: 該当。
+- その他の必須条件（Other required conditions）: PendingIntent / IntentSender 経由の background activity start、ActivityOptions BAL mode、caller / real caller の visible state。
+- Compat Change ID: `230590090L`
+- Compat default state: `@EnabledAfter(targetSdkVersion = BAKLAVA)`。Android 17 / targetSdkVersion 37 以上で enabled。
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
-| Android 17 / targetSdkVersion 37 | 公式文書上は、IntentSender へ BAL protections が拡張され、legacy BAL opt-in から granular controls への移行が必要。 |
-| Android 17 / targetSdkVersion 37 + 必須条件 | `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` 依存を避け、visible state などに限定する `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` への移行が推奨される。 |
+| Android 17 / targetSdkVersion 36 | compat default では `ASM_RESTRICTIONS` disabled。 |
+| Android 17 / targetSdkVersion 37 + `ALLOW_IF_VISIBLE` | caller / real caller が visible / foreground の場合に限定して BAL を許可。 |
+| Android 17 / targetSdkVersion 37 + `ALLOW_ALWAYS` | BAL permission、SYSTEM_ALERT_WINDOW、allowlist など広い exemption を評価。特殊用途向け。 |
 
 ## 要約（Summary）
 
-Android 17 では、Activity 起動まわりの security hardening として BAL restrictions が IntentSender にも拡張される、と公式文書は説明している。
+Android 17 では、PendingIntent / IntentSender 経由の Background Activity Launch がより厳格になり、legacy `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` から `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` または `MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` への移行が必要になる。
+
+AOSP では `BackgroundActivityStartController.ASM_RESTRICTIONS = 230590090L` が `@EnabledAfter(BAKLAVA)` として定義され、targetSdkVersion 37 以上で Activity Security rules が enabled になることを確認した。
 
 ## 顧客影響（Customer Impact）
 
-- 要確認
-
-## 影響対象（Who Is Affected）
-
-- 対象アプリ: background から Activity を起動するアプリ、IntentSender / PendingIntent 経由で画面起動を委譲するアプリ。
-- 対象機能: 通知、アラーム、認証、決済、デバイス連携、外部アプリ連携などの画面起動。
-- 対象条件: targetSdkVersion 37 以上、BAL opt-in、legacy `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` 利用、calling app visibility に依存する起動。
+- 通知、アラーム、認証、決済、デバイス連携、外部アプリ連携などで background から画面を起動する設計に影響する。
+- 通常用途では `ALLOW_IF_VISIBLE` を使い、visible でない状態からの起動は通知など user-mediated path に寄せる必要がある。
+- 常時起動が必要な特殊用途だけ `ALLOW_ALWAYS` を検討する。
 
 ## 対応要否（Required Action）
 
-- 必須対応: `MODE_BACKGROUND_ACTIVITY_START_ALLOWED`、IntentSender / PendingIntent 経由の Activity 起動箇所を棚卸しする。
-- 推奨対応: `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` などの granular controls へ移行し、strict mode / lint checks で legacy pattern を検出する。
-- 不要: background activity launch や IntentSender 経由の画面起動を行わないアプリでは直接影響は限定的。
-
-## テストマトリクス（Test Matrix）
-
-| 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
-| --- | --- | --- |
-| Android 16 | 36 | Android 16 baseline。具体挙動は Android 17 tag 比較待ち。 |
-| Android 17 | 36 | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
-| Android 17 | 37 | IntentSender へ BAL protections が拡張され、legacy broad opt-in から granular controls への移行が必要と公式文書は説明。 |
-
-## 顧客向け説明（Explanation for Customers）
-
-Android 17 では、background から Activity を起動する経路の安全性が強化され、IntentSender 経由の起動も BAL restrictions の対象として扱われる方向です。従来の `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` のような広い許可ではなく、呼び出し元が visible な場合だけ許可する `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` など、より限定的な opt-in へ移行する必要があります。
-
-現時点では local AOSP checkout に Android 17 tag がないため、targetSdkVersion gate、実装上の適用範囲、compat flag の有無は未確認です。Android 17 tag 公開後に AOSP evidence で再確認が必要です。
+- 必須対応候補: `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` と PendingIntent / IntentSender 経由の Activity 起動箇所を棚卸しする。
+- 推奨対応: `ALLOW_IF_VISIBLE` へ移行し、background 状態では通知や foreground service 経由にする。
+- テスト: targetSdkVersion 36 / 37、caller visible / background、`ALLOW_IF_VISIBLE` / `ALLOW_ALWAYS` を分けて検証する。
 
 ## 根拠（Evidence）
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-17
-- 検証対象の原文: Android 17 は secure-by-default architecture へ移行し、BAL restrictions を IntentSender に拡張する。開発者は legacy `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` から `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` などの granular controls へ移行する必要がある。
-- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
-- 差分解釈: 未分類。added behavior / changed condition / changed default の判定は Android 17 tag 待ち。
-- Gate conclusion: 未確認。公式ページ種別は targetSdkVersion 37 以上を示すが、AOSP gate evidence は未取得。
+- AOSP: `core/java/android/app/ActivityOptions.java` の `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` は deprecated。
+- AOSP: `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` は visible window がある場合だけ BAL privileges を付与。
+- AOSP: `MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` は広い BAL privileges を付与する特殊用途向け mode。
+- AOSP: `services/core/java/com/android/server/wm/BackgroundActivityStartController.java` の `ASM_RESTRICTIONS = 230590090L`
+- AOSP: `ASM_RESTRICTIONS` は `@EnabledAfter(targetSdkVersion = BAKLAVA)` かつ `@Overridable`。
+- AOSP: `ALLOW_IF_VISIBLE` の場合、caller / real caller visible / foreground 系 check に限定される。
 
 ## 人間の判断欄（Human Decision）
 
@@ -82,4 +67,4 @@ Android 17 では、background から Activity を起動する経路の安全性
 - 人間による判断が必要
 
 判断（Decision）:
-- 追加調査が必要
+- 未判断

@@ -8,7 +8,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -18,28 +18,32 @@ Android 17 Behavior Change
 
 ## 適用条件（Applicability）
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。Android 17 以上で動作する全アプリに target API level に関係なく適用と明記されている。
-- targetSdkVersion 37 以上: 公式文書上は不要。target API level に関係なく適用と説明されている。AOSP gate 未確認。
+- 主分類（Primary classification）: OS_UPDATE_ALL_APPS
+- OS アップデート / 全アプリ（OS update / all apps）: 該当。Android 17 以上で動作する全アプリに target API level に関係なく適用と明記されている。
+- targetSdkVersion 37 以上: 不要。target API level に関係なく適用。
 - その他の必須条件（Other required conditions）: 複数 profile があり、loopback traffic が profile boundary を跨ぐこと。same-profile loopback は対象外。
-- Compat Change ID: 未確認
+- Compat Change ID: 確認できず
 - Compat default state: 未確認
+- Confidence: Medium
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | cross-profile loopback traffic は default block の可能性。same-profile loopback は影響なし。AOSP gate 未確認。 |
-| Android 17 / targetSdkVersion 37 | targetSdkVersion 36 と同様。target API level に関係なく適用と公式文書は説明。 |
+| Android 17 / targetSdkVersion 36 | cross-profile loopback traffic は default block。same-profile loopback は影響なし。 |
+| Android 17 / targetSdkVersion 37 | targetSdkVersion 36 と同様。target API level に関係なく適用。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | work profile / personal profile など profile boundary を跨ぐ localhost / loopback communication が失敗する可能性。 |
 
 ## 要約（Summary）
 
 Android 17 では、cross-profile loopback traffic が default で許可されなくなる。same-profile loopback traffic は影響を受けないため、localhost 全般の禁止ではなく、profile boundary を跨ぐ loopback communication の制限として扱う。
 
+AOSP framework では `USE_LOOPBACK_INTERFACE` / `FORCE_USE_LOOPBACK_INTERFACE` permission と関連 feature flags、BPF permission allowlist への追加を確認した。packet-level enforcement は Connectivity / netd / BPF 側の追加確認が必要。
+
 ## 顧客影響（Customer Impact）
 
-- 要確認
+- work profile / personal profile 間で localhost service に接続する設計が失敗する可能性がある。
+- enterprise companion、DPC support、profile 間 helper、testing / diagnostic bridge などで影響が出る可能性がある。
 
 ## 影響対象（Who Is Affected）
 
@@ -58,7 +62,7 @@ Android 17 では、cross-profile loopback traffic が default で許可され�
 | 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
 | --- | --- | --- |
 | Android 16 | 36 | baseline。same-profile / cross-profile loopback の現行挙動を確認。 |
-| Android 17 | 36 | cross-profile loopback は default block、same-profile loopback は unaffected と公式文書は説明。 |
+| Android 17 | 36 | cross-profile loopback は default block、same-profile loopback は unaffected。 |
 | Android 17 | 37 | targetSdkVersion 36 と同じ期待。target API level に関係なく適用。 |
 
 ## 顧客向け説明（Explanation for Customers）
@@ -71,10 +75,10 @@ Android 17 では、work profile と personal profile など、profile boundary 
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
 - 検証対象の原文: Android 17 から cross-profile loopback traffic は default で許可されない。same-profile loopback traffic は影響なし。Android 17 以上の全アプリに target API level に関係なく適用。
-- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
-- 差分解釈: 未分類。公式文書上は changed default / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: 未確認。公式文書上は Android 17 all apps + cross-profile loopback condition。targetSdkVersion gate / compat framework evidence は未取得。
+- AOSP ファイル: `core/res/AndroidManifest.xml`, `core/api/current.txt`, `core/api/system-current.txt`, `core/java/android/permission/flags.aconfig`, `services/permission/java/com/android/server/permission/access/permission/PermissionService.kt`
+- AOSP ソース文脈: loopback interface traffic を permission で guard する `USE_LOOPBACK_INTERFACE` / `FORCE_USE_LOOPBACK_INTERFACE` と BPF permission allowlist。
+- 差分解釈: added permission / changed condition / guarded enforcement surface。
+- Gate conclusion: targetSdkVersion gate は確認されない。packet-level enforcement は Connectivity / netd / BPF 側の追加確認が必要。
 
 ## 人間の判断欄（Human Decision）
 
@@ -82,4 +86,4 @@ Android 17 では、work profile と personal profile など、profile boundary 
 - 人間による判断が必要
 
 判断（Decision）:
-- Android 17 AOSP tag 公開後に追加調査が必要
+- 未判断

@@ -8,7 +8,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -18,63 +18,48 @@ Android 17 Behavior Change
 
 ## 適用条件（Applicability）
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: 未確認。この section は targetSdkVersion 37 以上向けページにあるが、AOSP gate 未確認。WebOTP / SMS Retriever format messages の all-apps protection は別項目。
-- targetSdkVersion 37 以上: 公式文書上は該当。AOSP gate 未確認。
-- その他の必須条件（Other required conditions）: OTP を含む standard SMS、WebOTP / SMS Retriever format ではないこと、exempted app ではないこと、受信後 3 時間以内。
-- Compat Change ID: 未確認
-- Compat default state: 未確認
+- 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
+- OS アップデート / 全アプリ（OS update / all apps）: standard SMS OTP については主条件ではない。WebOTP / SMS Retriever OTP の all-apps protection は別項目。
+- targetSdkVersion 37 以上: 該当。`SmsManager.FILTER_GENERIC_OTP` は `@EnabledSince(CINNAMON_BUN)`。
+- その他の必須条件（Other required conditions）: generic OTP SMS、WebOTP / SMS Retriever subtype ではないこと、受信後 3 時間以内、trusted / exempted app ではないこと。
+- Compat Change ID: `437043173L`
+- Compat default state: `@EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)`
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。all-apps SMS OTP protection は別途確認が必要。 |
-| Android 17 / targetSdkVersion 37 | 公式文書上は、most apps で standard SMS OTP が受信後 3 時間まで利用不可。 |
-| Android 17 / targetSdkVersion 37 + 必須条件 | `SMS_RECEIVED_ACTION` broadcast は withheld、SMS provider database query は filtered。3 時間後に利用可能。 |
+| Android 17 / targetSdkVersion 36 | generic OTP SMS の receive/read は引き続き許可される想定。 |
+| Android 17 / targetSdkVersion 37 | untrusted app では standard SMS OTP が受信後 3 時間まで利用不可。 |
+| Android 17 / targetSdkVersion 37 + exempted app | system app、trusted role、carrier privileged、companion association、`READ_OTP_SMS` app op などは許可対象。 |
 
 ## 要約（Summary）
 
-Android 17 では、targetSdkVersion 37 以上の多くのアプリで、OTP を含む標準 SMS が受信後 3 時間まで broadcast / provider query から利用できなくなる、と公式文書は説明している。
+Android 17 では、targetSdkVersion 37 以上の多くのアプリで、WebOTP / SMS Retriever format ではない generic OTP SMS が受信後 3 時間まで broadcast / provider query から利用できなくなる。
+
+AOSP では `SmsManager.FILTER_GENERIC_OTP = 437043173L` が `@EnabledSince(CINNAMON_BUN)` として定義され、targetSdkVersion 37 以上で generic OTP protection が strict enforce されることを直接示している。
 
 ## 顧客影響（Customer Impact）
 
-- 要確認
-
-## 影響対象（Who Is Affected）
-
-- 対象アプリ: SMS inbox、SMS provider、`SMS_RECEIVED_ACTION` broadcast から OTP を直接抽出しているアプリ。
-- 対象機能: ログイン、サインアップ、本人確認、決済、アカウント復旧などの OTP 自動入力。
-- 対象条件: targetSdkVersion 37 以上、OTP を含む standard SMS、WebOTP / SMS Retriever format ではない SMS、exempted app ではないこと。
+- SMS inbox、SMS provider、`SMS_RECEIVED_ACTION` broadcast から OTP を直接抽出するログイン / サインアップ / 本人確認フローに影響する。
+- 3 時間後に読めても OTP は通常期限切れのため、認証用途では実質利用できない可能性が高い。
+- SMS Retriever API または SMS User Consent API への移行が推奨される。
 
 ## 対応要否（Required Action）
 
-- 必須対応: SMS を直接読んで OTP を抽出している箇所を棚卸しし、SMS Retriever API または SMS User Consent API への移行計画を作る。
-- 推奨対応: targetSdkVersion 36 / 37、standard SMS / SMS Retriever / WebOTP format、受信直後 / 3 時間後を分けて Android 17 で検証する。
-- 不要: OTP SMS を読まないアプリでは直接影響は限定的。
-
-## テストマトリクス（Test Matrix）
-
-| 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
-| --- | --- | --- |
-| Android 16 | 36 | Android 16 baseline。具体挙動は Android 17 tag 比較待ち。 |
-| Android 17 | 36 | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
-| Android 17 | 37 | standard SMS OTP は受信後 3 時間まで利用不可、broadcast withheld、provider query filtered と公式文書は説明。 |
-
-## 顧客向け説明（Explanation for Customers）
-
-Android 17 では、targetSdkVersion 37 以上の多くのアプリに対し、OTP を含む標準 SMS を直接読む経路が制限されます。受信後 3 時間は `SMS_RECEIVED_ACTION` broadcast が配信されず、SMS provider query でも対象 SMS が filtered されるため、SMS 本文を直接読んで OTP を自動入力する実装は認証フローに影響する可能性があります。
-
-継続して OTP 自動入力を行う場合は、SMS Retriever API または SMS User Consent API への移行を検討してください。現時点では local AOSP checkout に Android 17 tag がないため、targetSdkVersion gate、exemption 条件、compat flag の有無は未確認です。
+- 必須対応候補: OTP SMS 文面と読み取り経路を棚卸しする。
+- 推奨対応: SMS Retriever API / SMS User Consent API への移行、または trusted role / exemption に依存しない認証 UX を設計する。
+- テスト: targetSdkVersion 36 / 37、generic OTP / SMS Retriever / WebOTP、trusted / untrusted app を分けて検証する。
 
 ## 根拠（Evidence）
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-17
-- 検証対象の原文: Android 17 から standard SMS messages に SMS OTP protection を拡張し、Android 17 / API level 37 以上をターゲットにする多くのアプリでは受信後 3 時間まで対象 SMS が利用不可。遅延中は `SMS_RECEIVED_ACTION` broadcast が withheld され、SMS provider database queries が filtered される。
-- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
-- 差分解釈: 未分類。added behavior / changed condition / changed default の判定は Android 17 tag 待ち。
-- Gate conclusion: 未確認。公式文書は targetSdkVersion 37 以上と standard SMS OTP / exemption 条件を示すが、AOSP gate evidence は未取得。
+- AOSP: `telephony/java/android/telephony/SmsManager.java` の `FILTER_GENERIC_OTP = 437043173L`
+- AOSP: `FILTER_GENERIC_OTP` は `@EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)`
+- AOSP: `core/java/android/provider/Telephony.java` の `CONTAINS_OTP` / `OTP_SUBTYPE_SMS_RETRIEVER_OTP` / `OTP_SUBTYPE_WEB_OTP`
+- AOSP: subtype field が unset の OTP は generic OTP と扱われる。
+- AOSP: `core/java/android/app/AppOpsManager.java` の `OP_READ_OTP_SMS`
+- AOSP: `SmsManager.isAppTrustedForSmsOtp` が system app、role holder、carrier privileged app、companion association、`READ_OTP_SMS` app op allowed package を trusted とする。
 
 ## 人間の判断欄（Human Decision）
 
@@ -82,4 +67,4 @@ Android 17 では、targetSdkVersion 37 以上の多くのアプリに対し、O
 - 人間による判断が必要
 
 判断（Decision）:
-- 追加調査が必要
+- 未判断

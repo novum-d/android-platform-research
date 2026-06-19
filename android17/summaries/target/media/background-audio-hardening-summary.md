@@ -12,7 +12,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP タグ
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -22,63 +22,67 @@ Android 17 Behavior Change
 
 ## 適用条件
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
+- 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
 - OS アップデート / 全アプリ: 共通制限は [all/media/background-audio-hardening-summary.md](../../all/media/background-audio-hardening-summary.md) 側で扱う。
-- targetSdkVersion 37 以上: 公式文書上は、より厳格な制限が該当。AOSP gate は未確認。
-- その他の必須条件: background audio interaction、foreground service running、WIU capabilities、exact alarm permission、`USAGE_ALARM` audio stream。
-- Compat Change ID: 未確認
-- Compat default state: 未確認
+- targetSdkVersion 37 以上: Android 17 の `HardeningEnforcer` は `targetSdk < Build.VERSION_CODES.CINNAMON_BUN` を緩和条件にしており、37 以上では strict level に進みうる。
+- その他の必須条件: background audio interaction、AppOps denial、FGS / foreground audio control capability 不足、exact alarm + `USAGE_ALARM` exception を満たさないこと。
+- Compat Change ID: 確認できず
+- Compat default state: audio flags / AppOps / AudioPolicy hardening override に依存
+- 信頼度: Medium
 
 ## 早見マトリクス
 
 | シナリオ | 影響 |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | 未確認。一部 all apps 制限があると公式文書は述べるが、詳細未確認。 |
-| Android 17 / targetSdkVersion 37 | background audio interaction には running foreground service が必要と公式文書は説明。 |
-| Android 17 / targetSdkVersion 37 + 必須条件 | FGS が WIU capabilities を持つ、または exact alarm permission + `USAGE_ALARM` 条件を満たす必要がある。 |
+| Android 17 / targetSdkVersion 36 | all-apps 共通制限の対象。pre-CINNAMON_BUN として partial level まで緩和される。 |
+| Android 17 / targetSdkVersion 37 | strict level の追加制限に進みうる。 |
+| Android 17 / targetSdkVersion 37 + exact alarm + `USAGE_ALARM` | focus path では partial level に緩和される。 |
 
 ## 要約
 
-Android 17 では、background からの audio playback、audio focus request、volume change APIs が hardening され、targetSdkVersion 37 以上では foreground service と追加条件が必要になる、と公式文書は説明している。
+Android 17 では、targetSdkVersion 37 以上のアプリに対して background audio hardening がより厳しくなる。AOSP では `HardeningEnforcer` の CINNAMON_BUN target check、AppOps、alarm exception、foreground audio control capability が確認できる。
 
 ## 顧客影響
 
-- 要確認
+- targetSdkVersion 37 化後、background の audio focus request が失敗しやすくなる。
+- background の volume / ringer mode 変更が no-op になる可能性がある。
+- FGS があっても foreground audio control capability を満たせない場合、playback / focus / volume が制限される可能性がある。
 
 ## 影響対象
 
 - 対象アプリ: background で audio playback、audio focus request、volume change APIs を使うアプリ。
-- 対象機能: 音楽、ポッドキャスト、アラーム、通話、ナビゲーション、録音、音声通知。
-- 対象条件: targetSdkVersion 37 以上、background state、FGS なし、WIU capability なし、exact alarm + `USAGE_ALARM` 条件を満たさない audio interaction。
+- 対象機能: 音楽、ポッドキャスト、アラーム、通話、ナビゲーション、音声通知。
+- 対象条件: targetSdkVersion 37 以上、background state、FGS / foreground audio control capability 不足、alarm exception 不成立。
 
 ## 対応要否
 
-- 必須対応: background audio API 呼び出し箇所を棚卸しし、foreground service / WIU / alarm 条件を満たすか確認する。
-- 推奨対応: background audio 操作を user-initiated flow へ寄せ、alarm use case は exact alarm permission と `USAGE_ALARM` を明確にする。
-- 不要: background audio interaction を行わないアプリでは直接影響は限定的。
+- 必須対応: targetSdkVersion 37 へ上げる前に background audio API 呼び出し箇所を棚卸しする。
+- 推奨対応: Media3 `MediaSessionService` または user-initiated な `mediaPlayback` FGS flow を使う。
+- alarm 対応: exact alarm permission と `AudioAttributes.USAGE_ALARM` を明確にする。
 
 ## テストマトリクス
 
 | 端末 OS | targetSdkVersion | 期待挙動 |
 | --- | --- | --- |
-| Android 16 | 36 | Android 16 baseline。具体挙動は Android 17 タグ比較待ち。 |
-| Android 17 | 36 | 未確認。一部 all apps 制限があると公式文書は述べるが、範囲未確認。 |
-| Android 17 | 37 | background audio interaction には running FGS と WIU または exact alarm + `USAGE_ALARM` 条件が必要と公式文書は説明。 |
+| Android 16 | 36 | baseline。 |
+| Android 17 | 36 | partial level の共通制限を確認。 |
+| Android 17 | 37 | strict level の追加制限、focus failure、volume no-op、playback mute を確認。 |
 
 ## 顧客向け説明
 
-Android 17 では、background からの audio playback、audio focus request、volume change APIs に対する制限が強化されます。targetSdkVersion 37 以上のアプリが background で audio と interaction するには、foreground service が running であるだけでなく、WIU capabilities を持つか、exact alarm permission を持ち `USAGE_ALARM` audio stream を扱う必要があります。
-
-現時点ではローカル AOSP checkout に Android 17 タグがないため、all apps 制限の範囲、targetSdkVersion gate、API ごとの failure mode、compat flag の有無は未確認です。Android 17 タグ公開後に AOSP evidence で再確認が必要です。
+Android 17 で targetSdkVersion 37 以上にすると、background audio interaction の条件がより厳しくなります。background で音声再生や audio focus request、volume change を行う場合は、適切な foreground service / foreground audio control capability を満たす設計にしてください。alarm use case は exact alarm permission と `USAGE_ALARM` の組み合わせを確認してください。
 
 ## 根拠
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-17
-- 検証対象の原文: Android 17 では audio framework が background audio interactions を制限する。一部制限は all apps、targetSdkVersion 37 以上ではより厳格で、running FGS と WIU capability または exact alarm + `USAGE_ALARM` 条件が必要。
-- AOSP ファイル: 未確認。ローカル `frameworks-base` に `android-17*` タグがない。
-- AOSP ソース文脈: 未確認。タグ間 diff が実行できない。
-- 差分解釈: 未分類。公式文書上は added behavior / changed condition と読めるが、AOSP diff による確認は Android 17 タグ待ち。
-- 適用ゲートの結論: 未確認。公式文書は all apps 制限と targetSdkVersion 37+ 条件を示すが、AOSP gate evidence は未取得。
+- AOSP ファイル:
+  - `services/core/java/com/android/server/audio/HardeningEnforcer.java`
+  - `services/core/java/com/android/server/audio/AudioService.java`
+  - `services/core/java/com/android/server/am/psc/OomAdjusterImpl.java`
+  - `services/core/java/com/android/server/am/psc/CapabilityController.java`
+  - `core/java/android/app/ActivityManager.java`
+- 差分解釈: `targetSdk < Build.VERSION_CODES.CINNAMON_BUN` の緩和分岐があり、targetSdkVersion 37 以上では strict level へ進みうる。
+- 適用ゲートの結論: Android 17 + targetSdkVersion 37 以上 + background audio runtime condition。
 
 ## 人間の判断欄
 
@@ -86,4 +90,4 @@ Android 17 では、background からの audio playback、audio focus request、
 - 人間による判断が必要
 
 判断（Decision）:
-- 追加調査が必要
+- 未判断

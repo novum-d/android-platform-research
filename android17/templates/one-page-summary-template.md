@@ -8,7 +8,7 @@ From:
 - android-16.0.0_r4
 
 To:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 ## 適用条件（Applicability）
 

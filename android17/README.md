@@ -6,14 +6,14 @@
 
 現在の状況:
 - Android 17 Beta の公式ドキュメントは公開済み。
-- ローカルの `frameworks-base` には、現時点で `android-17*` タグが存在しない。
-- AOSP 根拠は、対象となる Android 17 タグが利用可能になってから、明示的なタグ比較で確認する。
+- ローカルの `frameworks-base` には `android-17.0.0_r1` タグが存在する。
+- AOSP 根拠は、`android-16.0.0_r4` と `android-17.0.0_r1` の明示的なタグ比較で確認する。
 
 比較元:
 - android-16.0.0_r4
 
 比較先:
-- 未定: Android 17 AOSP タグ
+- android-17.0.0_r1
 
 主な targetSdkVersion:
 - targetSdkVersion 37

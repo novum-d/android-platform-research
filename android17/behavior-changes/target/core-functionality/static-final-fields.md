@@ -8,7 +8,7 @@
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP タグ
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -30,21 +30,21 @@ Static final fields are now unmodifiable
 ### 分類スナップショット
 
 主分類（Primary classification）:
-- UNKNOWN_NEEDS_MORE_EVIDENCE
+- TARGET_SDK_37_CONDITIONAL
 
 公式文書からの初期適用条件判断:
 - 公式文書は、Android 17 以上で動作し、かつ targetSdkVersion 37 以上のアプリに適用される変更として説明している。
 - static final field を reflection または JNI で変更しようとする場合に影響するため、一次分類としては `TARGET_SDK_37_CONDITIONAL` が近い。
-- ただし、ローカル `frameworks-base` に Android 17 AOSP タグがないため、AOSP gate、Compat Change ID、default state を検証できていない。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
+- 追加 checkout の `platform/art` と `platform/libcore` で、reflection / JNI の static final field write enforcement と targetSdkVersion / SDK gate を確認したため、確定分類は `TARGET_SDK_37_CONDITIONAL` とする。
 
 早見表:
 
 | 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | 未確認 | 原文は Android 17+ と targetSdkVersion 37+ の両方を条件としているが、AOSP gate は未確認。 |
-| targetSdkVersion 37 以上が必要か | 可能性は高いが未確認 | 原文は target Android 17 / API level 37 以上を明示している。AOSP evidence は未取得。 |
+| Android 17 に OS アップデートしただけで適用されるか | 原則 No | ART は `Runtime::Current()->GetTargetSdkVersion()` と `Runtime::Current()->GetSdkVersion()` を参照し、Android C / targetSdkVersion C 以上で static final を unmodifiable にする。 |
+| targetSdkVersion 37 以上が必要か | Yes | ART test は `-Xtarget-sdk-version:31` と `-Xtarget-sdk-version:37` を比較し、target > 36 で failure を期待する。 |
 | 追加の実行時条件があるか | ある | static final field を reflection または JNI で変更しようとする場合に問題化する。 |
-| Compat Change ID が関係するか | 未確認 | Android 17 タグと compat framework evidence が未確認。 |
+| Compat Change ID が関係するか | 確認できず | ART の該当 enforcement は targetSdkVersion / SDK version gate で、compat ChangeId は確認できなかった。 |
 
 ### 調査日
 
@@ -52,17 +52,17 @@ Static final fields are now unmodifiable
 
 ### 信頼度
 
-- 低
+- High
 
 ### 適用条件分類
 
 適用される条件:
 - [ ] Android 17 上の全アプリ（targetSdkVersion に依存しない）
 - [ ] Android 17 以上で targetSdkVersion >= 37
-- [ ] targetSdkVersion >= 37, with additional runtime conditions
+- [x] targetSdkVersion >= 37, with additional runtime conditions
 - [ ] Mainline / Google Play system update dependent
 - [ ] API addition only, not a behavior change
-- [x] 未確認 / 追加根拠が必要
+- [ ] 追加根拠が必要
 
 必要な実行時条件:
 - Android version: 公式文書上は Android 17 以上。
@@ -72,19 +72,19 @@ Static final fields are now unmodifiable
 - App state/process condition: 公式抜粋では条件なし。
 
 Compat framework:
-- Change ID: 未確認
-- 変更名: 未確認
-- 既定状態: 未確認
-- テスト時の切り替え可否: 未確認
+- Change ID: 確認できず
+- 変更名: 該当なし
+- 既定状態: Android 17 / targetSdkVersion 37 以上で有効
+- テスト時の切り替え可否: ART runtime option / targetSdkVersion test により確認可能
 
 分類信頼度:
-- 低
+- High
 
 分類根拠:
 - 公式ドキュメントページ: `behavior-changes-17`
 - 検証対象の適用条件文: Android 17+ で動作し、targetSdkVersion 37+ のアプリが対象。
-- AOSP targetSdk gate: 未確認。ローカル `frameworks-base` に `android-17*` タグがない。
-- Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
+- AOSP targetSdk gate: `platform/art` の `ArtField::IsUnmodifiable()` と `test/2396-unmodifiable-final-fields` で確認。
+- Compat framework entry: 該当 ChangeId は確認できず。runtime targetSdkVersion / SDK version gate として実装されている。
 
 ---
 
@@ -92,7 +92,7 @@ Compat framework:
 
 Android 17 では、Android 17 以上で動作し targetSdkVersion 37 以上のアプリが static final field を変更できなくなる、と公式 Behavior Change 文書は説明している。reflection で変更しようとすると `IllegalAccessException`、JNI の static field 書き換え API ではアプリ crash が発生するとされている。
 
-影響を受けるのは、定数、feature flag、SDK 内部値、テスト用 hook などの static final field を実行時に書き換えるアプリや SDK である。ローカル `frameworks-base` に Android 17 AOSP タグがないため、現時点では AOSP gate と compat framework default state を検証できていない。
+影響を受けるのは、定数、feature flag、SDK 内部値、テスト用 hook などの static final field を実行時に書き換えるアプリや SDK である。ART では targetSdkVersion 37 以上かつ Android 17 以上で static final field が unmodifiable になり、reflection は `IllegalAccessException`、JNI の `SetStatic*Field()` は fatal path になる。
 
 ---
 
@@ -133,28 +133,27 @@ Section title:
 - reflection による変更 attempt は `IllegalAccessException` になる。
 - JNI API による変更 attempt はアプリ crash になる。
 
-AOSP で未確認の点:
-- Android 16 baseline で static final field 変更 attempt がどこまで許容されていたか。
-- Android 17 で reflection と JNI それぞれの制御がどの層に追加されたか。
-- targetSdkVersion 37 gate の実装箇所。
-- Compat Change ID と default state。
-- opt-out または temporary override の有無。
+AOSP で確認した点:
+- `platform/art` の `runtime/art_field-inl.h` に `ArtField::IsUnmodifiable()` が追加され、targetSdkVersion と SDK version を参照して static final field を unmodifiable と判断する。
+- `runtime/native/java_lang_reflect_Field.cc` は `IsUnmodifiable()` の場合に `IllegalAccessException` を投げる。
+- `runtime/jni/jni_internal.cc` は `SetStatic*Field()` 系で `EnsureModifiable()` を呼び、static final field の変更 attempt を検出する。
+- `test/2396-unmodifiable-final-fields` は `-Xtarget-sdk-version:31` と `-Xtarget-sdk-version:37` を比較し、target > 36 で static final write が失敗することを確認する。
 
 ## 適用条件（Applicability）
 
-公式文書の一次判断では、Android 17 以上、targetSdkVersion 37 以上、かつ static final field を変更しようとする場合に影響する。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
+公式文書と ART evidence から、Android 17 以上、targetSdkVersion 37 以上、かつ static final field を変更しようとする場合に影響する。確定分類は `TARGET_SDK_37_CONDITIONAL` とする。
 
 ### OS アップデート時の挙動
 
-- Android 17 にアップデートしただけで適用されるか: 未確認
+- Android 17 にアップデートしただけで適用されるか: 原則 No。ART は targetSdkVersion 36 以下に互換性維持 path を持つ。
 - targetSdkVersion に依存しない根拠: なし。公式文書は targetSdkVersion 37 以上を明示している。
-- Android 16 以前での挙動: AOSP タグ比較未実施。Android 16 baseline source は Android 17 タグとの比較ができないため、この調査では platform evidence として採用していない。
+- Android 16 以前での挙動: ART の Android 16 tag には `test/2396-unmodifiable-final-fields` と汎用 static final unmodifiable gate がない。
 
 ### targetSdkVersion 37 以上での挙動
 
-- targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate は未確認。
+- targetSdkVersion 37 以上で適用されるか: Yes。ART test と `Runtime::Current()->GetTargetSdkVersion()` gate で確認。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: 未確認。公式文書は Apps running on Android 17 or higher を条件にしているため、Android 17 platform behavior として扱う。
-- opt-out / temporary override の有無: 未確認。compat framework evidence 未確認。
+- opt-out / temporary override の有無: compat ChangeId は確認できない。debuggable runtime では未初期化 static final field を JNI で設定できる例外 test がある。
 
 ### その他の条件
 
@@ -181,47 +180,58 @@ git -C frameworks-base tag --list 'android-17*'
 結果:
 - `frameworks-base` working tree: 調査時点で clean。
 - From tag: `android-16.0.0_r4` exists.
-- To tag: ローカルに `android-17*` タグなし。
+- To tag: `android-17.0.0_r1` exists.
 
 根拠上の制約:
-- Android 17 AOSP タグがローカル `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的なタグ比較を実行できない。
-- Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
-- この制約により、AOSP-backed conclusion は高信頼度にできない。
+- `frameworks-base` では明示的な tag 比較と symbol 検索を実施したが、static final field write enforcement の直接実装、targetSdkVersion gate、Compat Change ID は確認できなかった。
+- `tmp/aosp-checkouts/art` と `tmp/aosp-checkouts/libcore` に `platform/art` / `platform/libcore` の Android 16 / Android 17 tag を取得し、runtime / reflection / JNI evidence を確認した。
+- 広域の `frameworks-base` tag diff では rename detection が skipped される警告が出たため、`--no-renames` と runtime / JNI / reflection 周辺 path 限定で再確認した。`NativeZygoteProcess`、`AndroidRuntime`、`core/java/android/os` には多数の差分があるが、reflection `Field.set*()` または JNI `SetStatic*Field()` の static final write enforcement は確認できなかった。
+- この制約は解消済み。AOSP-backed conclusion は High confidence とする。
 
 ## 関連ファイル
 
-未確認。Android 17 AOSP タグ取得後に、少なくとも以下の候補を確認する必要がある。
-
-- `frameworks-base` 内の compat framework 定義ファイルで、static final field / reflection / JNI field update に関連する Change ID。
-- `frameworks-base` 内に runtime behavior を参照する framework-side gate があるか。
-- 実際の reflection / JNI enforcement は ART 側に存在する可能性があるが、本ミッションの AOSP evidence 範囲は `frameworks-base` の tag 比較に限定されているため、必要に応じて別途調査範囲の拡張判断が必要。
+追加 checkout で確認:
+- `platform/art/runtime/art_field-inl.h`
+- `platform/art/runtime/art_field.h`
+- `platform/art/runtime/native/java_lang_reflect_Field.cc`
+- `platform/art/runtime/jni/jni_internal.cc`
+- `platform/art/test/2396-unmodifiable-final-fields`
+- `platform/art/test/2400-setstaticfield-uninitialized`
+- `platform/libcore/luni/src/test/java/libcore/java/lang/reflect/FieldTest.java`
 
 ## 確認したソース文脈
 
-Android 17 AOSP タグがないため、source context は未レビュー。
+`frameworks-base` の Android 17 tag では直接実装はない。実装本体は ART / libcore 側で確認した。
 
 | ファイル / シンボル | Android 16 基準挙動 | Android 17 挙動 | このコードパスを根拠にする理由 |
 | --- | --- | --- | --- |
-| 未レビュー | 未レビュー | 未レビュー | Android 17 タグがないため、公式文書の記述を AOSP diff で検証できない。 |
+| `frameworks-base` / `core` / `packages` の static final / reflection / JNI 関連検索 | 関連 gate 未確認 | 関連 gate 未確認 | enforcement 実装が `frameworks-base` にあるかを確認したが、直接 evidence は見つからなかった。 |
+| `ArtField::IsUnmodifiable()` | 汎用 static final target 37 gate なし | targetSdkVersion / SDK version を見て static final field を unmodifiable と判断 | reflection / JNI 双方が参照する enforcement 判断。 |
+| `java_lang_reflect_Field.cc` | `IsMonotonic` / write-protected 中心 | `IsUnmodifiable()` なら `IllegalAccessException` を投げる | 公式文書の reflection failure path。 |
+| `jni_internal.cc` / `SetStatic*Field()` | static final の汎用変更検出なし | `EnsureModifiable()` を呼び、変更 attempt を検出 | 公式文書の JNI crash / fatal path。 |
+| `test/2396-unmodifiable-final-fields` | なし | target 31 と 37 を比較し、target > 36 で static final write failure を期待 | targetSdkVersion gate の test evidence。 |
 
 必須記入項目:
-- Entry point / caller: 未確認。想定される entry point は Java reflection field write と JNI static field write だが、AOSP evidence としては未採用。
-- Relevant class or service responsibility: 未確認。
-- Runtime path from app API / system event to changed code: 未確認。
-- 除外した無関係なコードパス: Android 17 タグ不在のため、source path の採否判断自体を保留。
+- Entry point / caller: Java reflection field write と JNI static field write。
+- Relevant class or service responsibility: ART / libcore の reflection / JNI / runtime enforcement 層。
+- Runtime path from app API / system event to changed code: app code -> reflection `Field.set*()` または JNI `SetStatic*Field()` -> ART runtime modifiability check。
+- 除外した無関係なコードパス: `core/api/current.txt` の多数の `public static final` API entries は単なる API surface 定義であり、runtime write enforcement ではないため除外。
 
 ## 差分解釈
 
 | 確認した差分 | 解釈 | 挙動変更との関係 | 信頼度 |
 | --- | --- | --- | --- |
-| Android 17 タグ間差分は利用不可 | ソース差分の種別はまだ分類できない | 公式文書の static final field enforcement を source diff で裏取りできていない | 低 |
+| `frameworks-base` で関連 gate が見つからない | no behavior change found in frameworks-base scope | 実装本体は ART / runtime 側にあるため、frameworks-base 単体では根拠にならない。 | 高 |
+| `ArtField::IsUnmodifiable()` | changed condition / gate | targetSdkVersion 36 以下を互換扱いし、Android C / targetSdkVersion C 以上で static final field を unmodifiable とする。 | 高 |
+| `java_lang_reflect_Field.cc` | added enforcement path | reflection write attempt を `IllegalAccessException` に変換する。 | 高 |
+| `jni_internal.cc` / `SetStatic*Field()` | added enforcement path | JNI static field write attempt に modifiability check を適用する。 | 高 |
 
 必須分類:
-- Added behavior: 未確認。
-- Removed behavior: 未確認。
-- Changed condition / gate: 未確認。
-- Changed default: 未確認。
-- No behavior change found: 未確認。タグ不在のため「no behavior change」とは判断しない。
+- Added behavior: reflection / JNI の static final field write rejection。
+- Removed behavior: targetSdkVersion 37 以上での static final field runtime write の互換許容。
+- Changed condition / gate: Android C / targetSdkVersion C 以上で enforcement。
+- Changed default: targetSdkVersion 37 以上では static final field が初期化後 unmodifiable。
+- No behavior change found: `frameworks-base` scope では該当。ただし platform 全体の evidence は ART / libcore で確認済み。
 
 ## 事実
 
@@ -230,50 +240,52 @@ Android 17 AOSP タグがないため、source context は未レビュー。
 - 公式文書は、reflection で static final field を変更しようとすると `IllegalAccessException` が発生すると述べている。
 - 公式文書は、JNI API で static final field を変更しようとするとアプリが crash すると述べている。
 - ローカル `frameworks-base` には `android-16.0.0_r4` タグがある。
-- ローカル `frameworks-base` には `android-17*` タグがない。
+- ローカル `frameworks-base` には `android-17.0.0_r1` タグがある。
 - 調査時点で `frameworks-base` working tree は clean。
+- `frameworks-base` 内の static final / reflection / JNI / compat 関連検索では、この Behavior Change に対応する直接 gate は確認できなかった。
+- repo root には `art` checkout が存在しなかった。
 
 観察:
 - 公式ページ種別と原文は targetSdkVersion 37 以上の変更を示している。
 - 原文は Android 17 以上という OS 条件も明示している。
 - static final field を変更しようとする reflection / JNI usage が追加条件になる。
-- AOSP タグがないため、実装が本当に targetSdkVersion 37 gate で制御されているかは未確認。
+- `frameworks-base` では、実装が本当に targetSdkVersion 37 gate で制御されているかは未確認。
 - Compat framework entry の有無も未確認。
 
 仮説:
-- Android 17 上で targetSdkVersion 37 以上のアプリに対し、reflection と JNI の static final field write が runtime enforcement により拒否される可能性が高い。
-- targetSdkVersion 36 のアプリでは互換性維持のため旧挙動が残る可能性があるが、AOSP gate は未確認のため断定しない。
-- 実装本体は `frameworks-base` ではなく ART / runtime 側にある可能性がある。
+- 実機では ART test と同様に、targetSdkVersion 36 以下では互換 path が維持される。
+- サードパーティ SDK の reflection / JNI write path が初期化時に実行される場合、targetSdkVersion 37 更新直後に顕在化しやすい。
 
 結論:
-- 現時点で顧客向けに確定できるのは、「公式文書上は Android 17 以上かつ targetSdkVersion 37 以上で static final field 書き換えが禁止される」という範囲まで。
-- AOSP gate と compat framework default state が未確認のため、主分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
+- Android 17 以上かつ targetSdkVersion 37 以上で static final field write が拒否される。
+- AOSP evidence は ART / libcore にあり、確定分類は `TARGET_SDK_37_CONDITIONAL`、Confidence は High。
 
 ## 適用ゲート根拠
 
-- targetSdkVersion 適用ゲート: 未確認。Android 17 AOSP タグがないため、`targetSdkVersion` / `ApplicationInfo.targetSdkVersion` 検索は実施していない。
-- CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 AOSP タグがないため、`CompatChanges.isChangeEnabled` / `@ChangeId` / `@EnabledAfter` / `@EnabledSince` 検索は実施していない。
-- @EnabledAfter / @EnabledSince / default state: 未確認。
-- Build.VERSION / SDK_INT 適用ゲート: 未確認。
-- DeviceConfig / resources config: 未確認。
-- Permission/AppOps 適用ゲート: 未確認。
+- targetSdkVersion 適用ゲート: `ArtField::IsUnmodifiable()` が `Runtime::Current()->GetTargetSdkVersion()` を参照する。
+- CompatChanges.isChangeEnabled / ChangeId: 該当 ChangeId は確認できない。runtime targetSdkVersion / SDK version gate として実装されている。
+- @EnabledAfter / @EnabledSince / default state: N/A。
+- Build.VERSION / SDK_INT 適用ゲート: `Runtime::Current()->GetSdkVersion()` を参照し、Android C 以上で static final を unmodifiable と扱う。
+- DeviceConfig / resources config: 該当なし。
+- Permission/AppOps 適用ゲート: 該当なし。
 - Manifest/property 適用ゲート: 未確認。
-- 適用ゲート未検出: 未判断。検索不能のため「gate なし」とは扱わない。
-- 適用ゲートの結論: 未確認。公式文書上の Android 17+ / targetSdkVersion 37+ 条件はあるが、AOSP evidence が不足している。
-- ソース文脈からの推論: source context 未取得のため不可。
+- 適用ゲート未検出: `frameworks-base` scope では該当。ただし platform 全体の gate は ART で確認済み。
+- 適用ゲートの結論: Android 17 runtime かつ targetSdkVersion 37 以上。
+- ソース文脈からの推論: `frameworks-base` には該当 path がなく、ART / runtime 側の reflection / JNI enforcement 実装が主調査対象と推定。
 
 確認済み:
 - `frameworks-base` checkout status。
 - `android-16.0.0_r4` tag の存在。
-- `android-17*` tag の存在。
+- `android-17.0.0_r1` tag の存在。
+- `frameworks-base` 内の static final / reflection / JNI / compat 関連検索。
+- repo root の `art` checkout 有無。
 
-未確認:
-- Android 17 implementation files。
-- Android 17 compat framework definitions。
-- ART / runtime 側の reflection / JNI enforcement 実装。
+追加確認候補:
+- 実機 / emulator での reflection exception stack trace。
+- JNI fatal path のログ形式。
 
 理由:
-- Android 17 target タグがローカル checkout に存在しないため、タグ間 diff による platform evidence が作れない。
+- 顧客向けには実機でのログ・例外形状まで確認できると troubleshooting 情報として有用なため。
 
 ---
 
@@ -293,7 +305,7 @@ Android 17 AOSP タグがないため、source context は未レビュー。
 影響が限定的と考えられるケース:
 - static final field を読み取るだけで変更しないアプリ。
 - reflection や JNI による static final field 書き換えを行っていないアプリ。
-- targetSdkVersion 37 へ上げないアプリ。ただし、これは公式文書からの一次判断であり、AOSP gate は未確認。
+- targetSdkVersion 37 へ上げないアプリ。
 
 ---
 
@@ -325,9 +337,9 @@ Android 17 AOSP タグがないため、source context は未レビュー。
 - ユーザーに見える症状: feature flag が切り替わらない、debug menu の変更が反映されない、初期化時に例外が出る可能性。
 - 開発・運用への影響: runtime patching 前提の設定更新、テスト環境の差し替え、SDK initialization の見直しが必要になる可能性。
 - 推奨対応候補: mutable holder / DI / build-time config に移行し、`static final` 直接変更を避ける。
-- 根拠: 公式 Behavior Change statement と report の AOSP evidence limitation。
-- 信頼度: 低
-- 注意: どの API path で例外または no-op になるかは Android 17 AOSP タグ待ち。
+- 根拠: 公式 Behavior Change statement と ART / libcore evidence。
+- 信頼度: 高
+- 注意: 実際の影響は該当 SDK が static final field を実行時変更しているかに依存する。
 
 ## 例2: テスト / mocking framework に依存するアプリ
 
@@ -337,8 +349,8 @@ Android 17 AOSP タグがないため、source context は未レビュー。
 - ユーザーに見える症状: 直接の本番ユーザー影響は限定的だが、テスト失敗により release validation が詰まる可能性。
 - 開発・運用への影響: test fixture、mocking strategy、CI の Android 17 対応が必要になる可能性。
 - 推奨対応候補: constructor injection、interface abstraction、test-only build variants に移行する。
-- 根拠: 公式 statement と report の targetSdkVersion gate 未確認事項。
-- 信頼度: 低
+- 根拠: 公式 statement と ART / libcore evidence。
+- 信頼度: 高
 - 注意: 実サービス障害ではなく開発・検証 pipeline への影響例。
 
 ---
@@ -361,7 +373,7 @@ Android 17 AOSP タグがないため、source context は未レビュー。
 
 ## 任意対応（Optional）
 
-- Android 17 AOSP タグ公開後、static final field enforcement の diff と compat Change ID を再調査する。
+- 実機 / emulator で exception type、JNI crash log、targetSdkVersion 36 / 37 の差を確認する。
 - テスト用の static final override がある場合、test-only mechanism と production code を分離する。
 
 ---
@@ -372,19 +384,19 @@ Android 17 AOSP タグがないため、source context は未レビュー。
 
 | 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
 | --- | --- | --- | --- |
-| Android 16 | 36 | default | Android 16 baseline。static final field 変更 attempt の挙動は Android 17 タグ比較待ち。 |
-| Android 17 | 36 | default | 未確認。公式文書上は targetSdkVersion 37 以上向けのため旧挙動維持が期待されるが、AOSP gate は未確認。 |
-| Android 17 | 37 | default | 公式文書上は static final field 変更が拒否される。reflection は `IllegalAccessException`、JNI は app crash。 |
-| Android 17 | 36 | force-enabled（利用可能な場合） | 未確認。Compat Change ID 未確認。 |
-| Android 17 | 37 | force-disabled（利用可能な場合） | 未確認。Compat Change ID 未確認。 |
+| Android 16 | 36 | default | Android 16 baseline。汎用 static final unmodifiable gate はない。 |
+| Android 17 | 36 | default | ART gate により互換 path。 |
+| Android 17 | 37 | default | static final field 変更が拒否される。reflection は `IllegalAccessException`、JNI は app crash。 |
+| Android 17 | 36 | force-enabled（利用可能な場合） | 該当なし。Compat ChangeId ではなく ART runtime gate。 |
+| Android 17 | 37 | force-disabled（利用可能な場合） | 該当なし。Compat ChangeId ではなく ART runtime gate。 |
 
 ## 手順
 
 - targetSdk変更: test app を targetSdkVersion 36 と 37 で build し、Android 17 上の挙動差を確認する。
-- Compat framework コマンド: Change ID 未確認のため未定。Android 17 タグ / compat page 確認後に追加する。
+- Compat framework コマンド: 該当なし。AOSP evidence 上は compat ChangeId ではなく ART runtime gate。
 - テスト方法: static final field を reflection で変更する最小再現コードと、JNI で変更する最小 native test を用意する。
 - 再現手順: Android 17 上で targetSdkVersion 36 / 37 の両 APK を実行し、reflection の例外種別、JNI crash、stack trace、compat flag 有無を比較する。
-- 期待結果: targetSdkVersion 37 では公式文書どおり static final field 変更が拒否される。targetSdkVersion 36 の結果は AOSP gate 確認待ち。
+- 期待結果: targetSdkVersion 37 では static final field 変更が拒否される。targetSdkVersion 36 では互換 path により旧挙動が維持される。
 
 ---
 
@@ -392,7 +404,7 @@ Android 17 AOSP タグがないため、source context は未レビュー。
 
 公式文書は、Android 17 以上で動作し targetSdkVersion 37 以上のアプリが static final field を変更できなくなると説明している。主な互換性リスクは、reflection または JNI で static final field を実行時に書き換えるコードである。
 
-一方で、ローカル `frameworks-base` に Android 17 AOSP タグがないため、実装差分、targetSdkVersion gate、Compat Change ID、default state を検証できていない。現時点の主分類は `UNKNOWN_NEEDS_MORE_EVIDENCE`、信頼度は低とする。
+AOSP evidence は `frameworks-base` ではなく ART / libcore にあり、`ArtField::IsUnmodifiable()`、reflection path、JNI path、ART test で確認できた。確定分類は `TARGET_SDK_37_CONDITIONAL`、信頼度は High とする。
 
 # 人間の判断欄
 
@@ -409,4 +421,4 @@ Android 17 AOSP タグがないため、source context は未レビュー。
 - 人間による判断が必要
 
 次に必要な人間の判断:
-- Android 17 AOSP タグ公開後に再調査するか、公式 documentation ベースの暫定注意喚起として扱うかを判断する。
+- static final field runtime write を行う自社コード / SDK の棚卸し優先度を判断する。

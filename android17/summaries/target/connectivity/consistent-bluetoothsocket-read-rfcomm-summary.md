@@ -8,7 +8,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP タグ
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -18,28 +18,30 @@ Android 17 Behavior Change
 
 ## 適用条件
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ: 未確認。原文は targetSdkVersion 37 を明示しているが、AOSP gate は未確認。
-- targetSdkVersion 37 以上: 公式文書上は該当。AOSP gate は未確認。
+- 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
+- OS アップデート / 全アプリ: 非該当。AOSP gate は targetSdkVersion 37 以上で有効。
+- targetSdkVersion 37 以上: 該当。`BluetoothSocket.read()` の EOF 戻り値が `-1` になる。
 - その他の必須条件: RFCOMM-based `BluetoothSocket`、`InputStream.read()`、socket closed / connection dropped、read loop 実装。
-- Compat Change ID: 未確認
-- Compat default state: 未確認
+- Compat Change ID: `383671392` (`MAKE_SOCKET_READ_BEHAVIOR_CONSISTENT`)
+- Compat default state: `@EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)`
+- Confidence: High
 
 ## 早見マトリクス
 
 | シナリオ | 影響 |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | 未確認。この section は targetSdkVersion 37 向けだが、AOSP gate は未確認。 |
-| Android 17 / targetSdkVersion 37 | 公式文書上、RFCOMM `BluetoothSocket` の `read()` が close / disconnect 時に `-1` を返す。 |
+| Android 17 / targetSdkVersion 36 | 旧挙動。RFCOMM `read()` の EOF で `IOException` path が維持される。 |
+| Android 17 / targetSdkVersion 37 | RFCOMM `BluetoothSocket` の `read()` が close / disconnect 時に `-1` を返す。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | `IOException` だけに依存する read loop は終了しない可能性があり、`-1` check が必要。 |
 
 ## 要約
 
-Android 17 / targetSdkVersion 37 では、RFCOMM-based `BluetoothSocket` の `InputStream.read()` が socket close / connection dropped 時に `-1` を返す、と公式文書は説明している。
+Android 17 / targetSdkVersion 37 では、RFCOMM-based `BluetoothSocket` の `InputStream.read()` が socket close / connection dropped 時に `-1` を返す。Bluetooth module の `BluetoothSocket.java` で ChangeId `383671392`、targetSdkVersion 37 gate、RFCOMM EOF handling を確認した。
 
 ## 顧客影響
 
-- 要確認
+- `IOException` だけに依存する RFCOMM read loop は、切断時に終了しない可能性がある。
+- printer、scanner、IoT、serial data transfer など Bluetooth Classic / RFCOMM 連携で read loop の終了条件確認が必要。
 
 ## 影響対象
 
@@ -57,24 +59,25 @@ Android 17 / targetSdkVersion 37 では、RFCOMM-based `BluetoothSocket` の `In
 
 | 端末 OS | targetSdkVersion | 期待挙動 |
 | --- | --- | --- |
-| Android 16 | 36 | Android 16 baseline。具体挙動は Android 17 タグ比較待ち。 |
-| Android 17 | 36 | 未確認。この section は targetSdkVersion 37 向けだが、AOSP gate は未確認。 |
-| Android 17 | 37 | RFCOMM `read()` は socket closed / connection dropped 時に `-1` を返すと公式文書は説明。 |
+| Android 16 | 36 | Android 16 baseline。具体挙動は Bluetooth module 比較待ち。 |
+| Android 17 | 36 | 旧挙動。EOF で `IOException` path。 |
+| Android 17 | 37 | RFCOMM `read()` は socket closed / connection dropped 時に `-1` を返す。 |
 
 ## 顧客向け説明
 
 Android 17 / targetSdkVersion 37 では、RFCOMM `BluetoothSocket` の `InputStream.read()` が、socket close や remote disconnect 時に `-1` を返すようになります。これは `InputStream` の標準 EOF 挙動に合わせる変更です。
 
-`IOException` が throw されることだけを前提に read loop を抜けている実装は、切断時に loop が終了しない可能性があります。`bytesRead == -1` を明示的に確認して、EOF / disconnect として処理してください。現時点ではローカル AOSP checkout に Android 17 タグがないため、targetSdkVersion gate、実装 path、compat flag の有無は未確認です。
+`IOException` が throw されることだけを前提に read loop を抜けている実装は、切断時に loop が終了しない可能性があります。`bytesRead == -1` を明示的に確認して、EOF / disconnect として処理してください。
 
 ## 根拠
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-17
 - 検証対象の原文: targetSdkVersion 37 のアプリでは、RFCOMM-based `BluetoothSocket` から取得した `InputStream.read()` が socket closed / connection dropped 時に `-1` を返す。`IOException` だけに依存せず `-1` を確認する必要がある。
-- AOSP ファイル: 未確認。ローカル `frameworks-base` に `android-17*` タグがない。
-- AOSP ソース文脈: 未確認。タグ間 diff が実行できない。
-- 差分解釈: 未分類。公式文書上は changed condition / behavior consistency change と読めるが、AOSP diff による確認は Android 17 タグ待ち。
-- 適用ゲートの結論: 未確認。公式文書は targetSdkVersion 37 と RFCOMM condition を示すが、AOSP gate evidence は未取得。
+- AOSP ファイル: `tmp/aosp-checkouts/Bluetooth/framework/java/android/bluetooth/BluetoothSocket.java`
+- AOSP ソース文脈: app read loop -> `BluetoothSocket` input stream -> RFCOMM socket -> local close or remote disconnect handling。
+- AOSP gate: `Flags.makeSocketReadBehaviorConsistent()`、`CompatChanges.isChangeEnabled(MAKE_SOCKET_READ_BEHAVIOR_CONSISTENT)`、`SdkLevel.isAtLeastC()`。
+- 差分解釈: `ret < 0` の EOF path で、targetSdkVersion 37 以上では `-1` を返し、それ以外では従来どおり `IOException` を throw する changed condition。
+- 適用ゲートの結論: targetSdkVersion 37 条件付き。
 
 ## 人間の判断欄
 
@@ -82,4 +85,4 @@ Android 17 / targetSdkVersion 37 では、RFCOMM `BluetoothSocket` の `InputStr
 - 人間による判断が必要
 
 判断（Decision）:
-- 追加調査が必要
+- 未判断

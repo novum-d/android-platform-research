@@ -11,9 +11,9 @@ From:
 - android-16.0.0_r4
 
 To:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
-Until the Android 17 AOSP tag is available in `frameworks-base`, do not assign High confidence based on AOSP evidence.
+Android 17 AOSP evidence must use explicit tag comparisons against `android-17.0.0_r1`.
 
 ## Target SDK Focus
 

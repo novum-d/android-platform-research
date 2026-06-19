@@ -8,73 +8,39 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
-
-以前の targetSdkVersion:
-- 36
-
-対象 targetSdkVersion:
-- 37
+- android-17.0.0_r1
 
 ## 適用条件（Applicability）
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。Android 17 の all apps ページに掲載され、targetSdkVersion 条件は示されていない。
-- targetSdkVersion 37 以上: 公式文書上は不要。AOSP gate 未確認。
-- その他の必須条件（Other required conditions）: Bluetooth peripheral bond loss が発生し、system が autonomous re-pairing を試行すること。companion app が pairing / key missing broadcast を扱う場合は特に確認が必要。
-- Compat Change ID: 未確認
-- Compat default state: 未確認
-
-## 早見マトリクス（At-a-Glance Matrix）
-
-| シナリオ（Scenario） | 影響（Impact） |
-| --- | --- |
-| Android 17 / targetSdkVersion 36 | bond loss 後、system が autonomous re-pairing を試行する可能性。AOSP gate 未確認。 |
-| Android 17 / targetSdkVersion 37 | targetSdkVersion 36 と同様の可能性。公式文書に targetSdkVersion 条件なし。 |
-| Android 17 / companion app listens to pairing broadcasts | `ACTION_PAIRING_REQUEST` の context と `ACTION_KEY_MISSING` timing を確認する必要がある。 |
+- 主分類（Primary classification）: OS_UPDATE_ALL_APPS
+- OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。targetSdkVersion 条件なし。
+- targetSdkVersion 37 以上: 公式文書上は不要。
+- その他の必須条件: Bluetooth peripheral bond loss、system autonomous re-pairing attempt、Bluetooth module feature flag が有効、companion app の pairing / key missing handling。
+- Compat Change ID: 見つからない。AOSP evidence は Bluetooth module feature flag と platform flag。
+- Confidence: High
 
 ## 要約（Summary）
 
-Android 17 では、Bluetooth bond loss 後に system が autonomous re-pairing を試行できる。従来のように users が Settings で manual unpair / re-pair する必要が減る可能性がある。
+Android 17 では、Bluetooth bond loss 後に system が autonomous re-pairing を試行できる。`ACTION_PAIRING_REQUEST` の context と `ACTION_KEY_MISSING` の timing が変わるため、companion app / peripheral app は recovery flow を確認する必要がある。
 
-## 顧客影響（Customer Impact）
-
-- 要確認
-
-## 影響対象（Who Is Affected）
-
-- 対象アプリ: Bluetooth companion app、peripheral manufacturer app、wearable / audio / IoT / health device app。
-- 対象機能: pairing UX、bond loss recovery、manual unpair / re-pair guidance、`ACTION_PAIRING_REQUEST` / `ACTION_KEY_MISSING` handling。
-- 対象条件: Bluetooth bond loss が発生し、system-managed autonomous re-pairing が試行される場合。
-
-## 対応要否（Required Action）
-
-- 必須対応: bond loss recovery flow と pairing / key-missing broadcast handling を棚卸しする。
-- 推奨対応: `ACTION_PAIRING_REQUEST` の `EXTRA_PAIRING_CONTEXT` を確認し、standard pairing と autonomous re-pairing attempt を区別する。
-- 注意: `ACTION_KEY_MISSING` は autonomous re-pairing failure 時だけ broadcast されるため、successful recovery 時に届く前提の error handling は見直す。
-
-## テストマトリクス（Test Matrix）
-
-| 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
-| --- | --- | --- |
-| Android 16 | 36 | baseline。bond loss 後の manual recovery flow を確認。 |
-| Android 17 | 36 | system が autonomous re-pairing を試行する可能性。 |
-| Android 17 | 37 | targetSdkVersion 36 と同じ期待。targetSdkVersion 条件は公式文書に記載なし。 |
-
-## 顧客向け説明（Explanation for Customers）
-
-Android 17 では、Bluetooth peripheral の bond が失われた場合、system が autonomous re-pairing によって background で bond の再確立を試行できます。
-
-多くの app では code change は不要ですが、companion app や peripheral manufacturer app は、`EXTRA_PAIRING_CONTEXT`、`ACTION_KEY_MISSING` の timing、system-managed notification / dialog と app 側 recovery UI の整合を確認してください。
+Bluetooth module では `EXTRA_PAIRING_CONTEXT`、`PAIRING_CONTEXT_REPAIRING`、bond loss 検出後の autonomous repairing、失敗時の `ACTION_KEY_MISSING` broadcast path を確認した。targetSdkVersion gate は見つからないため、OS 更新で Bluetooth bond loss recovery flow に影響する all-apps change と扱う。
 
 ## 根拠（Evidence）
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
-- 検証対象の原文: Android 17 は Bluetooth bond loss を自動的に解決する autonomous re-pairing を導入する。`ACTION_PAIRING_REQUEST` に `EXTRA_PAIRING_CONTEXT` が追加され、`ACTION_KEY_MISSING` は autonomous re-pairing failure 時だけ broadcast される。
-- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。Bluetooth stack は `packages/modules/Bluetooth` など `frameworks-base` 外も確認対象になる可能性が高い。
-- 差分解釈: 未分類。公式文書上は added behavior / changed broadcast timing / API surface addition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: 未確認。公式文書上は Android 17 all apps + Bluetooth bond loss condition。targetSdkVersion gate / compat framework evidence は未取得。
+- AOSP checkout: `frameworks-base` と `tmp/aosp-checkouts/Bluetooth` の `android-16.0.0_r4` / `android-17.0.0_r1` tag を確認。
+- AOSP: `platform/packages/modules/Bluetooth` の `BluetoothDevice.java` に `EXTRA_PAIRING_CONTEXT`、`PAIRING_CONTEXT_USER_PARTICIPATION_REQUESTED`、`PAIRING_CONTEXT_USER_APPROVAL_REQUESTED`、`PAIRING_CONTEXT_REPAIRING` が追加。
+- AOSP: `BondStateMachine.java` は autonomous repairing 時に pairing context を `ACTION_PAIRING_REQUEST` / bond state change intent に含める。
+- AOSP: `RemoteDevices.java` は bond loss 検出時に autonomous repairing を開始し、repairing 失敗時に `ACTION_KEY_MISSING` を送る path を持つ。
+- AOSP: `flags/framework.aconfig` の `autonomous_repairing_initiation` flag は bond loss 検出時の autonomous re-pairing initiation を説明する。
+- AOSP: `packages/SettingsLib` に `EXTRA_PAIRING_CONTEXT` / `PAIRING_CONTEXT_REPAIRING` を Bluetooth 診断表示で扱う差分があるが、Bluetooth stack 実装ではない。
+- 残る確認事項: release build での flag default / device config override と、実機での peripheral 別 recovery 結果。
+
+## 対応候補（Action Candidates）
+
+- manual unpair / re-pair guidance を棚卸しする。
+- `EXTRA_PAIRING_CONTEXT` で standard pairing と autonomous re-pairing attempt を区別する。
+- `ACTION_KEY_MISSING` が failed autonomous re-pairing 時だけ届く前提でテストする。
 
 ## 人間の判断欄（Human Decision）
 
@@ -82,4 +48,4 @@ Android 17 では、Bluetooth peripheral の bond が失われた場合、system
 - 人間による判断が必要
 
 判断（Decision）:
-- Android 17 AOSP tag 公開後に追加調査が必要
+- 未判断

@@ -8,7 +8,7 @@
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -21,11 +21,8 @@
 文書:
 https://developer.android.com/about/versions/17/behavior-changes-17
 
-関連文書:
-- なし
-
 セクション:
-Safer Native DCL-C
+- Safer Native DCL-C
 
 ページ種別:
 - Android 17 以上をターゲットにするアプリ
@@ -33,72 +30,70 @@ Safer Native DCL-C
 ### 分類スナップショット（Classification Snapshot）
 
 主分類（Primary classification）:
-- UNKNOWN_NEEDS_MORE_EVIDENCE
+- TARGET_SDK_37_CONDITIONAL
 
 公式文書からの初期適用条件判断:
-- 公式文書は、targetSdkVersion 37 以上のアプリでは Android 14 で DEX / JAR files に導入された Safer Dynamic Code Loading (DCL) protection が native libraries にも拡張されると説明している。
-- `System.load()` で読み込まれる native files は read-only として mark されている必要があり、そうでない場合は system が `UnsatisfiedLinkError` を throw すると説明している。
-- 追加条件として、native file を `System.load()` で動的に読み込むこと、ファイルが writable ではなく read-only として扱われることが関係する。
-- ただし、local `frameworks-base` に Android 17 AOSP tag がないため、native DCL read-only check、targetSdkVersion gate、`System.load()` / runtime native loading path、error condition、Compat Change ID、default state は未検証である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
+- 公式文書は、targetSdkVersion 37 以上のアプリでは Android 14 で DEX / JAR files に導入された Safer Dynamic Code Loading protection が native libraries にも拡張されると説明している。
+- `System.load()` で読み込まれる native files は read-only として mark されている必要があり、そうでない場合は `UnsatisfiedLinkError` が throw される。
+- 追加 checkout の `platform/libcore` で、`Runtime.load0()` の writable file check、`UnsatisfiedLinkError` path、compat ChangeId `THROW_ERROR_FOR_WRITABLE_DCL = 463348571`、`@EnabledSince(CINNAMON_BUN)` を確認した。
 
 早見表（At-a-glance impact）:
 
 | 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | 未確認 | 公式文書は Android 17 / API level 37 以上をターゲットにする場合と述べるが、AOSP gate は未確認。 |
-| targetSdkVersion 37 以上が必要か | 可能性は高いが未検証 | 原文は targetSdkVersion 37 以上を明示している。 |
-| 追加の実行時条件があるか | ある | `System.load()` による native file loading と read-only file state が関係する。 |
-| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | 原則 No | compat ChangeId が `@EnabledSince(targetSdkVersion = CINNAMON_BUN)`。 |
+| targetSdkVersion 37 以上が必要か | Yes | `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL = 463348571` が `@EnabledSince(CINNAMON_BUN)`。 |
+| 追加の実行時条件があるか | ある | `System.load()` で native file を動的に読み込み、読み込み時点で file が read-only でない場合。 |
+| Compat Change ID が関係するか | Yes | `THROW_ERROR_FOR_WRITABLE_DCL = 463348571`。 |
 
 ### 調査日（Investigation Date）
 
-2026-06-10
+2026-06-19
 
 ### 信頼度（Confidence）
 
-- Low
+- High
 
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
 - [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
 - [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
-- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [x] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
 - [ ] Mainline / Google Play system update に依存
 - [ ] API 追加のみであり、挙動変更ではない
-- [x] 未確認 / 追加 evidence が必要
+- [ ] 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
-- Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
+- Android version: Android 17 以上。
 - targetSdkVersion: 公式文書上は 37 以上。
-- Device/form factor: 公式抜粋では条件なし。
-- Permission/API/component condition: `System.load()`、dynamic native library loading、native file の read-only state。
-- App state/process condition: アプリプロセスが native file を `System.load()` で読み込む時点。
+- API / component condition: `System.load()` による dynamic native library loading。
+- File condition: native file が read-only として mark されていること。
+- Error condition: read-only 条件を満たさない場合に `UnsatisfiedLinkError`。
 
 Compat framework:
-- Change ID: 未確認
-- 変更名: 未確認
-- 既定状態: 未確認
-- テスト時に切り替え可能か: 未確認
+- Change ID: `463348571`
+- 変更名: `THROW_ERROR_FOR_WRITABLE_DCL`
+- 既定状態: `@EnabledSince(targetSdkVersion = VersionCodes.CINNAMON_BUN)`
+- テスト時に切り替え可能か: compat change と runtime flags により切り替え可能
 
 分類信頼度（Classification confidence）:
-- Low
+- High
 
 分類根拠（Classification evidence）:
-- 公式ドキュメントページ: `behavior-changes-17`
-- 検証対象の適用条件文: apps targeting Android 17 / API level 37 or higher, `System.load()` で読み込まれる native files は read-only 必須、違反時は `UnsatisfiedLinkError`。
-- AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
+- 公式 Behavior Change 文書は targetSdkVersion 37 以上と `System.load()` / read-only / `UnsatisfiedLinkError` 条件を説明している。
+- `platform/libcore` Android 17 tag の `Runtime.load0()` が writable file を検出し、`VMRuntime.isReadOnlyDynamicCodeLoadThrowExceptionEnabled()`、`VMRuntime.isThrowErrorForWritableDclEnabled()`、SDK version `CINNAMON_BUN` 以上を満たす場合に `UnsatisfiedLinkError` を投げる。
+- `VMRuntime` に `THROW_ERROR_FOR_WRITABLE_DCL = 463348571` が追加され、`@EnabledSince(targetSdkVersion = VersionCodes.CINNAMON_BUN)` が付いている。
 
 ---
 
 # エグゼクティブサマリー（Executive Summary）
 
-Android 17 では、targetSdkVersion 37 以上のアプリに対し、Safer Dynamic Code Loading (DCL) protection が native libraries にも拡張される、と公式文書は説明している。`System.load()` で読み込む native file は read-only として mark されている必要があり、条件を満たさない場合は `UnsatisfiedLinkError` が発生する。
+Android 17 では、targetSdkVersion 37 以上のアプリに対し、Safer Dynamic Code Loading protection が native libraries にも拡張される、と公式文書は説明している。`System.load()` で読み込む native file は read-only として mark されている必要があり、条件を満たさない場合は `UnsatisfiedLinkError` が発生する。
 
-この変更は、アプリが実行時に `.so` などの native library をダウンロード、生成、展開、更新してから `System.load()` で読み込む設計に影響する可能性がある。公式文書は、dynamic code loading 自体が code injection / code tampering risk を高めるため、可能な限り避けることを推奨している。
+この変更は、実行時に `.so` をダウンロード、生成、展開、更新してから `System.load()` する設計に影響する可能性がある。dynamic code loading は code injection / code tampering risk を高めるため、可能な限り避けることが推奨される。
 
-ただし、現時点の local `frameworks-base` には Android 17 AOSP tag がないため、実装差分、targetSdkVersion gate、read-only 判定の正確な条件、Compat Change ID は未確認である。
+信頼度は High とする。`platform/libcore` で `System.load()` / `Runtime.load0()` の writable file check、`UnsatisfiedLinkError`、compat ChangeId、targetSdkVersion 37 gate を確認した。
 
 ---
 
@@ -112,67 +107,17 @@ Android 17 では、targetSdkVersion 37 以上のアプリに対し、Safer Dyna
 ページ URL:
 - https://developer.android.com/about/versions/17/behavior-changes-17
 
-ページ種別:
-- Android 17 をターゲットにするアプリ
-
 セクションタイトル:
 - Safer Native DCL-C
 
 検証対象の原文:
-
-> If your app targets Android 17 (API level 37) or higher, the Safer Dynamic Code Loading (DCL) protection introduced in Android 14 for DEX and JAR files now extends to native libraries.
-
-公式文書は、`System.load()` で読み込まれるすべての native files が read-only として mark されている必要があるとも説明している。そうでない場合、system は `UnsatisfiedLinkError` を throw する。また、dynamic code loading は code injection や code tampering のリスクを高めるため、可能な限り避けることを推奨している。
+- Android 17 / API level 37 以上を target する場合、Android 14 で DEX / JAR files に導入された Safer Dynamic Code Loading protection が native libraries にも拡張される。
+- `System.load()` で読み込まれるすべての native files は read-only として mark されている必要がある。
+- 条件を満たさない場合は `UnsatisfiedLinkError`。
 
 ## 解釈（Interpretation）
 
-この変更は、Android 14 で DEX / JAR files に導入された「動的に読み込むコードは writable な状態であってはならない」という保護を、Android 17 で native libraries に拡張する security behavior change である。
-
-アプリ開発者にとって重要なのは、targetSdkVersion 37 へ更新したアプリで、実行時に配置した native file を `System.load()` する場合、読み込み時点でその file が read-only として mark されていないと native library load が失敗し、`UnsatisfiedLinkError` として現れる可能性がある点である。
-
----
-
-# 変更内容（What Changed）
-
-公式文書上の変更点:
-- Android 14 で DEX / JAR files に導入された Safer Dynamic Code Loading protection が、Android 17 では native libraries にも拡張される。
-- 対象は targetSdkVersion 37 以上のアプリ。
-- `System.load()` で読み込まれる all native files は read-only として mark されている必要がある。
-- native file が read-only でない場合、system は `UnsatisfiedLinkError` を throw する。
-- 公式文書は、dynamic code loading は code injection / code tampering による compromise risk を大きくするため、可能な限り避けることを推奨している。
-
-AOSP で未確認の点:
-- Android 16 baseline で `System.load()` が writable native file を許容していたか。
-- Android 17 で native file read-only check が追加された実装箇所。
-- `System.load()` と `System.loadLibrary()` の扱いの差。
-- read-only 判定が file mode、open fd、filesystem property、mount option、SELinux label、signature / integrity check のどれに依存するか。
-- targetSdkVersion 37 gate の実装箇所。
-- Android 14 DEX / JAR DCL protection との shared implementation / compat relation。
-- Compat Change ID と default state。
-
-## 適用条件（Applicability）
-
-公式文書の一次判断では、Android 17 以上、targetSdkVersion 37 以上、native file を `System.load()` で動的に読み込むアプリに適用される。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
-
-### OS アップデート時の挙動（OS Update Behavior）
-
-- Android 17 にアップデートしただけで適用されるか: Unknown
-- targetSdkVersion に依存しない根拠: なし。原文は If your app targets Android 17 / API level 37 or higher と明示している。
-- Android 16 以前での挙動: 未確認。Android 17 tag との明示的な比較ができないため、Android 16 source だけから platform evidence として断定しない。
-
-### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
-
-- targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate 未確認。
-- Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式文書は Android 17 Behavior Changes として説明しているため、Android 17 platform behavior として扱う。
-- opt-out / temporary override の有無: Unknown。公式抜粋には opt-out は示されていない。compat framework による force enable / disable は未確認。
-
-### その他の条件（Other Conditions）
-
-- device/form factor: 公式抜粋では条件なし。
-- permission: 公式抜粋では条件なし。file access permission / app private storage permission は実装上関係する可能性があるが AOSP 未確認。
-- API usage: `System.load()`、dynamic native library loading、native file deployment / extraction / download / update。
-- manifest attribute: 公式抜粋では条件なし。
-- component boundary: app process、Java `System.load()` API、ART / runtime native loader、filesystem metadata、native linker にまたがる可能性がある。
+この変更は、動的に読み込む native code が writable な状態で改ざんされるリスクを減らす security behavior change である。targetSdkVersion 37 へ更新するアプリで dynamic native loading を行っている場合、load 前に file permission / seal / read-only state を満たす必要がある。
 
 ---
 
@@ -185,253 +130,113 @@ Commands checked before evidence use:
 ```bash
 git -C frameworks-base status --short
 git -C frameworks-base tag --list android-16.0.0_r4
-git -C frameworks-base tag --list 'android-17*'
+git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
 Result:
 - `frameworks-base` working tree: clean at the time of investigation.
 - From tag: `android-16.0.0_r4` exists.
-- To tag: no local `android-17*` tag found.
-
-根拠上の制約（Evidence limitation）:
-- Android 17 AOSP tag が local `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的な tag 比較を実行できない。
-- Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
-- この制約により、AOSP-backed conclusion は High confidence にできない。
+- To tag: `android-17.0.0_r1` exists.
 
 ## 関連ファイル（Related Files）
 
-未確認。Android 17 AOSP tag 取得後に、少なくとも以下の候補を tag 比較で確認する必要がある。
+frameworks-base で確認した候補:
+- `core/java/android/app/NativeActivity.java`
+- `core/java/android/app/ApplicationLoaders.java`
+- `core/java/android/app/LoadedApk.java`
+- `core/java/android/os/Build.java`
 
-- `core/java/java/lang/System.java` または `System.load()` の framework-visible API source
-- `core/java/dalvik/system/Runtime.java` / native loading 関連の Java boundary
-- `core/java/dalvik/system/BaseDexClassLoader.java` など Android 14 Safer DCL との関連候補
-- `core/java/android/os/Build.java` / target SDK gate 参照候補
-- compat framework 定義ファイル内の native DCL / safer DCL / dynamic code loading / targetSdkVersion 37 関連 Change ID
+追加で必要な AOSP project:
+- なし。`tmp/aosp-checkouts/libcore` に `platform/libcore` の Android 16 / Android 17 tag を取得して確認済み。
 
-Note:
-- `System.load()` の最終的な native loader、ART runtime、bionic linker、filesystem check は `frameworks-base` 以外の AOSP project にある可能性が高い。ただし、この mission は `frameworks-base` evidence を対象としているため、Android 17 tag 入手後は `frameworks-base` 内の app-facing API boundary、compat framework、targetSdkVersion gate の有無を優先して確認する。
+差分確認メモ:
+- 広域の `frameworks-base` tag diff では rename detection が skipped される警告が出るため、根拠確認では `--no-renames` と native loading 周辺 path 限定の diff を併用した。
+- `LoadedApk` には `LinkerNamespaceParams`、`NativeZygoteProcess` には native zygote 起動 / native child zygote 用の linker namespace 引数を渡す差分がある。
+- これらは package native library / native zygote の loading boundary であり、公式文書が述べる app の `System.load(path)` に対する read-only file enforcement ではないため、Safer Native DCL-C の直接 evidence には採用しない。
+- `platform/libcore` の `ojluni/src/main/java/java/lang/Runtime.java` と `libart/src/main/java/dalvik/system/VMRuntime.java` を直接 evidence として採用する。
 
 ## 確認したソース文脈（Source Context Reviewed）
 
-Android 17 AOSP tag がないため、source context は未レビュー。
-
 | File / symbol | Android 16 baseline | Android 17 behavior | 関連性 |
 | --- | --- | --- | --- |
-| 未レビュー | 未レビュー | 未レビュー | Android 17 tag がないため、公式文書の記述を AOSP diff で検証できない。 |
+| `NativeActivity.loadNativeCode` | native code load boundary は存在 | read-only enforcement evidence なし | `NativeActivity` の native load path だが、公式文書の `System.load()` enforcement とは直接一致しない。 |
+| `ApplicationLoaders` / `LoadedApk` | classloader native library path を libnativeloader に渡す | read-only enforcement evidence なし | package native library path の loader boundary。dynamic file `System.load()` の read-only check ではない。 |
+| `Build.VERSION_CODES.CINNAMON_BUN` | なし | API 37 constant あり | targetSdkVersion 37 参照先だが、DCL gate そのものではない。 |
+| `Runtime.load0(Class, String)` | writable native file は warning 中心 | non-root/system/shell UID で writable file を検出し、条件を満たすと `UnsatisfiedLinkError` | app の `System.load(path)` 実行 path。 |
+| `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL` | なし | ChangeId `463348571`、`@EnabledSince(CINNAMON_BUN)` | targetSdkVersion 37 gate。 |
 
-必要な context:
-- Entry point / caller: 未確認。想定される entry point は app code の `System.load(path)`、Java runtime boundary、native loader / linker だが、AOSP evidence としては未採用。
-- 関連 class / service の責務: 未確認。
-- app API / system event から変更箇所までの runtime path: 未確認。
-- 関係しない code path を除外した理由: Android 17 tag 不在のため、source path の採否判断自体を保留。
+Source context の補足:
+- Entry point / caller: app code の `System.load(path)`。
+- 関連 class / service の責務: `Runtime.load0()` が file state を確認し、`VMRuntime` が compat ChangeId の有効状態を返す。
+- Baseline Android behavior: Android 16 libcore では writable file に対して将来 throw する warning path が中心。
+- Target Android behavior: Android 17 libcore では writable file、compat change enabled、SDK version 37 以上の場合に `UnsatisfiedLinkError` を投げる。
+- Source diff type: changed condition / added enforcement。
+- Excluded code paths: SQLite / ContentProvider / SharedMemory など read-only 文字列を含む無関係な code path、`NativeActivity` の app bundle native library load path。
 
 ## 差分解釈（Diff Interpretation）
 
 | 観測した diff | 解釈 | Behavior Change との関連 | 信頼度 |
 | --- | --- | --- | --- |
-| Android 17 tag diff なし | Source diff type はまだ分類できない | 公式文書の native DCL extension、read-only native file requirement、`UnsatisfiedLinkError`、targetSdkVersion gate を source diff で裏取りできていない | Low |
-
-必要な解釈:
-- Added behavior: 未確認。公式文書上は native files への DCL protection extension なので added behavior の可能性がある。
-- Removed behavior: 未確認。
-- Changed condition / gate: 未確認。targetSdkVersion 37 gate がある可能性は高いが、AOSP 未確認。
-- Changed default: 未確認。
-- No behavior change found: 未確認。tag 不在のため「no behavior change」とは判断しない。
-
-## 事実（Evidence）
-
-事実:
-- 公式 Behavior Change 文書は、targetSdkVersion 37 以上のアプリで Safer Dynamic Code Loading protection が native libraries にも拡張されると述べている。
-- 公式文書は、この DCL protection が Android 14 で DEX / JAR files 向けに導入されたものだと述べている。
-- 公式文書は、`System.load()` で読み込まれる all native files は read-only として mark されている必要があると述べている。
-- 公式文書は、条件を満たさない場合 system が `UnsatisfiedLinkError` を throw すると述べている。
-- 公式文書は、dynamic code loading は code injection / code tampering による compromise risk を高めるため、可能な限り避けることを推奨している。
-- local `frameworks-base` には `android-16.0.0_r4` tag がある。
-- local `frameworks-base` には `android-17*` tag がない。
-- 調査時点で `frameworks-base` working tree は clean。
-
-観察:
-- 公式ページ種別は targetSdkVersion 37 以上向けである。
-- 原文は `If your app targets Android 17 (API level 37) or higher` と明示しており、targetSdkVersion 37 gate がある可能性が高い。
-- この項目は targetSdkVersion 37 条件に加えて、`System.load()`、native file、read-only file state という runtime / API usage condition を含む。
-- 影響は dynamic native library loading を使うアプリに集中し、通常の APK / AAB に同梱された native library を標準ロードするだけのアプリでは限定的な可能性がある。ただし AOSP 未確認。
-- AOSP tag がないため、実装が本当に targetSdkVersion 37 gate で制御されているかは未確認。
-- Compat framework entry の有無も未確認。
-
-仮説:
-- Android 17 / targetSdkVersion 37 以上では、writable な temporary file や app private storage に展開した native library をそのまま `System.load()` すると `UnsatisfiedLinkError` になる可能性が高い。
-- Android 17 / targetSdkVersion 36 のアプリでは旧挙動が維持される可能性があるが、AOSP gate 未確認のため断定しない。
-- dynamic native library を使う必要がある場合、書き込み完了後に file permission を read-only に変更してから load する必要がある可能性が高い。ただし exact requirement は AOSP / 実機検証待ち。
-
-結論:
-- 現時点で顧客向けに確定できるのは、「公式文書上は Android 17 / targetSdkVersion 37 以上のアプリで、`System.load()` する native files は read-only 必須となり、違反時は `UnsatisfiedLinkError` が発生する」という範囲まで。
-- AOSP gate、read-only 判定、native loader path、compat framework default state が未確認のため、primary classification は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
-
-## 適用ゲート根拠（Applicability Gate Evidence）
-
-- targetSdkVersion gate: 未確認。公式文書は targetSdkVersion 37 以上を示すが、AOSP gate evidence はない。
-- CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 tag がないため検索未実施。
-- @EnabledAfter / @EnabledSince / default state: 未確認。Android 17 tag がないため検索未実施。
-- Build.VERSION / SDK_INT gate: 未確認。
-- DeviceConfig / resources config: 未確認。
-- Permission/AppOps gate: 未確認。
-- Manifest/property gate: 未確認。
-- No gate found: 未確認。Android 17 tag がないため「gate がない」とは判断しない。
-- Gate conclusion: 未確認。公式文書の wording から targetSdkVersion 37 + `System.load()` + native file read-only condition と推定されるが、AOSP で検証できていない。
-- Reasoning from source context: source context 未レビューのため未確定。
+| frameworks-base に native DCL read-only gate は見つからない | no relevant behavior change found in frameworks-base | 実装本体は ART/native loader 側と判断 | Medium |
+| 公式文書は targetSdkVersion 37 条件を明示 | documentation evidence | 適用条件の一次判断 | Medium |
+| libcore `Runtime.load0()` に writable file throw path が追加 | added enforcement | `System.load(path)` で writable native file を拒否する本体 | High |
+| `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL = 463348571` | compat gate | targetSdkVersion 37 以上で default enabled | High |
 
 ---
 
-# 影響分析（Impact Analysis）
+# 事実・観察・仮説・結論
 
-## 影響を受けるアプリ（Affected Apps）
+## 事実（Facts）
 
-影響を受ける可能性があるアプリ:
-- 実行時に `.so` などの native library をダウンロード、生成、展開、更新してから `System.load()` するアプリ。
-- plugin、hotfix、feature module、ML / game engine / media engine などで native code を動的に扱うアプリ。
-- app private storage や temporary directory に native file を書き込み、その直後に writable なまま load しているアプリ。
-- targetSdkVersion 37 への更新を予定しており、native DCL の file permission をまだ検証していないアプリ。
+- `frameworks-base` の `android-16.0.0_r4` と `android-17.0.0_r1` tag は存在し、調査時点の working tree は clean。
+- 公式文書は targetSdkVersion 37 以上で native DCL read-only requirement が適用されると説明している。
+- `frameworks-base` grep では `System.load()` native file read-only enforcement、DCL-C ChangeId、`UnsatisfiedLinkError` path は見つからなかった。
+- `platform/libcore` Android 17 tag で `Runtime.load0()` の writable file check と `UnsatisfiedLinkError` path を確認した。
+- `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL = 463348571` は `@EnabledSince(CINNAMON_BUN)`。
 
-## 影響を受けないアプリ（Non-Affected Apps）
+## 観察（Observations）
 
-影響が限定的または対象外と考えられるケース:
-- dynamic native library loading を行わないアプリ。
-- APK / AAB に同梱された native libraries を通常の `System.loadLibrary()` / platform loader 経由で読み込むだけのアプリ。ただし `System.loadLibrary()` との境界は AOSP 未確認。
-- dynamic code loading を避け、配布時に native code を固定しているアプリ。
-- Android 17 AOSP tag 取得後に対象外 gate や exemption が確認されたケース。
+- この Behavior Change は `frameworks-base` ではなく libcore / ART API boundary に属する。
+- bionic linker まで追わなくても、app-facing exception と target gate は `Runtime.load0()` / `VMRuntime` で確認できる。
 
----
+## 仮説（Hypotheses）
 
-# 顧客影響（Customer Impact）
+- runtime flags と compat change が有効な Android 17 build で、non-root/system/shell UID の app が writable native file を `System.load()` すると `UnsatisfiedLinkError` になる。
 
-## 影響度
+## 結論（Conclusions）
 
-- 人間による判断が必要
-
-※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
-
-## ビジネス影響（Business Impact）
-
-- ユーザー影響: native library load が `UnsatisfiedLinkError` で失敗すると、アプリ起動、特定機能、plugin、ゲームエンジン、メディア処理などが利用不能になる可能性がある。
-- 運用影響: dynamic native library の配布、更新、展開、permission 設定、rollback 手順を確認する必要がある可能性がある。
-- 開発影響: DCL 自体の削減、`System.load()` 利用箇所の棚卸し、file permission の read-only 化、targetSdkVersion 37 環境での native load test が必要になる可能性がある。
+- `TARGET_SDK_37_CONDITIONAL` と分類する。
+- targetSdkVersion 37 以上、`System.load(path)`、writable native file、runtime enforcement flags enabled が条件。
+- Confidence は High。
 
 ---
 
-# サービス影響例（Service Impact Examples）
+# 開発者影響（Developer Impact）
 
-このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+影響を受ける可能性が高いアプリ:
+- 実行時に `.so` をダウンロード / 生成 / 展開 / 更新して `System.load()` するアプリ
+- plugin / scripting / ML delegate / game engine extension など native module を動的に差し替えるアプリ
 
-## 例1（Example 1）: Plugin / hotfix framework を使うアプリ
-
-- 対象サービス例: ゲーム、動画編集、業務アプリ、SDK plugin platform。
-- 影響を受ける実装パターン: 実行時に `.so` を download / extract し、writable なまま `System.load()` する実装。
-- 発生条件: Android 17 / targetSdkVersion 37 で native file が read-only でない場合。
-- ユーザーに見える症状: 起動失敗、plugin 機能停止、特定 feature の `UnsatisfiedLinkError` によるクラッシュの可能性。
-- 開発・運用への影響: native artifact 配布、permission hardening、rollback、crash monitoring の見直しが必要になる可能性。
-- 推奨対応候補: dynamic loading を避ける。必要な場合は書き込み完了後に read-only として mark してから load する。
-- 根拠: 公式 statement と report の expected behavior。
-- 信頼度: Low
-- 注意: exact file mode requirement は AOSP tag 待ち。
-
-## 例2（Example 2）: ML / media engine の native component 更新
-
-- 対象サービス例: on-device ML、音声処理、画像処理、ゲーム engine update。
-- 影響を受ける実装パターン: model runtime や media codec helper の native library を app private storage に更新配置する実装。
-- 発生条件: native file が writable 状態のまま `System.load()` される場合。
-- ユーザーに見える症状: ML 推論、画像処理、音声処理など特定機能だけが起動しない可能性。
-- 開発・運用への影響: download / verify / chmod / load の順序、integrity check、error recovery の見直しが必要になる可能性。
-- 推奨対応候補: native component を配布物に同梱するか、更新後に read-only 化と integrity verification を行う。
-- 根拠: 公式 statement と report の action candidates。
-- 信頼度: Low
-- 注意: `System.loadLibrary()` との境界は未確認。
+対応候補:
+- dynamic native loading を避け、APK / App Bundle 配布時点の native library に寄せる。
+- どうしても必要な場合、load 前に native file を read-only として確定し、その後に内容を書き換えない。
+- `UnsatisfiedLinkError` を認証 /起動 / feature initialization の failure として扱えるよう fallback を実装する。
 
 ---
 
-# 対応候補（Required Actions）
+# 追加調査 TODO
 
-## 必須対応（Must）
-
-- `System.load()` の利用箇所を検索し、読み込む native file の生成元、保存先、permission を棚卸しする。
-- 実行時に書き込んだ native file を load している場合、書き込み完了後に read-only として mark される設計に変更できるか確認する。
-- dynamic native code loading が本当に必要かを見直し、可能なら APK / AAB 配布時に native library を同梱する方式へ寄せる。
-- Android 17 / targetSdkVersion 37 のテスト環境が利用可能になったら、writable / read-only の native file で `System.load()` の結果を検証する。
-- Android 17 AOSP tag 入手後に、targetSdkVersion gate、read-only 判定、compat Change ID を再確認する。
-
-## 推奨対応（Recommended）
-
-- dynamic native library の download / extraction / verification / permission change / load の順序を明文化する。
-- native file の integrity check、signature verification、atomic write、permission hardening を組み合わせて code tampering risk を下げる。
-- `UnsatisfiedLinkError` 発生時の fallback、ログ、メトリクス、リカバリ手順を整備する。
-- Android 14 の DEX / JAR Safer DCL 対応状況も併せて確認し、dynamic code loading 全体の棚卸しを行う。
-
-## 任意対応（Optional）
-
-- plugin / hotfix framework を利用している場合、vendor documentation で Android 17 / targetSdkVersion 37 対応状況を確認する。
-- dynamic loading をやめられない場合、security review で code injection / code tampering threat model を更新する。
+- ART/libcore の `System.load()` / `Runtime.load0()` path を Android 16 / Android 17 tag で比較する。
+- native loader / bionic linker で read-only file state と targetSdkVersion 37 gate を確認する。
+- Compat ChangeId と default state を確認する。
+- `System.loadLibrary()` と `System.load(path)` の扱い差を確認する。
 
 ---
 
-# 検証方法（Verification Method）
-
-## 検証マトリクス（Matrix）
-
-| 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
-| --- | --- | --- | --- |
-| Android 16 | 36 | default | Android 16 baseline。native file の read-only requirement は Android 17 tag 比較待ち。 |
-| Android 17 | 36 | default | 未確認。この section は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
-| Android 17 | 37 | default | 公式文書上、`System.load()` する native files は read-only 必須。違反時は `UnsatisfiedLinkError`。 |
-| Android 17 | 36 | force-enabled if available | 未確認。Compat Change ID 未確認。 |
-| Android 17 | 37 | force-disabled if available | 未確認。Compat Change ID 未確認。 |
-
-## 手順（Steps）
-
-- targetSdk変更: targetSdkVersion 36 と 37 の test build を用意する。
-- compat framework command: 未確認。Android 17 compat framework entry / Change ID が判明後に記録する。
-- テスト方法: 同一 native library file を writable / read-only の 2 状態で用意し、`System.load()` の成功 / `UnsatisfiedLinkError` を比較する。
-- 再現手順: Android 17 device / emulator で対象アプリを install し、app private storage に native file を展開する。permission を writable のまま load するケースと read-only に変更してから load するケースを比較する。
-- 期待結果: targetSdkVersion 37 のアプリでは、read-only でない native file の `System.load()` が `UnsatisfiedLinkError` で失敗する。具体的な file mode requirement は AOSP tag と実機検証待ち。
-
----
-
-# 結論（Conclusion）
-
-公式文書上、Android 17 / targetSdkVersion 37 以上のアプリでは Safer DCL protection が native libraries に拡張され、`System.load()` で読み込む native files は read-only 必須になる。違反時は `UnsatisfiedLinkError` が発生するため、dynamic native library loading を使うアプリは targetSdkVersion 37 更新前に棚卸しと検証が必要である。
-
-ただし、Android 17 AOSP tag が local checkout にないため、実装 gate、read-only 判定、native loader path、compat framework の確認は未完了である。最終的な適用分類と顧客向け確定説明は、Android 17 AOSP tag 入手後に再調査が必要である。
-
----
-
-# 人間の判断欄
+# 人間の判断欄（Human Decision）
 
 最終優先度（Final Priority）:
 - 人間による判断が必要
 
-最終影響度:
-- 人間による判断が必要
-
-リリース判断:
-- 人間による判断が必要
-
-顧客連絡の優先度:
-- 人間による判断が必要
-
 判断（Decision）:
-- 追加調査が必要
-
-判断メモ:
-- Android 17 AOSP tag 入手後に、AOSP evidence と compat framework evidence を確認してから最終判断する。
-
----
-
-# 参照（References）
-
-## ドキュメント（Documentation）
-
-- https://developer.android.com/about/versions/17/behavior-changes-17
-
-## AOSP
-
-- local `frameworks-base` では Android 17 は利用不可。
-- 確認済みの比較元 tag: `android-16.0.0_r4`
-- 確認済みの比較先 tag: local `android-17*` tag なし。
+- 未判断

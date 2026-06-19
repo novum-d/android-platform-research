@@ -8,7 +8,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -18,28 +18,33 @@ Android 17 Behavior Change
 
 ## 適用条件（Applicability）
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。`behavior-changes-all` ページに掲載され、WebOTP format messages への追加保護は target API level に関係なく適用されると説明されている。
-- targetSdkVersion 37 以上: WebOTP protection では公式文書上は不要と読める。ただし AOSP gate 未確認。standard SMS protection は targetSdkVersion 37+ の別項目。
+- 主分類（Primary classification）: OS_UPDATE_ALL_APPS
+- OS アップデート / 全アプリ（OS update / all apps）: 該当。`behavior-changes-all` ページに掲載され、WebOTP format messages への追加保護は target API level に関係なく適用されると説明されている。
+- targetSdkVersion 37 以上: WebOTP protection では不要。standard SMS protection は targetSdkVersion 37+ の別項目。
 - その他の必須条件（Other required conditions）: SMS read permission、WebOTP format message、intended recipient ではないこと、domain verification、受信後 3 時間以内、exempted app ではないこと。
-- Compat Change ID: 未確認
-- Compat default state: 未確認
+- Compat Change ID: WebOTP all-apps 側では確認できず
+- Compat default state: compat framework では確認できず
+- Confidence: Medium
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | 公式文書上、WebOTP format message は intended recipient ではない app から 3 時間 access できない可能性がある。AOSP gate 未確認。 |
-| Android 17 / targetSdkVersion 37 | WebOTP protection に加え、standard SMS protection の別条件も発生する可能性がある。両者を分けて確認する。 |
+| Android 17 / targetSdkVersion 36 | WebOTP format message は intended recipient ではない app から 3 時間 access できない想定。 |
+| Android 17 / targetSdkVersion 37 | WebOTP protection に加え、standard SMS protection の別条件も発生する可能性がある。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | `SMS_RECEIVED_ACTION` broadcast withheld、SMS provider query filtered、3 時間後に利用可能と公式文書は説明。 |
 
 ## 要約（Summary）
 
 Android 17 では、SMS OTP protection が WebOTP format messages にも拡張される。SMS を読む permission があるアプリでも、domain verification 上の intended recipient ではない場合、受信後 3 時間は broadcast / provider query から message を利用できない。
 
+AOSP では `TextClassifier.TYPE_SMS_WEB_OTP`、`Telephony.Sms.OTP_SUBTYPE_WEB_OTP`、`DomainVerificationManager.getVerifiedOwnersForDomain()`、`SmsManager.getSmsOtpTrustedPackages()` / `isAppTrustedForSmsOtp()` など、WebOTP の識別、domain verification、trusted package 判定に必要な framework API surface が追加されている。
+
 ## 顧客影響（Customer Impact）
 
-- 要確認
+- SMS 本文や provider query から OTP を直接抽出しているログイン / 本人確認 flow が失敗する可能性がある。
+- 3 時間以内に OTP 自動入力できず、ユーザーが手入力を求められる可能性がある。
+- Android 17 / targetSdkVersion 37 では standard SMS protection も別途確認が必要。
 
 ## 影響対象（Who Is Affected）
 
@@ -57,24 +62,24 @@ Android 17 では、SMS OTP protection が WebOTP format messages にも拡張�
 
 | 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
 | --- | --- | --- |
-| Android 16 | 36 | Android 16 baseline。SMS Retriever hash delay は公式文書上存在。WebOTP baseline は AOSP tag 比較待ち。 |
-| Android 17 | 36 | WebOTP format message は intended recipient ではない app から 3 時間 access できない可能性がある。 |
+| Android 16 | 36 | Android 16 baseline。公式文書上、主保護対象は SMS Retriever format messages。 |
+| Android 17 | 36 | WebOTP format message は intended recipient ではない app から 3 時間 access できない想定。 |
 | Android 17 | 37 | WebOTP protection と standard SMS protection の両方を分けて確認する。 |
 
 ## 顧客向け説明（Explanation for Customers）
 
 Android 17 では、OTP を含む SMS の保護が WebOTP format messages にも拡張されます。SMS を読む permission があるアプリでも、domain verification でその WebOTP message の intended recipient ではないと判断される場合、受信後 3 時間は `SMS_RECEIVED_ACTION` broadcast が配信されず、SMS provider query でも対象 message が filtered されます。
 
-OTP を SMS 本文から直接抽出している実装は、ログインや本人確認の自動入力に影響する可能性があります。継続して OTP 取得を行う場合は、SMS Retriever API または SMS User Consent API への移行を検討してください。targetSdkVersion 37 以上では standard SMS messages にも別の保護が適用されるため、WebOTP と standard SMS を分けて検証する必要があります。
+OTP を SMS 本文から直接抽出している実装は、SMS Retriever API または SMS User Consent API への移行を検討してください。
 
 ## 根拠（Evidence）
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
-- 検証対象の原文: Android 17 から WebOTP format messages にも SMS OTP protection が適用され、intended recipient ではない app では受信後 3 時間まで access できない。遅延中は `SMS_RECEIVED_ACTION` broadcast が withheld され、SMS provider database queries が filtered される。
-- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
-- 差分解釈: 未分類。公式文書上は added behavior / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: 未確認。公式文書上は Android 17 all apps + WebOTP / SMS read permission / domain verification / 3 hour delay / exemption 条件。targetSdkVersion gate / compat framework evidence は未取得。
+- 検証対象の原文: Android 17 から WebOTP format messages にも SMS OTP protection が適用され、intended recipient ではない app では受信後 3 時間まで access できない。
+- AOSP ファイル: `core/java/android/view/textclassifier/TextClassifier.java`, `core/java/android/provider/Telephony.java`, `core/java/android/content/pm/verify/domain/DomainVerificationManager.java`, `telephony/java/android/telephony/SmsManager.java`, `core/res/AndroidManifest.xml`
+- AOSP ソース文脈: WebOTP subtype、trusted package extra、domain verification query、OTP trusted package 判定、provider query filtering helper を確認。
+- 差分解釈: added behavior / added API surface / changed condition の evidence。
+- Gate conclusion: WebOTP all-apps path に targetSdkVersion gate は確認できない。broadcast withholding / 3 時間 delay の exact enforcement は Telephony provider / module 側の追加確認が必要。
 
 ## 人間の判断欄（Human Decision）
 
@@ -82,4 +87,4 @@ OTP を SMS 本文から直接抽出している実装は、ログインや本�
 - 人間による判断が必要
 
 判断（Decision）:
-- Android 17 AOSP tag 公開後に追加調査が必要
+- 未判断

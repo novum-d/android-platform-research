@@ -8,7 +8,7 @@
 - android-16.0.0_r4
 
 比較先:
-- 未定: Android 17 AOSP タグ
+- android-17.0.0_r1
 
 ## 公式ドキュメント参照元
 
@@ -17,7 +17,7 @@
 - targetSdkVersion 37 以上: https://developer.android.com/about/versions/17/behavior-changes-17
 
 Compat framework:
-- 未定: Android 17 compatibility framework ページが公開された場合に参照する
+- AOSP の `@ChangeId` / `@EnabledAfter` / `@EnabledSince` / `CompatChanges.isChangeEnabled` を優先して確認する。
 
 ## 分類ラベル
 
@@ -134,7 +134,7 @@ Mainline module または Google Play system update で配信され、Android 17
 - 追加条件と例外を記載している。
 - 顧客向け表現で、OS アップデートによる影響と targetSdkVersion 変更による影響を混同していない。
 
-Android 17 AOSP タグをローカルで利用できるようになるまでは、AOSP 根拠に基づく結論に High confidence を付けない。
+Android 17 AOSP タグは `android-17.0.0_r1` を利用する。High confidence を付ける場合は、このタグと `android-16.0.0_r4` の明示的な比較に基づくこと。
 
 ## 根拠の記録順
 

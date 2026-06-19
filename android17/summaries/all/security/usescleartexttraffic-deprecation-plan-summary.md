@@ -8,7 +8,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -18,28 +18,33 @@ Android 17 Behavior Change
 
 ## 適用条件（Applicability）
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: All apps ページに掲載。ただし本文は future release の deprecation plan であり、Android 17 で即時 runtime behavior change があるとは明記していない。
-- targetSdkVersion 37 以上: 公式文書上、この項目に targetSdkVersion 37 条件はない。AOSP gate 未確認。
-- その他の必須条件（Other required conditions）: unencrypted HTTP connection が必要なアプリ、`android:usesCleartextTraffic` 利用、Network Security Configuration 移行状況、`minSdkVersion` が 24 未満か以上か。
-- Compat Change ID: 未確認
-- Compat default state: 未確認
+- 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
+- OS アップデート / 全アプリ（OS update / all apps）: 無条件の即時 runtime change ではない。公式文書は future release の deprecation plan と説明。
+- targetSdkVersion 37 以上: 意図としては該当候補。AOSP の feature flag description は targetSdk C+ で `usesCleartextTraffic` を無視すると説明する。
+- その他の必須条件（Other required conditions）: feature flag と compat change が有効、Network Security Config 未指定、`usesCleartextTraffic` に依存、cleartext HTTP が必要。
+- Compat Change ID: `415007211` (`DEPRECATE_USES_CLEARTEXT_TRAFFIC`)
+- Compat default state: source annotation は `@Disabled`。targetSdk 37 default-enabled evidence は追加確認が必要。
+- Confidence: Medium
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | 公式文書上、即時 runtime behavior change は未確認。future deprecation に備えた移行対象。 |
-| Android 17 / targetSdkVersion 37 | targetSdkVersion 36 と同様。targetSdkVersion 37 gate は公式文書上確認できない。 |
-| Android 17 / targetSdkVersion 37 + 必須条件 | HTTP cleartext が必要な場合、Network Security Configuration へ移行すべき。`minSdkVersion < 24` では `usesCleartextTraffic="true"` も併用。 |
+| Android 17 / targetSdkVersion 36 | compat change が無効なら従来通り `usesCleartextTraffic` が default cleartext policy に反映される想定。 |
+| Android 17 / targetSdkVersion 37 | flag + compat change が有効で Network Security Config がない場合、`usesCleartextTraffic` が false 扱いになる可能性。 |
+| Android 17 / targetSdkVersion 37 + Network Security Config | 必要 domain の `cleartextTrafficPermitted` を明示することで cleartext を許可する想定。 |
 
 ## 要約（Summary）
 
-Android 17 の all apps ページは、将来 release で `usesCleartextTraffic` element を deprecate する計画を示している。Android 17 で即時に HTTP cleartext 接続が壊れる変更とは公式文書上確認できず、主な対応は Network Security Configuration への移行である。
+Android 17 の文書は、将来 release で `usesCleartextTraffic` element を deprecate する計画を示している。Android 17 AOSP では `usesCleartextTraffic` attribute が `@Deprecated` / flagged API になり、Network Security Config 側に compat ChangeId `415007211` が追加された。
+
+実装上は `deprecate_uses_cleartext_traffic2` feature flag と compat change が両方有効な場合、Network Security Config 未指定アプリの manifest `usesCleartextTraffic` は false に上書きされる。`usesCleartextTraffic` だけに依存せず、Network Security Configuration へ移行する必要がある。
 
 ## 顧客影響（Customer Impact）
 
-- 要確認
+- legacy HTTP endpoint への接続が、targetSdkVersion 37 以上で失敗する可能性がある。
+- 閉域網、IoT、gateway、partner integration など HTTPS 化が完了していない通信で影響が出る可能性がある。
+- Network Security Configuration に必要 domain を明示していれば影響を避けられる想定。
 
 ## 影響対象（Who Is Affected）
 
@@ -58,23 +63,23 @@ Android 17 の all apps ページは、将来 release で `usesCleartextTraffic`
 | 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
 | --- | --- | --- |
 | Android 16 | 36 | baseline。`usesCleartextTraffic` と Network Security Configuration の現行挙動を確認。 |
-| Android 17 | 36 | 即時挙動変更がないか確認。公式文書上は future deprecation plan。 |
-| Android 17 | 37 | targetSdkVersion 37 による差分がないか確認。公式文書上は targetSdkVersion gate なし。 |
+| Android 17 | 36 | compat change が無効なら従来挙動の想定。 |
+| Android 17 | 37 | flag + compat enabled では、Network Security Config なしの `usesCleartextTraffic` が無視される可能性。 |
 
 ## 顧客向け説明（Explanation for Customers）
 
-Android 17 の文書では、将来 release で `usesCleartextTraffic` element を deprecate する計画が示されています。Android 17 で直ちに HTTP cleartext 接続が失敗する変更とは公式文書上確認できませんが、HTTP が必要なアプリは Network Security Configuration へ移行することが推奨されています。
+Android 17 の文書では、将来 release で `usesCleartextTraffic` element を deprecate する計画が示されています。AOSP 実装上も、feature flag と compat change が有効な場合に manifest の `usesCleartextTraffic` を Network Security Config の default policy へ反映しない path が追加されています。
 
-`minSdkVersion` が 24 未満の場合は、API 24 未満で Network Security Configuration が使えないため、`usesCleartextTraffic="true"` を残しつつ Network Security Configuration も追加します。`minSdkVersion` が 24 以上であれば、Network Security Configuration を使うことで `usesCleartextTraffic` への依存をなくせます。
+HTTP が必要なアプリは Network Security Configuration へ移行し、必要な domain だけ `cleartextTrafficPermitted="true"` を明示してください。
 
 ## 根拠（Evidence）
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
 - 検証対象の原文: future release で `usesCleartextTraffic` element を deprecate する計画があり、unencrypted HTTP connection が必要なアプリは Network Security Configuration file へ移行すべき。
-- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
-- 差分解釈: 未分類。公式文書上は immediate behavior change ではなく future deprecation plan / migration guidance と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: 未確認。公式文書上は targetSdkVersion 37 gate なし、`minSdkVersion` と Network Security Configuration support が migration condition。runtime gate / compat framework evidence は未取得。
+- AOSP ファイル: `core/java/android/security/flags.aconfig`, `core/res/res/values/attrs_manifest.xml`, `core/api/current.txt`, `packages/NetworkSecurityConfig/platform/src/android/security/net/config/ManifestConfigSource.java`, `packages/NetworkSecurityConfig/tests/src/android/security/net/config/UsesCleartextTrafficDeprecationTest.java`
+- AOSP ソース文脈: `ManifestConfigSource.getConfigSource()` が feature flag + compat change 有効時に `usesCleartextTraffic = false` に上書きする。
+- 差分解釈: changed condition / changed default / API deprecation。
+- Gate conclusion: `DEPRECATE_USES_CLEARTEXT_TRAFFIC = 415007211L` と `deprecate_uses_cleartext_traffic2` が gate。targetSdk 37 default-enabled evidence は追加確認が必要。
 
 ## 人間の判断欄
 
@@ -82,4 +87,4 @@ Android 17 の文書では、将来 release で `usesCleartextTraffic` element �
 - 人間による判断が必要
 
 判断（Decision）:
-- Android 17 AOSP tag 公開後に追加調査が必要
+- 未判断

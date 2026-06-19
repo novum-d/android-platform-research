@@ -8,7 +8,7 @@
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -40,21 +40,21 @@
 ### 分類スナップショット（Classification Snapshot）
 
 主分類（Primary classification）:
-- UNKNOWN_NEEDS_MORE_EVIDENCE
+- OS_UPDATE_ALL_APPS
 
 公式文書からの初期適用条件判断:
 - 公式文書は Android 17 の `Behavior changes: all apps` ページにこの項目を掲載しているため、一次判断では `OS_UPDATE_ALL_APPS` 候補である。
-- ただし、local `frameworks-base` に Android 17 AOSP tag がないため、memory limiter 実装、targetSdkVersion gate の有無、device eligibility gate、DeviceConfig / resource config、compat framework default state は未確認である。
+- AOSP では `MemoryLimiter` が `system_server` 内の Java component と JNI component として追加され、`ActivityManagerService` / `ProcessRecord` に接続されている。targetSdkVersion gate は確認されず、feature flag、system_server、vendor config、device RAM 条件、DeviceConfig runtime disable flags により有効可否が決まる。
 - 公式文書は「一部の Android devices のみで memory limits が課される」と明記しているため、OS update impact であっても device 条件付きの挙動として扱う必要がある。
 
 早見表（At-a-glance impact）:
 
 | 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | 可能性は高いが条件付き、かつ未検証 | `behavior-changes-all` ページに掲載。公式文書は all apps 対象ページであるが、AOSP gate 未確認。 |
-| targetSdkVersion 37 以上が必要か | 不要と考えられるが未検証 | all apps ページの説明から targetSdkVersion 非依存と読むのが自然。ただし AOSP targetSdkVersion gate 未確認。 |
+| Android 17 に OS アップデートしただけで適用されるか | Yes / Conditional | all apps ページに掲載。AOSP では targetSdkVersion gate は確認されず、device / vendor config 条件で有効化される。 |
+| targetSdkVersion 37 以上が必要か | No | `MemoryLimiter` / `ProcessRecord` / `ActivityManagerService` path に targetSdkVersion gate は確認されない。 |
 | 追加の実行時条件があるか | ある | 公式文書は memory limits が一部の Android devices のみに課されると説明している。 |
-| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
+| Compat Change ID が関係するか | No evidence | compat framework Change ID ではなく `Flags.memoryLimiterEnable()`、vendor config、DeviceConfig flags で制御される。 |
 
 ### 調査日（Investigation Date）
 
@@ -62,39 +62,39 @@
 
 ### 信頼度（Confidence）
 
-- Low
+- High
 
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
-- [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
+- [x] targetSdkVersion に関係なく Android 17 の全アプリへ適用
 - [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
 - [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
 - [ ] Mainline / Google Play system update に依存
 - [ ] API 追加のみであり、挙動変更ではない
-- [x] 未確認 / 追加 evidence が必要
+- [ ] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
-- Android version: Android 17 であることが前提。Android 17 AOSP tag 未取得のため実装上の OS gate は未確認。
-- targetSdkVersion: 公式文書上は targetSdkVersion に依存しない all apps change と読める。AOSP gate 未確認。
-- Device/form factor: 一部の Android devices のみ。device total RAM、device eligibility、config / DeviceConfig 条件は AOSP tag 待ち。
+- Android version: Android 17 であることが前提。
+- targetSdkVersion: 条件なし。AOSP evidence 上、targetSdkVersion gate は確認されない。
+- Device/form factor: 一部の Android devices のみ。`/vendor/etc/memory-limiter-config.xml` が存在し、現在の `memTotal` に適用可能な config があることが必要。
 - Permission/API/component condition: アプリが制限値を超える memory usage、特に extreme memory leak / outlier に該当する場合に影響が顕在化する。
-- App state/process condition: visible / non-visible process 別の limit が存在する可能性があると公式 test command の `status` 説明から読めるが、実装未確認。
+- App state/process condition: process state により visible / not-visible / cached / unrestricted の limit が割り当てられる。
 
 Compat framework:
-- Change ID: 未確認
-- 変更名: 未確認
-- 既定状態: 未確認
-- テスト時の切り替え可否: 公式文書は compat flag ではなく `am memory-limiter` command による test controls を説明している。compat framework entry は未確認。
+- Change ID: 確認されず
+- 変更名: 該当なし
+- 既定状態: compat framework ではなく `Flags.memoryLimiterEnable()`、vendor config、DeviceConfig `memory_limiter_disable_limits` / `memory_limiter_disable_kill` に依存
+- テスト時の切り替え可否: `am memory-limiter ignore` / `manual` / `status` による test controls がある。
 
 分類信頼度（Classification confidence）:
-- Low
+- High
 
 分類根拠（Classification evidence）:
 - 公式ドキュメントページ: `behavior-changes-all`
 - 検証対象の適用条件文: Android 17 all-apps page states that its changes apply to all apps running on Android 17 regardless of targetSdkVersion.
-- AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
+- AOSP targetSdk gate: なし。確認した `MemoryLimiter` / `ActivityManagerService` / `ProcessRecord` path に targetSdkVersion gate は見つからない。
+- Compat framework entry: なし。compat framework ではなく feature flag / vendor config / DeviceConfig で制御。
 
 ---
 
@@ -104,7 +104,7 @@ Android 17 では、device total RAM に基づく app memory limits が導入さ
 
 この項目は Android 17 の all apps ページに掲載されているため、targetSdkVersion 37 への更新有無に関係なく Android 17 上で影響する可能性がある。ただし、公式文書は memory limits が一部の Android devices のみに課されると説明しているため、全端末で必ず発生する変更ではない。
 
-現時点では local `frameworks-base` に Android 17 AOSP tag がないため、memory limiter の実装、device eligibility、targetSdkVersion gate の不存在、compat framework entry は未確認である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とし、Android 17 AOSP tag 公開後に再調査する。
+AOSP では `MemoryLimiter` 実装、`ActivityManagerService` への組み込み、process state に応じた limit 割り当て、`MemoryLimiter:AnonSwap` exit description、`am memory-limiter` test controls が確認できる。適用は Android 17 上の all apps change だが、`/vendor/etc/memory-limiter-config.xml` と device RAM 条件を満たす device に限定される。
 
 ---
 
@@ -135,11 +135,11 @@ Android 17 では、device total RAM に基づく app memory limits が導入さ
 検証対象のサブセクション:
 - `Test your app's behavior under the memory constraints` is a verification subsection under `App memory limits`, not a separate Behavior Change.
 - Developers can use ADB and the shell command `am` to adjust or disable memory limits on devices that impose memory limits.
-- The `am memory-limiter` subcommands are `ignore <uid>|none|all`, `manual <pid> <limit>|max|none`, and `status`.
+- AOSP の `am memory-limiter` subcommands are `ignore <UID|none|all>`, `manual <PID> <PERCENT|none>`, and `status`.
 - These commands have no effect on devices that do not impose memory limits.
 - `ignore <uid>` ignores enforcement for all processes associated with that UID; `all` ignores all apps; `none` clears previous ignore settings.
 - Even if a UID is ignored, `manual` can still apply a memory limit to a process in that app.
-- `manual <pid> <limit>` imposes a MB-based memory constraint on a process; `max` removes all memory limits for that process; `none` removes manual limits and restores the system default if any.
+- AOSP の `am memory-limiter manual <PID> <PERCENT|none>` は、PID 単位で total RAM に対する percentage based manual memory limit を課す。`none` は manual override を解除する。
 - `status` reports current memory limiter status, including limits imposed on visible and non-visible processes.
 
 ## 解釈（Interpretation）
@@ -165,16 +165,18 @@ Android 17 では、device total RAM に基づく app memory limits が導入さ
 - `am memory-limiter` command で test controls が提供される。
 - `am memory-limiter` commands は memory limits を impose する device 上でのみ効果を持つ。memory limits を impose しない device では効果がない。
 - `ignore` は UID 単位または全アプリ単位で enforcement を無視させる。
-- `manual` は PID 単位で MB 指定の memory constraint を課す。
+- `manual` は PID 単位で total RAM に対する percent 指定の memory constraint を課す。
 - `status` は visible / non-visible process に課される memory limit 状態を報告する。
 
-AOSP で未確認の点:
-- memory limiter の実装ファイル、service / daemon / LMKD との関係。
-- limit がどの process state、UID、cgroup、anon swap accounting、visible / non-visible process に適用されるか。
-- device total RAM から limit を算出する具体式。
-- 一部 devices の判定条件。
-- targetSdkVersion gate が本当に存在しないか。
-- compat framework Change ID の有無。
+AOSP で確認した点 / 未確認の点:
+- `MemoryLimiter.java` は app process memory usage を monitor / limit し、Java layer から native layer へ process 情報と limit を渡す。
+- `com_android_server_am_MemoryLimiter.cpp` は cgroup v2 の `memory.high` / `memory.swap.max` と inotify event を扱う native component。
+- `ActivityManagerService` は `MemoryLimiter.getDefaultMemoryLimiter(mContext)` を保持し、`ProcessRecord` は process ごとの `MemoryLimiter.Limiter` を持つ。
+- `ProcessRecord` は UID、PID、process state update を MemoryLimiter に渡す。
+- `MemoryLimiter.isMemoryLimiterSupported()` は `/vendor/etc/memory-limiter-config.xml` の存在と、現在の `memTotal` に適用できる config を条件にする。
+- over-limit type `LIMIT_TYPE_ANON_SWAP` では `ProfilingTrigger.TRIGGER_TYPE_ANOMALY` を通知し、30 秒後に `"MemoryLimiter:AnonSwap"` description 付きで kill を request する。
+- `am memory-limiter ignore` / `manual` / `status` が ActivityManager shell command に追加されている。
+- 未確認: vendor config の実端末別 default、native cgroup event の実機挙動、端末ごとの limit 値。
 
 ## 適用条件（Applicability）
 
@@ -182,15 +184,15 @@ AOSP で未確認の点:
 
 ### OS アップデート時の挙動（OS Update Behavior）
 
-- Android 17 にアップデートしただけで適用されるか: 公式文書上は Yes / Conditional。`behavior-changes-all` ページに掲載されているため、targetSdkVersion に依存しない all apps change と読む。
-- targetSdkVersion に依存しない根拠: 公式ページ全体が「Android 17 上で動作する全アプリに適用される」と説明している。
-- Android 16 以前での挙動: この Behavior Change としての app memory limits は公式文書上 Android 17 introduced とされる。AOSP baseline 実装差分は未確認。
+- Android 17 にアップデートしただけで適用されるか: Yes / Conditional。`behavior-changes-all` ページに掲載され、AOSP 実装に targetSdkVersion gate は確認されない。
+- targetSdkVersion に依存しない根拠: `MemoryLimiter` は `ActivityManagerService` / `ProcessRecord` の process lifecycle path に接続され、targetSdkVersion を参照しない。
+- Android 16 以前での挙動: Android 16 baseline には `MemoryLimiter.java`、MemoryLimiter JNI、`am memory-limiter` command、memory-limiter config schema が存在しない。
 
 ### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
 - targetSdkVersion 37 以上で適用されるか: 公式文書上、targetSdkVersion 37 は必要条件として示されていない。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: 未確認。公式文書は Android 17 all apps change として説明しているため、Android 17 platform / device condition が前提と考えられる。
-- opt-out / temporary override の有無: compat opt-out は未確認。公式文書は `am memory-limiter ignore <uid>|none|all` と manual limits による test controls を説明している。
+- opt-out / temporary override の有無: compat opt-out は確認されない。開発 / QA 用に `am memory-limiter ignore <UID|none|all>` と `manual <PID> <PERCENT|none>` がある。DeviceConfig `memory_limiter_disable_limits` / `memory_limiter_disable_kill` による runtime disable flags もある。
 
 ### その他の条件（Other Conditions）
 
@@ -198,7 +200,7 @@ AOSP で未確認の点:
 - permission: 公式文書からは特定 permission 条件は確認できない。
 - API usage: 診断には `ApplicationExitInfo.getDescription()`、`ApplicationExitInfo.REASON_OTHER`、trigger-based profiling / `TRIGGER_TYPE_ANOMALY` が関連する。
 - manifest attribute: 公式文書からは確認できない。
-- component boundary: process / UID 単位で制限される可能性がある。`am memory-limiter ignore <uid>` と `manual <pid>` から UID / PID 境界の test control があることは読み取れるが、実装境界は AOSP tag 待ち。
+- component boundary: process / UID 単位。`ignore` は UID または all UIDs、`manual` は PID を指定し、実装は PID から UID を引いて `MemoryLimiter.setManualLimit(pid, uid, limitPercent)` を呼ぶ。
 
 ---
 
@@ -217,57 +219,57 @@ git -C frameworks-base tag --list 'android-17*'
 結果:
 - `frameworks-base` の `status --short` は空で、dirty working tree は確認されなかった。
 - `android-16.0.0_r4` tag は存在する。
-- `android-17*` tag は local checkout に存在しない。
+- `android-17.0.0_r1` tag は local checkout に存在する。
 
 根拠上の制約:
-- Android 17 AOSP tag が local `frameworks-base` にないため、`android-16.0.0_r4` と Android 17 tag の明示的な source diff は実行できない。
-- そのため、local working tree や未確定 branch を platform evidence として扱わない。
-- 本レポートの AOSP-backed conclusion は Low confidence に留める。
+- source evidence は `android-16.0.0_r4` と `android-17.0.0_r1` の明示的な tag 比較、および `android-17.0.0_r1` 上の symbol 確認に限定した。
+- `frameworks-base` working tree は clean のため、local working tree changes を platform evidence として誤採用するリスクは確認されていない。
 
 ## 関連ファイル（Related Files）
 
-Android 17 AOSP tag 未取得のため、tag diff に基づく related files は未確定。
-
-Android 17 tag 公開後に確認すべき候補:
 - `services/core/java/com/android/server/am/` 以下の process / memory management path
-- `services/core/java/com/android/server/` 以下の memory limiter command / shell command implementation
-- `cmds/am/` または ActivityManager shell command の `memory-limiter` subcommands
-- UID / PID lookup、shell permission、caller permission、user boundary を扱う command path
-- LMKD / ProcessList / OOM adjustment / cgroup / memory pressure 関連 path
+- `services/core/java/com/android/server/am/MemoryLimiter.java`
+- `services/core/jni/com_android_server_am_MemoryLimiter.cpp`
+- `services/core/java/com/android/server/am/ActivityManagerService.java`
+- `services/core/java/com/android/server/am/ActivityManagerShellCommand.java`
+- `services/core/java/com/android/server/am/ProcessRecord.java`
+- `services/core/xsd/memory-limiter-config/memory-limiter-config.xsd`
 - `core/java/android/app/ApplicationExitInfo.java`
-- trigger-based profiling / `ProfilingManager` / anomaly trigger 関連 API surface
+- `services/core/java/com/android/server/am/MemoryLimiter.md`
 
 ## 確認したソース文脈（Source Context Reviewed）
 
-AOSP tag diff は未実行。以下は公式文書から見た確認予定の source context であり、AOSP evidence ではない。
-
 | ファイル / シンボル（File / symbol） | Android 16 の基準挙動（baseline） | Android 17 の挙動 | このコードパスを根拠にする理由 |
 | --- | --- | --- | --- |
-| ActivityManager / process memory management path | 未確認 | device total RAM に基づく app memory limits の enforcement が存在する可能性 | app process に memory limit を課す中心 path と考えられる |
-| ActivityManager shell command `am memory-limiter` | 未確認 | `ignore` / `manual` / `status` subcommands が提供されると公式文書が説明 | developer test controls の実装 root になる可能性 |
-| UID / PID command handling | 未確認 | `ignore` は UID、`manual` は PID を受け取ると公式文書が説明 | app 全体の ignore と process 単位 manual limit の境界を確認するため |
-| visible / non-visible process status reporting | 未確認 | `status` が visible / non-visible process limits を報告すると公式文書が説明 | process state ごとの limit が存在するかを確認するため |
-| `ApplicationExitInfo.getDescription()` / `REASON_OTHER` | 未確認 | memory limiter 影響時に `MemoryLimiter:AnonSwap` を含む description を返すと公式文書が説明 | app developer が影響を観測する public API |
-| trigger-based profiling / `TRIGGER_TYPE_ANOMALY` | 未確認 | memory limit hit 時に heap dump collection に使えると公式文書が説明 | memory limit hit の診断 path |
+| `MemoryLimiter.java` | file なし。 | app process memory usage を monitor / limit し、over-limit 時に statsd / profiling / delayed kill を行う。 | Behavior Change 本体の framework-side controller。 |
+| `com_android_server_am_MemoryLimiter.cpp` | file なし。 | cgroup v2 の `memory.high` / `memory.swap.max` を扱う native component。 | 実際に kernel cgroup へ limit を適用し event を監視する layer。 |
+| `ActivityManagerService` / `mMemoryLimiter` | MemoryLimiter 接続なし。 | `MemoryLimiter.getDefaultMemoryLimiter(mContext)` を保持し system ready で初期化する。 | AMS が system_server 内で limiter を所有する根拠。 |
+| `ProcessRecord.mMemoryLimiter` | process ごとの limiter なし。 | UID / PID / process state update を limiter に伝える。 | process lifecycle と limit assignment の接点。 |
+| `ActivityManagerShellCommand.runMemoryLimiter()` | command なし。 | `ignore` / `manual` / `status` subcommands を実装。 | 公式 test controls の実装根拠。 |
+| `MemoryLimiter.isMemoryLimiterSupported()` | 該当なし。 | `/vendor/etc/memory-limiter-config.xml` と current RAM に合う config が必要。 | 「一部 devices のみ」を裏付ける device eligibility gate。 |
+| `MemoryLimiter.onLimitExceeded()` | 該当なし。 | `LIMIT_TYPE_ANON_SWAP` で `TRIGGER_TYPE_ANOMALY` を通知し、`MemoryLimiter:AnonSwap` description 付き kill を遅延 request。 | 開発者が `ApplicationExitInfo` で観測する signal の根拠。 |
 
 必須記入項目:
-- Entry point / caller: 未確認。Android 17 tag 公開後に `adb shell am memory-limiter ...` -> ActivityManager shell command -> memory limiter service / controller の command path、process memory accounting / kill path、`ApplicationExitInfo` recording path を確認する。
+- Entry point / caller: app process lifecycle -> `ProcessRecord` -> `MemoryLimiter.Limiter` -> native cgroup limit; test path は `adb shell am memory-limiter ...` -> `ActivityManagerShellCommand.runMemoryLimiter()` -> `MemoryLimiter`。
 - Relevant class or service responsibility: process memory limit enforcement、exit reason / description recording、developer diagnostics。
-- Runtime path from app API / system event to changed code: アプリ process の memory usage が limit を超える -> system memory limiter が enforcement -> process exit / record -> app が後続起動時に `ApplicationExitInfo` から診断、という path が想定される。検証 path としては、`adb shell am memory-limiter status` で対象 device / current limits を確認し、`adb shell am memory-limiter manual <pid> <limit>` で process 単位の manual limit を設定する。
-- Why unrelated code paths were excluded: tag diff 未実行のため、除外判断は未完了。
+- Runtime path from app API / system event to changed code: app process が起動し `ProcessRecord` が PID / UID / proc state を limiter に渡す -> native layer が cgroup limit を設定 / 監視 -> anon+swap limit exceeded で Java callback -> anomaly profiling trigger -> delayed kill with `"MemoryLimiter:AnonSwap"` description。
+- Why unrelated code paths were excluded: existing heap dump notification strings and generic image decode memory limits are別機能であり、app process memory limiter enforcement ではないため primary evidence から除外。
 
 ## 差分解釈（Diff Interpretation）
 
 | 確認した差分（Observed diff） | 解釈（Interpretation） | Behavior Change との関係 | 信頼度（Confidence） |
 | --- | --- | --- | --- |
-| Android 17 tag 未取得のため source diff 未確認 | 公式文書上は added behavior / changed condition と読める | app memory limits の新規導入、device subset condition、diagnostic signal が説明されている | Low |
+| `MemoryLimiter.java` / JNI / config schema / shell command が追加される | added behavior | Android 17 に app process memory limiter が導入された直接根拠。 | High |
+| `MemoryLimiter.isMemoryLimiterSupported()` が vendor config と current RAM を確認する | changed condition / device gate | 「一部 devices のみ」を AOSP で裏付ける。 | High |
+| `ProcessRecord` が UID / PID / proc state を `MemoryLimiter` に通知する | added behavior / process lifecycle integration | app process に state-based memory limits を適用する runtime path。 | High |
+| `onLimitExceeded()` が `TRIGGER_TYPE_ANOMALY` と `"MemoryLimiter:AnonSwap"` delayed kill を行う | added behavior / diagnostic signal | 公式文書の `ApplicationExitInfo` / profiling 診断と一致。 | High |
 
 必須分類:
-- Added behavior: 公式文書上、Android 17 で app memory limits が導入される。
-- Removed behavior: 未確認。
-- Changed condition / gate: 公式文書上、一部 devices でのみ imposed。AOSP gate 未確認。
-- Changed default: 未確認。Android 17 の platform default として有効になる可能性があるが、device / config default は AOSP tag 待ち。
-- No behavior change found: 未確認。
+- Added behavior: Android 17 で `MemoryLimiter`、JNI component、vendor config schema、`am memory-limiter` command が追加される。
+- Removed behavior: 該当なし。
+- Changed condition / gate: `Flags.memoryLimiterEnable()`、system_server、vendor config file、current RAM matching config、DeviceConfig runtime flags が gate。
+- Changed default: MemoryLimiter 対象 device では process state に応じた limit が default path に組み込まれる。
+- No behavior change found: 該当しない。
 
 ## 事実（Evidence）
 
@@ -283,37 +285,39 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 - 公式文書は `am memory-limiter` commands が memory limits を impose しない device では効果を持たないと説明している。
 - 公式文書は `ignore <uid>` がその UID に属する全 processes の enforcement を ignore し、`all` が全アプリ、`none` が以前の ignore 設定解除を意味すると説明している。
 - 公式文書は UID を ignore していても、同じ app 内 process には `manual` memory limit を適用できると説明している。
-- 公式文書は `manual <pid> <limit>` が PID 単位で MB 指定の memory constraint を課し、`max` が全 memory limits を削除し、`none` が manual limit を解除して system default limit があれば復元すると説明している。
+- AOSP は `manual <PID> <PERCENT|none>` が PID 単位で percentage based manual memory limit を課し、`none` が manual override を解除すると説明している。
 - 公式文書は `status` が visible / non-visible processes に課される memory limits を含む current status を報告すると説明している。
+- local `frameworks-base` には `android-16.0.0_r4` tag がある。
+- local `frameworks-base` には `android-17.0.0_r1` tag がある。
+- 調査時点で `frameworks-base` working tree は clean。
+- Android 17 tag には `MemoryLimiter.java`、`com_android_server_am_MemoryLimiter.cpp`、`MemoryLimiter.md`、memory-limiter config schema、`am memory-limiter` command が存在する。
 
 観察:
-- all apps ページ掲載のため、一次分類は `OS_UPDATE_ALL_APPS` 候補である。
+- all apps ページ掲載であり、AOSP に targetSdkVersion gate が見つからないため、primary classification は `OS_UPDATE_ALL_APPS` とする。
 - device subset condition があるため、顧客向けには「Android 17 全アプリ対象候補」かつ「対象 device 条件付き」と説明する必要がある。
-- test command は compat framework ではなく ActivityManager shell command として提供される可能性がある。
-- `ignore` と `manual` の UID / PID split から、app-level ignore と process-level manual limit は別の control plane として扱われる可能性がある。
-- `status` が visible / non-visible process limits を報告することから、process state ごとの limit が存在する可能性がある。
+- test command は compat framework ではなく ActivityManager shell command として提供される。
+- `ignore` と `manual` の UID / PID split から、app-level ignore と process-level manual limit は別の control plane として扱われる。
+- `MemoryLimiter` は visible / not-visible / cached / unrestricted process state ごとの limit を持つ。
 
 仮説:
-- enforcement は targetSdkVersion 37 gate ではなく、Android 17 platform / device config / process state / memory usage により制御される可能性が高い。
-- visible / non-visible process に異なる limit がある可能性がある。
-- `MemoryLimiter:AnonSwap` は anon swap usage または memory accounting に基づく enforcement reason を示している可能性がある。
-- `am memory-limiter` subcommands は shell / ADB 経由の developer-facing test hook であり、通常の app production mitigation ではない可能性が高い。
+- `MemoryLimiter:AnonSwap` は anon+swap が memory.high + memory.swap.max を超えたことに対応する enforcement reason と解釈できる。
+- `am memory-limiter` subcommands は shell / ADB 経由の developer-facing test hook であり、通常の app production mitigation ではない。
 
 結論:
-- 現時点の確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE`。公式文書上は `OS_UPDATE_ALL_APPS` 候補だが、AOSP tag 未取得のため High confidence にできない。
+- 公式文書と AOSP evidence が一致するため、primary classification は `OS_UPDATE_ALL_APPS`、confidence は High とする。ただし実際に適用されるかは device / vendor config / RAM 条件に依存する。
 
 ## 適用ゲート根拠（Applicability Gate Evidence）
 
-- targetSdkVersion gate: 未確認。公式文書上は targetSdkVersion 条件なし。
-- CompatChanges.isChangeEnabled / ChangeId: 未確認。
-- @EnabledAfter / @EnabledSince / default state: 未確認。
-- Build.VERSION / SDK_INT gate: 未確認。公式文書上は Android 17 introduced。
-- DeviceConfig / resources config: 未確認。一部 devices のみという条件から、device config / resource config / feature flag が存在する可能性がある。
+- targetSdkVersion gate: なし。確認した path では targetSdkVersion / compat gate は使われていない。
+- CompatChanges.isChangeEnabled / ChangeId: 確認されず。
+- @EnabledAfter / @EnabledSince / default state: 該当なし。
+- Build.VERSION / SDK_INT gate: 明示的な runtime SDK_INT gate は主根拠ではない。Android 17 platform implementation として追加。
+- DeviceConfig / resources config: DeviceConfig `memory_limiter_disable_limits` / `memory_limiter_disable_kill` が runtime disable flags。vendor config `/vendor/etc/memory-limiter-config.xml` が device eligibility gate。
 - Permission/AppOps gate: 公式文書からは確認できない。
 - Manifest/property gate: 公式文書からは確認できない。
-- No gate found: 未確認。AOSP tag 未取得のため gate search 未実行。
-- Gate conclusion: 公式文書上は Android 17 all apps + device subset condition。AOSP evidence 未取得のため `UNKNOWN_NEEDS_MORE_EVIDENCE`。
-- Reasoning from source context: source context は未確認。公式文書の page type と statement のみから一次判断している。
+- No gate found: targetSdkVersion gate / compat gate は見つからない。
+- Gate conclusion: Android 17 上で MemoryLimiter が feature enabled、system_server 内で動作し、vendor config と RAM 条件を満たす device で、対象 app process が configured limit に達した場合に適用される。
+- Reasoning from source context: `ProcessRecord` が process lifecycle を limiter に渡し、native cgroup layer が memory / swap limits を監視し、anon+swap over-limit で profiling trigger と delayed kill を行う。
 
 ---
 
@@ -333,7 +337,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 - memory limits が imposed されない device subset 上で動作する場合。
 - memory baseline が安定しており、extreme leak / outlier がない場合。
 - memory limit に達していない app sessions。
-- ただし、AOSP tag 未取得のため正確な non-affected condition は未確定。
+- target device に `/vendor/etc/memory-limiter-config.xml` がない、または current RAM に一致する limit set がない場合。
 
 ---
 
@@ -367,7 +371,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 - 開発・運用への影響: memory baseline 測定、bitmap / native buffer lifecycle、autosave / restore path の確認が必要。
 - 推奨対応候補: heap dump、trigger-based profiling、large allocation path の棚卸し、`ApplicationExitInfo` collection。
 - 根拠: 公式文書は extreme memory leaks / outliers を対象とし、`MemoryLimiter:AnonSwap` で診断可能と説明している。
-- Confidence（信頼度）: Low。AOSP enforcement condition 未確認。
+- Confidence（信頼度）: High。発生有無は対象 device / memory usage に依存する。
 - 注意: 実サービスで発生確認した事実ではない。
 
 ## 例2（Example 2）: 長時間 background 同期 / cache 保持アプリ
@@ -379,7 +383,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 - 開発・運用への影響: background work の checkpoint、idempotency、memory pressure handling の確認が必要。
 - 推奨対応候補: WorkManager / foreground work の状態復旧、cache eviction、memory leak monitoring、`am memory-limiter manual` を使った再現試験。
 - 根拠: 公式文書は status command が visible / non-visible process の memory limits を報告すると説明している。
-- Confidence（信頼度）: Low。process state 別 enforcement は AOSP tag 待ち。
+- Confidence（信頼度）: High。process state 別 limit assignment は AOSP evidence で確認済み。
 - 注意: 実サービスで発生確認した事実ではない。
 
 ---
@@ -396,7 +400,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 ## 推奨対応（Recommended）
 
 - `am memory-limiter status` で対象 device の memory limiter 状態を確認する。
-- `am memory-limiter manual <pid> <limit>` を使い、memory limit 到達時の app behavior を再現する。
+- `am memory-limiter manual <pid> <percent>` を使い、memory limit 到達時の app behavior を再現する。
 - `am memory-limiter ignore <uid>|none|all` を使い、memory limiter 有無による差分を検証する。
 - trigger-based profiling with `TRIGGER_TYPE_ANOMALY` を設定し、limit hit 時の heap dump を取得する。
 - Android Developers の memory best practices に沿って memory usage を最適化する。
@@ -418,9 +422,9 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | 端末 OS（Device OS） | targetSdkVersion | Compat flag / test control | 期待挙動（Expected behavior） |
 | --- | --- | --- | --- |
 | Android 16 | 36 | default | Android 17 app memory limits は対象外。baseline memory behavior を測定する。 |
-| Android 17 | 36 | default | 公式文書上は all apps change のため、対象 device では memory limiter が適用される可能性がある。AOSP gate 未確認。 |
+| Android 17 | 36 | default | 対象 device では memory limiter が適用され得る。targetSdkVersion gate は確認されない。 |
 | Android 17 | 37 | default | targetSdkVersion 36 と同様に、対象 device では memory limiter が適用される可能性がある。 |
-| Android 17 | 36 | `am memory-limiter manual <pid> <limit>` | manual limit により memory limit hit 時の process behavior を再現する。 |
+| Android 17 | 36 | `am memory-limiter manual <pid> <percent>` | manual limit により memory limit hit 時の process behavior を再現する。 |
 | Android 17 | 37 | `am memory-limiter ignore <uid>` | memory limiter ignore により enforcement 差分を確認する。 |
 
 ## `am memory-limiter` subcommands
@@ -430,9 +434,8 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 | `am memory-limiter ignore <uid>` | UID | 指定 UID に属する全 process の enforcement を ignore する | UID を ignore していても、同じ app 内 process に `manual` limit は適用できる |
 | `am memory-limiter ignore all` | all apps | 全アプリの enforcement を ignore する | QA 中に system-wide に影響するため、検証後に戻す |
 | `am memory-limiter ignore none` | none | 以前の ignore 設定を解除する | cleanup |
-| `am memory-limiter manual <pid> <limit>` | PID / MB | 指定 process に MB 単位の memory constraint を課す | 例: `30` = 30MB |
-| `am memory-limiter manual <pid> max` | PID | 指定 process の全 memory limits を削除する | system default との差分は AOSP tag 公開後に確認する |
-| `am memory-limiter manual <pid> none` | PID | manual limit を解除し、system default limit があれば復元する | default limit の有無は対象 device 依存 |
+| `am memory-limiter manual <pid> <percent>` | PID / percent | 指定 process に total RAM 比率の manual memory limit を課す | AOSP help は `PERCENT: percentage of total RAM (1-99)` と説明する |
+| `am memory-limiter manual <pid> none` | PID | manual limit override を解除する | default limit の有無は対象 device 依存 |
 | `am memory-limiter status` | device state | memory limiter の現在状態を表示する | visible / non-visible process limits を含む |
 
 ## 手順（Steps）
@@ -441,7 +444,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 - compat framework command: 公式文書上 compat flag は未確認。代わりに `am memory-limiter` commands を使う。
 - テスト方法:
   - `am memory-limiter status`
-  - `am memory-limiter manual <pid> <limit>|max|none`
+  - `am memory-limiter manual <pid> <percent>|none`
   - `am memory-limiter ignore <uid>|none|all`
   - `ApplicationExitInfo.getDescription()` の collection
   - trigger-based profiling with `TRIGGER_TYPE_ANOMALY`
@@ -463,7 +466,7 @@ AOSP tag diff は未実行。以下は公式文書から見た確認予定の so
 
 # 結論（Conclusion）
 
-App memory limits は、Android 17 all apps ページに掲載されているため、targetSdkVersion 更新ではなく Android 17 OS update 側の影響候補である。ただし、一部 devices のみで imposed される条件付き変更であり、AOSP tag 未取得のため確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
+App memory limits は、Android 17 all apps ページに掲載され、AOSP でも targetSdkVersion gate が確認されないため、targetSdkVersion 更新ではなく Android 17 OS update 側の影響である。ただし、一部 devices のみで imposed される条件付き変更であり、vendor config と device RAM 条件に依存する。
 
 Android app developer は、Android 17 対応の一環として memory baseline、leak / outlier detection、`ApplicationExitInfo` による診断、`am memory-limiter` を使った再現検証を準備する必要がある。
 
@@ -475,10 +478,10 @@ Android app developer は、Android 17 対応の一環として memory baseline�
 - 人間による判断が必要
 
 判断（Decision）:
-- Android 17 AOSP tag 公開後に追加調査が必要
+- 人間による判断が必要
 
 判断理由候補:
-- 公式文書上は all apps change だが、device subset condition と AOSP gate 未確認が残っている。
+- 公式文書と AOSP evidence は all apps change を支持するが、顧客影響は device subset condition と memory usage pattern に依存する。
 - 顧客影響は memory usage pattern に依存するため、実サービスの memory baseline と crash / exit telemetry を見て判断する必要がある。
 
 ---
@@ -499,4 +502,10 @@ Android app developer は、Android 17 対応の一環として memory baseline�
 
 ## AOSP
 
-- 未確認。local `frameworks-base` に Android 17 AOSP tag がないため、tag diff による source evidence は未取得。
+- `services/core/java/com/android/server/am/MemoryLimiter.java`
+- `services/core/jni/com_android_server_am_MemoryLimiter.cpp`
+- `services/core/java/com/android/server/am/ActivityManagerService.java`
+- `services/core/java/com/android/server/am/ActivityManagerShellCommand.java`
+- `services/core/java/com/android/server/am/ProcessRecord.java`
+- `services/core/xsd/memory-limiter-config/memory-limiter-config.xsd`
+- `services/core/java/com/android/server/am/MemoryLimiter.md`

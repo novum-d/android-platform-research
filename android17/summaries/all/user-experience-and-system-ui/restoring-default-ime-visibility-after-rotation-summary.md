@@ -8,7 +8,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -18,28 +18,33 @@ Android 17 Behavior Change
 
 ## 適用条件（Applicability）
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。Android 17 の all apps ページに掲載され、targetSdkVersion 条件は示されていない。
-- targetSdkVersion 37 以上: 公式文書上は不要。AOSP gate 未確認。
+- 主分類（Primary classification）: OS_UPDATE_ALL_APPS
+- OS アップデート / 全アプリ（OS update / all apps）: 該当。Android 17 の all apps ページに掲載され、AOSP の確認済み path に targetSdkVersion gate は見つからない。
+- targetSdkVersion 37 以上: 不要。Android 17 / targetSdkVersion 36 と 37 で同じ扱いになる想定。
 - その他の必須条件（Other required conditions）: rotation など configuration change が発生し、app がそれを自身で処理せず、previous IME visibility の自動復元を期待していること。
-- Compat Change ID: 未確認
-- Compat default state: 未確認
+- Compat Change ID: 確認できず
+- Compat default state: compat framework では確認できず。実装は aconfig flag `disable_ime_restore_on_activity_create` を参照する。
+- Confidence: Medium
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | unhandled configuration change 後、previous IME visibility が自動復元されない可能性。AOSP gate 未確認。 |
-| Android 17 / targetSdkVersion 37 | targetSdkVersion 36 と同様の可能性。公式文書に targetSdkVersion 条件なし。 |
-| Android 17 / targetSdkVersion 37 + 必須条件 | rotation 後に keyboard が閉じたままになり、明示的な IME 表示要求が必要になる可能性。 |
+| Android 17 / targetSdkVersion 36 | 条件を満たす場合、unhandled configuration change 後に previous IME visibility は自動復元されない想定。 |
+| Android 17 / targetSdkVersion 37 | targetSdkVersion 36 と同じ想定。targetSdkVersion 37 は必要条件ではない。 |
+| Android 17 / targetSdkVersion 37 + 明示 IME 表示要求 | `stateAlwaysVisible` や programmatic show により、必要な画面で keyboard 表示を request できる。 |
 
 ## 要約（Summary）
 
 Android 17 では、rotation などの configuration change が発生し、その変更を app 自身が処理しない場合、以前表示されていた IME / soft keyboard は自動復元されない。rotation 後も keyboard を表示したい screen では、app が明示的に request する必要がある。
 
+AOSP では `WindowManagerService.shouldRestoreImeVisibility()` が `disable_ime_restore_on_activity_create` flag を参照する。flag 有効時は `ActivityRecord.mLastImeShown` ではなく、対象 window が `WindowInsets.Type.ime()` の visibility を明示 request しているかを restore 根拠にする。確認済み path に targetSdkVersion gate はない。
+
 ## 顧客影響（Customer Impact）
 
-- 要確認
+- rotation 後に keyboard が閉じたままになり、ユーザーが再度 text field を tap する必要が出る可能性がある。
+- 検索、ログイン、チャット、メモ入力、業務入力フォームなど、入力継続が重要な画面で影響が見える可能性がある。
+- UI / E2E テストが「rotation 後も keyboard が表示されている」前提の場合、Android 17 で失敗する可能性がある。
 
 ## 影響対象（Who Is Affected）
 
@@ -57,9 +62,9 @@ Android 17 では、rotation などの configuration change が発生し、そ�
 
 | 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
 | --- | --- | --- |
-| Android 16 | 36 | baseline。rotation 後の IME visibility restoration を確認。 |
-| Android 17 | 36 | previous IME visibility は自動復元されないと公式文書は説明。 |
-| Android 17 | 37 | targetSdkVersion 36 と同じ期待。targetSdkVersion 条件は公式文書に記載なし。 |
+| Android 16 | 36 | baseline。release flag/config により restore 挙動が異なる可能性があるため実機確認する。 |
+| Android 17 | 36 | previous IME visibility は自動復元されない想定。 |
+| Android 17 | 37 | targetSdkVersion 36 と同じ期待。targetSdkVersion 条件は確認されていない。 |
 
 ## 顧客向け説明（Explanation for Customers）
 
@@ -71,10 +76,10 @@ rotation 後も keyboard を表示したい場合は、`android:windowSoftInputM
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
 - 検証対象の原文: Android 17 から、app が処理しない configuration change 後に previous IME visibility は復元されない。
-- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
-- 差分解釈: 未分類。公式文書上は changed default / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: 未確認。公式文書上は Android 17 all apps + unhandled configuration change condition。targetSdkVersion gate / compat framework evidence は未取得。
+- AOSP ファイル: `core/java/android/view/inputmethod/flags.aconfig`, `services/core/java/com/android/server/inputmethod/ImeVisibilityStateComputer.java`, `services/core/java/com/android/server/wm/WindowManagerService.java`, `services/core/java/com/android/server/wm/ActivityRecord.java`
+- AOSP ソース文脈: `ImeVisibilityStateComputer.computeState()` が restore 判断を show decision へ変換し、`WindowManagerService.shouldRestoreImeVisibility()` が `disableImeRestoreOnActivityCreate()` 有効時に明示的な IME visibility request を restore 根拠にする。
+- 差分解釈: changed default / changed condition の候補。ただし同 flag と分岐は `android-16.0.0_r4` にも存在し、`frameworks-base` だけでは release flag/config の有効化差分を確認できない。
+- Gate conclusion: targetSdkVersion gate と compat ChangeId は確認できない。分類は `OS_UPDATE_ALL_APPS`、confidence は Medium。
 
 ## 人間の判断欄
 
@@ -82,4 +87,4 @@ rotation 後も keyboard を表示したい場合は、`android:windowSoftInputM
 - 人間による判断が必要
 
 判断（Decision）:
-- Android 17 AOSP tag 公開後に追加調査が必要
+- 未判断

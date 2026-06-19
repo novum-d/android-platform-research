@@ -8,7 +8,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -18,28 +18,32 @@ Android 17 Behavior Change
 
 ## 適用条件（Applicability）
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。Android 17 で per-app keystore key ownership limit を enforce すると説明されている。
-- targetSdkVersion 37 以上: non-system app では stricter 50,000 key limit と `ERROR_TOO_MANY_KEYS` numeric error code が関係する。AOSP gate 未確認。
+- 主分類（Primary classification）: OS_UPDATE_ALL_APPS
+- OS アップデート / 全アプリ（OS update / all apps）: 該当。Android 17 で per-app key ownership limit が導入され、all other apps は 200,000 key limit と説明されている。
+- targetSdkVersion 37 以上: non-system app では stricter 50,000 key limit と `ERROR_TOO_MANY_KEYS` numeric error code が関係する。
 - その他の必須条件（Other required conditions）: Android Keystore keys を作成し、app-owned key count が limit に達する / 超えること。system / non-system app 判定も関係する。
-- Compat Change ID: 未確認
+- Compat Change ID: framework API 側では確認できず
 - Compat default state: 未確認
+- Confidence: Medium
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | 公式文書上、all other apps として 200,000 key limit の対象になる可能性がある。AOSP gate 未確認。 |
-| Android 17 / targetSdkVersion 37 | non-system app では 50,000 key limit、limit 超過時は `ERROR_TOO_MANY_KEYS` と公式文書は説明。 |
+| Android 17 / targetSdkVersion 36 | all other apps として 200,000 key limit の対象。limit 超過時は `ERROR_INCORRECT_USAGE` と説明されている。 |
+| Android 17 / targetSdkVersion 37 | non-system app では 50,000 key limit、limit 超過時は `ERROR_TOO_MANY_KEYS`。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | key count が limit を超えると key creation が `KeyStoreException` で失敗する。 |
 
 ## 要約（Summary）
 
 Android 17 では、Android Keystore が shared resource であることを踏まえ、app が所有できる key 数に per-app limit が導入される。non-system app targeting Android 17+ は 50,000 keys、all other apps は 200,000 keys、system apps は target API level に関係なく 200,000 keys と説明されている。
 
+AOSP framework では `KeyStoreException.ERROR_TOO_MANY_KEYS` と response code mapping が追加されている。ただし keystore2 service 側の 50,000 / 200,000 enforcement 本体はこの checkout では未確認。
+
 ## 顧客影響（Customer Impact）
 
-- 要確認
+- 大量の Keystore key を作成するアプリで、新規 key creation が失敗する可能性がある。
+- secure storage、wallet、credential、encrypted document、enterprise security、per-record encryption などで影響が出る可能性がある。
 
 ## 影響対象（Who Is Affected）
 
@@ -58,23 +62,23 @@ Android 17 では、Android Keystore が shared resource であることを踏�
 | 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
 | --- | --- | --- |
 | Android 16 | 36 | baseline。per-app key limit enforcement の有無を確認する。 |
-| Android 17 | 36 | all other apps として 200,000 key limit の対象になる可能性がある。 |
-| Android 17 | 37 | non-system app では 50,000 key limit、limit 超過時に `ERROR_TOO_MANY_KEYS` と公式文書は説明。 |
+| Android 17 | 36 | all other apps として 200,000 key limit の対象。 |
+| Android 17 | 37 | non-system app では 50,000 key limit、limit 超過時に `ERROR_TOO_MANY_KEYS`。 |
 
 ## 顧客向け説明（Explanation for Customers）
 
-Android 17 では、Android Keystore に app ごとの key ownership limit が導入されます。limit を超えて key を作成しようとすると `KeyStoreException` で失敗します。通常の少数 key 利用では影響しにくい一方、record / account / session ごとに Keystore key を増やし続ける設計では、将来的に key creation failure が発生する可能性があります。
+Android 17 では、Android Keystore に app ごとの key ownership limit が導入されます。limit を超えて key を作成しようとすると `KeyStoreException` で失敗します。
 
-特に targetSdkVersion 37 以上の non-system app は 50,000 key limit と説明されており、limit 超過時の `getNumericErrorCode()` は `ERROR_TOO_MANY_KEYS` になります。targetSdkVersion 36 など all other apps では 200,000 key limit と `ERROR_INCORRECT_USAGE` が説明されているため、OS update 影響と targetSdkVersion 37 影響を分けて検証してください。
+targetSdkVersion 37 以上の non-system app は 50,000 key limit と説明されており、limit 超過時の `getNumericErrorCode()` は `ERROR_TOO_MANY_KEYS` になります。targetSdkVersion 36 など all other apps では 200,000 key limit と `ERROR_INCORRECT_USAGE` が説明されているため、OS update 影響と targetSdkVersion 37 影響を分けて検証してください。
 
 ## 根拠（Evidence）
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
-- 検証対象の原文: Android 17 から app-owned Keystore keys に limit が enforce され、non-system target 37+ は 50,000 keys、all other apps は 200,000 keys、system apps は target API level に関係なく 200,000 keys。limit 超過時は `KeyStoreException` で失敗する。
-- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
-- 差分解釈: 未分類。公式文書上は added behavior / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: 未確認。公式文書上は Android 17 all apps + app type + targetSdkVersion + key count condition。targetSdkVersion gate / compat framework evidence は未取得。
+- 検証対象の原文: Android 17 から app-owned Keystore keys に limit が enforce され、non-system target 37+ は 50,000 keys、all other apps は 200,000 keys。
+- AOSP ファイル: `keystore/java/android/security/KeyStoreException.java`, `keystore/java/android/security/KeyStore2.java`, `keystore/java/android/security/KeyStoreSecurityLevel.java`, `core/api/current.txt`
+- AOSP ソース文脈: `ERROR_TOO_MANY_KEYS` API surface と response code 29 / 30 から public error code への mapping。
+- 差分解釈: added API surface / changed error-code mapping。
+- Gate conclusion: OS update で all-apps limit、target 37 で stricter limit / new numeric error code。enforcement 本体は keystore2 service 側の追加確認が必要。
 
 ## 人間の判断欄（Human Decision）
 
@@ -82,4 +86,4 @@ Android 17 では、Android Keystore に app ごとの key ownership limit が�
 - 人間による判断が必要
 
 判断（Decision）:
-- Android 17 AOSP tag 公開後に追加調査が必要
+- 未判断

@@ -22,8 +22,8 @@
 
 注意:
 - Android 17 is currently documented as Beta.
-- Local `frameworks-base` does not currently have an `android-17*` tag.
-- AOSP evidence should be completed after the target Android 17 AOSP tag is available.
+- Local `frameworks-base` has `android-17.0.0_r1`.
+- AOSP evidence should use explicit tag comparisons from `android-16.0.0_r4` to `android-17.0.0_r1`.
 
 ## 計画とバックログ
 
@@ -47,7 +47,7 @@ Android 17 の AOSP tag が利用可能になったら、analysis files を生�
 ```bash
 VERSION_DIR=android17 \
 OLD_TAG=android-16.0.0_r4 \
-NEW_TAG=<android-17-aosp-tag> \
-TARGET_CODENAME=<android-17-codename> \
+NEW_TAG=android-17.0.0_r1 \
+TARGET_CODENAME=CINNAMON_BUN \
 scripts/generate_target.sh
 ```

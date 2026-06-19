@@ -8,7 +8,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -18,18 +18,18 @@ Android 17 Behavior Change
 
 ## 適用条件（Applicability）
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: 未確認。公式ページは targetSdkVersion 37 以上向け。
-- targetSdkVersion 37 以上: 公式文書上は該当。AOSP gate 未確認。
+- 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
+- OS アップデート / 全アプリ（OS update / all apps）: No。AOSP の Change ID は targetSdkVersion 37 以上で default enabled。
+- targetSdkVersion 37 以上: Yes。`@EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)` で確認。
 - その他の必須条件（Other required conditions）: password field、physical input device、touchscreen input の setting 分岐。
-- Compat Change ID: 未確認
-- Compat default state: 未確認
+- Compat Change ID: `417951523` / `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL`
+- Compat default state: targetSdkVersion 36 では default disabled、targetSdkVersion 37 以上で default enabled
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | 未確認。公式文書上は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
+| Android 17 / targetSdkVersion 36 | default では旧 `TEXT_SHOW_PASSWORD` 相当の挙動が維持される。 |
 | Android 17 / targetSdkVersion 37 | physical input device 使用時に `show_passwords_physical` が適用されると公式文書は説明。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | password field への external keyboard 等の入力で、default では全 password characters が hidden。 |
 
@@ -58,23 +58,23 @@ Android 17 では、targetSdkVersion 37 以上のアプリで physical input dev
 | 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
 | --- | --- | --- |
 | Android 16 | 36 | Android 16 baseline。具体挙動は Android 17 tag 比較待ち。 |
-| Android 17 | 36 | 未確認。公式文書上は targetSdkVersion 37 以上向けだが、AOSP gate 未確認。 |
+| Android 17 | 36 | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` は default disabled。旧 path が維持される。 |
 | Android 17 | 37 | physical input device 使用時、default では全 password characters が hidden。 |
 
 ## 顧客向け説明（Explanation for Customers）
 
 Android 17 では、targetSdkVersion 37 以上のアプリで外部キーボードなどの physical input device を使って password を入力する場合、最後に入力した文字も含めて password characters が既定で隠されます。大きな画面や外部キーボード環境では覗き見リスクが高いため、従来の入力確認用の一時表示とは別の policy が適用されます。
 
-現時点では local AOSP checkout に Android 17 tag がないため、targetSdkVersion gate、setting default、input device 判定、compat flag の有無は未確認です。最終的な適用分類は Android 17 AOSP tag 公開後に再確認が必要です。
+Android 17 AOSP tag `android-17.0.0_r1` では、`SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL = 417951523` が `@EnabledSince(CINNAMON_BUN)` として定義されています。`PasswordTransformationMethod` は `PhysicalInputSpan` で physical input を判定し、physical input では default `HIDE` の `show_password_physical`、touch input では default `SHOW` の `show_password_touch` を参照します。
 
 ## 根拠（Evidence）
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-17
 - 検証対象の原文: targetSdkVersion 37 以上のアプリで physical input device 使用中は `show_passwords_physical` が password field の全 characters に適用され、default では全 characters が hidden。touchscreen では `show_passwords_touch` が適用される。
-- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
-- 差分解釈: 未分類。added behavior / changed condition / changed default の判定は Android 17 tag 待ち。
-- Gate conclusion: 未確認。公式文書は targetSdkVersion 37 以上と physical input device / password field 条件を示すが、AOSP gate evidence は未取得。
+- AOSP ファイル: `core/java/android/text/ShowSecretsSetting.java`, `core/java/android/text/method/PasswordTransformationMethod.java`, `core/java/android/text/method/BaseKeyListener.java`, `core/java/android/provider/Settings.java`, `packages/SettingsProvider/src/com/android/providers/settings/SettingsProvider.java`
+- AOSP ソース文脈: Change ID、`@EnabledSince(CINNAMON_BUN)`、physical input span、touch / physical setting default を確認。
+- 差分解釈: added behavior / changed condition / changed default。split setting 追加、targetSdkVersion 37 gate、physical input default hide。
+- Gate conclusion: Android 17 上で targetSdkVersion 37 以上、かつ password field への入力時に適用。physical input device では default で全文字非表示。
 
 ## 人間の判断欄（Human Decision）
 
@@ -82,4 +82,4 @@ Android 17 では、targetSdkVersion 37 以上のアプリで外部キーボー�
 - 人間による判断が必要
 
 判断（Decision）:
-- 追加調査が必要
+- 人間による判断が必要

@@ -8,7 +8,7 @@
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -35,62 +35,62 @@ ECH (Encrypted Client Hello) enabled
 ### 分類スナップショット（Classification Snapshot）
 
 主分類（Primary classification）:
-- UNKNOWN_NEEDS_MORE_EVIDENCE
+- TARGET_SDK_37_CONDITIONAL
 
 公式文書からの初期適用条件判断:
 - 公式 Behavior Change 文書は、targetSdkVersion 37 以上のアプリでは TLS connection に ECH が使われると説明している。
 - ただし ECH が実際に有効になるには、アプリが使う networking library が ECH を統合していること、remote server が ECH protocol をサポートしていることが必要。
 - Network Security Configuration の `<domainEncryption>` により、global または per-domain で ECH mode を `"enabled"` / `"disabled"` に設定できる。
-- local `frameworks-base` に Android 17 AOSP tag がないため、AOSP gate、Network Security Configuration parser diff、Compat Change ID、default state は未検証である。確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
+- AOSP では `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO = 419020719L` が `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` として定義され、targetSdkVersion 37 以上で default domain encryption mode が有効側になる。
 
 早見表（At-a-glance impact）:
 
 | 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | 未確認 | 公式ページは targetSdkVersion 37 以上向け。AOSP gate は未確認。 |
-| targetSdkVersion 37 以上が必要か | 可能性は高いが未検証 | 公式文書と Network Security Configuration docs は API 37 以上で default enabled になることを示している。AOSP evidence は未取得。 |
+| Android 17 に OS アップデートしただけで適用されるか | No | `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` は `@EnabledAfter(BAKLAVA)` の compat change。 |
+| targetSdkVersion 37 以上が必要か | Yes | AOSP Change ID が targetSdkVersion 37 以上で default enabled。 |
 | 追加の実行時条件があるか | ある | networking library の ECH support、remote server の ECH support、TLS connection、`<domainEncryption>` mode が条件。 |
-| Compat Change ID が関係するか | 未確認 | Android 17 tag と compat framework evidence が未確認。 |
+| Compat Change ID が関係するか | Yes | `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO = 419020719L`。 |
 
 ### 調査日（Investigation Date）
 
-2026-06-10
+2026-06-18
 
 ### 信頼度（Confidence）
 
-- Low
+- High
 
 ### 適用条件分類（Applicability Classification）
 
 適用される条件（Applies when）:
 - [ ] targetSdkVersion に関係なく Android 17 の全アプリへ適用
 - [ ] Android 17 以上かつ targetSdkVersion 37 以上で適用
-- [ ] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
+- [x] targetSdkVersion 37 以上かつ追加の実行時条件を満たす場合に適用
 - [ ] Mainline / Google Play system update に依存
 - [ ] API 追加のみであり、挙動変更ではない
-- [x] 未確認 / 追加 evidence が必要
+- [ ] 未確認 / 追加 evidence が必要
 
 必要な実行時条件（Required runtime conditions）:
-- Android version: Android 17 以上が前提と考えられるが、AOSP tag 未取得。
-- targetSdkVersion: 公式文書上は 37 以上。
+- Android version: Android 17 以上。
+- targetSdkVersion: 37 以上。AOSP の `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` で確認。
 - Device/form factor: 公式抜粋では条件なし。
 - Permission/API/component condition: TLS connection、ECH 対応 networking library、ECH 対応 server、Network Security Configuration の `<domainEncryption>` mode。
 - App state/process condition: remote endpoint への TLS handshake 実行時。
 
 Compat framework:
-- Change ID: 未確認
-- 変更名: 未確認
-- 既定状態: 未確認
-- テスト時に切り替え可能か: 未確認
+- Change ID: `419020719`
+- 変更名: `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO`
+- 既定状態: targetSdkVersion 36 では default disabled、targetSdkVersion 37 以上で default enabled。
+- テスト時に切り替え可能か: compat change として切り替え可能。
 
 分類信頼度（Classification confidence）:
-- Low
+- High
 
 分類根拠（Classification evidence）:
 - 公式ドキュメントページ: `behavior-changes-17`
 - 検証対象の適用条件文: targetSdkVersion 37 以上のアプリでは TLS connection に ECH が使われる。
-- AOSP targetSdk gate: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- Compat framework entry: 未確認。Android 17 compat framework evidence が未取得。
+- AOSP targetSdk gate: `packages/NetworkSecurityConfig/platform/src/android/security/net/config/NetworkSecurityConfig.java` の `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` が `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)`。
+- Compat framework entry: `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO = 419020719L`。
 
 ---
 
@@ -100,7 +100,7 @@ Android 17 では、targetSdkVersion 37 以上のアプリに対して Encrypted
 
 実際に ECH が使われるには、アプリが使う networking library が ECH に対応し、接続先 server も ECH をサポートしている必要がある。ECH を negotiated できない場合は ECH GREASE が送信される。また、Android 17 では Network Security Configuration に `<domainEncryption>` が追加され、global または per-domain で ECH を enabled / disabled にできる。
 
-ただし、現時点の local `frameworks-base` には Android 17 AOSP tag がないため、実装差分、targetSdkVersion gate、Compat Change ID、default state は未確認である。
+AOSP では `NetworkSecurityConfig.defaultDomainEncryptionMode()` が `CompatChanges.isChangeEnabled(ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO)` と `encryptedClientHelloConfiguration()` を確認し、条件を満たす場合に `DOMAIN_ENCRYPTION_MODE_OPPORTUNISTIC` を返す。`XmlConfigSource` は `<domainEncryption>` を parse し、`disabled` / `enabled` / `opportunistic` を Network Security Config に反映する。
 
 ---
 
@@ -145,29 +145,28 @@ Android 17 では、targetSdkVersion 37 以上のアプリに対して Encrypted
 - `<domainEncryption>` は `<base-config>` または `<domain-config>` 内で使え、global または per-domain に ECH mode を `"enabled"` / `"disabled"` へ設定できる。
 - Network Security Configuration docs は、`<domainEncryption>` の default mode が targetSdkVersion 37 以上では `"enabled"`、それ以外では `"disabled"` と説明している。
 
-AOSP で未確認の点:
-- Android 16 baseline で ECH / `<domainEncryption>` が存在しなかったこと。
-- Android 17 で追加された Network Security Configuration parser / policy の diff。
-- targetSdkVersion 37 gate の実装箇所。
-- ECH mode default `"enabled"` / `"disabled"` の実装。
-- HttpEngine、WebView、OkHttp など library integration との接続点。
-- Compat Change ID と default state。
+AOSP で確認した点:
+- `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO = 419020719L` は `@ChangeId` かつ `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)`。
+- `defaultDomainEncryptionMode()` は compat change と `encryptedClientHelloConfiguration()` が true の場合に `DOMAIN_ENCRYPTION_MODE_OPPORTUNISTIC`、それ以外では `DOMAIN_ENCRYPTION_MODE_DISABLED` を返す。
+- `NetworkSecurityConfig.Builder` の `mDomainEncryptionMode` default は `defaultDomainEncryptionMode()`。
+- `XmlConfigSource` は `<domainEncryption mode="disabled|enabled|opportunistic">` を parse して builder に反映する。
+- `NetworkSecurityPolicy` に `DOMAIN_ENCRYPTION_MODE_*` 定数と `getDomainEncryptionMode(String)` API surface が追加されている。
 
 ## 適用条件（Applicability）
 
-公式文書の一次判断では、Android 17 以上、targetSdkVersion 37 以上、TLS connection、ECH 対応 networking library、ECH 対応 server、`<domainEncryption>` mode が条件となる。AOSP tag が未取得のため、確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
+公式文書と AOSP evidence から、Android 17 以上、targetSdkVersion 37 以上、TLS connection、ECH 対応 networking library、ECH 対応 server、`<domainEncryption>` mode が条件となる変更として分類する。
 
 ### OS アップデート時の挙動（OS Update Behavior）
 
-- Android 17 にアップデートしただけで適用されるか: Unknown
-- targetSdkVersion に依存しない根拠: なし。公式文書は targetSdkVersion 37 以上を明示している。
-- Android 16 以前での挙動: Network Security Configuration docs は Android 16 以下では ECH は available ではないと説明しているが、AOSP tag 比較は未実施。
+- Android 17 にアップデートしただけで適用されるか: No。targetSdkVersion 36 では compat change が default enabled ではない。
+- targetSdkVersion に依存しない根拠: なし。AOSP は `@EnabledAfter(BAKLAVA)` を使う。
+- Android 16 以前での挙動: Network Security Configuration docs は Android 16 以下では ECH は available ではないと説明している。AOSP でも Android 17 tag で default domain encryption mode と parser が追加されている。
 
 ### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
-- targetSdkVersion 37 以上で適用されるか: 公式文書上は Yes と読めるが、AOSP gate 未確認。
-- Android 17 以外で targetSdkVersion 37 にした場合の挙動: Unknown。公式文書と Network Security Configuration docs は Android 17 / API level 37 以上の機能として説明している。
-- opt-out / temporary override の有無: `<domainEncryption mode="disabled"/>` による opt-out が公式 docs で説明されている。compat framework による force enable / disable は未確認。
+- targetSdkVersion 37 以上で適用されるか: Yes。`ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` が `@EnabledAfter(BAKLAVA)` で default enabled。
+- Android 17 以外で targetSdkVersion 37 にした場合の挙動: Android 17 platform の `frameworks-base` 実装に依存する。Android 16 platform には本調査対象の `<domainEncryption>` 実装はない。
+- opt-out / temporary override の有無: `<domainEncryption mode="disabled"/>` による opt-out が可能。compat change としてテスト時に切り替え可能。
 
 ### その他の条件（Other Conditions）
 
@@ -194,54 +193,54 @@ git -C frameworks-base tag --list 'android-17*'
 Result:
 - `frameworks-base` working tree: clean at the time of investigation.
 - From tag: `android-16.0.0_r4` exists.
-- To tag: no local `android-17*` tag found.
+- To tag: `android-17.0.0_r1` exists.
 
 根拠上の制約（Evidence limitation）:
-- Android 17 AOSP tag が local `frameworks-base` に存在しないため、`git -C frameworks-base diff android-16.0.0_r4 <android-17-tag> -- ...` による明示的な tag 比較を実行できない。
-- Repository rule に従い、Android 17 working tree や推測による source evidence は採用しない。
-- この制約により、AOSP-backed conclusion は High confidence にできない。
+- source evidence は `android-16.0.0_r4` と `android-17.0.0_r1` の明示的な tag 比較、および `android-17.0.0_r1` 上の symbol 確認に限定した。
+- `frameworks-base` working tree は clean のため、local working tree changes を platform evidence として誤採用するリスクは確認されていない。
 
 ## 関連ファイル（Related Files）
 
-未確認。Android 17 AOSP tag 取得後に、少なくとも以下の候補を tag 比較で確認する必要がある。
-
-- `core/java/android/security/net/config/NetworkSecurityConfig.java`
-- `core/java/android/security/net/config/XmlConfigSource.java`
-- `core/java/android/security/net/config/ConfigSource.java`
-- `core/java/android/security/net/config/ApplicationConfig.java`
-- `core/java/android/security/NetworkSecurityPolicy.java`
-- API surface files for Network Security Configuration / policy exposure, if any
-- compat framework 定義ファイル内の ECH / domain encryption / Network Security Configuration 関連 Change ID
+- `packages/NetworkSecurityConfig/platform/src/android/security/net/config/NetworkSecurityConfig.java`
+- `packages/NetworkSecurityConfig/platform/src/android/security/net/config/XmlConfigSource.java`
+- `packages/NetworkSecurityConfig/platform/src/android/security/net/config/ApplicationConfig.java`
+- `packages/NetworkSecurityConfig/platform/src/android/security/net/config/ConfigNetworkSecurityPolicy.java`
+- `packages/NetworkSecurityConfig/platform/src/android/security/NetworkSecurityPolicy.java`
+- `packages/NetworkSecurityConfig/api/current.txt`
 
 Note:
 - 実際の ECH handshake implementation は networking library や TLS stack 側にある可能性がある。今回の mission は `frameworks-base` evidence に限定されているため、library / TLS stack 側は Android 17 tag 公開後の追加調査対象として扱う。
 
 ## 確認したソース文脈（Source Context Reviewed）
 
-Android 17 AOSP tag がないため、source context は未レビュー。
-
 | File / symbol | Android 16 baseline | Android 17 behavior | 関連性 |
 | --- | --- | --- | --- |
-| 未レビュー | 未レビュー | 未レビュー | Android 17 tag がないため、公式文書の記述を AOSP diff で検証できない。 |
+| `NetworkSecurityConfig.ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` | ECH default の compat gate は存在しない。 | Change ID `419020719L` が追加され、`@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` で targetSdkVersion 37 以上 default enabled。 | 公式文書の targetSdkVersion 37 条件を直接裏付ける gate。 |
+| `NetworkSecurityConfig.defaultDomainEncryptionMode()` | default domain encryption mode は存在しない。 | compat change と `encryptedClientHelloConfiguration()` が true の場合に `DOMAIN_ENCRYPTION_MODE_OPPORTUNISTIC`、それ以外で disabled。 | targetSdkVersion 37 default behavior を決める実装。 |
+| `XmlConfigSource` / `domainEncryption` | `<domainEncryption>` parser は存在しない。 | `<base-config>` / `<domain-config>` 内の `domainEncryption` を parse し、builder に mode を反映する。 | 公式文書の global / per-domain mode 設定を裏付ける。 |
+| `NetworkSecurityPolicy.getDomainEncryptionMode(String)` | API surface なし。 | domain encryption mode を取得する API surface が追加される。 | Network Security Config policy が library / TLS stack から参照可能になる根拠。 |
 
 必要な context:
-- Entry point / caller: 未確認。想定される entry point は app TLS connection、Network Security Configuration parsing、networking library の TLS handshake setup だが、AOSP evidence としては未採用。
-- 関連 class / service の責務: 未確認。
-- app API / system event から変更箇所までの runtime path: 未確認。
-- 関係しない code path を除外した理由: Android 17 tag 不在のため、source path の採否判断自体を保留。
+- Entry point / caller: app の TLS connection -> networking library / TLS stack -> `NetworkSecurityPolicy.getDomainEncryptionMode(hostname)`。
+- 関連 class / service の責務: `NetworkSecurityConfig` は domain ごとの security policy を保持し、`XmlConfigSource` は app の Network Security Config XML を parse する。
+- app API / system event から変更箇所までの runtime path: app TLS handshake -> hostname の Network Security Config lookup -> domain encryption mode -> ECH / GREASE の有効化判断。
+- 関係しない code path を除外した理由: CT default enable は同じ `NetworkSecurityConfig` 内の別 Change ID であり、ECH の gate とは別変更として除外した。
 
 ## 差分解釈（Diff Interpretation）
 
 | 観測した diff | 解釈 | Behavior Change との関連 | 信頼度 |
 | --- | --- | --- | --- |
-| Android 17 tag diff なし | Source diff type はまだ分類できない | 公式文書の ECH default behavior と `<domainEncryption>` 追加を source diff で裏取りできていない | Low |
+| `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO = 419020719L` が `@EnabledAfter(BAKLAVA)` で定義される。 | changed condition / gate | targetSdkVersion 37 以上で default domain encryption mode が有効側になる直接根拠。 | High |
+| `defaultDomainEncryptionMode()` が compat change を確認し、default を opportunistic / disabled に分岐する。 | changed default | Android 17 / targetSdkVersion 37 の default behavior を決める実装。 | High |
+| `XmlConfigSource` が `<domainEncryption>` を parse する。 | added behavior / explicit override path | 公式文書の global / per-domain enabled / disabled 設定を裏付ける。 | High |
+| `NetworkSecurityPolicy` に domain encryption mode API surface が追加される。 | API surface addition supporting behavior | TLS stack / networking library が policy を参照できる接点。 | Medium |
 
 必要な解釈:
-- 追加された挙動: 未確認。
-- 削除された挙動: 未確認。
-- 変更された条件 / gate: 未確認。
-- 変更された default: 未確認。
-- 挙動変更なし: 未確認。tag 不在のため「no behavior change」とは判断しない。
+- 追加された挙動: `<domainEncryption>` parser と domain encryption mode policy。
+- 削除された挙動: public API の削除は確認していない。
+- 変更された条件 / gate: targetSdkVersion 37 以上で default domain encryption mode が opportunistic。
+- 変更された default: targetSdkVersion 37 以上では default disabled ではなく opportunistic。
+- 挙動変更なし: 該当しない。
 
 ## 事実（Evidence）
 
@@ -254,52 +253,50 @@ Android 17 AOSP tag がないため、source context は未レビュー。
 - Network Security Configuration docs は、`<domainEncryption>` の default mode が API level 37 以上で `"enabled"`、それ以外で `"disabled"` と説明している。
 - RFC 9849 は、ECH を実装する client が実 ECH extension または GREASE ECH extension を送る client behavior を定義している。
 - local `frameworks-base` には `android-16.0.0_r4` tag がある。
-- local `frameworks-base` には `android-17*` tag がない。
+- local `frameworks-base` には `android-17.0.0_r1` tag がある。
 - 調査時点で `frameworks-base` working tree は clean。
+- AOSP では `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO = 419020719L` が `@EnabledAfter(BAKLAVA)` として定義される。
+- AOSP では default domain encryption mode が compat change と ECH config flag の両方を満たす場合に `OPPORTUNISTIC` になる。
 
 観察:
 - 公式ページ種別は targetSdkVersion 37 以上向けである。
 - この項目は privacy behavior change と Network Security Configuration の新要素追加の両方を含む。
 - 実際の ECH negotiated behavior は、app targetSdkVersion だけでなく networking library と server support に依存する。
 - `<domainEncryption mode="disabled"/>` により opt-out できる。
-- AOSP tag がないため、実装が本当に targetSdkVersion 37 gate で制御されているかは未確認。
-- Compat framework entry の有無も未確認。
+- AOSP gate は targetSdkVersion 37 以上で default enabled であり、公式文書と一致する。
+- `encryptedClientHelloConfiguration()` の platform flag が false の環境では default opportunistic path が抑止されるため、実端末では platform flag / module state も確認対象になる。
 
 仮説:
 - Android 17 / targetSdkVersion 37 以上では、Network Security Configuration の default domain encryption mode が enabled になり、ECH 対応 library が TLS handshake 時に ECH または ECH GREASE を送る可能性が高い。
-- targetSdkVersion 36 のアプリでは default mode が disabled の可能性が高いが、AOSP gate 未確認のため断定しない。
+- targetSdkVersion 36 のアプリでは compat change が default disabled のため、default mode は disabled。
 - 一部の enterprise network、TLS inspection、domain-based filtering、allowlist / blocklist 運用では、SNI visibility 低下または GREASE extension により観測・制御の前提が変わる可能性がある。
 
 結論:
-- 現時点で顧客向けに確定できるのは、「公式文書上は Android 17 / targetSdkVersion 37 以上で ECH が default enabled になり、library / server support と `<domainEncryption>` 設定に依存する」という範囲まで。
-- AOSP gate、Network Security Configuration parser diff、compat framework default state が未確認のため、primary classification は `UNKNOWN_NEEDS_MORE_EVIDENCE` とする。
+- 公式文書と AOSP evidence が一致するため、primary classification は `TARGET_SDK_37_CONDITIONAL` とする。
+- Android 17 / targetSdkVersion 37 以上で、ECH 対応 networking library / server を使い、`<domainEncryption>` が disabled でない場合に ECH / GREASE behavior が適用される。
 
 ## 適用ゲート根拠（Applicability Gate Evidence）
 
-- targetSdkVersion gate: 未確認。Android 17 AOSP tag がないため、`targetSdkVersion` / `ApplicationInfo.targetSdkVersion` 検索は実施していない。
-- CompatChanges.isChangeEnabled / ChangeId: 未確認。Android 17 AOSP tag がないため、`CompatChanges.isChangeEnabled` / `@ChangeId` / `@EnabledAfter` / `@EnabledSince` 検索は実施していない。
-- @EnabledAfter / @EnabledSince / default state: 未確認。
-- Build.VERSION / SDK_INT gate: 未確認。
-- DeviceConfig / resources config: 未確認。
-- Permission/AppOps gate: 公式文書上は permission 条件なし。AOSP 未確認。
-- Manifest/property gate: Network Security Configuration の `<domainEncryption>` mode が関係する。manifest で network security config file を指定する構成は未確認。
-- No gate found: 未判断。検索不能のため「gate なし」とは扱わない。
-- Gate conclusion: 未確認。公式文書上の Android 17 / targetSdkVersion 37 / library support / server support / config 条件はあるが、AOSP evidence が不足している。
-- Reasoning from source context: source context 未取得のため不可。
+- targetSdkVersion gate: `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)`。targetSdkVersion 37 以上で default enabled。
+- CompatChanges.isChangeEnabled / ChangeId: `CompatChanges.isChangeEnabled(ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO)`、Change ID `419020719L`。
+- @EnabledAfter / @EnabledSince / default state: `@EnabledAfter(BAKLAVA)`。targetSdkVersion 36 では default disabled、37 以上では default enabled。
+- Build.VERSION / SDK_INT gate: Android 17 platform implementation として扱う。明示的な SDK_INT runtime gate は主根拠ではない。
+- DeviceConfig / resources config: `encryptedClientHelloConfiguration()` の platform flag が default opportunistic path の追加条件。
+- Permission/AppOps gate: 公式文書上は permission 条件なし。確認した AOSP の Network Security Config gate でも permission / AppOps 条件は主条件ではない。
+- Manifest/property gate: Network Security Configuration の `<domainEncryption>` mode により domain 単位で `disabled` / `enabled` / `opportunistic` を指定できる。
+- No gate found: 該当しない。
+- Gate conclusion: Android 17 上で targetSdkVersion 37 以上、かつ TLS connection / ECH 対応 library / ECH 対応 server / config 条件を満たす場合に ECH が使われる。
+- Reasoning from source context: `NetworkSecurityConfig` が domain encryption mode を保持し、`NetworkSecurityPolicy.getDomainEncryptionMode(hostname)` 経由で library / TLS stack が参照できる。
 
 検索済み:
 - `frameworks-base` checkout status。
 - `android-16.0.0_r4` tag の存在。
-- `android-17*` tag の存在。
+- `android-17.0.0_r1` tag の存在。
+- Change ID、targetSdkVersion gate、domain encryption mode default、`<domainEncryption>` parser、API surface。
 
 未検索:
-- Android 17 implementation files。
-- Android 17 compat framework definitions。
-- Android 17 API surface files。
 - networking library / TLS stack integration points。
-
-理由:
-- Android 17 target tag が local checkout に存在しないため、tag 間 diff による platform evidence が作れない。
+- `encryptedClientHelloConfiguration()` の product / module default。
 
 ---
 
@@ -322,7 +319,7 @@ Android 17 AOSP tag がないため、source context は未レビュー。
 - ECH 非対応 networking library のみを使うアプリ。
 - 接続先 server が ECH をサポートせず、かつ ECH GREASE も disabled にしている構成。
 - `<domainEncryption mode="disabled"/>` で対象 domain の ECH / ECH GREASE を無効化している構成。
-- targetSdkVersion 37 へ上げないアプリ。ただし、これは公式文書からの一次判断であり、AOSP gate 未確認。
+- targetSdkVersion 37 へ上げないアプリ。AOSP gate 上は targetSdkVersion 36 では default disabled。
 
 ---
 
@@ -354,9 +351,9 @@ Android 17 AOSP tag がないため、source context は未レビュー。
 - ユーザーに見える症状: 社内ネットワークで接続失敗、proxy policy mismatch、特定 endpoint だけ接続できない可能性。
 - 開発・運用への影響: network team と ECH 対応、DNS / HTTPS RR、proxy policy の確認が必要になる可能性。
 - 推奨対応候補: ECH 詳細ページと network policy を照合し、検証環境で endpoint 別接続テストを行う。
-- 根拠: 公式 Behavior Change statement と report の missing AOSP evidence。
-- 信頼度: Low
-- 注意: 実ネットワークでの発生確認ではない。ECH availability は DNS / server / network condition に依存する可能性がある。
+- 根拠: 公式 Behavior Change statement、AOSP の domain encryption default gate、`<domainEncryption>` parser。
+- 信頼度: Medium
+- 注意: 実ネットワークでの発生確認ではない。ECH availability は DNS / server / network condition に依存する。
 
 ## 例2（Example 2）: 独自ネットワーク診断 / SNI ベース制御を持つアプリ
 
@@ -366,9 +363,9 @@ Android 17 AOSP tag がないため、source context は未レビュー。
 - ユーザーに見える症状: 診断結果が不正確になる、接続先分類が失敗する、policy 表示が変わる可能性。
 - 開発・運用への影響: ECH 対応の telemetry / logging / support documentation 更新が必要になる可能性。
 - 推奨対応候補: public hostname 依存を減らし、app-layer / explicit config による診断へ寄せる。
-- 根拠: 公式 statement と report の target / gate 未確認事項。
-- 信頼度: Low
-- 注意: Android 17 AOSP tag と実通信条件の確認が必要。
+- 根拠: 公式 statement、AOSP の domain encryption mode API surface、Network Security Config policy。
+- 信頼度: Medium
+- 注意: 実際の可観測性は library / TLS stack / network path に依存する。
 
 ---
 
@@ -390,7 +387,6 @@ Android 17 AOSP tag がないため、source context は未レビュー。
 
 ## 任意対応（Optional）
 
-- Android 17 AOSP tag 公開後、`<domainEncryption>` parser / policy diff と compat Change ID を再調査する。
 - packet capture / TLS handshake logging が可能な検証環境で、ECH enabled / disabled の差分を観測する。
 
 ---
@@ -401,19 +397,19 @@ Android 17 AOSP tag がないため、source context は未レビュー。
 
 | 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
 | --- | --- | --- | --- |
-| Android 16 | 36 | default | Android 16 baseline。公式 docs では ECH は available ではない。AOSP baseline diff は未確認。 |
-| Android 17 | 36 | default | 未確認。Network Security Configuration docs は API 37 未満で default disabled と示すが、AOSP gate 未確認。 |
+| Android 16 | 36 | default | Android 16 baseline。公式 docs では ECH は available ではない。 |
+| Android 17 | 36 | default | `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` は default disabled。domain encryption default は disabled。 |
 | Android 17 | 37 | default | 公式文書上は ECH が TLS connection に使われる。library / server support がある場合に active。未 negotiated 時は ECH GREASE。 |
-| Android 17 | 36 | force-enabled if available | 未確認。Compat Change ID 未確認。`<domainEncryption mode="enabled"/>` による config 明示は別途検証対象。 |
-| Android 17 | 37 | force-disabled if available | 未確認。Compat Change ID 未確認。`<domainEncryption mode="disabled"/>` による opt-out は公式 docs 上あり。 |
+| Android 17 | 36 | force-enabled | `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` を有効化すると default opportunistic path を検証できる。`<domainEncryption mode="enabled"/>` による config 明示は別途検証対象。 |
+| Android 17 | 37 | force-disabled | `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO` を無効化すると default disabled path との切り分けができる。`<domainEncryption mode="disabled"/>` による opt-out は公式 docs 上あり。 |
 
 ## 手順（Steps）
 
 - targetSdk変更: test app を targetSdkVersion 36 と 37 で build し、Android 17 上で同じ endpoint へ TLS connection を行う。
-- compat framework command: Change ID 未確認のため未定。Android 17 tag / compat page 確認後に追加する。
+- compat framework command: `adb am compat enable|disable ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO <package>`、または Change ID `419020719` を使って切り替える。
 - テスト方法: ECH 対応 server と非対応 server、ECH 対応 networking library と非対応 library、`<domainEncryption mode="enabled"/>` / `"disabled"` を組み合わせる。
 - 再現手順: TLS handshake、connection success / failure、server support、network observer 上の SNI visibility、GREASE extension の有無を比較する。
-- 期待結果: targetSdkVersion 37 かつ ECH 対応 library / server では ECH が active になる。ECH negotiated 不可の場合は ECH GREASE が送信される。targetSdkVersion 36 の結果は AOSP gate 確認待ち。
+- 期待結果: targetSdkVersion 37 かつ ECH 対応 library / server では ECH が active になる。ECH negotiated 不可の場合は ECH GREASE が送信される。targetSdkVersion 36 では default disabled。
 
 ---
 
@@ -421,11 +417,11 @@ Android 17 AOSP tag がないため、source context は未レビュー。
 
 公式文書は、Android 17 で targetSdkVersion 37 以上のアプリに ECH support が導入され、TLS connection の SNI 露出を減らすと説明している。実際の効果は、networking library、server support、Network Security Configuration の `<domainEncryption>` mode に依存する。
 
-一方で、local `frameworks-base` に Android 17 AOSP tag がないため、実装差分、targetSdkVersion gate、Network Security Configuration parser diff、Compat Change ID、default state を検証できていない。現時点の primary classification は `UNKNOWN_NEEDS_MORE_EVIDENCE`、confidence は Low とする。
+AOSP では `ENABLE_DEFAULT_ENCRYPTED_CLIENT_HELLO = 419020719L` が `@EnabledAfter(BAKLAVA)` として定義され、`defaultDomainEncryptionMode()` と `<domainEncryption>` parser が追加されていることを確認した。primary classification は `TARGET_SDK_37_CONDITIONAL`、confidence は High とする。
 
 Human decision placeholder:
 - 最終優先度: 人間による判断が必要
 - 最終 severity: 人間による判断が必要
 - リリース可否: 人間による判断が必要
 - 顧客連絡の優先度: 人間による判断が必要
-- 次に必要な人間の判断: Android 17 AOSP tag 公開後に再調査するか、公式 documentation ベースの暫定 privacy / networking guidance として扱うかを判断する。
+- 次に必要な人間の判断: ECH による enterprise network / TLS inspection 影響をどの優先度で顧客へ案内するかを判断する。

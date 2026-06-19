@@ -8,7 +8,7 @@ Android 17 Behavior Change
 - android-16.0.0_r4
 
 比較先:
-- TBD: Android 17 AOSP tag
+- android-17.0.0_r1
 
 以前の targetSdkVersion:
 - 36
@@ -18,28 +18,28 @@ Android 17 Behavior Change
 
 ## 適用条件（Applicability）
 
-- 主分類（Primary classification）: UNKNOWN_NEEDS_MORE_EVIDENCE
-- OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。`behavior-changes-all` ページに掲載されている。
-- targetSdkVersion 37 以上: 公式文書上は不要と読める。ただし AOSP gate 未確認。
-- その他の必須条件（Other required conditions）: 一部の Android devices のみ。device total RAM、memory usage、process state、memory limiter 対象 device 条件が関係する可能性。
-- Compat Change ID: 未確認
-- Compat default state: 未確認
+- 主分類（Primary classification）: OS_UPDATE_ALL_APPS
+- OS アップデート / 全アプリ（OS update / all apps）: Yes / Conditional。AOSP に targetSdkVersion gate は確認されず、device / vendor config 条件で有効化される。
+- targetSdkVersion 37 以上: 不要。targetSdkVersion gate は確認されない。
+- その他の必須条件（Other required conditions）: 一部の Android devices のみ。`/vendor/etc/memory-limiter-config.xml`、device RAM、process state、memory usage が関係する。
+- Compat Change ID: 確認されず
+- Compat default state: compat framework ではなく feature flag / vendor config / DeviceConfig に依存
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
 | シナリオ（Scenario） | 影響（Impact） |
 | --- | --- |
-| Android 17 / targetSdkVersion 36 | 公式文書上は all apps change のため、対象 device では app memory limits が適用される可能性がある。AOSP gate 未確認。 |
+| Android 17 / targetSdkVersion 36 | 対象 device では app memory limits が適用され得る。targetSdkVersion gate は確認されない。 |
 | Android 17 / targetSdkVersion 37 | targetSdkVersion 36 と同様に、対象 device では app memory limits が適用される可能性がある。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | memory limiter 対象 device で app が limit に達すると、`REASON_OTHER` / `MemoryLimiter:AnonSwap` として観測される可能性がある。 |
 
 ## 要約（Summary）
 
-Android 17 では、device total RAM に基づく app memory limits が導入される、と公式文書は説明している。主な目的は extreme memory leak や memory outlier による system-wide instability を抑えることである。
+Android 17 では、device total RAM に基づく app memory limits が導入される。AOSP では `MemoryLimiter` が `ActivityManagerService` / `ProcessRecord` に接続され、process state に応じた memory / swap limits を native cgroup layer に渡す。
 
 ## 顧客影響（Customer Impact）
 
-- 要確認
+- 対象 device で extreme memory leak / memory outlier がある session は、`REASON_OTHER` / `MemoryLimiter:AnonSwap` として process exit する可能性がある。
 
 ## 影響対象（Who Is Affected）
 
@@ -50,8 +50,8 @@ Android 17 では、device total RAM に基づく app memory limits が導入さ
 ## 対応要否（Required Action）
 
 - 必須対応: memory baseline を測定し、`ApplicationExitInfo` で `REASON_OTHER` / `MemoryLimiter:AnonSwap` を収集できるようにする。
-- 推奨対応: `am memory-limiter status`、`manual <pid> <limit>|max|none`、`ignore <uid>|none|all` と trigger-based profiling を使って、limit hit 時の挙動と heap dump を確認する。
-- 不要: memory limiter 非対象 device、または limit に到達しない app sessions では直接影響は限定的。ただし対象条件は AOSP tag 待ち。
+- 推奨対応: `am memory-limiter status`、`manual <pid> <percent>|none`、`ignore <uid>|none|all` と trigger-based profiling を使って、limit hit 時の挙動と heap dump を確認する。
+- 不要: memory limiter 非対象 device、または limit に到達しない app sessions では直接影響は限定的。
 
 ## テストマトリクス（Test Matrix）
 
@@ -68,7 +68,7 @@ Android 17 では、device total RAM に基づく app memory limits が導入さ
 | Command | 用途 |
 | --- | --- |
 | `am memory-limiter ignore <uid>|none|all` | UID または全アプリ単位で memory limiter enforcement を ignore / reset する |
-| `am memory-limiter manual <pid> <limit>|max|none` | PID 単位で MB 指定の manual memory limit を課す、または解除する |
+| `am memory-limiter manual <pid> <percent>|none` | PID 単位で total RAM 比率の manual memory limit を課す、または解除する |
 | `am memory-limiter status` | visible / non-visible process を含む current memory limiter status を確認する |
 
 ## 顧客向け説明（Explanation for Customers）
@@ -84,10 +84,10 @@ Android 17 では、一部の端末でアプリごとの memory limit が導入�
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
 - 検証対象の原文: Android 17 introduces app memory limits based on device total RAM, and memory limits are imposed only on a subset of Android devices.
 - 検証サブセクション: `am memory-limiter ignore` / `manual` / `status` are official test controls, and they have no effect on devices that do not impose memory limits.
-- AOSP ファイル: 未確認。local `frameworks-base` に `android-17*` tag がない。
-- AOSP ソース文脈: 未確認。tag 間 diff が実行できない。
-- 差分解釈: 未分類。公式文書上は added behavior / changed condition と読めるが、AOSP diff による確認は Android 17 tag 待ち。
-- Gate conclusion: 未確認。公式文書上は Android 17 all apps + device subset condition。targetSdkVersion gate / compat framework evidence は未取得。
+- AOSP ファイル: `MemoryLimiter.java`, `com_android_server_am_MemoryLimiter.cpp`, `ActivityManagerService.java`, `ActivityManagerShellCommand.java`, `ProcessRecord.java`, `memory-limiter-config.xsd`, `MemoryLimiter.md`
+- AOSP ソース文脈: app process lifecycle -> `ProcessRecord` -> `MemoryLimiter.Limiter` -> native cgroup limit / event -> anomaly profiling trigger -> delayed kill with `MemoryLimiter:AnonSwap`.
+- 差分解釈: added behavior / changed condition。MemoryLimiter 本体、JNI、vendor config schema、shell command が追加され、vendor config と RAM 条件で対象 device が決まる。
+- Gate conclusion: Android 17 上で MemoryLimiter が feature enabled、system_server 内で動作し、vendor config と RAM 条件を満たす device で、対象 app process が configured limit に達した場合に適用される。targetSdkVersion gate / compat Change ID は確認されない。
 
 ## 人間の判断欄（Human Decision）
 
@@ -95,4 +95,4 @@ Android 17 では、一部の端末でアプリごとの memory limit が導入�
 - 人間による判断が必要
 
 判断（Decision）:
-- Android 17 AOSP tag 公開後に追加調査が必要
+- 人間による判断が必要
