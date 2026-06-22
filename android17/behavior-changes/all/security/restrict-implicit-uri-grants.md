@@ -43,7 +43,7 @@
 公式文書からの初期適用条件判断:
 - 公式文書は Android 17 の `Behavior changes: all apps` ページにこの項目を掲載している。
 - ただし、本文は "Starting in Android 18" で system が implicit URI permission grants を自動付与しなくなると説明しており、Android 17 で即時に自動付与が停止するとは述べていない。
-- Android 17 AOSP evidence では `StrictMode.VmPolicy.Builder.detectImplicitUriPermissionGrant()` が追加され、`StrictMode.detectAll()` では feature flag と compat change が有効な場合に自動検出へ含まれる。
+- Android 17 AOSP 根拠 では `StrictMode.VmPolicy.Builder.detectImplicitUriPermissionGrant()` が追加され、`StrictMode.detectAll()` では feature flag と compat change が有効な場合に自動検出へ含まれる。
 - compat ChangeId `DETECT_IMPLICIT_URI_PERMISSION_GRANT` は `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` であり、Android 17 / targetSdkVersion 37 以上の StrictMode 検出に関係する。
 
 早見表（At-a-glance impact）:
@@ -96,7 +96,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 の all apps ページは、URI を含む `ACTION_SEND`、`ACTION_SEND_MULTIPLE`、`ACTION_IMAGE_CAPTURE` intent に対する implicit URI permission grants の制限計画を示している。公式文書上、system が read / write URI permissions を自動付与しなくなるのは Android 18 starting であり、Android 17 で即時に自動 grant が停止する変更ではない。
 
@@ -139,7 +139,7 @@ Section title:
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
 確認コマンド:
 
@@ -150,7 +150,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
 結果:
-- `frameworks-base` の `status --short` は空で、dirty working tree は確認されなかった。
+- `frameworks-base` の `status --short` は空で、未コミット変更 は確認されなかった。
 - `android-16.0.0_r4` tag は存在する。
 - `android-17.0.0_r1` tag は存在する。
 
@@ -239,7 +239,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性がある app:
 - content URI を他アプリへ共有するアプリ。
@@ -270,7 +270,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 # テスト観点（Test Matrix）
 
-| 端末 OS（Device OS） | targetSdkVersion | 条件 | 期待挙動（Expected behavior） |
+| 端末 OS | targetSdkVersion | 条件 | 期待挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | URI 付き send / capture intent、grant flag なし | baseline。implicit grant により target app が URI を読める可能性。 |
 | Android 17 | 36 | StrictMode 明示検出なし、grant flag なし | legacy grant が維持され、logcat warning が出る可能性。 |

@@ -139,7 +139,7 @@ AOSP で確認した点:
 - `runtime/jni/jni_internal.cc` は `SetStatic*Field()` 系で `EnsureModifiable()` を呼び、static final field の変更 attempt を検出する。
 - `test/2396-unmodifiable-final-fields` は `-Xtarget-sdk-version:31` と `-Xtarget-sdk-version:37` を比較し、target > 36 で static final write が失敗することを確認する。
 
-## 適用条件（Applicability）
+## 適用条件
 
 公式文書と ART evidence から、Android 17 以上、targetSdkVersion 37 以上、かつ static final field を変更しようとする場合に影響する。確定分類は `TARGET_SDK_37_CONDITIONAL` とする。
 
@@ -183,7 +183,7 @@ git -C frameworks-base tag --list 'android-17*'
 - To tag: `android-17.0.0_r1` exists.
 
 根拠上の制約:
-- `frameworks-base` では明示的な tag 比較と symbol 検索を実施したが、static final field write enforcement の直接実装、targetSdkVersion gate、Compat Change ID は確認できなかった。
+- `frameworks-base` では明示的な tag 比較と symbol 検索を実施したが、static final field write enforcement の直接実装、targetSdkVersion ゲート、Compat Change ID は確認できなかった。
 - `tmp/aosp-checkouts/art` と `tmp/aosp-checkouts/libcore` に `platform/art` / `platform/libcore` の Android 16 / Android 17 tag を取得し、runtime / reflection / JNI evidence を確認した。
 - 広域の `frameworks-base` tag diff では rename detection が skipped される警告が出たため、`--no-renames` と runtime / JNI / reflection 周辺 path 限定で再確認した。`NativeZygoteProcess`、`AndroidRuntime`、`core/java/android/os` には多数の差分があるが、reflection `Field.set*()` または JNI `SetStatic*Field()` の static final write enforcement は確認できなかった。
 - この制約は解消済み。AOSP-backed conclusion は High confidence とする。
@@ -209,7 +209,7 @@ git -C frameworks-base tag --list 'android-17*'
 | `ArtField::IsUnmodifiable()` | 汎用 static final target 37 gate なし | targetSdkVersion / SDK version を見て static final field を unmodifiable と判断 | reflection / JNI 双方が参照する enforcement 判断。 |
 | `java_lang_reflect_Field.cc` | `IsMonotonic` / write-protected 中心 | `IsUnmodifiable()` なら `IllegalAccessException` を投げる | 公式文書の reflection failure path。 |
 | `jni_internal.cc` / `SetStatic*Field()` | static final の汎用変更検出なし | `EnsureModifiable()` を呼び、変更 attempt を検出 | 公式文書の JNI crash / fatal path。 |
-| `test/2396-unmodifiable-final-fields` | なし | target 31 と 37 を比較し、target > 36 で static final write failure を期待 | targetSdkVersion gate の test evidence。 |
+| `test/2396-unmodifiable-final-fields` | なし | target 31 と 37 を比較し、target > 36 で static final write failure を期待 | targetSdkVersion ゲートの test evidence。 |
 
 必須記入項目:
 - Entry point / caller: Java reflection field write と JNI static field write。
@@ -258,7 +258,7 @@ git -C frameworks-base tag --list 'android-17*'
 
 結論:
 - Android 17 以上かつ targetSdkVersion 37 以上で static final field write が拒否される。
-- AOSP evidence は ART / libcore にあり、確定分類は `TARGET_SDK_37_CONDITIONAL`、Confidence は High。
+- AOSP 根拠 は ART / libcore にあり、確定分類は `TARGET_SDK_37_CONDITIONAL`、Confidence は High。
 
 ## 適用ゲート根拠
 
@@ -327,7 +327,7 @@ git -C frameworks-base tag --list 'android-17*'
 
 # サービス影響例
 
-このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+このセクションは、公式文書と AOSP 根拠 から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
 ## 例1: 設定値を reflection で差し替えるアプリ / SDK
 
@@ -393,7 +393,7 @@ git -C frameworks-base tag --list 'android-17*'
 ## 手順
 
 - targetSdk変更: test app を targetSdkVersion 36 と 37 で build し、Android 17 上の挙動差を確認する。
-- Compat framework コマンド: 該当なし。AOSP evidence 上は compat ChangeId ではなく ART runtime gate。
+- Compat framework コマンド: 該当なし。AOSP 根拠 上は compat ChangeId ではなく ART runtime gate。
 - テスト方法: static final field を reflection で変更する最小再現コードと、JNI で変更する最小 native test を用意する。
 - 再現手順: Android 17 上で targetSdkVersion 36 / 37 の両 APK を実行し、reflection の例外種別、JNI crash、stack trace、compat flag 有無を比較する。
 - 期待結果: targetSdkVersion 37 では static final field 変更が拒否される。targetSdkVersion 36 では互換 path により旧挙動が維持される。
@@ -404,7 +404,7 @@ git -C frameworks-base tag --list 'android-17*'
 
 公式文書は、Android 17 以上で動作し targetSdkVersion 37 以上のアプリが static final field を変更できなくなると説明している。主な互換性リスクは、reflection または JNI で static final field を実行時に書き換えるコードである。
 
-AOSP evidence は `frameworks-base` ではなく ART / libcore にあり、`ArtField::IsUnmodifiable()`、reflection path、JNI path、ART test で確認できた。確定分類は `TARGET_SDK_37_CONDITIONAL`、信頼度は High とする。
+AOSP 根拠 は `frameworks-base` ではなく ART / libcore にあり、`ArtField::IsUnmodifiable()`、reflection path、JNI path、ART test で確認できた。確定分類は `TARGET_SDK_37_CONDITIONAL`、信頼度は High とする。
 
 # 人間の判断欄
 

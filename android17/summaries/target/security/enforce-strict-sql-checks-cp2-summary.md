@@ -1,6 +1,6 @@
 # CP2 での strict SQL checks の強制 - 1ページ要約
 
-## 対象（Target）
+## 対象
 
 Android 17 Behavior Change
 
@@ -10,7 +10,7 @@ Android 17 Behavior Change
 比較先:
 - android-17.0.0_r1
 
-## 適用条件（Applicability）
+## 適用条件
 
 - 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
 - OS アップデート / 全アプリ: 非該当。ContactsProvider gate は targetSdkVersion 37 以上で有効。
@@ -20,7 +20,7 @@ Android 17 Behavior Change
 - Compat default state: `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)`
 - Confidence: High
 
-## 要約（Summary）
+## 要約
 
 Android 17 では、targetSdkVersion 37 以上のアプリが `READ_CONTACTS` permission なしで CP2 `ContactsContract.Data` table を query する場合、strict SQL validation が強制される、と公式文書は説明している。
 

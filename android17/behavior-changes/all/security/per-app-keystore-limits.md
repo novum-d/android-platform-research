@@ -63,7 +63,7 @@
 
 理由:
 - 公式文書と一致する `ERROR_TOO_MANY_KEYS` API surface と response code mapping は Android 17 tag で確認できた。
-- `frameworks-base` checkout には keystore2 service 本体がなく、50,000 / 200,000 の key count enforcement、system app 判定、targetSdkVersion gate の実装本体は確認できない。
+- `frameworks-base` checkout には keystore2 service 本体がなく、50,000 / 200,000 の key count enforcement、system app 判定、targetSdkVersion ゲートの実装本体は確認できない。
 
 ### 適用条件分類（Applicability Classification）
 
@@ -93,7 +93,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、Android Keystore が device-wide shared resource であることを踏まえ、app が所有できる key 数に per-app limit が導入される、と公式文書は説明している。limit を超えて key を作成しようとすると `KeyStoreException` で失敗する。
 
@@ -138,7 +138,7 @@ Android 17 AOSP tag では、`KeyStoreException.ERROR_TOO_MANY_KEYS` と keystor
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
 確認コマンド:
 
@@ -149,7 +149,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
 結果:
-- `frameworks-base` の `status --short` は空で、dirty working tree は確認されなかった。
+- `frameworks-base` の `status --short` は空で、未コミット変更 は確認されなかった。
 - `android-16.0.0_r4` tag は存在する。
 - `android-17.0.0_r1` tag は存在する。
 
@@ -233,7 +233,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性がある app:
 - Android Keystore keys を大量に作成するアプリ。
@@ -262,7 +262,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 # テスト観点（Test Matrix）
 
-| 端末 OS（Device OS） | targetSdkVersion | 条件 | 期待挙動（Expected behavior） |
+| 端末 OS | targetSdkVersion | 条件 | 期待挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | 大量 key creation | baseline。limit enforcement の有無を確認する。 |
 | Android 17 | 36 | app-owned key count が 200,000 超 | key creation が `KeyStoreException` で失敗し、numeric error は `ERROR_INCORRECT_USAGE` の想定。 |

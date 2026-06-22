@@ -38,13 +38,13 @@ New lock-free implementation of MessageQueue
 
 公式文書からの初期適用条件判断:
 - targetSdkVersion 37 以上のアプリに適用される変更として扱う。
-- AOSP では `USE_NEW_MESSAGEQUEUE` Change ID が `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` として定義され、Android 16 / API 36 より後、すなわち targetSdkVersion 37 以上で default enabled になる。
+- AOSP では `USE_NEW_MESSAGEQUEUE` Change ID が `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` として定義され、Android 16 / API 36 より後、すなわち targetSdkVersion 37 以上で デフォルト有効 になる。
 
 早見表:
 
 | 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | No | `USE_NEW_MESSAGEQUEUE` は `@EnabledAfter(targetSdkVersion = BAKLAVA)` の compat change。targetSdkVersion 36 では default enabled ではない。 |
+| Android 17 に OS アップデートしただけで適用されるか | No | `USE_NEW_MESSAGEQUEUE` は `@EnabledAfter(targetSdkVersion = BAKLAVA)` の compat change。targetSdkVersion 36 では デフォルト有効 ではない。 |
 | targetSdkVersion 37 以上が必要か | Yes | 公式文書と AOSP の `@EnabledAfter(BAKLAVA)` が一致する。 |
 | 追加の実行時条件があるか | Yes | 互換性リスクは `MessageQueue` private field / private method への reflection に依存するコードで顕在化する。 |
 | Compat Change ID が関係するか | Yes | `USE_NEW_MESSAGEQUEUE = 421623328L`。 |
@@ -69,7 +69,7 @@ New lock-free implementation of MessageQueue
 
 必要な実行時条件:
 - Android version: Android 17 以上。
-- targetSdkVersion: 37 以上。AOSP の `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` により、Android 16 / API 36 より後で default enabled。
+- targetSdkVersion: 37 以上。AOSP の `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` により、Android 16 / API 36 より後で デフォルト有効。
 - Device/form factor: 条件なし。
 - Permission/API/component condition: `android.os.MessageQueue` の private field / private method へ reflection している場合に互換性リスクがあると公式文書が述べる。
 - App state/process condition: アプリプロセスで `MessageQueue` が生成されるときに実装選択が行われる。
@@ -77,7 +77,7 @@ New lock-free implementation of MessageQueue
 Compat framework:
 - Change ID: `421623328`
 - 変更名: `USE_NEW_MESSAGEQUEUE`
-- 既定状態: targetSdkVersion 37 以上で default enabled。targetSdkVersion 36 では default disabled。
+- 既定状態: targetSdkVersion 37 以上で デフォルト有効。targetSdkVersion 36 では デフォルト無効。
 - テスト時の切り替え可否: 公式 guidance は `adb am compat enable/disable USE_NEW_MESSAGEQUEUE <package>` を案内している。
 
 分類信頼度:
@@ -148,21 +148,21 @@ AOSP で確認した点:
 - Espresso は 3.7.0 以上へ更新することが推奨されている。
 - Robolectric は 4.17 以上へ更新し、`@LooperMode(LEGACY)` を使っている場合は `@LooperMode(PAUSED)` へ移行することが推奨されている。
 - debuggable build では `adb am compat enable USE_NEW_MESSAGEQUEUE <package>` で targetSdkVersion を上げずに挙動を test できる。
-- targetSdkVersion 37 以上では default enabled と説明されており、原因切り分けのため `adb am compat disable USE_NEW_MESSAGEQUEUE <package>` で一時的に legacy lock-based implementation へ戻せる。
+- targetSdkVersion 37 以上では デフォルト有効 と説明されており、原因切り分けのため `adb am compat disable USE_NEW_MESSAGEQUEUE <package>` で一時的に legacy lock-based implementation へ戻せる。
 
-## 適用条件（Applicability）
+## 適用条件
 
-この変更は、公式文書と AOSP の compat gate の両方から、Android 17 上で targetSdkVersion 37 以上のアプリに default enabled になる変更として扱う。
+この変更は、公式文書と AOSP の compat gate の両方から、Android 17 上で targetSdkVersion 37 以上のアプリに デフォルト有効 になる変更として扱う。
 
 ### OS アップデート時の挙動
 
-- Android 17 にアップデートしただけで適用されるか: No。targetSdkVersion 36 のままでは `USE_NEW_MESSAGEQUEUE` は default enabled ではない。
+- Android 17 にアップデートしただけで適用されるか: No。targetSdkVersion 36 のままでは `USE_NEW_MESSAGEQUEUE` は デフォルト有効 ではない。
 - targetSdkVersion に依存しない根拠: なし。AOSP は `@EnabledAfter(targetSdkVersion = BAKLAVA)` を使う。
 - Android 16 以前での挙動: legacy `MessageQueue` implementation が基準。Android 17 の combined / concurrent implementation は `android-17.0.0_r1` で確認した差分。
 
 ### targetSdkVersion 37 以上での挙動
 
-- targetSdkVersion 37 以上で適用されるか: Yes。`USE_NEW_MESSAGEQUEUE` が `@EnabledAfter(BAKLAVA)` で default enabled。
+- targetSdkVersion 37 以上で適用されるか: Yes。`USE_NEW_MESSAGEQUEUE` が `@EnabledAfter(BAKLAVA)` で デフォルト有効。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: Android 17 platform の `frameworks-base` 実装に依存する。Android 16 platform には本調査対象の new implementation はない。
 - opt-out / temporary override の有無: debuggable build では `adb am compat disable USE_NEW_MESSAGEQUEUE <package>` で切り分けできる。公式 guidance と AOSP Change ID が一致する。
 
@@ -194,8 +194,8 @@ git -C frameworks-base tag --list 'android-17*'
 - To tag: `android-17.0.0_r1` exists.
 
 根拠上の制約:
-- source evidence は `android-16.0.0_r4` と `android-17.0.0_r1` の明示的なタグ比較、および `android-17.0.0_r1` 上の該当 symbol 確認に限定した。
-- `frameworks-base` working tree は clean のため、local working tree changes を platform evidence として誤採用するリスクは確認されていない。
+- ソース根拠 は `android-16.0.0_r4` と `android-17.0.0_r1` の明示的なタグ比較、および `android-17.0.0_r1` 上の該当 symbol 確認に限定した。
+- `frameworks-base` working tree は clean のため、ローカル作業ツリーの変更 を platform 根拠 として誤採用するリスクは確認されていない。
 
 ## 関連ファイル
 
@@ -212,7 +212,7 @@ git -C frameworks-base tag --list 'android-17*'
 
 | ファイル / シンボル | Android 16 基準挙動 | Android 17 挙動 | このコードパスを根拠にする理由 |
 | --- | --- | --- | --- |
-| `core/java/android/os/CombinedMessageQueue/MessageQueue.java` / `USE_NEW_MESSAGEQUEUE` | Android 16 tag にはこの combined concurrent implementation file は存在しない。legacy queue が既定。 | `@ChangeId` `USE_NEW_MESSAGEQUEUE = 421623328L` が追加され、`@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` で default enabled 条件を定義する。 | 公式文書の「targetSdkVersion 37 以上で新 MessageQueue 実装」を直接 gate する compat change である。 |
+| `core/java/android/os/CombinedMessageQueue/MessageQueue.java` / `USE_NEW_MESSAGEQUEUE` | Android 16 tag にはこの combined concurrent implementation file は存在しない。legacy queue が既定。 | `@ChangeId` `USE_NEW_MESSAGEQUEUE = 421623328L` が追加され、`@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` で デフォルト有効 条件を定義する。 | 公式文書の「targetSdkVersion 37 以上で新 MessageQueue 実装」を直接 gate する compat change である。 |
 | `CombinedMessageQueue/MessageQueue.java` / `computeUseConcurrent()` | legacy implementation を使う。 | `CompatChanges.isChangeEnabled(USE_NEW_MESSAGEQUEUE)` または `Flags.useConcurrentMessageQueueInApps()` が true の場合に concurrent implementation を選ぶ。 | アプリプロセスでどの MessageQueue implementation が使われるかを決める実行時 gate である。 |
 | `CombinedMessageQueue/MessageQueue.java` / `mMessages` | legacy queue の private linked-list head として reflection 依存が成立しうる。 | `mMessages` は binary compatibility のため残るが、`@UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.BAKLAVA)` により legacy 互換境界が置かれる。 | 公式文書が警告する private field reflection 破損リスクと対応する。 |
 | `core/java/android/app/ActivityThread.java` / process start | Android 16 では combined queue 選択のための初期化 path はない。 | process startup で `Looper.prepareMainLooper()` より前に MessageQueue 関連の process-level 初期化が行われる。 | `MessageQueue` は app main looper 作成時に生成されるため、process lifetime の早い段階で implementation が決まる。 |
@@ -229,7 +229,7 @@ git -C frameworks-base tag --list 'android-17*'
 
 | 確認した差分 | 解釈 | 挙動変更との関係 | 信頼度 |
 | --- | --- | --- | --- |
-| `CombinedMessageQueue/MessageQueue.java` と `CombinedDeliMessageQueue/MessageQueue.java` が Android 17 tag に存在し、`USE_NEW_MESSAGEQUEUE` compat change を定義する。 | added behavior / changed default gate | Android 17 で新しい concurrent / lock-free queue implementation を導入し、targetSdkVersion 37 以上で default enabled にする。 | High |
+| `CombinedMessageQueue/MessageQueue.java` と `CombinedDeliMessageQueue/MessageQueue.java` が Android 17 tag に存在し、`USE_NEW_MESSAGEQUEUE` compat change を定義する。 | added behavior / changed default gate | Android 17 で新しい concurrent / lock-free queue implementation を導入し、targetSdkVersion 37 以上で デフォルト有効 にする。 | High |
 | `computeUseConcurrent()` が `CompatChanges.isChangeEnabled(USE_NEW_MESSAGEQUEUE)` を確認する。 | changed condition / gate | targetSdkVersion 36 と 37 で expected behavior が分かれる根拠。 | High |
 | `mMessages` に `maxTargetSdk = BAKLAVA` の unsupported app usage 境界が置かれる。 | changed compatibility boundary | private field reflection 依存が targetSdkVersion 37 で互換性リスクになる説明を補強する。 | High |
 | `Handler.java` / `Looper.java` に MessageQueue 周辺の内部変更がある。 | implementation support changes | public API path から新 implementation に到達することを補強するが、gate の主根拠ではない。 | Medium |
@@ -237,7 +237,7 @@ git -C frameworks-base tag --list 'android-17*'
 必須分類:
 - Added behavior: new concurrent / lock-free MessageQueue implementation。
 - Removed behavior: public API の削除は確認していない。
-- Changed condition / gate: `USE_NEW_MESSAGEQUEUE` compat change が targetSdkVersion 37 以上で default enabled。
+- Changed condition / gate: `USE_NEW_MESSAGEQUEUE` compat change が targetSdkVersion 37 以上で デフォルト有効。
 - Changed default: targetSdkVersion 37 以上では legacy implementation ではなく new implementation が default。
 - No behavior change found: 該当しない。
 
@@ -263,19 +263,19 @@ git -C frameworks-base tag --list 'android-17*'
 
 結論:
 - 公式文書と AOSP gate が一致するため、主分類は `TARGET_SDK_37` とする。
-- Android 17 / targetSdkVersion 36 では default disabled、Android 17 / targetSdkVersion 37 では default enabled と説明できる。
+- Android 17 / targetSdkVersion 36 では デフォルト無効、Android 17 / targetSdkVersion 37 では デフォルト有効 と説明できる。
 
 ## 適用ゲート根拠
 
-- targetSdkVersion 適用ゲート: `@EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.BAKLAVA)`。Android 17 の targetSdkVersion 37 以上で default enabled。
+- targetSdkVersion 適用ゲート: `@EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.BAKLAVA)`。Android 17 の targetSdkVersion 37 以上で デフォルト有効。
 - CompatChanges.isChangeEnabled / ChangeId: `CompatChanges.isChangeEnabled(USE_NEW_MESSAGEQUEUE)`、Change ID `421623328L`。
-- @EnabledAfter / @EnabledSince / default state: `@EnabledAfter(BAKLAVA)`。targetSdkVersion 36 では default disabled、37 以上では default enabled。
+- @EnabledAfter / @EnabledSince / default state: `@EnabledAfter(BAKLAVA)`。targetSdkVersion 36 では デフォルト無効、37 以上では デフォルト有効。
 - Build.VERSION / SDK_INT 適用ゲート: 明示的な SDK_INT runtime gate は主根拠として確認していない。AOSP tag 自体が Android 17 platform 実装。
-- DeviceConfig / resources config: `Flags.useConcurrentMessageQueueInApps()` による platform flag path は存在するが、公式 Behavior Change の targetSdkVersion gate とは別の override path として扱う。
+- DeviceConfig / resources config: `Flags.useConcurrentMessageQueueInApps()` による platform flag path は存在するが、公式 Behavior Change の targetSdkVersion ゲートとは別の override path として扱う。
 - Permission/AppOps 適用ゲート: なし。
 - Manifest/property 適用ゲート: なし。
 - 適用ゲート未検出: 該当しない。
-- 適用ゲートの結論: Android 17 上で targetSdkVersion 37 以上のアプリに default enabled。
+- 適用ゲートの結論: Android 17 上で targetSdkVersion 37 以上のアプリに デフォルト有効。
 - ソース文脈からの推論: app の `Handler` / `Looper` 利用は `MessageQueue` に到達し、queue implementation selection は process-level に評価される。
 
 確認済み:
@@ -306,7 +306,7 @@ git -C frameworks-base tag --list 'android-17*'
 影響が限定的と考えられるケース:
 - `Handler`、`Looper`、`MessageQueue` の public API のみを使っているアプリ。
 - `MessageQueue` の private field / private method に reflection していないアプリ。
-- targetSdkVersion 37 へ上げないアプリ。AOSP gate 上は targetSdkVersion 36 では default disabled。
+- targetSdkVersion 37 へ上げないアプリ。AOSP gate 上は targetSdkVersion 36 では デフォルト無効。
 
 ---
 
@@ -328,7 +328,7 @@ git -C frameworks-base tag --list 'android-17*'
 
 # サービス影響例
 
-このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+このセクションは、公式文書と AOSP 根拠 から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
 ## 例1: UI 操作が多い一般アプリ
 
@@ -386,7 +386,7 @@ git -C frameworks-base tag --list 'android-17*'
 | 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | default | Android 16 baseline。lock-free implementation の Android 17 変更は適用されない想定。ただし本調査では AOSP baseline 未比較。 |
-| Android 17 | 36 | default | `USE_NEW_MESSAGEQUEUE` は default disabled。legacy implementation が維持される想定。 |
+| Android 17 | 36 | default | `USE_NEW_MESSAGEQUEUE` は デフォルト無効。legacy implementation が維持される想定。 |
 | Android 17 | 37 | default | 公式文書上は新しい lock-free `MessageQueue` 実装が適用される。private reflection client は破損リスクあり。 |
 | Android 17 | 36 | force-enabled | `adb am compat enable USE_NEW_MESSAGEQUEUE <package>` で new implementation を検証できる。 |
 | Android 17 | 37 | force-disabled | `adb am compat disable USE_NEW_MESSAGEQUEUE <package>` で legacy implementation に戻して原因切り分けできる。 |

@@ -19,11 +19,11 @@ Android 17 Behavior Change
 ## 適用条件
 
 - 主分類（Primary classification）: TARGET_SDK_37
-- OS アップデート / 全アプリ: No。AOSP の `USE_NEW_MESSAGEQUEUE` は targetSdkVersion 37 以上で default enabled。
+- OS アップデート / 全アプリ: No。AOSP の `USE_NEW_MESSAGEQUEUE` は targetSdkVersion 37 以上で デフォルト有効。
 - targetSdkVersion 37 以上: Yes。`@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` により Android 16 / API 36 より後で有効。
 - その他の必須条件: `MessageQueue` private field / private method への reflection が互換性リスク条件。
 - Compat Change ID: `421623328` / `USE_NEW_MESSAGEQUEUE`
-- Compat default state: targetSdkVersion 36 では default disabled、targetSdkVersion 37 以上で default enabled
+- Compat default state: targetSdkVersion 36 では デフォルト無効、targetSdkVersion 37 以上で デフォルト有効
 
 ## 早見マトリクス
 
@@ -58,8 +58,8 @@ Android 17 では、targetSdkVersion 37 以上のアプリに新しい lock-free
 | 端末 OS | targetSdkVersion | 期待挙動 |
 | --- | --- | --- |
 | Android 16 | 36 | Android 16 baseline。Android 17 の lock-free implementation は対象外。 |
-| Android 17 | 36 | `USE_NEW_MESSAGEQUEUE` は default disabled。旧 implementation が維持される想定。 |
-| Android 17 | 37 | `USE_NEW_MESSAGEQUEUE` が default enabled になり、新しい `MessageQueue` implementation が適用される。 |
+| Android 17 | 36 | `USE_NEW_MESSAGEQUEUE` は デフォルト無効。旧 implementation が維持される想定。 |
+| Android 17 | 37 | `USE_NEW_MESSAGEQUEUE` が デフォルト有効 になり、新しい `MessageQueue` implementation が適用される。 |
 | Android 17 | 36 / debuggable | `adb am compat enable USE_NEW_MESSAGEQUEUE <package>` で新実装を test できると公式 guidance は説明。 |
 
 ## 顧客向け説明
@@ -78,8 +78,8 @@ Android 17 AOSP tag `android-17.0.0_r1` では、`USE_NEW_MESSAGEQUEUE = 4216233
 - 検証対象の原文: Android 17 から targetSdkVersion 37 以上のアプリが新しい lock-free `MessageQueue` 実装を受け取り、private field / method reflection client が壊れる可能性がある。
 - AOSP ファイル: `core/java/android/os/CombinedMessageQueue/MessageQueue.java`, `core/java/android/os/Handler.java`, `core/java/android/os/Looper.java`, `core/java/android/app/ActivityThread.java`
 - AOSP ソース文脈: `USE_NEW_MESSAGEQUEUE` Change ID、`computeUseConcurrent()` の `CompatChanges.isChangeEnabled(USE_NEW_MESSAGEQUEUE)`、`mMessages` の `maxTargetSdk = BAKLAVA` 互換境界を確認。
-- 差分解釈: added behavior / changed condition / changed default。新 implementation の追加と targetSdkVersion 37 default enable gate。
-- 適用ゲートの結論: Android 17 上で targetSdkVersion 37 以上にすると default enabled。targetSdkVersion 36 では default disabled。
+- 差分解釈: added behavior / changed condition / changed default。新 implementation の追加と targetSdkVersion 37 デフォルト有効化ゲート。
+- 適用ゲートの結論: Android 17 上で targetSdkVersion 37 以上にすると デフォルト有効。targetSdkVersion 36 では デフォルト無効。
 
 ## 人間の判断欄
 

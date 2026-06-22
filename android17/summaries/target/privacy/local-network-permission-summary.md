@@ -1,6 +1,6 @@
 # Android 17 をターゲットにするアプリで必要になるローカルネットワーク権限 - 1ページ要約
 
-## 対象（Target）
+## 対象
 
 Android 17 Behavior Change
 
@@ -16,7 +16,7 @@ Android 17 Behavior Change
 対象 targetSdkVersion:
 - 37
 
-## 適用条件（Applicability）
+## 適用条件
 
 - 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
 - OS アップデート / 全アプリ（OS update / all apps）: 主条件ではない。旧 targetSdkVersion は compat / implicit grant の対象と考えられるが、connectivity module evidence が未確認。
@@ -25,35 +25,35 @@ Android 17 Behavior Change
 - Compat Change ID: `365139289L`
 - Compat default state: frameworks-base では未確認。`MediaRouter2ServiceImpl` はこの ID を connectivity module の `RESTRICT_LOCAL_NETWORK` として参照する。
 
-## 早見マトリクス（At-a-Glance Matrix）
+## 早見マトリクス
 
-| シナリオ（Scenario） | 影響（Impact） |
+| シナリオ | 影響 |
 | --- | --- |
 | Android 17 / targetSdkVersion 36 | legacy app として permission check が免除または implicit grant される想定。ただし final enforcement は connectivity module で要確認。 |
 | Android 17 / targetSdkVersion 37 | direct local network access には system picker または `ACCESS_LOCAL_NETWORK` runtime grant が必要。 |
 | Android 17 / targetSdkVersion 37 + permission denied | LAN device discovery / connection、mDNS / NSD、casting、IoT、local endpoint socket access が失敗する可能性。 |
 
-## 要約（Summary）
+## 要約
 
 Android 17 では、targetSdkVersion 37 以上のアプリが LAN 上の device を discover / connect する場合、新しい `ACCESS_LOCAL_NETWORK` runtime permission または system-mediated picker が必要になる。AOSP `frameworks-base` では permission 定義、API surface、AppOps、permission policy、BPF permission map、MediaRouter の compat path まで確認できた。
 
 信頼度は Medium。`frameworks-base` は permission infrastructure を裏付けるが、network traffic の実 enforcement と `RESTRICT_LOCAL_NETWORK` の定義本体は connectivity module 側の追加確認が必要。
 
-## 顧客影響（Customer Impact）
+## 顧客影響
 
 - smart home、IoT、casting、mDNS / NSD、`.local` resolution、local endpoint socket、WebView local network access を使うアプリは targetSdkVersion 37 更新時に影響を受ける可能性が高い。
 - system-mediated picker で要件を満たせる場合は、広い runtime permission request を避けられる。
 - direct / persistent access が必要な場合は、manifest declaration、runtime request、denial / revocation handling が必要。
 
-## 対応要否（Required Action）
+## 対応要否
 
 - 必須対応候補: local network access 箇所を棚卸しし、picker path と runtime permission path のどちらを採用するか決める。
 - 推奨対応: Android 17 / targetSdkVersion 37 で permission 未許可、許可、取り消し後の動作をテストする。
 - 不要な可能性: local network access を行わないアプリ、または system-mediated picker だけで要件を満たすアプリ。
 
-## テストマトリクス（Test Matrix）
+## テストマトリクス
 
-| 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
+| 端末 OS | targetSdkVersion | 期待挙動 |
 | --- | --- | --- |
 | Android 16 | 36 | 従来どおり local network access が許可される想定。 |
 | Android 17 | 36 | legacy app として compat exemption / implicit grant が働く想定。 |

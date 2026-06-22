@@ -105,7 +105,7 @@ Android 17 では、background からの audio playback、audio focus request、
 
 具体的には、audio focus は `OP_TAKE_AUDIO_FOCUS` と `OP_CONTROL_AUDIO`、volume は `OP_CONTROL_AUDIO_PARTIAL` と `OP_CONTROL_AUDIO` の AppOps 結果を見て partial / full の block state を作る。targetSdkVersion が 37 未満の場合は partial level まで緩和されるが、37 以上では strict flag や exception によっては full level の block になる。
 
-信頼度は Medium とする。Java framework 側では targetSdkVersion gate、alarm exception、focus / volume の failure mode を確認できたが、playback mute の最終判定は native AudioPolicy / audioserver 側にもまたがる。
+信頼度は Medium とする。Java framework 側では targetSdkVersion ゲート、alarm exception、focus / volume の failure mode を確認できたが、playback mute の最終判定は native AudioPolicy / audioserver 側にもまたがる。
 
 ---
 
@@ -147,7 +147,7 @@ AOSP で確認した変更点:
 - volume でも exact alarm permission / eligibility が partial level 緩和に使われる。
 - ActivityManager 側では `PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL` が FGS / process state と結びつき、BFGS より低い procstate では capability が剥がされる。
 
-## 適用条件（Applicability）
+## 適用条件
 
 ### OS アップデート時の挙動
 

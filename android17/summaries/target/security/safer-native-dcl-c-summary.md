@@ -1,6 +1,6 @@
 # Safer Native DCL-C - 1ページ要約
 
-## 対象（Target）
+## 対象
 
 Android 17 Behavior Change
 
@@ -16,7 +16,7 @@ Android 17 Behavior Change
 対象 targetSdkVersion:
 - 37
 
-## 適用条件（Applicability）
+## 適用条件
 
 - 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
 - OS アップデート / 全アプリ（OS update / all apps）: 非該当。AOSP gate は targetSdkVersion 37 以上で有効。
@@ -26,13 +26,13 @@ Android 17 Behavior Change
 - Compat default state: `@EnabledSince(targetSdkVersion = VersionCodes.CINNAMON_BUN)`
 - Confidence: High
 
-## 要約（Summary）
+## 要約
 
 Android 17 では、targetSdkVersion 37 以上のアプリで、`System.load()` する native file が read-only として mark されていない場合に `UnsatisfiedLinkError` になる、と公式文書は説明している。
 
 libcore の `Runtime.load0()` と `VMRuntime` で、writable native file の検出、compat ChangeId `463348571`、targetSdkVersion 37 gate、`UnsatisfiedLinkError` path を確認した。
 
-## 顧客影響（Customer Impact）
+## 顧客影響
 
 - 実行時に `.so` をダウンロード、生成、展開、更新して `System.load()` するアプリに影響する可能性がある。
 - dynamic native loading は code injection / tampering risk が高いため、可能な限り避けることが推奨される。

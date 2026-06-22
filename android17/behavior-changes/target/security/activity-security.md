@@ -95,7 +95,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、Background Activity Launch (BAL) restrictions がさらに強化され、PendingIntent / IntentSender 経由の Activity 起動でも、起動を許可する条件をより明示的に選ぶ必要がある。従来の broad opt-in である `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` は deprecated になり、通常は `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE`、本当に常時許可が必要な特殊用途だけ `MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` を使う設計へ移行する。
 
@@ -150,9 +150,9 @@ AOSP で確認した変更点:
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
-Commands checked before evidence use:
+根拠利用前に確認したコマンド:
 
 ```bash
 git -C frameworks-base status --short
@@ -160,7 +160,7 @@ git -C frameworks-base tag --list android-16.0.0_r4
 git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
-Result:
+結果:
 - `frameworks-base` working tree: clean at the time of investigation.
 - From tag: `android-16.0.0_r4` exists.
 - To tag: `android-17.0.0_r1` exists.
@@ -181,14 +181,14 @@ Result:
 | `ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED` | BAL broad opt-in として利用 | deprecated。`ALLOW_IF_VISIBLE` / `ALLOW_ALWAYS` への移行を案内 | 公式文書の legacy constant migration。 |
 | `ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` | 既存だが Android 17 で推奨 migration path として強調 | visible window を持つ場合だけ BAL privileges を付与する mode | 推奨される granular control。 |
 | `ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` | 既存だが Android 17 で broad privilege として明確化 | privileged context を含む広い BAL privileges を付与 | 特殊用途向けの強い opt-in。 |
-| `BackgroundActivityStartController.ASM_RESTRICTIONS` | ChangeId はあるが Android 17 target までは disabled | `@EnabledAfter(targetSdkVersion = BAKLAVA)` により targetSdkVersion 37 以上で enabled | targetSdkVersion gate の中核 evidence。 |
+| `BackgroundActivityStartController.ASM_RESTRICTIONS` | ChangeId はあるが Android 17 target までは disabled | `@EnabledAfter(targetSdkVersion = BAKLAVA)` により targetSdkVersion 37 以上で enabled | targetSdkVersion ゲートの中核 evidence。 |
 | `checkBackgroundActivityStartAllowedByCaller` | broad BAL exemption を評価 | `ALLOW_IF_VISIBLE` では caller visible / non-app visible / foreground process のみ評価 | visible-only mode の enforcement。 |
 | `checkBackgroundActivityStartAllowedByRealCaller` | broad BAL exemption を評価 | `ALLOW_IF_VISIBLE` では real caller visible / foreground 系のみ評価。`ALLOW_ALWAYS` で permission / allowlist 系を評価 | IntentSender / PendingIntent sender 側の enforcement。 |
 
 Source context の補足:
 - Entry point / caller: `PendingIntent.send()` / `IntentSender` 実行時に `ActivityOptions` の BAL mode が `BackgroundActivityStartController` へ渡る。
 - 関連性: Activity 起動の可否を最終的に判断する WM policy が、ActivityOptions の mode と caller visibility を使って BAL を許可 / 拒否する。
-- Baseline Android behavior: Android 16 target 相当では `ASM_RESTRICTIONS` が compat default disabled。
+- Baseline Android behavior: Android 16 target 相当では `ASM_RESTRICTIONS` が compat デフォルト無効。
 - Target Android behavior: Android 17 / targetSdkVersion 37 以上では `ASM_RESTRICTIONS` が enabled になり、visible-only / always の granular mode に基づく判定が適用される。
 - Source diff type: changed condition / gate、changed default、added API guidance。
 - Excluded code paths: ordinary foreground `startActivity`、accessibility global actions、drag and drop など BAL / IntentSender 起動と直接関係しない activity launch path は除外した。
@@ -234,7 +234,7 @@ Source context の補足:
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性が高いアプリ:
 - notification / alarm / reminder から画面起動するアプリ
@@ -254,7 +254,7 @@ Source context の補足:
 
 | 端末 OS | targetSdkVersion | BAL mode | Caller state | 期待挙動 |
 | --- | --- | --- | --- | --- |
-| Android 17 | 36 | `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` | background | 互換扱い。`ASM_RESTRICTIONS` は default disabled。 |
+| Android 17 | 36 | `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` | background | 互換扱い。`ASM_RESTRICTIONS` は デフォルト無効。 |
 | Android 17 | 37 | `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` | visible | Activity start が許可される想定。 |
 | Android 17 | 37 | `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` | background | Activity start が拒否される想定。 |
 | Android 17 | 37 | `MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` | background + valid exemption | Activity start が許可される可能性。用途を限定して確認が必要。 |

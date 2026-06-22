@@ -1,6 +1,6 @@
 # Cross-profile loopback traffic のブロック - 1ページ要約
 
-## 対象（Target）
+## 対象
 
 Android 17 Behavior Change
 
@@ -16,7 +16,7 @@ Android 17 Behavior Change
 対象 targetSdkVersion:
 - 37
 
-## 適用条件（Applicability）
+## 適用条件
 
 - 主分類（Primary classification）: OS_UPDATE_ALL_APPS
 - OS アップデート / 全アプリ（OS update / all apps）: 該当。Android 17 以上で動作する全アプリに target API level に関係なく適用と明記されている。
@@ -26,21 +26,21 @@ Android 17 Behavior Change
 - Compat default state: 未確認
 - Confidence: Medium
 
-## 早見マトリクス（At-a-Glance Matrix）
+## 早見マトリクス
 
-| シナリオ（Scenario） | 影響（Impact） |
+| シナリオ | 影響 |
 | --- | --- |
 | Android 17 / targetSdkVersion 36 | cross-profile loopback traffic は default block。same-profile loopback は影響なし。 |
 | Android 17 / targetSdkVersion 37 | targetSdkVersion 36 と同様。target API level に関係なく適用。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | work profile / personal profile など profile boundary を跨ぐ localhost / loopback communication が失敗する可能性。 |
 
-## 要約（Summary）
+## 要約
 
 Android 17 では、cross-profile loopback traffic が default で許可されなくなる。same-profile loopback traffic は影響を受けないため、localhost 全般の禁止ではなく、profile boundary を跨ぐ loopback communication の制限として扱う。
 
 AOSP framework では `USE_LOOPBACK_INTERFACE` / `FORCE_USE_LOOPBACK_INTERFACE` permission と関連 feature flags、BPF permission allowlist への追加を確認した。packet-level enforcement は Connectivity / netd / BPF 側の追加確認が必要。
 
-## 顧客影響（Customer Impact）
+## 顧客影響
 
 - work profile / personal profile 間で localhost service に接続する設計が失敗する可能性がある。
 - enterprise companion、DPC support、profile 間 helper、testing / diagnostic bridge などで影響が出る可能性がある。
@@ -51,21 +51,21 @@ AOSP framework では `USE_LOOPBACK_INTERFACE` / `FORCE_USE_LOOPBACK_INTERFACE` 
 - 対象機能: enterprise companion、DPC support、profile 間 helper、testing / diagnostic bridge。
 - 対象条件: one profile で server を起動し、別 profile から `localhost` / `127.0.0.1` / `::1` へ接続する場合。
 
-## 対応要否（Required Action）
+## 対応要否
 
 - 必須対応: localhost / loopback 利用箇所を棚卸しし、same-profile か cross-profile かを確認する。
 - 推奨対応: cross-profile communication は managed profile / enterprise 向けの公式 mechanism へ移行する。
 - 不要: single profile device、same-profile loopback のみ、loopback を使わないアプリでは直接影響は限定的。
 
-## テストマトリクス（Test Matrix）
+## テストマトリクス
 
-| 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
+| 端末 OS | targetSdkVersion | 期待挙動 |
 | --- | --- | --- |
 | Android 16 | 36 | baseline。same-profile / cross-profile loopback の現行挙動を確認。 |
 | Android 17 | 36 | cross-profile loopback は default block、same-profile loopback は unaffected。 |
 | Android 17 | 37 | targetSdkVersion 36 と同じ期待。target API level に関係なく適用。 |
 
-## 顧客向け説明（Explanation for Customers）
+## 顧客向け説明
 
 Android 17 では、work profile と personal profile など、profile boundary を跨ぐ loopback traffic が default で許可されなくなります。これは `localhost` / `127.0.0.1` / `::1` を profile 間通信路として使う設計に影響する可能性があります。
 
@@ -78,7 +78,7 @@ Android 17 では、work profile と personal profile など、profile boundary 
 - AOSP ファイル: `core/res/AndroidManifest.xml`, `core/api/current.txt`, `core/api/system-current.txt`, `core/java/android/permission/flags.aconfig`, `services/permission/java/com/android/server/permission/access/permission/PermissionService.kt`
 - AOSP ソース文脈: loopback interface traffic を permission で guard する `USE_LOOPBACK_INTERFACE` / `FORCE_USE_LOOPBACK_INTERFACE` と BPF permission allowlist。
 - 差分解釈: added permission / changed condition / guarded enforcement surface。
-- Gate conclusion: targetSdkVersion gate は確認されない。packet-level enforcement は Connectivity / netd / BPF 側の追加確認が必要。
+- ゲート結論: targetSdkVersion ゲートは確認されない。packet-level enforcement は Connectivity / netd / BPF 側の追加確認が必要。
 
 ## 人間の判断欄（Human Decision）
 

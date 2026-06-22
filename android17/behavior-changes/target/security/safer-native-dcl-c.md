@@ -87,7 +87,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、targetSdkVersion 37 以上のアプリに対し、Safer Dynamic Code Loading protection が native libraries にも拡張される、と公式文書は説明している。`System.load()` で読み込む native file は read-only として mark されている必要があり、条件を満たさない場合は `UnsatisfiedLinkError` が発生する。
 
@@ -123,9 +123,9 @@ Android 17 では、targetSdkVersion 37 以上のアプリに対し、Safer Dyna
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
-Commands checked before evidence use:
+根拠利用前に確認したコマンド:
 
 ```bash
 git -C frameworks-base status --short
@@ -133,7 +133,7 @@ git -C frameworks-base tag --list android-16.0.0_r4
 git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
-Result:
+結果:
 - `frameworks-base` working tree: clean at the time of investigation.
 - From tag: `android-16.0.0_r4` exists.
 - To tag: `android-17.0.0_r1` exists.
@@ -180,7 +180,7 @@ Source context の補足:
 | frameworks-base に native DCL read-only gate は見つからない | no relevant behavior change found in frameworks-base | 実装本体は ART/native loader 側と判断 | Medium |
 | 公式文書は targetSdkVersion 37 条件を明示 | documentation evidence | 適用条件の一次判断 | Medium |
 | libcore `Runtime.load0()` に writable file throw path が追加 | added enforcement | `System.load(path)` で writable native file を拒否する本体 | High |
-| `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL = 463348571` | compat gate | targetSdkVersion 37 以上で default enabled | High |
+| `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL = 463348571` | compat gate | targetSdkVersion 37 以上で デフォルト有効 | High |
 
 ---
 
@@ -211,7 +211,7 @@ Source context の補足:
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性が高いアプリ:
 - 実行時に `.so` をダウンロード / 生成 / 展開 / 更新して `System.load()` するアプリ

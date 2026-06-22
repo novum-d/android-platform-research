@@ -101,7 +101,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、background からの audio playback、audio focus request、volume / ringer mode API に対して audio hardening が強化される。AOSP では、`HardeningEnforcer` が AppOps の audio restriction を見て、volume API を no-op 化し、audio focus request を `AUDIOFOCUS_REQUEST_FAILED` にする経路が確認できた。playback については audioserver から `AudioService` へ `playbackHardeningEvent()` が通知され、`AudioHardening background playback ... muted` として記録される。
 
@@ -135,7 +135,7 @@ Android 17 では、background からの audio playback、audio focus request、
 
 ## 解釈（Interpretation）
 
-この変更は単一の targetSdkVersion gate ではなく、二層の適用条件を持つ。第一層は Android 17 上の all apps に対する background audio hardening で、AppOps / process state / foreground service capability により audio interaction が許可されない場合に制限される。第二層は targetSdkVersion 37 以上の app に対する追加制限で、CINNAMON_BUN 以降の targetSdkVersion が strict level の判定に使われる。
+この変更は単一の targetSdkVersion ゲートではなく、二層の適用条件を持つ。第一層は Android 17 上の all apps に対する background audio hardening で、AppOps / process state / foreground service capability により audio interaction が許可されない場合に制限される。第二層は targetSdkVersion 37 以上の app に対する追加制限で、CINNAMON_BUN 以降の targetSdkVersion が strict level の判定に使われる。
 
 ---
 
@@ -148,7 +148,7 @@ AOSP で確認した変更点:
 - Playback では audioserver から `AudioService.playbackHardeningEvent()` へ hardening event が通知され、partial / full、reason、usage が `AudioHardening background playback ... muted` としてログ・metrics に記録される。
 - ActivityManager の process capability に `PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL` が使われ、`OomAdjusterImpl` は process state が `PROCESS_STATE_BOUND_FOREGROUND_SERVICE` より低い場合に `hardeningBfgs()` 条件で foreground audio control capability を落とす。
 
-## 適用条件（Applicability）
+## 適用条件
 
 ### OS アップデート時の挙動（OS Update Behavior）
 
@@ -172,7 +172,7 @@ AOSP で確認した変更点:
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
 確認コマンド:
 
@@ -183,7 +183,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
 結果:
-- `frameworks-base` の `status --short` は空で、dirty working tree は確認されなかった。
+- `frameworks-base` の `status --short` は空で、未コミット変更 は確認されなかった。
 - `android-16.0.0_r4` tag は存在する。
 - `android-17.0.0_r1` tag は存在する。
 
@@ -247,7 +247,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 
 ## 仮説（Hypotheses）
 
-- all apps 共通制限は AppOps / process capability / audio policy の default policy により有効化され、targetSdkVersion 37 は strict level の追加条件に使われる。
+- all apps 共通制限は AppOps / process capability / audio policy の デフォルト ポリシー により有効化され、targetSdkVersion 37 は strict level の追加条件に使われる。
 - Media3 `MediaSessionService` や適切な `mediaPlayback` FGS は foreground audio control capability を得ることで、通常の継続再生を維持できる可能性が高い。
 
 ## 結論（Conclusions）
@@ -258,7 +258,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 
 ---
 
-# 顧客影響（Customer Impact）
+# 顧客影響
 
 影響しやすいアプリ:
 - 音楽、podcast、radio、audiobook、video streaming、alarm、timer、reminder、background sound、通話・ナビゲーションなど、background で audio interaction を行うアプリ。

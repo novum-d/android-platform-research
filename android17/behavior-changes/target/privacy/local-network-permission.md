@@ -40,7 +40,7 @@ https://developer.android.com/about/versions/17/behavior-changes-17
 - 公式文書は、Android 17 / targetSdkVersion 37 以上のアプリでは local network access に `ACCESS_LOCAL_NETWORK` runtime permission、または system-mediated picker が必要になると説明している。
 - 追加条件は、アプリが LAN / Wi-Fi / Ethernet などの local network 上の device discovery / connection / socket communication を行うこと。
 - AOSP `frameworks-base` では permission 定義、API surface、AppOps、permission policy、BPF permission map への接続、MediaRouter の互換処理を確認できた。
-- 一方、local network traffic を実際に拒否する packet / socket enforcement と targetSdkVersion gate の本体は connectivity module 側にあると考えられ、`frameworks-base` だけでは High confidence まで上げない。
+- 一方、local network traffic を実際に拒否する packet / socket enforcement と targetSdkVersion ゲートの本体は connectivity module 側にあると考えられ、`frameworks-base` だけでは High confidence まで上げない。
 
 早見表（At-a-glance impact）:
 
@@ -97,13 +97,13 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、targetSdkVersion 37 以上のアプリが LAN 上の device を discover / connect する場合、新しい `ACCESS_LOCAL_NETWORK` runtime permission、または system-mediated な privacy-preserving picker が必要になる。AOSP `frameworks-base` では、この permission の API / manifest 定義、AppOps、runtime permission policy、permission state を BPF map に配布する仕組み、MediaRouter 経由の互換処理を確認できた。
 
 この変更は local network access を dangerous runtime permission の制御下に置く privacy hardening である。smart home、IoT、casting、mDNS / NSD、`.local` resolution、local endpoint socket などを使うアプリは、targetSdkVersion 37 更新前に access path の棚卸しが必要になる。
 
-信頼度は Medium とする。`frameworks-base` だけで permission infrastructure は十分確認できたが、packet / socket enforcement と targetSdkVersion gate の定義本体は connectivity module 側に残るため、High confidence にはしていない。
+信頼度は Medium とする。`frameworks-base` だけで permission infrastructure は十分確認できたが、packet / socket enforcement と targetSdkVersion ゲートの定義本体は connectivity module 側に残るため、High confidence にはしていない。
 
 ---
 
@@ -147,7 +147,7 @@ AOSP で確認した変更点:
 - `MediaRouter2ServiceImpl` は target package が local network permission を持たない場合の権限補完と、`RESTRICT_LOCAL_NETWORK` compat change disabled 時の後方互換処理を持つ。
 
 未確認として残る点:
-- connectivity module 側の `RESTRICT_LOCAL_NETWORK` 定義、default state、targetSdkVersion gate。
+- connectivity module 側の `RESTRICT_LOCAL_NETWORK` 定義、default state、targetSdkVersion ゲート。
 - packet / socket / DNS / NSD / Cronet / OkHttp などに対する実 enforcement path。
 - 旧 targetSdkVersion アプリに対する temporary implicit grant の実装詳細。
 
@@ -155,9 +155,9 @@ AOSP で確認した変更点:
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
-Commands checked before evidence use:
+根拠利用前に確認したコマンド:
 
 ```bash
 git -C frameworks-base status --short
@@ -165,7 +165,7 @@ git -C frameworks-base tag --list android-16.0.0_r4
 git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
-Result:
+結果:
 - `frameworks-base` working tree: clean at the time of investigation.
 - From tag: `android-16.0.0_r4` exists.
 - To tag: `android-17.0.0_r1` exists.
@@ -201,7 +201,7 @@ Result:
 | `PermissionBpfMap.java` | interface なし | UID ごとの granted permission bitmap を管理する interface を追加 | local network access enforcement が参照する permission state の保存先。 |
 | `DefaultPermissionGrantPolicy.java` / `NEARBY_DEVICES_PERMISSIONS` | local network permission なし | `ACCESS_LOCAL_NETWORK` を default grant policy の nearby devices set に含める | permission grant policy の追加。 |
 | `SystemConfig.java` / `VENDOR_ASSIGNABLE_PERMISSIONS` | vendor assignable ではない | `INTERNET` とともに `ACCESS_LOCAL_NETWORK` を vendor assignable permission に含める | system config からの permission assignment 対象。 |
-| `MediaRouter2ServiceImpl.java` / `permissionAllowedForAppCompat` | local network permission check なし | `RESTRICT_LOCAL_NETWORK` compat change が disabled の uid では `ACCESS_LOCAL_NETWORK` を満たした扱いにする | targetSdkVersion gate / compat gate が存在することを示す frameworks-base 側 evidence。 |
+| `MediaRouter2ServiceImpl.java` / `permissionAllowedForAppCompat` | local network permission check なし | `RESTRICT_LOCAL_NETWORK` compat change が disabled の uid では `ACCESS_LOCAL_NETWORK` を満たした扱いにする | targetSdkVersion ゲート / compat gate が存在することを示す frameworks-base 側 evidence。 |
 | `SystemUI MediaSwitchingController` | local network permission request なし | flag 有効時に media output picker で `ACCESS_LOCAL_NETWORK` を request / check | system-mediated media routing UI の permission path。 |
 
 Source context の補足:
@@ -257,7 +257,7 @@ Source context の補足:
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性が高いアプリ:
 - smart home / IoT device setup

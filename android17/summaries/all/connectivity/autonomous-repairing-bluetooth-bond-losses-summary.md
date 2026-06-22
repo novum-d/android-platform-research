@@ -1,6 +1,6 @@
 # Bluetooth bond loss に対する autonomous re-pairing - 1ページ要約
 
-## 対象（Target）
+## 対象
 
 Android 17 Behavior Change
 
@@ -10,20 +10,20 @@ Android 17 Behavior Change
 比較先:
 - android-17.0.0_r1
 
-## 適用条件（Applicability）
+## 適用条件
 
 - 主分類（Primary classification）: OS_UPDATE_ALL_APPS
 - OS アップデート / 全アプリ（OS update / all apps）: 公式文書上は該当候補。targetSdkVersion 条件なし。
 - targetSdkVersion 37 以上: 公式文書上は不要。
 - その他の必須条件: Bluetooth peripheral bond loss、system autonomous re-pairing attempt、Bluetooth module feature flag が有効、companion app の pairing / key missing handling。
-- Compat Change ID: 見つからない。AOSP evidence は Bluetooth module feature flag と platform flag。
+- Compat Change ID: 見つからない。AOSP 根拠 は Bluetooth module feature flag と platform flag。
 - Confidence: High
 
-## 要約（Summary）
+## 要約
 
 Android 17 では、Bluetooth bond loss 後に system が autonomous re-pairing を試行できる。`ACTION_PAIRING_REQUEST` の context と `ACTION_KEY_MISSING` の timing が変わるため、companion app / peripheral app は recovery flow を確認する必要がある。
 
-Bluetooth module では `EXTRA_PAIRING_CONTEXT`、`PAIRING_CONTEXT_REPAIRING`、bond loss 検出後の autonomous repairing、失敗時の `ACTION_KEY_MISSING` broadcast path を確認した。targetSdkVersion gate は見つからないため、OS 更新で Bluetooth bond loss recovery flow に影響する all-apps change と扱う。
+Bluetooth module では `EXTRA_PAIRING_CONTEXT`、`PAIRING_CONTEXT_REPAIRING`、bond loss 検出後の autonomous repairing、失敗時の `ACTION_KEY_MISSING` broadcast path を確認した。targetSdkVersion ゲートは見つからないため、OS 更新で Bluetooth bond loss recovery flow に影響する all-apps change と扱う。
 
 ## 根拠（Evidence）
 

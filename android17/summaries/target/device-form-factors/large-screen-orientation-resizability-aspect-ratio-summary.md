@@ -1,6 +1,6 @@
 # 大画面で画面向き・リサイズ可否・アスペクト比制約を無視するプラットフォーム API の変更（sw >= 600dp） - 1ページ要約
 
-## 対象（Target）
+## 対象
 
 Android 17 Behavior Change
 
@@ -16,7 +16,7 @@ Android 17 Behavior Change
 対象 targetSdkVersion:
 - 37
 
-## 適用条件（Applicability）
+## 適用条件
 
 - 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
 - OS アップデート / 全アプリ（OS update / all apps）: 主条件ではない。Android 17 target で opt-out が無効化される。
@@ -25,27 +25,27 @@ Android 17 Behavior Change
 - Compat Change ID: `357141415L` (`UNIVERSAL_RESIZABLE_BY_DEFAULT`), `447301631L` (`DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT`)
 - Compat default state: Android 16 target で制約無視 enabled、Android 17 target で opt-out disabled。
 
-## 早見マトリクス（At-a-Glance Matrix）
+## 早見マトリクス
 
-| シナリオ（Scenario） | 影響（Impact） |
+| シナリオ | 影響 |
 | --- | --- |
 | Android 16 / targetSdkVersion 36 | large screen 制約無視は有効だが opt-out property が効く。 |
 | Android 17 / targetSdkVersion 36 | Android 16 互換として opt-out が効く想定。 |
 | Android 17 / targetSdkVersion 37 | opt-out property が無効。large screen で orientation / resizability / aspect ratio restrictions が無視される。 |
 
-## 要約（Summary）
+## 要約
 
 Android 17 では、targetSdkVersion 37 以上のアプリで、Android 16 / SDK 36 では可能だった large screen 制約無視への opt-out が利用できなくなる。
 
 AOSP では `UNIVERSAL_RESIZABLE_BY_DEFAULT = 357141415L` が Android 16 target 以上で制約無視を有効化し、`DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT = 447301631L` が Android 17 target 以上で `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` を無効化する。
 
-## 顧客影響（Customer Impact）
+## 顧客影響
 
 - 固定 portrait、non-resizable、固定 aspect ratio を前提にした UI は、tablet、foldable、desktop windowing、multi-window で想定外に resize / full area 表示される可能性がある。
 - Android 17 target では Android 16 opt-out に依存できない。
 - large screen adaptive UI、configuration change、fold / unfold、multi-window resize の検証が必要。
 
-## 対応要否（Required Action）
+## 対応要否
 
 - 必須対応候補: Android 16 opt-out property、`screenOrientation`、`resizeableActivity`、`minAspectRatio` / `maxAspectRatio`、`setRequestedOrientation()` 依存を棚卸しする。
 - 推奨対応: `sw >= 600dp` の tablet / foldable / desktop windowing でレイアウトを検証する。

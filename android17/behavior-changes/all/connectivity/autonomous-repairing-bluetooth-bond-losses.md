@@ -48,7 +48,7 @@
 
 | 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Yes / Conditional | all apps ページで、targetSdkVersion 条件なし。Bluetooth module 側でも targetSdkVersion gate は見つからず、feature flag と bond loss 条件で分岐する。 |
+| Android 17 に OS アップデートしただけで適用されるか | Yes / Conditional | all apps ページで、targetSdkVersion 条件なし。Bluetooth module 側でも targetSdkVersion ゲートは見つからず、feature flag と bond loss 条件で分岐する。 |
 | targetSdkVersion 37 以上が必要か | 公式文書上は不要 | targetSdkVersion 条件は示されていない。 |
 | 追加の実行時条件があるか | ある | Bluetooth peripheral bond loss が発生し、system が re-pairing を試行する場合。 |
 | Compat Change ID が関係するか | 確認できず | Bluetooth module の該当 path は aconfig flag と bond loss state を参照しており、targetSdkVersion compat gate は見つからない。 |
@@ -91,11 +91,11 @@ Compat framework:
 - 公式 Behavior Change 文書は Android 17 all apps change として autonomous re-pairing を説明している。
 - `frameworks-base` Android 17 tag では `core/java/android/net/flags.aconfig` に `autonomous_repairing_initiation` flag が追加されている。
 - `platform/packages/modules/Bluetooth` Android 17 tag では `BluetoothDevice.EXTRA_PAIRING_CONTEXT`、`PAIRING_CONTEXT_REPAIRING`、`ACTION_KEY_MISSING` の API surface と、`BondStateMachine` / `RemoteDevices` の bond-loss / re-pairing path を確認した。
-- Bluetooth module の該当 path では targetSdkVersion gate は見つからず、`Utils.isAutonomousRepairingSupported()` と bond loss state が主な条件である。
+- Bluetooth module の該当 path では targetSdkVersion ゲートは見つからず、`Utils.isAutonomousRepairingSupported()` と bond loss state が主な条件である。
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、Bluetooth bond loss を system が自動的に回復する autonomous re-pairing が導入される。従来は users が Settings で peripheral を unpair / re-pair する必要があったが、Android 17 では system が background で bond の再確立を試行できる。
 
@@ -107,9 +107,9 @@ Android 17 では、Bluetooth bond loss を system が自動的に回復する a
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
-Commands checked before evidence use:
+根拠利用前に確認したコマンド:
 
 ```bash
 git -C frameworks-base status --short
@@ -117,7 +117,7 @@ git -C frameworks-base tag --list android-16.0.0_r4
 git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
-Result:
+結果:
 - `frameworks-base` working tree: clean at the time of investigation.
 - From tag: `android-16.0.0_r4` exists.
 - To tag: `android-17.0.0_r1` exists.
@@ -178,7 +178,7 @@ Source context の補足:
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性が高いアプリ:
 - Bluetooth companion app

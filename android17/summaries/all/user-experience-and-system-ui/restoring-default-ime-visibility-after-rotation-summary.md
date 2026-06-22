@@ -1,6 +1,6 @@
 # Rotation 後の default IME visibility 復元 - 1ページ要約
 
-## 対象（Target）
+## 対象
 
 Android 17 Behavior Change
 
@@ -16,31 +16,31 @@ Android 17 Behavior Change
 対象 targetSdkVersion:
 - 37
 
-## 適用条件（Applicability）
+## 適用条件
 
 - 主分類（Primary classification）: OS_UPDATE_ALL_APPS
-- OS アップデート / 全アプリ（OS update / all apps）: 該当。Android 17 の all apps ページに掲載され、AOSP の確認済み path に targetSdkVersion gate は見つからない。
+- OS アップデート / 全アプリ（OS update / all apps）: 該当。Android 17 の all apps ページに掲載され、AOSP の確認済み path に targetSdkVersion ゲートは見つからない。
 - targetSdkVersion 37 以上: 不要。Android 17 / targetSdkVersion 36 と 37 で同じ扱いになる想定。
 - その他の必須条件（Other required conditions）: rotation など configuration change が発生し、app がそれを自身で処理せず、previous IME visibility の自動復元を期待していること。
 - Compat Change ID: 確認できず
 - Compat default state: compat framework では確認できず。実装は aconfig flag `disable_ime_restore_on_activity_create` を参照する。
 - Confidence: Medium
 
-## 早見マトリクス（At-a-Glance Matrix）
+## 早見マトリクス
 
-| シナリオ（Scenario） | 影響（Impact） |
+| シナリオ | 影響 |
 | --- | --- |
 | Android 17 / targetSdkVersion 36 | 条件を満たす場合、unhandled configuration change 後に previous IME visibility は自動復元されない想定。 |
 | Android 17 / targetSdkVersion 37 | targetSdkVersion 36 と同じ想定。targetSdkVersion 37 は必要条件ではない。 |
 | Android 17 / targetSdkVersion 37 + 明示 IME 表示要求 | `stateAlwaysVisible` や programmatic show により、必要な画面で keyboard 表示を request できる。 |
 
-## 要約（Summary）
+## 要約
 
 Android 17 では、rotation などの configuration change が発生し、その変更を app 自身が処理しない場合、以前表示されていた IME / soft keyboard は自動復元されない。rotation 後も keyboard を表示したい screen では、app が明示的に request する必要がある。
 
-AOSP では `WindowManagerService.shouldRestoreImeVisibility()` が `disable_ime_restore_on_activity_create` flag を参照する。flag 有効時は `ActivityRecord.mLastImeShown` ではなく、対象 window が `WindowInsets.Type.ime()` の visibility を明示 request しているかを restore 根拠にする。確認済み path に targetSdkVersion gate はない。
+AOSP では `WindowManagerService.shouldRestoreImeVisibility()` が `disable_ime_restore_on_activity_create` flag を参照する。flag 有効時は `ActivityRecord.mLastImeShown` ではなく、対象 window が `WindowInsets.Type.ime()` の visibility を明示 request しているかを restore 根拠にする。確認済み path に targetSdkVersion ゲートはない。
 
-## 顧客影響（Customer Impact）
+## 顧客影響
 
 - rotation 後に keyboard が閉じたままになり、ユーザーが再度 text field を tap する必要が出る可能性がある。
 - 検索、ログイン、チャット、メモ入力、業務入力フォームなど、入力継続が重要な画面で影響が見える可能性がある。
@@ -52,21 +52,21 @@ AOSP では `WindowManagerService.shouldRestoreImeVisibility()` が `disable_ime
 - 対象機能: 検索、ログイン、チャット、メモ入力、業務入力フォーム。
 - 対象条件: keyboard 表示中に configuration change が発生し、Activity recreation 後の IME 自動復元を期待している場合。
 
-## 対応要否（Required Action）
+## 対応要否
 
 - 必須対応: rotation / configuration change 後も keyboard が必要な screen を棚卸しする。
 - 推奨対応: `android:windowSoftInputMode="stateAlwaysVisible"`、`Activity.onCreate()`、または `onConfigurationChanged()` で明示的に IME 表示を request する。
 - 不要: rotation 後に keyboard 表示が不要な screen、入力欄がない screen、すでに focus / IME visibility を明示制御している screen では直接影響は限定的。
 
-## テストマトリクス（Test Matrix）
+## テストマトリクス
 
-| 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
+| 端末 OS | targetSdkVersion | 期待挙動 |
 | --- | --- | --- |
 | Android 16 | 36 | baseline。release flag/config により restore 挙動が異なる可能性があるため実機確認する。 |
 | Android 17 | 36 | previous IME visibility は自動復元されない想定。 |
 | Android 17 | 37 | targetSdkVersion 36 と同じ期待。targetSdkVersion 条件は確認されていない。 |
 
-## 顧客向け説明（Explanation for Customers）
+## 顧客向け説明
 
 Android 17 では、画面回転などで app が処理しない configuration change が発生した後、変更前に表示されていた keyboard は system によって自動復元されません。
 
@@ -79,7 +79,7 @@ rotation 後も keyboard を表示したい場合は、`android:windowSoftInputM
 - AOSP ファイル: `core/java/android/view/inputmethod/flags.aconfig`, `services/core/java/com/android/server/inputmethod/ImeVisibilityStateComputer.java`, `services/core/java/com/android/server/wm/WindowManagerService.java`, `services/core/java/com/android/server/wm/ActivityRecord.java`
 - AOSP ソース文脈: `ImeVisibilityStateComputer.computeState()` が restore 判断を show decision へ変換し、`WindowManagerService.shouldRestoreImeVisibility()` が `disableImeRestoreOnActivityCreate()` 有効時に明示的な IME visibility request を restore 根拠にする。
 - 差分解釈: changed default / changed condition の候補。ただし同 flag と分岐は `android-16.0.0_r4` にも存在し、`frameworks-base` だけでは release flag/config の有効化差分を確認できない。
-- Gate conclusion: targetSdkVersion gate と compat ChangeId は確認できない。分類は `OS_UPDATE_ALL_APPS`、confidence は Medium。
+- ゲート結論: targetSdkVersion ゲートと compat ChangeId は確認できない。分類は `OS_UPDATE_ALL_APPS`、confidence は Medium。
 
 ## 人間の判断欄
 

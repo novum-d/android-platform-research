@@ -41,7 +41,7 @@
 - 公式文書は Android 17 の `Behavior changes: all apps` ページにこの項目を掲載している。
 - 原文は、Android 17 から cross-profile loopback traffic が default で許可されなくなると説明している。
 - 原文は、この変更が Android 17 以上で動作するすべてのアプリに target API level に関係なく適用されると明記している。
-- Android 17 AOSP evidence では、loopback interface traffic を permission で guard するための `USE_LOOPBACK_INTERFACE` と `FORCE_USE_LOOPBACK_INTERFACE` が追加されている。
+- Android 17 AOSP 根拠 では、loopback interface traffic を permission で guard するための `USE_LOOPBACK_INTERFACE` と `FORCE_USE_LOOPBACK_INTERFACE` が追加されている。
 
 早見表（At-a-glance impact）:
 
@@ -93,7 +93,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、profile boundary を跨ぐ loopback traffic が default で許可されなくなる、と公式文書は説明している。対象は personal profile と work profile などの別 profile 間で localhost / loopback を使う通信であり、同じ profile 内の loopback traffic は影響を受けない。
 
@@ -134,7 +134,7 @@ Android 17 AOSP では、loopback interface traffic を permission で guard す
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
 確認コマンド:
 
@@ -145,7 +145,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
 結果:
-- `frameworks-base` の `status --short` は空で、dirty working tree は確認されなかった。
+- `frameworks-base` の `status --short` は空で、未コミット変更 は確認されなかった。
 - `android-16.0.0_r4` tag は存在する。
 - `android-17.0.0_r1` tag は存在する。
 
@@ -202,7 +202,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 差分解釈:
 - Source diff type: added permission / changed condition / guarded enforcement surface。
 - Behavior Change を支える evidence: loopback interface traffic を permission で guard する framework API / permission surface が Android 17 tag に存在する。
-- 分類を支える evidence: 公式文書は all apps / target API level independent と明記し、確認済み framework evidence に targetSdkVersion gate はない。
+- 分類を支える evidence: 公式文書は all apps / target API level independent と明記し、確認済み framework evidence に targetSdkVersion ゲートはない。
 
 ## 関連しない / 除外した path
 
@@ -236,7 +236,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性がある app:
 - work profile / personal profile など複数 profile 間で localhost / loopback communication を使うアプリ。
@@ -265,7 +265,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 # テスト観点（Test Matrix）
 
-| 端末 OS（Device OS） | targetSdkVersion | 条件 | 期待挙動（Expected behavior） |
+| 端末 OS | targetSdkVersion | 条件 | 期待挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | personal -> work profile loopback | baseline。cross-profile loopback の現行挙動を確認。 |
 | Android 17 | 36 | personal -> work profile loopback | default block の想定。 |

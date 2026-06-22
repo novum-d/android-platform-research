@@ -29,7 +29,7 @@ Compat framework:
 
 必要な根拠:
 - Behavior Change の参照元が `behavior-changes-all` である、または同等の公式記述が存在する。
-- Android 17 AOSP タグの根拠を確認できる状態で、AOSP evidence に targetSdkVersion 37 gate が見つからない。
+- Android 17 AOSP タグの根拠を確認できる状態で、AOSP 根拠に targetSdkVersion 37 ゲートが見つからない。
 - 実装に gate がある場合、その gate が OS version、device capability、module version、permission state、app state、API usage、または targetSdkVersion 以外の条件である。
 
 顧客向け表現:
@@ -37,7 +37,7 @@ Compat framework:
 
 記入例:
 - Android 17 端末上で、targetSdkVersion 36 のままでも新しい制限が有効になる。
-- AOSP で targetSdkVersion gate が見つからず、OS version または機能利用条件だけで分岐している。
+- AOSP で targetSdkVersion ゲートが見つからず、OS version または機能利用条件だけで分岐している。
 
 ### TARGET_SDK_37
 
@@ -45,7 +45,7 @@ Android 17 / API level 37 以上を target にするアプリへ適用される�
 
 必要な根拠:
 - Behavior Change の参照元が `behavior-changes-17` である、または同等の公式記述が存在する。
-- Android 17 AOSP タグの根拠を確認できる状態で、AOSP evidence に targetSdkVersion 37 gate、API 37 以上で default-enabled になる compat ChangeId、または API 37 条件が確認できる。
+- Android 17 AOSP タグの根拠を確認できる状態で、AOSP 根拠に targetSdkVersion 37 ゲート、API 37 以上で default-enabled になる compat ChangeId、または API 37 条件が確認できる。
 - Android 17 / targetSdkVersion 36 と Android 17 / targetSdkVersion 37 で、期待される挙動が異なる。
 
 顧客向け表現:
@@ -85,7 +85,7 @@ Mainline module または Google Play system update で配信され、Android 17
 
 必要な根拠:
 - 公式ドキュメントが、module または Google Play system update による配信であると説明している。
-- 可能な範囲で、AOSP evidence により module または package boundary を特定している。
+- 可能な範囲で、AOSP 根拠により module または package boundary を特定している。
 - 影響説明で platform version と module version を分けている。
 
 顧客向け表現:
@@ -128,7 +128,7 @@ Mainline module または Google Play system update で配信され、Android 17
 
 - 公式ドキュメントの原文または要約を、出典 URL とともに記録している。
 - ページ種別と原文の内容が一致している。
-- AOSP evidence により適用 gate を確認している、または targetSdkVersion gate が存在しないことを確認している。
+- AOSP 根拠により適用 gate を確認している、または targetSdkVersion ゲートが存在しないことを確認している。
 - Change ID が存在する場合は、compat framework entry を確認している。
 - Android 17 / targetSdkVersion 36 と Android 17 / targetSdkVersion 37 の期待挙動をどちらも記載している。
 - 追加条件と例外を記載している。
@@ -160,7 +160,7 @@ Android 17 AOSP タグは `android-17.0.0_r1` を利用する。High confidence 
 ## よくある誤分類
 
 - Android 17 ページに掲載されているという理由だけで `TARGET_SDK_37` に分類しない。掲載ページと文言を確認する。
-- AOSP 実装が変わっているという理由だけで `OS_UPDATE_ALL_APPS` に分類しない。実装が targetSdkVersion gate または compat gate の内側にないか確認する。
+- AOSP 実装が変わっているという理由だけで `OS_UPDATE_ALL_APPS` に分類しない。実装が targetSdkVersion ゲートまたは compat gate の内側にないか確認する。
 - 既存挙動が変わらない限り、新 API 追加だけを Behavior Change として扱わない。
 - opt-out、例外、device form factor、permission 条件を無視しない。
 - Android 17 AOSP タグを利用できない状態で High confidence を使わない。

@@ -98,7 +98,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、targetSdkVersion 37 以上の多くのアプリに対し、OTP を含む標準 SMS は受信後 3 時間まで利用できなくなる。対象は WebOTP / SMS Retriever format ではない generic OTP SMS であり、遅延中は `SMS_RECEIVED_ACTION` broadcast が withheld され、SMS provider database query からも filtered される。
 
@@ -152,9 +152,9 @@ AOSP で確認した変更点:
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
-Commands checked before evidence use:
+根拠利用前に確認したコマンド:
 
 ```bash
 git -C frameworks-base status --short
@@ -162,7 +162,7 @@ git -C frameworks-base tag --list android-16.0.0_r4
 git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
-Result:
+結果:
 - `frameworks-base` working tree: clean at the time of investigation.
 - From tag: `android-16.0.0_r4` exists.
 - To tag: `android-17.0.0_r1` exists.
@@ -179,7 +179,7 @@ Result:
 
 | File / symbol | Android 16 baseline | Android 17 behavior | 関連性 |
 | --- | --- | --- | --- |
-| `SmsManager.FILTER_GENERIC_OTP` | ChangeId なし | `437043173L` として追加。`@EnabledSince(CINNAMON_BUN)`。comment は targetSdkVersion 37 以上で strict enforcement と説明 | targetSdkVersion gate の中核 evidence。 |
+| `SmsManager.FILTER_GENERIC_OTP` | ChangeId なし | `437043173L` として追加。`@EnabledSince(CINNAMON_BUN)`。comment は targetSdkVersion 37 以上で strict enforcement と説明 | targetSdkVersion ゲートの中核 evidence。 |
 | `Telephony.Sms.CONTAINS_OTP` | OTP metadata column なし | SMS provider が message body の OTP type / subtype を記録する hidden/test API を追加 | provider query filtering と OTP classifier の連携点。 |
 | `Telephony.Sms.OTP_SUBTYPE_*` | subtype constants なし | SMS Retriever OTP / WebOTP subtype と、subtype unset の generic OTP を表現 | standard SMS OTP と WebOTP / SMS Retriever OTP を分離する evidence。 |
 | `AppOpsManager.OP_READ_OTP_SMS` | app op なし | OTP SMS read を許可する app op を追加。comment は `READ_SMS` app op の必要性を消さないと説明 | trusted / exempted app の明示的な escape hatch。 |
@@ -219,7 +219,7 @@ Source context の補足:
 
 ## 観察（Observations）
 
-- AOSP evidence は、targetSdkVersion gate、generic OTP 判定、trusted app exemption、app op escape hatch をすべて `frameworks-base` 内で確認できる。
+- AOSP 根拠 は、targetSdkVersion ゲート、generic OTP 判定、trusted app exemption、app op escape hatch をすべて `frameworks-base` 内で確認できる。
 - 公式文書の「standard SMS messages」は、AOSP 上では WebOTP / SMS Retriever subtype が付かない generic OTP と対応する。
 - 3 時間 delay の timer / provider filtering / broadcast withholding 本体は provider / telephony pipeline 側にある可能性が高いが、`frameworks-base` の gate evidence だけで適用分類は十分に確定できる。
 
@@ -237,7 +237,7 @@ Source context の補足:
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性が高いアプリ:
 - SMS inbox / provider query から OTP を抽出するアプリ

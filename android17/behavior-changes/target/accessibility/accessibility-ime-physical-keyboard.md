@@ -47,7 +47,7 @@
 
 | 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | 未確定 | `TextView` 実装は `a11yTextChangeTypesApi()` flag で動作し、targetSdkVersion gate は見つからない。flag default / rollout の確認が必要。 |
+| Android 17 に OS アップデートしただけで適用されるか | 未確定 | `TextView` 実装は `a11yTextChangeTypesApi()` flag で動作し、targetSdkVersion ゲートは見つからない。flag default / rollout の確認が必要。 |
 | `targetSdkVersion 37` 以上が必要か | 公式文書上は Yes / AOSP gate は未検出 | target 37 ページに掲載されているが、該当コードに targetSdkVersion 37 分岐を確認できない。 |
 | 追加の実行時条件があるか | ある | CJKV IME、`TextAttribute`、標準 `TextView` / `EditableInputConnection`、`TYPE_VIEW_TEXT_CHANGED`、AccessibilityService が関係する。 |
 | Compat Change ID が関係するか | 確認できず | `@ChangeId` / `@EnabledSince(CINNAMON_BUN)` / `CompatChanges.isChangeEnabled()` は該当実装で確認できない。 |
@@ -151,18 +151,18 @@ AOSP で確認した変更点:
 - `EditableInputConnection.commitText(..., TextAttribute)` は commit 中フラグを `TextView.beginCommitText()` / `endCommitText()` で管理し、commit 後に suggestion selection を reset する。
 - `TextView.sendAccessibilityEventTypeViewTextChanged()` は `a11yTextChangeTypesApi()` が true の場合、`setTextChangeTypes(event)` により composition / commit / suggestion selected を event に設定する。
 
-## 適用条件（Applicability）
+## 適用条件
 
 ### OS アップデート時の挙動
 
 - Android 17 にアップデートしただけで適用されるか: 未確定。
-- targetSdkVersion に依存しない根拠: 確認した `TextView` / `EditableInputConnection` 実装には targetSdkVersion gate が見つからず、`a11yTextChangeTypesApi()` flag で制御される。
+- targetSdkVersion に依存しない根拠: 確認した `TextView` / `EditableInputConnection` 実装には targetSdkVersion ゲートが見つからず、`a11yTextChangeTypesApi()` flag で制御される。
 - Android 16 以前での挙動: `AccessibilityEvent` の text change type API、`TextAttribute` の suggestion selected field、`TextView` の text change type 設定処理は Android 17 tag で追加されている。
 
 ### targetSdkVersion 37 以上での挙動
 
 - `targetSdkVersion 37` 以上で適用されるか: 公式文書上は Yes。ただし AOSP の該当 Java path に targetSdkVersion 37 gate は未検出。
-- Android 17 / targetSdkVersion 36 と Android 17 / targetSdkVersion 37 の差分: AOSP evidence だけでは差分を確定できない。
+- Android 17 / targetSdkVersion 36 と Android 17 / targetSdkVersion 37 の差分: AOSP 根拠 だけでは差分を確定できない。
 - opt-out / temporary override の有無: Compat ChangeId は未検出。feature flag `a11y_text_change_types_api` の状態に依存する。
 
 ### その他の条件
@@ -258,7 +258,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 
 ## 結論
 
-- AOSP evidence は十分に更新できたが、targetSdkVersion 37 gate は確認できない。
+- AOSP 根拠 は十分に更新できたが、targetSdkVersion 37 gate は確認できない。
 - そのため、顧客向けの確定分類は `UNKNOWN_NEEDS_MORE_EVIDENCE` のままとする。
 - 実装上の影響説明としては、「Android 17 の flag-enabled TextView / InputConnection / AccessibilityEvent path で CJKV IME 入力の text change type が AccessibilityService に伝わる」と説明できる。
 

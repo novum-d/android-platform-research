@@ -1,6 +1,6 @@
 # 物理デバイス入力時のパスワード非表示 - 1ページ要約
 
-## 対象（Target）
+## 対象
 
 Android 17 Behavior Change
 
@@ -16,28 +16,28 @@ Android 17 Behavior Change
 対象 targetSdkVersion:
 - 37
 
-## 適用条件（Applicability）
+## 適用条件
 
 - 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
-- OS アップデート / 全アプリ（OS update / all apps）: No。AOSP の Change ID は targetSdkVersion 37 以上で default enabled。
+- OS アップデート / 全アプリ（OS update / all apps）: No。AOSP の Change ID は targetSdkVersion 37 以上で デフォルト有効。
 - targetSdkVersion 37 以上: Yes。`@EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)` で確認。
 - その他の必須条件（Other required conditions）: password field、physical input device、touchscreen input の setting 分岐。
 - Compat Change ID: `417951523` / `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL`
-- Compat default state: targetSdkVersion 36 では default disabled、targetSdkVersion 37 以上で default enabled
+- Compat default state: targetSdkVersion 36 では デフォルト無効、targetSdkVersion 37 以上で デフォルト有効
 
-## 早見マトリクス（At-a-Glance Matrix）
+## 早見マトリクス
 
-| シナリオ（Scenario） | 影響（Impact） |
+| シナリオ | 影響 |
 | --- | --- |
 | Android 17 / targetSdkVersion 36 | default では旧 `TEXT_SHOW_PASSWORD` 相当の挙動が維持される。 |
 | Android 17 / targetSdkVersion 37 | physical input device 使用時に `show_passwords_physical` が適用されると公式文書は説明。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | password field への external keyboard 等の入力で、default では全 password characters が hidden。 |
 
-## 要約（Summary）
+## 要約
 
 Android 17 では、targetSdkVersion 37 以上のアプリで physical input device を使って password field に入力する場合、`show_passwords_physical` setting により既定で全 password characters が非表示になる、と公式文書は説明している。
 
-## 顧客影響（Customer Impact）
+## 顧客影響
 
 - 要確認
 
@@ -47,21 +47,21 @@ Android 17 では、targetSdkVersion 37 以上のアプリで physical input dev
 - 対象機能: login、sign-up、password confirmation、custom password field、password visibility toggle。
 - 対象条件: external keyboard など physical input device で password を入力する場合。touchscreen input は `show_passwords_touch` が適用される。
 
-## 対応要否（Required Action）
+## 対応要否
 
 - 必須対応: password field と custom password UI を棚卸しし、physical keyboard / touchscreen の両方で Android 17 テストを行う。
 - 推奨対応: UI test、support 文言、custom transformation が last-character reveal を前提としていないか確認する。
 - 不要: password field を持たないアプリでは直接影響は限定的。
 
-## テストマトリクス（Test Matrix）
+## テストマトリクス
 
-| 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
+| 端末 OS | targetSdkVersion | 期待挙動 |
 | --- | --- | --- |
 | Android 16 | 36 | Android 16 baseline。具体挙動は Android 17 tag 比較待ち。 |
-| Android 17 | 36 | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` は default disabled。旧 path が維持される。 |
+| Android 17 | 36 | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` は デフォルト無効。旧 path が維持される。 |
 | Android 17 | 37 | physical input device 使用時、default では全 password characters が hidden。 |
 
-## 顧客向け説明（Explanation for Customers）
+## 顧客向け説明
 
 Android 17 では、targetSdkVersion 37 以上のアプリで外部キーボードなどの physical input device を使って password を入力する場合、最後に入力した文字も含めて password characters が既定で隠されます。大きな画面や外部キーボード環境では覗き見リスクが高いため、従来の入力確認用の一時表示とは別の policy が適用されます。
 
@@ -74,7 +74,7 @@ Android 17 AOSP tag `android-17.0.0_r1` では、`SPLIT_SHOW_PASSWORDS_TO_TOUCH_
 - AOSP ファイル: `core/java/android/text/ShowSecretsSetting.java`, `core/java/android/text/method/PasswordTransformationMethod.java`, `core/java/android/text/method/BaseKeyListener.java`, `core/java/android/provider/Settings.java`, `packages/SettingsProvider/src/com/android/providers/settings/SettingsProvider.java`
 - AOSP ソース文脈: Change ID、`@EnabledSince(CINNAMON_BUN)`、physical input span、touch / physical setting default を確認。
 - 差分解釈: added behavior / changed condition / changed default。split setting 追加、targetSdkVersion 37 gate、physical input default hide。
-- Gate conclusion: Android 17 上で targetSdkVersion 37 以上、かつ password field への入力時に適用。physical input device では default で全文字非表示。
+- ゲート結論: Android 17 上で targetSdkVersion 37 以上、かつ password field への入力時に適用。physical input device では default で全文字非表示。
 
 ## 人間の判断欄（Human Decision）
 

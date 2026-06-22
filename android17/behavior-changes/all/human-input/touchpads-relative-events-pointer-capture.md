@@ -53,10 +53,10 @@
 
 | 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | Yes / Conditional | all apps ページの項目であり、`View.requestPointerCapture()` の default mode 変更に targetSdkVersion gate は見つからない。 |
+| Android 17 に OS アップデートしただけで適用されるか | Yes / Conditional | all apps ページの項目であり、`View.requestPointerCapture()` の default mode 変更に targetSdkVersion ゲートは見つからない。 |
 | targetSdkVersion 37 以上が必要か | No | `View.requestPointerCapture()` は `targetSdkVersion` を参照せず、feature flag により relative / absolute を分岐する。 |
 | 追加の実行時条件があるか | ある | app が pointer capture を使い、input device が touchpad で、captured event の座標解釈に依存している場合。 |
-| Compat Change ID が関係するか | No evidence in frameworks-base | `CompatChanges.isChangeEnabled` / `@ChangeId` は確認されず、aconfig flag による制御が確認された。 |
+| Compat Change ID が関係するか | 根拠なし in frameworks-base | `CompatChanges.isChangeEnabled` / `@ChangeId` は確認されず、aconfig flag による制御が確認された。 |
 
 ### 調査日（Investigation Date）
 
@@ -78,7 +78,7 @@
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上。
-- targetSdkVersion: 条件なし。`View.requestPointerCapture()` の default mode 分岐に targetSdkVersion gate は確認されていない。
+- targetSdkVersion: 条件なし。`View.requestPointerCapture()` の default mode 分岐に targetSdkVersion ゲートは確認されていない。
 - Device/form factor: touchpad を持つ device、または touchpad input device が接続された device。
 - Permission/API/component condition: `View.requestPointerCapture()`、`View.requestPointerCapture(int)`、`View.onCapturedPointerEvent(MotionEvent)`、`MotionEvent`、`InputDevice`、pointer capture、relative pointer events。
 - App state/process condition: app が pointer capture 中の touchpad event を処理し、absolute coordinate を前提にしている場合。
@@ -100,7 +100,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、touchpad input が pointer capture 中に default で relative motion event として app に届く、と公式文書は説明している。これまで pointer capture 中の touchpad event を absolute coordinate として扱っていた app は、Android 17 で pointer movement の解釈が変わる可能性がある。
 
@@ -152,13 +152,13 @@ AOSP で確認した点 / 未確認の点:
 - `input_framework.aconfig` に `pointer_capture_modes` と `relative_capture_mode_by_default` が追加され、説明文は touchpad gesture を mouse-like event に変換する relative mode default を示す。
 - 未確認: `relative_capture_mode_by_default` の製品 default state、native inputflinger 側の exact conversion、touchpad 以外への影響有無。
 
-## 適用条件（Applicability）
+## 適用条件
 
 この変更がいつ適用されるかを OS 条件と targetSdkVersion 条件に分けて説明する。
 
 ### OS アップデート時の挙動（OS Update Behavior）
 
-- Android 17 に OS アップデートしただけで適用されるか: Yes / Conditional。all apps ページに掲載され、`View.requestPointerCapture()` の default mode 分岐に targetSdkVersion gate はない。
+- Android 17 に OS アップデートしただけで適用されるか: Yes / Conditional。all apps ページに掲載され、`View.requestPointerCapture()` の default mode 分岐に targetSdkVersion ゲートはない。
 - targetSdkVersion に依存しない根拠: 原文に targetSdkVersion 条件がなく、AOSP の `View.requestPointerCapture()` は feature flag のみで relative / absolute を分岐する。
 - Android 16 以前での挙動: Android 16 の `requestPointerCapture()` は absolute mode 相当の従来挙動。Android 17 では flag 条件により relative mode を default にできる。
 
@@ -180,7 +180,7 @@ AOSP で確認した点 / 未確認の点:
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
 確認コマンド:
 
@@ -191,13 +191,13 @@ git -C frameworks-base tag --list 'android-17*'
 ```
 
 結果:
-- `frameworks-base` の `status --short` は空で、dirty working tree は確認されなかった。
+- `frameworks-base` の `status --short` は空で、未コミット変更 は確認されなかった。
 - `android-16.0.0_r4` tag は存在する。
 - `android-17.0.0_r1` tag は local checkout に存在する。
 
 根拠上の制約:
-- source evidence は `android-16.0.0_r4` と `android-17.0.0_r1` の明示的な tag 比較、および `android-17.0.0_r1` 上の symbol 確認に限定した。
-- `frameworks-base` working tree は clean のため、local working tree changes を platform evidence として誤採用するリスクは確認されていない。
+- ソース根拠 は `android-16.0.0_r4` と `android-17.0.0_r1` の明示的な tag 比較、および `android-17.0.0_r1` 上の symbol 確認に限定した。
+- `frameworks-base` working tree は clean のため、ローカル作業ツリーの変更 を platform 根拠 として誤採用するリスクは確認されていない。
 - native inputflinger 側の exact conversion と flag default は未確認のため、confidence は Medium に留める。
 
 ## 関連ファイル（Related Files）
@@ -210,7 +210,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `core/java/android/hardware/input/input_framework.aconfig`
 - `core/api/current.txt`
 
-Note:
+注記:
 - 実際の input dispatch は `frameworks-base` 以外の inputflinger / native service 側にある可能性がある。Android 17 tag 入手後は該当 project も evidence 対象として確認する必要がある。
 
 ## 確認したソース文脈（Source Context Reviewed）
@@ -244,7 +244,7 @@ Note:
 
 ---
 
-# 影響分析（Impact Analysis）
+# 影響分析
 
 ## 影響を受ける可能性があるアプリ（Potentially Affected Apps）
 
@@ -297,7 +297,7 @@ Android 17 では、touchpad を pointer capture 中に使った場合、default
 
 # 検証マトリクス（Verification Matrix）
 
-| Device OS | targetSdkVersion | App condition | Expected behavior |
+| 端末 OS | targetSdkVersion | アプリ条件 | 期待挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | touchpad + pointer capture | baseline。captured event が absolute / relative のどちらとして届くか確認。 |
 | Android 17 | 36 | touchpad + pointer capture + default request | flag 条件を満たす場合、`requestPointerCapture()` は relative mode を default request する。 |

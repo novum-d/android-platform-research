@@ -87,19 +87,19 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、targetSdkVersion 37 以上のアプリが `READ_CONTACTS` permission なしで `ContactsContract.Data` table を query する場合、CP2 が strict SQL query validation を強制する、と公式文書は説明している。`StrictColumns` と `StrictGrammar` が有効になり、互換性のない query は exception になる。
 
-ContactsProvider 側で targetSdkVersion gate、`READ_CONTACTS` permission 判定、`setStrictColumns` / `setStrictGrammar` の呼び出し、Compat ChangeId を確認できたため、信頼度は High とする。
+ContactsProvider 側で targetSdkVersion ゲート、`READ_CONTACTS` permission 判定、`setStrictColumns` / `setStrictGrammar` の呼び出し、Compat ChangeId を確認できたため、信頼度は High とする。
 
 ---
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
-Commands checked before evidence use:
+根拠利用前に確認したコマンド:
 
 ```bash
 git -C frameworks-base status --short
@@ -107,7 +107,7 @@ git -C frameworks-base tag --list android-16.0.0_r4
 git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
-Result:
+結果:
 - `frameworks-base` working tree: clean at the time of investigation.
 - From tag: `android-16.0.0_r4` exists.
 - To tag: `android-17.0.0_r1` exists.
@@ -161,7 +161,7 @@ Source context の補足:
 - `platform/packages/providers/ContactsProvider` Android 17 tag に `ENFORCE_STRICT_SQL_CHECKS = 484953293L` と strict SQL gate がある。
 
 観察:
-- targetSdkVersion gate / permission gate は ContactsProvider 側で確認できた。
+- targetSdkVersion ゲート / permission gate は ContactsProvider 側で確認できた。
 - Contact Picker session forwarded query は `READ_CONTACTS` なしでも strict SQL path に入る別条件として扱われる。
 
 結論:
@@ -171,7 +171,7 @@ Source context の補足:
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性が高いアプリ:
 - `READ_CONTACTS` なしで `ContactsContract.Data` を query するアプリ。

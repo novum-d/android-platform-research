@@ -94,7 +94,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 の all apps ページは、将来 release で `usesCleartextTraffic` element を deprecate する計画を示している。Android 17 で全アプリに対して即時かつ無条件に HTTP cleartext 接続を壊す変更とは読めない。
 
@@ -136,7 +136,7 @@ Section title:
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
 確認コマンド:
 
@@ -147,7 +147,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
 結果:
-- `frameworks-base` の `status --short` は空で、dirty working tree は確認されなかった。
+- `frameworks-base` の `status --short` は空で、未コミット変更 は確認されなかった。
 - `android-16.0.0_r4` tag は存在する。
 - `android-17.0.0_r1` tag は存在する。
 
@@ -237,7 +237,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性がある app:
 - HTTP cleartext connection が必要で、Network Security Configuration を使っていないアプリ。
@@ -268,7 +268,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 # テスト観点（Test Matrix）
 
-| 端末 OS（Device OS） | targetSdkVersion | 条件 | 期待挙動（Expected behavior） |
+| 端末 OS | targetSdkVersion | 条件 | 期待挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | Network Security Config なし / `usesCleartextTraffic=true` | baseline。manifest flag が default cleartext policy に反映される。 |
 | Android 17 | 36 | Network Security Config なし / `usesCleartextTraffic=true` | compat change が無効なら従来挙動の想定。 |
@@ -279,7 +279,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 # 顧客向け説明（Customer-facing Explanation）
 
-Android 17 の文書では、将来 release で `usesCleartextTraffic` element を deprecate する計画が示されています。Android 17 AOSP には、その準備として `usesCleartextTraffic` を `@Deprecated` 化し、feature flag と compat change が有効な場合に manifest の `usesCleartextTraffic` を Network Security Config の default policy へ反映しない実装が追加されています。
+Android 17 の文書では、将来 release で `usesCleartextTraffic` element を deprecate する計画が示されています。Android 17 AOSP には、その準備として `usesCleartextTraffic` を `@Deprecated` 化し、feature flag と compat change が有効な場合に manifest の `usesCleartextTraffic` を Network Security Config の デフォルト ポリシー へ反映しない実装が追加されています。
 
 HTTP cleartext が必要なアプリは、`usesCleartextTraffic` だけに依存せず、Network Security Configuration で必要な domain を明示してください。`minSdkVersion` が 24 未満の場合は API 24 未満向けに `usesCleartextTraffic="true"` を残しつつ、API 24 以上向けに Network Security Configuration も追加する必要があります。
 

@@ -42,7 +42,7 @@ Hiding passwords from physical devices
 | 確認項目 | 回答 | 根拠 |
 | --- | --- | --- |
 | Android 17 に OS アップデートしただけで適用されるか | No | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` は `@EnabledSince(CINNAMON_BUN)` の compat change。 |
-| targetSdkVersion 37 以上が必要か | Yes | AOSP の Change ID が targetSdkVersion 37 以上で default enabled。 |
+| targetSdkVersion 37 以上が必要か | Yes | AOSP の Change ID が targetSdkVersion 37 以上で デフォルト有効。 |
 | 追加の実行時条件があるか | Yes | password field 入力、physical input device / touchscreen input の判定、split settings が関係する。 |
 | Compat Change ID が関係するか | Yes | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL = 417951523`。 |
 
@@ -74,7 +74,7 @@ Hiding passwords from physical devices
 Compat framework:
 - Change ID: `417951523`
 - 変更名: `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL`
-- 既定状態: targetSdkVersion 37 以上で default enabled。targetSdkVersion 36 では default disabled。
+- 既定状態: targetSdkVersion 37 以上で デフォルト有効。targetSdkVersion 36 では デフォルト無効。
 - テスト時に切り替え可能か: compat change として切り替え可能。
 
 分類信頼度（Classification confidence）:
@@ -88,7 +88,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、targetSdkVersion 37 以上のアプリでユーザーが external keyboard などの physical input device を使って password field に入力する場合、新しい `show_passwords_physical` setting が適用され、既定では password characters がすべて非表示になる、と公式文書は説明している。
 
@@ -144,19 +144,19 @@ AOSP で確認した点:
 - `PasswordTransformationMethod.onTextChanged()` は compat change が有効な場合、`BaseKeyListener.PhysicalInputSpan` で physical input を判定し、physical / touch の setting を分岐する。
 - `Settings.Secure.TEXT_SHOW_PASSWORD_TOUCH` と `TEXT_SHOW_PASSWORD_PHYSICAL` が追加され、SettingsProvider に backup / validator / migration path が追加された。
 
-## 適用条件（Applicability）
+## 適用条件
 
-公式文書と AOSP evidence から、Android 17 以上、targetSdkVersion 37 以上、password field への入力時に適用される条件付き変更と分類する。physical input device では `show_password_physical`、touchscreen 入力では `show_password_touch` が参照される。
+公式文書と AOSP 根拠 から、Android 17 以上、targetSdkVersion 37 以上、password field への入力時に適用される条件付き変更と分類する。physical input device では `show_password_physical`、touchscreen 入力では `show_password_touch` が参照される。
 
 ### OS アップデート時の挙動（OS Update Behavior）
 
-- Android 17 にアップデートしただけで適用されるか: No。targetSdkVersion 36 では compat change が default enabled ではない。
+- Android 17 にアップデートしただけで適用されるか: No。targetSdkVersion 36 では compat change が デフォルト有効 ではない。
 - targetSdkVersion に依存しない根拠: なし。AOSP は `@EnabledSince(CINNAMON_BUN)` を使う。
 - Android 16 以前での挙動: 従来の `TEXT_SHOW_PASSWORD` / `TextKeyListener.SHOW_PASSWORD` による単一 setting を参照する。
 
 ### targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 
-- targetSdkVersion 37 以上で適用されるか: Yes。`SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` が `@EnabledSince(CINNAMON_BUN)` で default enabled。
+- targetSdkVersion 37 以上で適用されるか: Yes。`SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` が `@EnabledSince(CINNAMON_BUN)` で デフォルト有効。
 - Android 17 以外で targetSdkVersion 37 にした場合の挙動: Android 17 platform の `frameworks-base` 実装に依存する。Android 16 platform には本調査対象の split setting 実装はない。
 - opt-out / temporary override の有無: compat change としてテスト時に切り替え可能。ユーザー設定として `show_password_touch` / `show_password_physical` が分離される。
 
@@ -172,9 +172,9 @@ AOSP で確認した点:
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
-Commands checked before evidence use:
+根拠利用前に確認したコマンド:
 
 ```bash
 git -C frameworks-base status --short
@@ -182,14 +182,14 @@ git -C frameworks-base tag --list android-16.0.0_r4
 git -C frameworks-base tag --list 'android-17*'
 ```
 
-Result:
+結果:
 - `frameworks-base` working tree: clean at the time of investigation.
 - From tag: `android-16.0.0_r4` exists.
 - To tag: `android-17.0.0_r1` exists.
 
 根拠上の制約（Evidence limitation）:
-- source evidence は `android-16.0.0_r4` と `android-17.0.0_r1` の明示的な tag 比較、および `android-17.0.0_r1` 上の symbol 確認に限定した。
-- `frameworks-base` working tree は clean のため、local working tree changes を platform evidence として誤採用するリスクは確認されていない。
+- ソース根拠 は `android-16.0.0_r4` と `android-17.0.0_r1` の明示的な tag 比較、および `android-17.0.0_r1` 上の symbol 確認に限定した。
+- `frameworks-base` working tree は clean のため、ローカル作業ツリーの変更 を platform 根拠 として誤採用するリスクは確認されていない。
 
 ## 関連ファイル（Related Files）
 
@@ -206,7 +206,7 @@ Result:
 
 | File / symbol | Android 16 baseline | Android 17 behavior | 関連性 |
 | --- | --- | --- | --- |
-| `ShowSecretsSetting.SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` | split setting API / compat change は存在しない。 | `@ChangeId` `417951523` が追加され、`@EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)` で targetSdkVersion 37 以上 default enabled。 | 公式文書の targetSdkVersion 37 条件を直接裏付ける gate。 |
+| `ShowSecretsSetting.SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` | split setting API / compat change は存在しない。 | `@ChangeId` `417951523` が追加され、`@EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)` で targetSdkVersion 37 以上 デフォルト有効。 | 公式文書の targetSdkVersion 37 条件を直接裏付ける gate。 |
 | `ShowSecretsSetting.shouldShowTouchInput()` | 単一の show password setting を利用。 | `TEXT_SHOW_PASSWORD_TOUCH` を既定 `SHOW` で読む。 | touchscreen input の表示 policy を分離する実装。 |
 | `ShowSecretsSetting.shouldShowPhysicalInput()` | 単一の show password setting を利用。 | `TEXT_SHOW_PASSWORD_PHYSICAL` を既定 `HIDE` で読む。 | physical input device では既定で全文字を隠すという公式文書の説明と一致する。 |
 | `PasswordTransformationMethod.onTextChanged()` | `TextKeyListener.SHOW_PASSWORD` が有効なら最後の1文字を一時表示する。 | compat change が有効な場合、`PhysicalInputSpan` により physical input を判定し、touch / physical の setting を分岐する。 | password field 入力時に behavior change が実際に適用される entry point。 |
@@ -253,36 +253,36 @@ Result:
 - この項目は targetSdkVersion 37 条件に加えて、physical input device / touchscreen の runtime condition を含む。
 - standard password field を使うアプリでは platform behavior change として現れる可能性がある。
 - custom password UI は platform setting と一致しない表示をしてしまう可能性がある。
-- AOSP gate は targetSdkVersion 37 以上で default enabled であり、公式文書と一致する。
+- AOSP gate は targetSdkVersion 37 以上で デフォルト有効 であり、公式文書と一致する。
 - input source 判定は `PhysicalInputSpan` によって password transformation path に伝達される。
 
 仮説:
 - Android 17 / targetSdkVersion 37 以上では、external keyboard など physical input device から password field へ入力した場合、最後の1文字表示が抑制される可能性が高い。
 - touchscreen 入力では `show_passwords_touch` により、default では最後の1文字表示に近い policy が維持される。
-- targetSdkVersion 36 のアプリでは compat change が default disabled のため、旧 `show_passwords` 相当の挙動が維持される。
+- targetSdkVersion 36 のアプリでは compat change が デフォルト無効 のため、旧 `show_passwords` 相当の挙動が維持される。
 
 結論:
-- 公式文書と AOSP evidence が一致するため、primary classification は `TARGET_SDK_37_CONDITIONAL` とする。
+- 公式文書と AOSP 根拠 が一致するため、primary classification は `TARGET_SDK_37_CONDITIONAL` とする。
 - Android 17 / targetSdkVersion 37 以上で、password field に physical input device から入力する場合、default では最後の1文字も含めて非表示になる。
 
 ## 適用ゲート根拠（Applicability Gate Evidence）
 
-- targetSdkVersion gate: `@EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)`。targetSdkVersion 37 以上で default enabled。
+- targetSdkVersion ゲート: `@EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)`。targetSdkVersion 37 以上で デフォルト有効。
 - CompatChanges.isChangeEnabled / ChangeId: `CompatChanges.isChangeEnabled(ShowSecretsSetting.SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL)`、Change ID `417951523`。
-- @EnabledAfter / @EnabledSince / default state: `@EnabledSince(CINNAMON_BUN)`。targetSdkVersion 36 では default disabled、37 以上では default enabled。
+- @EnabledAfter / @EnabledSince / default state: `@EnabledSince(CINNAMON_BUN)`。targetSdkVersion 36 では デフォルト無効、37 以上では デフォルト有効。
 - Build.VERSION / SDK_INT gate: Android 17 platform implementation として扱う。明示的な SDK_INT runtime gate は主根拠ではない。
 - DeviceConfig / resources config: `Flags.splitShowPasswordsToTouchAndPhysical()` の flag guard があるが、Behavior Change の適用条件分類は compat change の default state に基づく。
 - Permission/AppOps gate: 公式文書上は permission 条件なし。
 - Manifest/property gate: なし。
 - No gate found: 該当しない。
-- Gate conclusion: Android 17 上で targetSdkVersion 37 以上、かつ password field 入力時に split setting が適用される。physical input device では default hide。
+- ゲート結論: Android 17 上で targetSdkVersion 37 以上、かつ password field 入力時に split setting が適用される。physical input device では default hide。
 - Reasoning from source context: `BaseKeyListener` が physical input span を付け、`PasswordTransformationMethod` が compat change と setting を確認する。
 
 検索済み:
 - `frameworks-base` checkout status。
 - `android-16.0.0_r4` tag の存在。
 - `android-17.0.0_r1` tag の存在。
-- Change ID、targetSdkVersion gate、setting definition、physical input 判定、default values。
+- Change ID、targetSdkVersion ゲート、setting definition、physical input 判定、default values。
 
 未検索:
 - OEM / product config で `Flags.splitShowPasswordsToTouchAndPhysical()` がどう設定されるか。
@@ -290,7 +290,7 @@ Result:
 
 ---
 
-# 影響分析（Impact Analysis）
+# 影響分析
 
 ## 影響を受けるアプリ（Affected Apps）
 
@@ -307,11 +307,11 @@ Result:
 - password field を持たないアプリ。
 - physical input device での password input を想定しないアプリ。ただし foldable / tablet / Chromebook / desktop mode では想定外に該当する可能性がある。
 - touchscreen 入力のみの場合。`show_passwords_touch` の default は `SHOW`。
-- targetSdkVersion 37 へ上げないアプリ。AOSP gate 上は targetSdkVersion 36 では default disabled。
+- targetSdkVersion 37 へ上げないアプリ。AOSP gate 上は targetSdkVersion 36 では デフォルト無効。
 
 ---
 
-# 顧客影響（Customer Impact）
+# 顧客影響
 
 ## 影響度
 
@@ -319,7 +319,7 @@ Result:
 
 ※ 最終 severity / priority は人間が判断する。このレポートでは確定しない。
 
-## ビジネス影響（Business Impact）
+## ビジネス影響
 
 - ユーザー影響: physical keyboard 入力時に最後の password character が表示されなくなり、入力確認の UX が変わる可能性がある。一方で、large display / external keyboard 環境での覗き見リスクは低下する。
 - 運用影響: password 入力の UI test、manual QA、サポート手順で「最後の1文字が表示される」前提がある場合、期待結果の更新が必要。
@@ -327,9 +327,9 @@ Result:
 
 ---
 
-# サービス影響例（Service Impact Examples）
+# サービス影響例
 
-このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+このセクションは、公式文書と AOSP 根拠 から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
 ## 例1（Example 1）: 外部キーボード利用が多いログイン画面
 
@@ -385,7 +385,7 @@ Result:
 | 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | default | Android 16 baseline。last-typed password character reveal の挙動は Android 17 tag 比較待ち。 |
-| Android 17 | 36 | default | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` は default disabled。旧 `TEXT_SHOW_PASSWORD` 相当の挙動が維持される。 |
+| Android 17 | 36 | default | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` は デフォルト無効。旧 `TEXT_SHOW_PASSWORD` 相当の挙動が維持される。 |
 | Android 17 | 37 | default | 公式文書上は physical input device 使用時に `show_passwords_physical` が適用され、default では全 password characters が hidden。 |
 | Android 17 | 36 | force-enabled | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` を有効化すると split setting path を検証できる。 |
 | Android 17 | 37 | force-disabled | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` を無効化すると旧 path との切り分けができる。 |

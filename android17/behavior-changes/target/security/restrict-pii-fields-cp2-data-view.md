@@ -43,7 +43,7 @@ https://developer.android.com/about/versions/17/behavior-changes-17
 - 公式文書は、targetSdkVersion 37 以上のアプリに対し、Contacts Provider 2 (CP2) の `ContactsContract.Data` data view から PII を含む `ACCOUNT_NAME`、`ACCOUNT_TYPE`、`ACCOUNT_TYPE_AND_DATA_SET` が制限されると説明している。
 - 該当 columns が必要な場合は、`RAW_CONTACT_ID` で `ContactsContract.RawContacts` と join して RawContacts 側から取得するよう案内されている。
 - `frameworks-base` では `ContactsContract.Data` / `RawContacts` / `DataColumnsWithJoins` の API surface と `RAW_CONTACT_ID` 境界を確認できた。
-- 追加 checkout の `platform/packages/providers/ContactsProvider` で、projection filtering、targetSdkVersion gate、Compat ChangeId を確認した。
+- 追加 checkout の `platform/packages/providers/ContactsProvider` で、projection filtering、targetSdkVersion ゲート、Compat ChangeId を確認した。
 
 ### 調査日（Investigation Date）
 
@@ -87,21 +87,21 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、targetSdkVersion 37 以上のアプリに対し、CP2 の `ContactsContract.Data` data view から account PII に該当する `ACCOUNT_NAME`、`ACCOUNT_TYPE`、`ACCOUNT_TYPE_AND_DATA_SET` が制限される、と公式文書は説明している。
 
 この変更は、`ContactsContract.Data` query の projection にこれらの columns を含めているアプリに影響する。代替は `RAW_CONTACT_ID` を使って `ContactsContract.RawContacts` から account 情報を取得する設計である。
 
-信頼度は High とする。ContactsProvider 側で Compat ChangeId、targetSdkVersion gate、restricted projection map を確認した。
+信頼度は High とする。ContactsProvider 側で Compat ChangeId、targetSdkVersion ゲート、restricted projection map を確認した。
 
 ---
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
-Commands checked before evidence use:
+根拠利用前に確認したコマンド:
 
 ```bash
 git -C frameworks-base status --short
@@ -109,7 +109,7 @@ git -C frameworks-base tag --list android-16.0.0_r4
 git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
-Result:
+結果:
 - `frameworks-base` working tree: clean at the time of investigation.
 - From tag: `android-16.0.0_r4` exists.
 - To tag: `android-17.0.0_r1` exists.
@@ -162,7 +162,7 @@ Source context の補足:
 - `platform/packages/providers/ContactsProvider` Android 17 tag に `RESTRICT_DATA_URI_COLUMNS = 437318646L` と restricted projection map がある。
 
 観察:
-- provider query projection filtering と targetSdkVersion gate は ContactsProvider 側で確認できた。
+- provider query projection filtering と targetSdkVersion ゲートは ContactsProvider 側で確認できた。
 - 対象 columns は Data view から除外されるが、RawContacts 側の account columns は代替 path として残る。
 
 結論:
@@ -172,7 +172,7 @@ Source context の補足:
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性が高いアプリ:
 - `ContactsContract.Data` query で `ACCOUNT_NAME`、`ACCOUNT_TYPE`、`ACCOUNT_TYPE_AND_DATA_SET` を projection に含めるアプリ。

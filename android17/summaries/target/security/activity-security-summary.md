@@ -1,6 +1,6 @@
 # Activity Security - 1ページ要約
 
-## 対象（Target）
+## 対象
 
 Android 17 Behavior Change
 
@@ -16,7 +16,7 @@ Android 17 Behavior Change
 対象 targetSdkVersion:
 - 37
 
-## 適用条件（Applicability）
+## 適用条件
 
 - 主分類（Primary classification）: TARGET_SDK_37_CONDITIONAL
 - OS アップデート / 全アプリ（OS update / all apps）: 主条件ではない。`ASM_RESTRICTIONS` は targetSdkVersion 37 以上で enabled。
@@ -25,27 +25,27 @@ Android 17 Behavior Change
 - Compat Change ID: `230590090L`
 - Compat default state: `@EnabledAfter(targetSdkVersion = BAKLAVA)`。Android 17 / targetSdkVersion 37 以上で enabled。
 
-## 早見マトリクス（At-a-Glance Matrix）
+## 早見マトリクス
 
-| シナリオ（Scenario） | 影響（Impact） |
+| シナリオ | 影響 |
 | --- | --- |
 | Android 17 / targetSdkVersion 36 | compat default では `ASM_RESTRICTIONS` disabled。 |
 | Android 17 / targetSdkVersion 37 + `ALLOW_IF_VISIBLE` | caller / real caller が visible / foreground の場合に限定して BAL を許可。 |
 | Android 17 / targetSdkVersion 37 + `ALLOW_ALWAYS` | BAL permission、SYSTEM_ALERT_WINDOW、allowlist など広い exemption を評価。特殊用途向け。 |
 
-## 要約（Summary）
+## 要約
 
 Android 17 では、PendingIntent / IntentSender 経由の Background Activity Launch がより厳格になり、legacy `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` から `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` または `MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` への移行が必要になる。
 
 AOSP では `BackgroundActivityStartController.ASM_RESTRICTIONS = 230590090L` が `@EnabledAfter(BAKLAVA)` として定義され、targetSdkVersion 37 以上で Activity Security rules が enabled になることを確認した。
 
-## 顧客影響（Customer Impact）
+## 顧客影響
 
 - 通知、アラーム、認証、決済、デバイス連携、外部アプリ連携などで background から画面を起動する設計に影響する。
 - 通常用途では `ALLOW_IF_VISIBLE` を使い、visible でない状態からの起動は通知など user-mediated path に寄せる必要がある。
 - 常時起動が必要な特殊用途だけ `ALLOW_ALWAYS` を検討する。
 
-## 対応要否（Required Action）
+## 対応要否
 
 - 必須対応候補: `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` と PendingIntent / IntentSender 経由の Activity 起動箇所を棚卸しする。
 - 推奨対応: `ALLOW_IF_VISIBLE` へ移行し、background 状態では通知や foreground service 経由にする。

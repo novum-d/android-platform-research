@@ -36,7 +36,7 @@ Android 17 Behavior Change
 
 ## 要約
 
-Android 17 では、CJKV IME の物理キーボード入力中に、候補選択や composition / commit の違いを AccessibilityService へ伝える API と `TextView` 処理が追加される。AOSP evidence は確認できたが、targetSdkVersion 37 gate は未検出のため分類は保留する。
+Android 17 では、CJKV IME の物理キーボード入力中に、候補選択や composition / commit の違いを AccessibilityService へ伝える API と `TextView` 処理が追加される。AOSP 根拠 は確認できたが、targetSdkVersion 37 gate は未検出のため分類は保留する。
 
 ## 顧客影響
 

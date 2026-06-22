@@ -1,6 +1,6 @@
 # Pointer capture 中の touchpad relative event 既定化 - 1ページ要約
 
-## 対象（Target）
+## 対象
 
 Android 17 Behavior Change
 
@@ -16,28 +16,28 @@ Android 17 Behavior Change
 対象 targetSdkVersion:
 - 37
 
-## 適用条件（Applicability）
+## 適用条件
 
 - 主分類（Primary classification）: OS_UPDATE_ALL_APPS
-- OS アップデート / 全アプリ（OS update / all apps）: Yes / Conditional。Android 17 の all apps ページに掲載され、AOSP の `View.requestPointerCapture()` に targetSdkVersion gate は見つからない。
+- OS アップデート / 全アプリ（OS update / all apps）: Yes / Conditional。Android 17 の all apps ページに掲載され、AOSP の `View.requestPointerCapture()` に targetSdkVersion ゲートは見つからない。
 - targetSdkVersion 37 以上: 不要。default mode は aconfig flag により分岐し、targetSdkVersion は参照されない。
 - その他の必須条件（Other required conditions）: app が pointer capture を使い、input device が touchpad で、captured event の座標解釈に依存していること。
 - Compat Change ID: 確認されず
 - Compat default state: compat framework ではなく aconfig flags `pointer_capture_modes` / `relative_capture_mode_by_default` に依存
 
-## 早見マトリクス（At-a-Glance Matrix）
+## 早見マトリクス
 
-| シナリオ（Scenario） | 影響（Impact） |
+| シナリオ | 影響 |
 | --- | --- |
 | Android 17 / targetSdkVersion 36 | flag 条件を満たす場合、touchpad + pointer capture で default relative motion event が届く可能性。 |
 | Android 17 / targetSdkVersion 37 | targetSdkVersion 36 と同様の可能性。公式文書に targetSdkVersion 条件なし。 |
 | Android 17 / targetSdkVersion 37 + 必須条件 | absolute coordinate 前提の pointer capture 実装で cursor movement / remote pointer mapping が変わる可能性。 |
 
-## 要約（Summary）
+## 要約
 
 Android 17 では、touchpad が pointer capture 中に default で relative motion event を deliver する。AOSP では `View.requestPointerCapture()` が `pointerCaptureModes()` と `relativeCaptureModeByDefault()` を確認し、条件を満たす場合に `POINTER_CAPTURE_MODE_RELATIVE` を request する。
 
-## 顧客影響（Customer Impact）
+## 顧客影響
 
 - pointer capture 中の touchpad event を absolute coordinate として扱うアプリでは、cursor movement、remote pointer mapping、drag / pan / selection の解釈が変わる可能性がある。
 
@@ -47,21 +47,21 @@ Android 17 では、touchpad が pointer capture 中に default で relative mot
 - 対象機能: camera control、remote cursor mapping、drag、pan、selection、viewport navigation。
 - 対象条件: touchpad input を captured event として受け取り、absolute coordinate 前提で処理している場合。
 
-## 対応要否（Required Action）
+## 対応要否
 
 - 必須対応: pointer capture 利用箇所で touchpad event の座標解釈を確認する。
 - 推奨対応: relative motion event 前提に処理するか、absolute coordinate behavior が必要な場合は Android 17 以上で `requestPointerCapture(int)` と `View.POINTER_CAPTURE_MODE_ABSOLUTE` を使う。
 - 不要: pointer capture を使わない app、touchpad input を扱わない app、relative delta 前提の実装では直接影響は限定的。
 
-## テストマトリクス（Test Matrix）
+## テストマトリクス
 
-| 端末 OS（Device OS） | targetSdkVersion | 期待挙動（Expected behavior） |
+| 端末 OS | targetSdkVersion | 期待挙動 |
 | --- | --- | --- |
 | Android 16 | 36 | baseline。touchpad + pointer capture の event coordinate behavior を確認。 |
 | Android 17 | 36 | touchpad captured event は default relative motion event として届くと公式文書は説明。 |
 | Android 17 | 37 | targetSdkVersion 36 と同じ期待。targetSdkVersion 条件は公式文書に記載なし。 |
 
-## 顧客向け説明（Explanation for Customers）
+## 顧客向け説明
 
 Android 17 では、touchpad を pointer capture 中に使った場合、default で relative motion event が app に届くようになります。absolute coordinate 前提の実装では cursor movement や remote pointer mapping が変わる可能性があります。
 
@@ -74,7 +74,7 @@ Android 17 では、touchpad を pointer capture 中に使った場合、default
 - AOSP ファイル: `View.java`, `ViewRootImpl.java`, `InputManagerService.java`, `input_framework.aconfig`, `core/api/current.txt`
 - AOSP ソース文脈: app `requestPointerCapture()` -> `ViewRootImpl.requestPointerCapture(mode)` -> `InputManagerService.requestPointerCapture()` -> native input manager。
 - 差分解釈: changed default / API addition。`requestPointerCapture()` default が flag 条件下で relative mode になり、`requestPointerCapture(int)` と `POINTER_CAPTURE_MODE_*` が追加された。
-- Gate conclusion: Android 17 で pointer capture を使い、touchpad event を扱う場合に影響し得る。targetSdkVersion gate / compat Change ID は確認されず、aconfig flag と device input condition に依存する。
+- ゲート結論: Android 17 で pointer capture を使い、touchpad event を扱う場合に影響し得る。targetSdkVersion ゲート / compat Change ID は確認されず、aconfig flag と device input condition に依存する。
 
 ## 人間の判断欄（Human Decision）
 

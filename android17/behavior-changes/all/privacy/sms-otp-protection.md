@@ -43,7 +43,7 @@
 - 公式文書は Android 17 の `Behavior changes: all apps` ページにこの項目を掲載している。
 - 本項目では、Android 17 から WebOTP format messages にも SMS OTP protection が適用される、と説明している。
 - WebOTP 側の保護は、公式文書上 targetSdkVersion 条件を持たない。
-- Android 17 AOSP evidence では WebOTP OTP subtype、TextClassifier entity、domain verification query API、OTP trusted package 判定 API が追加されている。
+- Android 17 AOSP 根拠 では WebOTP OTP subtype、TextClassifier entity、domain verification query API、OTP trusted package 判定 API が追加されている。
 - targetSdkVersion 37 以上で standard SMS messages にも保護が拡張される点は、`behavior-changes-17` 側の別項目として分離する。
 
 早見表（At-a-glance impact）:
@@ -65,7 +65,7 @@
 
 理由:
 - 公式文書と一致する WebOTP / domain verification / trusted packages の AOSP API surface は確認できた。
-- `frameworks-base` 上で targetSdkVersion gate は WebOTP all-apps path には見つからない。
+- `frameworks-base` 上で targetSdkVersion ゲートは WebOTP all-apps path には見つからない。
 - ただし `SMS_RECEIVED_ACTION` broadcast withholding、SMS provider query filtering、3 時間 delay の実装本体は Telephony provider / module 側にまたがるため、この checkout だけでは完全な runtime enforcement を確認できない。
 
 ### 適用条件分類（Applicability Classification）
@@ -96,7 +96,7 @@ Compat framework:
 
 ---
 
-# エグゼクティブサマリー（Executive Summary）
+# エグゼクティブサマリー
 
 Android 17 では、SMS OTP protection が WebOTP format messages にも拡張される。SMS を読む permission を持つアプリであっても、domain verification で WebOTP message の intended recipient と判定されない場合、受信後 3 時間はその message にアクセスできない、と公式文書は説明している。
 
@@ -143,7 +143,7 @@ All apps ページ上の変更として WebOTP format messages への保護が t
 
 # AOSP 調査（AOSP Investigation）
 
-## checkout 状態（Checkout Status）
+## チェックアウト状態
 
 確認コマンド:
 
@@ -154,7 +154,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 ```
 
 結果:
-- `frameworks-base` の `status --short` は空で、dirty working tree は確認されなかった。
+- `frameworks-base` の `status --short` は空で、未コミット変更 は確認されなかった。
 - `android-16.0.0_r4` tag は存在する。
 - `android-17.0.0_r1` tag は存在する。
 
@@ -185,7 +185,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 
 ## 実装 path（Runtime Path）
 
-公式文書と AOSP evidence から推定できる path:
+公式文書と AOSP 根拠 から推定できる path:
 1. SMS が受信され、TextClassifier / Telephony 側で OTP かつ WebOTP subtype と判定される。
 2. WebOTP message の domain に対して `DomainVerificationManager.getVerifiedOwnersForDomain()` などで verified owner / intended recipient が判定される。
 3. `SmsManager.getSmsOtpTrustedPackages()` / `isAppTrustedForSmsOtp()` により、default SMS / assistant / companion device / carrier privileged / app op allowed などの trusted packages が判定される。
@@ -217,7 +217,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 差分解釈:
 - Source diff type: added behavior / added API surface / changed condition の evidence。
 - Behavior Change を支える evidence: WebOTP subtype、domain verification、trusted package 判定、provider query filtering helper が Android 17 tag に存在する。
-- 分類を支える evidence: WebOTP all-apps path に targetSdkVersion gate は確認できず、公式文書も all apps / regardless of target API level と説明している。
+- 分類を支える evidence: WebOTP all-apps path に targetSdkVersion ゲートは確認できず、公式文書も all apps / regardless of target API level と説明している。
 
 ## 関連しない / 除外した path
 
@@ -231,7 +231,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 ## OS アップデート時の挙動（OS Update Behavior）
 
 - Android 17 に OS アップデートしただけで適用されるか: Yes / Conditional。
-- targetSdkVersion に依存しない根拠: 公式文書は all apps ページに掲載し、WebOTP protection は target API level に関係なく適用されると説明している。確認済み WebOTP API surface に targetSdkVersion gate は見つからない。
+- targetSdkVersion に依存しない根拠: 公式文書は all apps ページに掲載し、WebOTP protection は target API level に関係なく適用されると説明している。確認済み WebOTP API surface に targetSdkVersion ゲートは見つからない。
 - Android 16 以前での挙動: 公式文書は、以前は主に SMS Retriever format messages が保護対象だったと説明している。Android 17 diff では WebOTP subtype / domain verification query / trusted package extra が追加されている。
 
 ## targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
@@ -250,7 +250,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
-# 開発者影響（Developer Impact）
+# 開発者影響
 
 影響を受ける可能性がある app:
 - SMS inbox、SMS provider、`SMS_RECEIVED_ACTION` broadcast から OTP を直接抽出しているアプリ。
@@ -282,7 +282,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 # テスト観点（Test Matrix）
 
-| 端末 OS（Device OS） | targetSdkVersion | 条件 | 期待挙動（Expected behavior） |
+| 端末 OS | targetSdkVersion | 条件 | 期待挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | WebOTP format message / SMS read app | baseline。公式文書上、主保護対象は SMS Retriever format messages。 |
 | Android 17 | 36 | WebOTP format message / intended recipient ではない / 受信後 3 時間以内 | `SMS_RECEIVED_ACTION` broadcast withheld、SMS provider query filtered の想定。 |

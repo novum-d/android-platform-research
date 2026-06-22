@@ -101,7 +101,7 @@ Android 17 / targetSdkVersion 37 のアプリでは、RFCOMM-based `BluetoothSoc
 
 これまで `IOException` が throw されることだけを期待して read loop を終了していたアプリは、`read()` が `-1` を返した場合に loop が抜けず、無限ループ、空読み、切断検出遅延などを起こす可能性がある。RFCOMM read loop は `-1` を明示的にチェックする必要がある。
 
-Bluetooth module の Android 17 tag で `BluetoothSocket` 実装差分、targetSdkVersion gate、Compat Change ID を確認できたため、信頼度は High とする。
+Bluetooth module の Android 17 tag で `BluetoothSocket` 実装差分、targetSdkVersion ゲート、Compat Change ID を確認できたため、信頼度は High とする。
 
 ---
 
@@ -155,7 +155,7 @@ AOSP で確認した点 / 未確認の点:
 - LE CoC socket の既存挙動との整合。
 - native stack 内部の close reason 詳細。
 
-## 適用条件（Applicability）
+## 適用条件
 
 公式文書と Bluetooth module evidence から、Android 17 以上、targetSdkVersion 37、RFCOMM-based `BluetoothSocket` の `InputStream.read()` を使うアプリに適用される。確定分類は `TARGET_SDK_37_CONDITIONAL` とする。
 
@@ -199,7 +199,7 @@ git -C frameworks-base tag --list 'android-17*'
 - To tag: `android-17.0.0_r1` exists.
 
 根拠上の制約:
-- `frameworks-base` では明示的な tag 比較と file / symbol 検索を実施したが、`BluetoothSocket` / RFCOMM read path の直接実装、targetSdkVersion gate、Compat Change ID は確認できなかった。
+- `frameworks-base` では明示的な tag 比較と file / symbol 検索を実施したが、`BluetoothSocket` / RFCOMM read path の直接実装、targetSdkVersion ゲート、Compat Change ID は確認できなかった。
 - Bluetooth socket の実装本体は `frameworks-base` ではなく Bluetooth module 側にあり、追加 checkout で確認済み。
 - 広域の `frameworks-base` tag diff では rename detection が skipped される警告が出たため、`--no-renames` と対象 path 限定で再確認した。追加で見つかった Bluetooth 関連差分は `core/java/android/net/flags.aconfig` の Bluetooth flags と SettingsLib の pairing diagnosis であり、RFCOMM `BluetoothSocket.read()` 実装ではなかった。
 - この制約は解消済み。AOSP-backed conclusion は High confidence とする。
@@ -238,13 +238,13 @@ git -C frameworks-base tag --list 'android-17*'
 | --- | --- | --- | --- |
 | `frameworks-base` で `BluetoothSocket` 実装が見つからない | no behavior change found in frameworks-base scope | 実装本体は Bluetooth module 側にあるため、frameworks-base 単体では根拠にならない。 | 高 |
 | Bluetooth module `BluetoothSocket.read()` の EOF branch | changed condition | flag + compat change + Android C 以上なら `IOException` ではなく `-1` を返す。 | 高 |
-| ChangeId `383671392` | compat gate | targetSdkVersion 37 以上で default enabled。 | 高 |
+| ChangeId `383671392` | compat gate | targetSdkVersion 37 以上で デフォルト有効。 | 高 |
 
 必須分類:
 - Added behavior: RFCOMM EOF 時の `-1` return path。
 - Removed behavior: targetSdkVersion 37 以上での RFCOMM EOF 時 `IOException` path。
 - Changed condition / gate: `@EnabledSince(CINNAMON_BUN)` の compat ChangeId と feature flag。
-- Changed default: targetSdkVersion 37 以上では compat change が default enabled。
+- Changed default: targetSdkVersion 37 以上では compat change が デフォルト有効。
 - No behavior change found: `frameworks-base` scope では該当。ただし platform 全体の evidence は Bluetooth module で確認済み。
 
 ## 事実
@@ -271,7 +271,7 @@ git -C frameworks-base tag --list 'android-17*'
 
 仮説:
 - Android 17 / targetSdkVersion 37 では、flag と compat change が有効な場合に RFCOMM remote disconnect 時の negative read return が `-1` として返る。
-- Android 17 / targetSdkVersion 36 のアプリでは compat change が default disabled のため旧挙動が維持される。
+- Android 17 / targetSdkVersion 36 のアプリでは compat change が デフォルト無効 のため旧挙動が維持される。
 - `IOException` catch だけを終了条件にした loop は、`-1` を data length として扱って誤動作する、または loop 終了しない可能性がある。
 
 結論:
@@ -312,7 +312,7 @@ git -C frameworks-base tag --list 'android-17*'
 - LE CoC socket だけを使うアプリ。
 - `InputStream.read()` の `-1` return をすでに EOF として扱っているアプリ。
 - socket close / disconnect handling を byte count と exception の両方で処理しているアプリ。
-- Bluetooth module 側の AOSP evidence で対象外 gate や exemption が確認されたケース。
+- Bluetooth module 側の AOSP 根拠 で対象外 gate や exemption が確認されたケース。
 
 ---
 
@@ -334,7 +334,7 @@ git -C frameworks-base tag --list 'android-17*'
 
 # サービス影響例
 
-このセクションは、公式文書と AOSP evidence から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+このセクションは、公式文書と AOSP 根拠 から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
 ## 例1: Bluetooth プリンター / スキャナー連携
 
@@ -393,7 +393,7 @@ git -C frameworks-base tag --list 'android-17*'
 | 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
 | --- | --- | --- | --- |
 | Android 16 | 36 | default | Android 16 baseline。compat gated `-1` return path はない。 |
-| Android 17 | 36 | default | compat change default disabled。旧挙動。 |
+| Android 17 | 36 | default | compat change デフォルト無効。旧挙動。 |
 | Android 17 | 37 | default | RFCOMM `BluetoothSocket` input stream `read()` は socket closed / connection dropped 時に `-1` を返す。 |
 | Android 17 | 36 | force-enabled（利用可能な場合） | `-1` return path を強制できる可能性がある。 |
 | Android 17 | 37 | force-disabled（利用可能な場合） | 旧 `IOException` path に戻せる可能性がある。 |
@@ -434,7 +434,7 @@ Bluetooth module の Android 17 AOSP タグで、実装 gate、RFCOMM read path�
 - 未判断
 
 判断メモ:
-- AOSP evidence は確認済み。最終 priority / customer communication priority は人間が判断する。
+- AOSP 根拠 は確認済み。最終 priority / customer communication priority は人間が判断する。
 
 ---
 
