@@ -216,10 +216,11 @@ Source context の補足:
 影響を受ける可能性が高いアプリ:
 - 実行時に `.so` をダウンロード / 生成 / 展開 / 更新して `System.load()` するアプリ
 - plugin / scripting / ML delegate / game engine extension など native module を動的に差し替えるアプリ
+- 画像・動画処理、codec、AI / ML delegate、ネットワーク処理、暗号処理などの native library をアプリ起動後に展開・更新して読み込むアプリ / SDK
 
 対応候補:
 - dynamic native loading を避け、APK / App Bundle 配布時点の native library に寄せる。
-- どうしても必要な場合、load 前に native file を read-only として確定し、その後に内容を書き換えない。
+- どうしても必要な場合、`System.load()` 前に native file を read-only として確定し、その後に内容を書き換えない。
 - `UnsatisfiedLinkError` を認証 /起動 / feature initialization の failure として扱えるよう fallback を実装する。
 
 ---

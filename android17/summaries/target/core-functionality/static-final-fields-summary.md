@@ -46,7 +46,7 @@ Android 17 では、Android 17 以上で動作し targetSdkVersion 37 以上の�
 ## 影響対象
 
 - 対象アプリ: targetSdkVersion 37 への更新を予定している Android アプリ。
-- 対象機能: feature flag override、SDK 内部値の変更、hot patch、mocking、hooking、diagnostics、native instrumentation。
+- 対象機能: 古いアプリ / SDK の reflection による private API / SDK 内部値 / feature flag 差し替え、hot patch、mocking、hooking、diagnostics、native instrumentation。
 - 対象条件: 自社コードまたは SDK が reflection / JNI で static final field を変更している場合。
 
 ## 対応要否

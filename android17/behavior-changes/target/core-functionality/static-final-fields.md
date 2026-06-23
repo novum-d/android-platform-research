@@ -298,6 +298,7 @@ git -C frameworks-base tag --list 'android-17*'
 - reflection で static final field を書き換える自社コードを持つアプリ。
 - JNI で static final field を書き換える native code を持つアプリ。
 - feature flag、SDK 内部定数、build-time constant、テスト用 override、互換性回避のために static final field を実行時に変更しているアプリまたは SDK。
+- 古いアプリや古い SDK で、private API / SDK 内部値 / feature flag を reflection で差し替える実装を残しているアプリ。
 - 古い instrumentation、hot patch、mocking、hooking、diagnostics 系 SDK を組み込んでいるアプリ。
 
 ## 影響を受けにくいアプリ

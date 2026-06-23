@@ -270,7 +270,7 @@ Source context の補足:
 必要な対応候補:
 - local network access 箇所を棚卸しする。
 - system-mediated picker で要件を満たせる機能は picker path を優先する。
-- direct / persistent access が必要な機能は `ACCESS_LOCAL_NETWORK` を manifest に宣言し、runtime permission request と denied / revoked handling を実装する。
+- system-mediated picker でユーザー許可を取得しない direct / persistent access では、`ACCESS_LOCAL_NETWORK` を manifest に宣言し、コードで runtime permission request と denied / revoked handling を実装する。
 - targetSdkVersion 37 で、permission 未許可時、許可後、取り消し後、旧 targetSdkVersion 互換時の挙動をテストする。
 - Android 16 opt-in / compat change で事前検証できる場合は regression test を作る。
 

@@ -35,6 +35,8 @@ libcore の `Runtime.load0()` と `VMRuntime` で、writable native file の検�
 ## 顧客影響
 
 - 実行時に `.so` をダウンロード、生成、展開、更新して `System.load()` するアプリに影響する可能性がある。
+- 画像・動画処理、codec、AI / ML delegate、ネットワーク処理、暗号処理などの native library をアプリ起動後に展開・更新して読み込むアプリ / SDK も確認対象。
+- `System.load()` 前に、読み込む native file を read-only にしておく必要がある。
 - dynamic native loading は code injection / tampering risk が高いため、可能な限り避けることが推奨される。
 
 ## 根拠（Evidence）

@@ -43,11 +43,11 @@ Android 17 では、targetSdkVersion 37 以上のアプリが LAN 上の device 
 
 - smart home、IoT、casting、mDNS / NSD、`.local` resolution、local endpoint socket、WebView local network access を使うアプリは targetSdkVersion 37 更新時に影響を受ける可能性が高い。
 - system-mediated picker で要件を満たせる場合は、広い runtime permission request を避けられる。
-- direct / persistent access が必要な場合は、manifest declaration、runtime request、denial / revocation handling が必要。
+- system picker でユーザー許可を取得しない direct / persistent access では、manifest への `ACCESS_LOCAL_NETWORK` 宣言、コード上の runtime permission request、denial / revocation handling が必要。
 
 ## 対応要否
 
-- 必須対応候補: local network access 箇所を棚卸しし、picker path と runtime permission path のどちらを採用するか決める。
+- 必須対応候補: local network access 箇所を棚卸しし、system picker path と runtime permission path のどちらを採用するか決める。system picker を使わない direct access は manifest とコードの permission 対応を実装する。
 - 推奨対応: Android 17 / targetSdkVersion 37 で permission 未許可、許可、取り消し後の動作をテストする。
 - 不要な可能性: local network access を行わないアプリ、または system-mediated picker だけで要件を満たすアプリ。
 

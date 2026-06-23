@@ -71,9 +71,9 @@ To:
 
 # エグゼクティブサマリー（Executive Summary）
 
-対象アプリは、カメラとの Bluetooth / Wi-Fi 接続、ローカルネットワーク上の機器探索・接続、画像 / 動画転送、リモート操作を行う可能性が高い。そのため Android 17 では、特に `ACCESS_LOCAL_NETWORK`、Bluetooth bond loss recovery、RFCOMM `BluetoothSocket.read()`、TLS 周辺の変更を優先確認すべきである。
+対象アプリは、カメラとの Bluetooth / Wi-Fi 接続、ローカルネットワーク上の機器探索・接続、画像 / 動画転送、リモート操作を行う可能性が高い。そのため Android 17 では、特に `ACCESS_LOCAL_NETWORK`、Bluetooth bond loss recovery、RFCOMM `BluetoothSocket.read()`、TLS 周辺の変更を優先確認すべきである。加えて、古いアプリ / SDK の reflection と、画像・動画処理またはネットワーク処理 native library の dynamic loading は、Static final fields / Safer Native DCL-C の 1 項目として確認する。
 
-OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後の autonomous re-pairing と app memory limits である。targetSdkVersion 37 更新時に影響しうる項目は、ローカルネットワーク権限、RFCOMM read EOF、certificate transparency、ECH、Activity Security、大画面制約無視である。
+OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後の autonomous re-pairing と app memory limits である。targetSdkVersion 37 更新時に影響しうる項目は、ローカルネットワーク権限、RFCOMM read EOF、certificate transparency、ECH、Activity Security、大画面制約無視、Static final fields / Safer Native DCL-C である。
 
 現時点では対象アプリの manifest / API usage を直接確認していないため、アプリ固有影響は「要確認」を含む。特にカメラとの直接 Wi-Fi 接続、mDNS / NSD / `.local` 解決、ローカル IP への socket / HTTP 接続がある場合、Android 17 / targetSdkVersion 37 で runtime permission UX と接続失敗時の fallback を設計する必要がある。
 
@@ -92,7 +92,7 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 | BC-007 | Large screen orientation / resizability / aspect ratio restrictions ignored | 固定向き UI、リモート操作画面、ライブビュー、画像一覧 | TARGET_SDK_37_CONDITIONAL | 要確認 | tablet / foldable / multi-window で検証 | High |
 | BC-008 | App memory limits | 画像 / 動画一覧、サムネイル生成、転送、キャッシュ | OS_UPDATE_ALL_APPS | 影響軽微から要確認 | memory baseline と `ApplicationExitInfo` 収集 | High |
 | BC-009 | Background audio hardening | 音声再生 / 音声アラーム | OS_UPDATE_ALL_APPS / TARGET_SDK_37_CONDITIONAL | 影響なしの可能性が高い | 音声バックグラウンド再生がある場合のみ確認 | Medium |
-| BC-010 | Contacts Provider / SMS OTP / static final / native DCL-C など | 連絡先、SMS、reflection、native dynamic loading | 各項目による | 現時点では影響なしから要確認 | 対象 API usage がある場合のみ追加調査 | Medium |
+| BC-010 | Static final fields / Safer Native DCL-C | 古いアプリ / SDK の reflection、JNI、画像・動画処理 native library、ネットワーク処理 native library、native dynamic loading | TARGET_SDK_37_CONDITIONAL | 要確認。古い SDK や native plugin 構成では該当可能性あり | reflection / JNI による `static final` 書き換え、`System.load()` 前の read-only 化、native library 展開処理を棚卸し | High |
 
 ---
 
@@ -109,7 +109,8 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 
 | Behavior Change | targetSdkVersion 条件 | 追加条件 | 想定されるアプリ影響 | 推奨確認 |
 | --- | --- | --- | --- | --- |
-| Local network permission required for apps targeting Android 17 | targetSdkVersion 37 以上 | direct local network access、LAN device discovery / connection、`ACCESS_LOCAL_NETWORK` grant state | カメラ探索、接続、画像転送、リモート制御が permission denied 時に失敗する可能性。 | local network API / socket / HTTP / mDNS / NSD / `.local` 利用を棚卸しし、permission UX と denied fallback を設計する。 |
+| Local network permission required for apps targeting Android 17 | targetSdkVersion 37 以上 | direct local network access、LAN device discovery / connection、system picker 利用有無、`ACCESS_LOCAL_NETWORK` grant state | カメラ探索、接続、画像転送、リモート制御が permission denied 時に失敗する可能性。 | local network API / socket / HTTP / mDNS / NSD / `.local` 利用を棚卸しする。system picker でユーザー許可を取得しない direct access では、manifest への `ACCESS_LOCAL_NETWORK` 追記と runtime permission request 実装が必要。 |
+| Static final fields / Safer Native DCL-C | targetSdkVersion 37 以上 | reflection / JNI による `static final` field write、または `System.load()` で writable native file を読み込む場合 | 古いアプリ / SDK の runtime patching、画像・動画処理やネットワーク処理の native module 動的差し替えで初期化失敗や crash が起きる可能性。 | 古い reflection 実装、JNI field write、native library の download / generate / extract / update / load 処理を棚卸しする。`System.load()` 前に対象 `.so` を read-only にし、その後に書き換えない。 |
 | RFCOMM `BluetoothSocket.read()` EOF | targetSdkVersion 37 以上 | RFCOMM-based `BluetoothSocket`、socket close / disconnect、read loop | `IOException` だけで read loop を終了している場合、切断処理が期待通り動かない可能性。 | `bytesRead == -1` を EOF / disconnect として処理しているか確認する。 |
 | Certificate transparency default enabled | targetSdkVersion 37 以上 | platform TLS / HTTPS、証明書チェーン、Network Security Config | CT 要件を満たさない endpoint で HTTPS 接続が失敗する可能性。 | production / staging / test / device-local HTTPS endpoint の証明書チェーンを確認する。 |
 | ECH enabled | targetSdkVersion 37 以上 | TLS connection、ECH 対応 library / server、`<domainEncryption>` | SNI 前提の network inspection / filtering 環境で観測・制御の前提が変わる可能性。 | 通信先、library、CDN、enterprise network 条件を確認し、必要なら domain encryption policy を決める。 |
@@ -123,8 +124,7 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 | Contacts Provider PII / strict SQL checks | 影響なしの可能性が高い | カメラ連携アプリの主要機能と Contacts Provider data view query の関連が薄い。ただし連絡先共有機能がある場合は要確認。 | Medium |
 | SMS OTP protection | 影響なしの可能性が高い | SMS OTP 受信・読み取りが主要機能に見えない。アカウント認証で SMS Retriever / SMS User Consent を使う場合は要確認。 | Medium |
 | Background audio hardening | 影響なしから軽微 | カメラ連携・画像転送が主用途で、background audio playback が主機能ではない想定。 | Medium |
-| Static final fields are now unmodifiable | 要確認だが優先低 | 通常のアプリ実装では影響しにくい。reflection / JNI による `static final` 書き換えがある場合のみ影響。 | High |
-| Safer Native DCL-C | 要確認だが優先低 | native dynamic code loading を使う場合のみ影響。一般的なカメラ連携機能とは直接結びつかない。 | High |
+| Static final fields / Safer Native DCL-C | 要確認 | カメラ連携アプリでも、古い SDK が reflection / JNI で `static final` を書き換える場合や、画像・動画処理、ネットワーク処理、codec、AI / ML delegate などの native library を実行時に展開・更新して `System.load()` する場合は影響し得る。 | High |
 
 ## 要確認の項目（Needs More Evidence）
 
@@ -135,6 +135,7 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 | CT / ECH | 通信先一覧、Network Security Config、certificate pinning、利用 networking library | production / staging / device-local endpoint の証明書と ECH support を確認する。 | 通信先・設定未確認 |
 | Activity Security | PendingIntent / IntentSender 経由の Activity 起動箇所 | 通知、ペアリング復旧、接続復旧、外部アプリ連携の起動経路を確認する。 | 対象アプリ実装未確認 |
 | Large screen | manifest の orientation / resizability / aspect ratio 設定、UI の adaptive 対応 | tablet / foldable / multi-window で主要画面を確認する。 | 対象アプリ実装未確認 |
+| Static final fields / Safer Native DCL-C | 古い reflection / JNI 実装、native library の動的展開・更新・読み込み処理、画像・動画処理 / ネットワーク処理 SDK の実装 | `static final` field write、`System.load()`、download / generate / extract した `.so` の file mode を確認する。 | 対象アプリ実装・SDK 実装未確認 |
 
 ---
 
@@ -192,6 +193,7 @@ Original statement:
 
 判断理由:
 - カメラ連携アプリでは、スマートフォンとカメラが同一 LAN またはカメラ側 Wi-Fi AP を介して通信する設計が一般的である。Android 17 / targetSdkVersion 37 では、この種の direct local network access が runtime permission の影響を受ける可能性がある。
+- system picker など system-mediated picker でユーザー許可を取得する経路を使わない場合、direct local network access には manifest への `ACCESS_LOCAL_NETWORK` 宣言と、コード上の runtime permission request / denied handling が必要になる。
 
 確認したアプリ実装:
 - File / module: 未確認。
@@ -292,7 +294,8 @@ Compat framework:
 - 権限拒否または取り消し後にカメラが見つからない、接続できない、転送できない状態になる可能性。
 
 開発者影響:
-- manifest declaration、runtime request、permission denied / revoked handling、system picker 利用可否の設計が必要。
+- system picker でユーザー許可を取得できる機能か、direct / persistent local network access が必要な機能かを分ける必要がある。
+- direct / persistent local network access では、manifest declaration、runtime request、permission denied / revoked handling の設計が必要。
 
 既存実装で確認すべき点:
 - local network access の全 entry point。
@@ -302,6 +305,7 @@ Compat framework:
 
 推奨対応候補:
 - local network access を棚卸しする。
+- system picker を使わない direct local network access については、manifest に `ACCESS_LOCAL_NETWORK` を追加し、コードで runtime permission request と拒否時の案内を実装する。
 - Android 17 / targetSdkVersion 37 で permission denied / granted / revoked をテストする。
 - 権限説明文をカメラ接続の文脈に合わせる。
 
@@ -1234,7 +1238,9 @@ Confidence の根拠:
 
 OS アップデートだけで確認すべき点は、Bluetooth の bond loss 復旧挙動と、一部端末で導入される app memory limits です。targetSdkVersion を変更しなくても、Bluetooth 再ペアリングのタイミングや、大きな画像 / 動画処理時の memory limit 影響が出る可能性があります。
 
-targetSdkVersion 37 に更新する場合は、ローカルネットワーク権限が最重要です。カメラ探索、Wi-Fi 接続、ローカル IP や `.local` への通信、画像 / 動画転送、リモート操作が direct local network access に該当する場合、`ACCESS_LOCAL_NETWORK` の宣言、runtime permission request、拒否・取り消し時の案内が必要になる可能性があります。
+targetSdkVersion 37 に更新する場合は、ローカルネットワーク権限が最重要です。カメラ探索、Wi-Fi 接続、ローカル IP や `.local` への通信、画像 / 動画転送、リモート操作が direct local network access に該当する場合、system picker でユーザー許可を取得する経路を使えるか確認してください。system picker を使わない direct / persistent access では、`ACCESS_LOCAL_NETWORK` の manifest 宣言、runtime permission request、拒否・取り消し時の案内が必要になります。
+
+古いアプリや組み込み SDK では、`static final` field を reflection / JNI で書き換える実装、または画像・動画処理、ネットワーク処理、codec、AI / ML delegate などの native library を実行時に展開・更新して `System.load()` する実装も確認対象です。Native DCL-C では、`System.load()` 前に読み込む native file を read-only にしておく必要があります。
 
 Bluetooth Classic / RFCOMM を使っている場合は、切断時の `InputStream.read()` が `-1` を返す挙動に対応してください。`IOException` だけで read loop を終了している実装は、Android 17 / targetSdkVersion 37 で切断処理が期待通り動かない可能性があります。
 
@@ -1251,17 +1257,21 @@ HTTPS 通信については、certificate transparency の default enabled と E
 - 高優先: RFCOMM `BluetoothSocket.read()` EOF `-1`。
 - 中優先: CT default enabled / ECH。
 - 中優先: Activity Security と large screen。
+- 要確認: 古い reflection / JNI の `static final` 書き換え、画像・動画処理 / ネットワーク処理 native library の dynamic loading。
 - OS update impact: app memory limits。
 
 ## 対応要否
 
-- 必須対応候補: local network access 棚卸し、permission UX、Bluetooth read loop / pairing recovery 確認。
+- 必須対応候補: local network access 棚卸し、system picker または `ACCESS_LOCAL_NETWORK` runtime permission UX、Bluetooth read loop / pairing recovery 確認。
 - 推奨対応: HTTPS endpoint / certificate / ECH 方針、large screen UI、memory baseline。
+- 追加確認: `System.load()` 前の native file read-only 化、古い reflection / JNI 実装の有無。
 - 不要候補: Contacts / SMS / background audio は該当 API usage がなければ優先度低。
 
 ## 顧客に伝えるべき要点
 
 - targetSdkVersion 37 更新時は、カメラとのローカル接続に runtime permission が関係する可能性がある。
+- system picker で許可を得ない direct local network access は、manifest とコードの runtime permission 対応が必要。
+- Native DCL-C は、`System.load()` 前に対象 native file を read-only にしておく必要がある。
 - Android 17 OS 更新だけでも、Bluetooth 再ペアリングと memory limits は確認対象。
 - 実装未確認のため、最終判断には manifest / API usage / 実機テストが必要。
 
