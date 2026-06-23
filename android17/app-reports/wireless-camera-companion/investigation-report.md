@@ -1232,6 +1232,312 @@ Confidence の根拠:
 
 ---
 
+## BC-009: Background audio hardening
+
+### 基本情報（Basic Information）
+
+Behavior Change 文書:
+- URL: https://developer.android.com/about/versions/17/behavior-changes-all
+- URL: https://developer.android.com/about/versions/17/behavior-changes-17
+- Section: Background audio hardening
+
+Original statement:
+> Android 17 では background audio interaction が制限され、audio playback、audio focus request、volume change API などが、アプリの lifecycle / foreground service / capability 条件を満たさない場合に失敗または mute される、という趣旨の公式説明。
+
+調査対象 Android バージョン:
+- From: android-16.0.0_r4
+- To: android-17.0.0_r1
+
+### 対象アプリとの関係（Relevance to Target App）
+
+関連するアプリ機能:
+- カメラ接続完了音、転送完了音、エラー音。
+- カメラのシャッター音や操作音をアプリ側で再生する機能。
+- 転送完了、タイマー、リモート撮影通知に音声 / アラームを使う機能。
+- バックグラウンドで音声再生、audio focus request、volume / ringer mode 変更を行う処理。
+
+関連する API / permission / component:
+- `AudioManager.requestAudioFocus()`
+- `AudioManager.setStreamVolume()` / `adjustStreamVolume()` / `adjustVolume()`
+- `AudioAttributes.USAGE_ALARM`
+- foreground service
+- exact alarm permission
+- AppOps `OP_PLAY_AUDIO` / `OP_TAKE_AUDIO_FOCUS` / `OP_CONTROL_AUDIO`
+
+アプリが該当する可能性:
+- 低いから Conditional。カメラ連携・画像転送が主用途で、バックグラウンド音声再生が主要機能でなければ影響は限定的。ただし、バックグラウンドで転送完了音、アラーム、音声通知、音量変更を行う場合は該当し得る。
+
+確認したアプリ実装:
+- File / module: 未確認。
+- Symbol / entry point: 未確認。
+- Manifest / permission: foreground service / exact alarm permission の利用有無は未確認。
+- Runtime condition: バックグラウンド状態で音声 API を呼ぶ場合。
+
+### 適用条件分類（Applicability Classification）
+
+主分類（Primary classification）:
+- OS_UPDATE_ALL_APPS / TARGET_SDK_37_CONDITIONAL
+
+早見表（At-a-glance impact）:
+
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| --- | --- | --- |
+| Android 17 に OS アップデートしただけで適用されるか | Yes / Conditional | all apps 側の共通制限は targetSdkVersion 37 を必須にしない。 |
+| targetSdkVersion 37 以上が必要か | 追加制限では Yes | target 側レポートでは CINNAMON_BUN 以上で strict level に進む条件を確認。 |
+| 追加の実行時条件があるか | Yes | background audio interaction、AppOps、foreground service / foreground audio control capability、exact alarm / `USAGE_ALARM` 条件。 |
+| Compat Change ID が関係するか | No / 未確認 | `frameworks-base` では compat ChangeId ではなく audio flags / AppOps / hardening override が主要条件。 |
+
+必要な実行時条件（Required runtime conditions）:
+- Android version: Android 17。
+- targetSdkVersion: 共通制限は条件なし。target 37 追加制限は targetSdkVersion 37 以上。
+- Permission/API/component condition: audio playback、audio focus request、volume / ringer mode API、foreground service、exact alarm permission、`USAGE_ALARM`。
+- App state/process condition: アプリが background にいて、audio AppOps / process capability により操作が許可されない状態。
+
+Compat framework:
+- Change ID: 確認されず。
+- Change name: N/A
+- Default state: audio flags / AppOps / AudioPolicy hardening override に依存。
+- Toggleable for testing: privileged `AudioManager.setHardeningOverride()` / shell hardening override path。
+
+### AOSP 調査（AOSP Investigation）
+
+関連ファイル:
+- `services/core/java/com/android/server/audio/HardeningEnforcer.java`
+- `services/core/java/com/android/server/audio/AudioService.java`
+- `services/core/java/com/android/server/am/psc/OomAdjusterImpl.java`
+- `services/core/java/com/android/server/am/psc/CapabilityController.java`
+- `core/java/android/app/ActivityManager.java`
+- `core/java/android/app/AppOpsManager.java`
+
+確認したソース文脈（Source Context Reviewed）:
+
+| ファイル / シンボル（File / symbol） | Android 16 の基準挙動（baseline） | Android 17 の挙動 | このコードパスを根拠にする理由 |
+| --- | --- | --- | --- |
+| `HardeningEnforcer.blockVolumeMethod()` | AppOps による audio hardening の土台あり | AppOps、targetSdk、exact alarm、hardening override により volume API の block level を決める | volume API が silent no-op になる条件の根拠。 |
+| `AudioService.requestAudioFocus()` | hardening block 時に focus request failure | Android 17 でも block 時に `AUDIOFOCUS_REQUEST_FAILED` を返す | audio focus request の開発者可視結果。 |
+| `AudioService.playbackHardeningEvent()` | playback hardening event を受ける | reason / usage 付きで background playback mute をログ・metrics に記録 | playback mute の framework 側証跡。 |
+| `OomAdjusterImpl` / `CapabilityController` | 従来の process capability 管理 | foreground audio control capability を FGS / process state と結びつける | foreground service / WIU 相当条件との接続点。 |
+
+差分解釈（Diff Interpretation）:
+- Changed condition / gate: AppOps、process capability、targetSdkVersion 37、exact alarm exception、hardening flags により block level が変わる。
+- Changed default / enforcement: background の audio focus は failure、volume API は no-op、playback は mute され得る。
+- No behavior change found: カメラ機能そのものの Camera API 変更ではない。
+
+適用ゲート根拠（Applicability Gate Evidence）:
+- targetSdkVersion gate: 共通制限では必須ではない。target 37 追加制限では CINNAMON_BUN 以上が strict level の条件。
+- CompatChanges.isChangeEnabled / ChangeId: 確認されず。
+- Permission/AppOps gate: `OP_PLAY_AUDIO` / `OP_TAKE_AUDIO_FOCUS` / `OP_CONTROL_AUDIO` / `OP_CONTROL_AUDIO_PARTIAL`。
+- Gate conclusion: Android 17 上で background audio interaction を行い、visible activity / 適切な foreground service / foreground audio control capability / alarm exception を満たさない場合に影響する。
+
+### 事実・観察・仮説・結論（Facts / Observations / Hypotheses / Conclusion）
+
+事実（Facts）:
+- Android 17 の `HardeningEnforcer` / `AudioService` は background audio interaction に対する focus / volume / playback hardening path を持つ。
+- targetSdkVersion 37 以上では strict level の追加条件がある。
+
+観察（Observations）:
+- カメラ連携アプリでは、音声再生が主機能でない限り該当可能性は低い。
+- ただし、転送完了音、アラーム、バックグラウンド通知音、音量変更を独自実装している場合は確認対象になる。
+
+仮説（Hypotheses）:
+- 対象アプリがバックグラウンド転送完了時に音声を鳴らす、またはリモート撮影タイマーで `USAGE_ALARM` を使う場合、Android 17 / targetSdkVersion 37 で failure mode が変わる可能性がある。
+
+結論（Conclusion）:
+- カメラ連携アプリでは「影響なしから軽微」と仮置きする。ただし background audio API usage がある場合は、Android 17 / targetSdkVersion 37 の個別確認が必要。
+
+### アプリ影響（App Impact）
+
+想定される影響:
+- バックグラウンド状態で転送完了音やアラーム音が鳴らない。
+- `requestAudioFocus()` が `AUDIOFOCUS_REQUEST_FAILED` を返す。
+- volume / ringer mode API が silent no-op になる。
+
+ユーザー影響:
+- 転送完了やエラーを音で認識できない。
+- タイマー撮影やリモート操作の音声フィードバックが期待通り動かない。
+
+開発者影響:
+- background audio interaction の棚卸し。
+- user-initiated flow、foreground service、exact alarm + `USAGE_ALARM` の条件確認。
+- audio focus failure の戻り値処理。
+
+推奨対応候補:
+- 音声再生 / audio focus / volume 変更 API の利用箇所を検索する。
+- バックグラウンド転送中・画面消灯中・通知経由復帰時に音声フィードバックをテストする。
+- アラーム用途なら exact alarm permission と `AudioAttributes.USAGE_ALARM` を確認する。
+
+### Confidence
+
+Confidence:
+- Medium
+
+Confidence の根拠:
+- AOSP Java framework 側の focus / volume / capability path は確認済み。
+- 実際の playback mute 最終判定は native AudioPolicy / audioserver 側にもまたがる。
+
+不足している根拠:
+- 対象アプリの background audio API usage。
+- foreground service / exact alarm / audio usage 設定。
+
+---
+
+## BC-010: Static final fields / Safer Native DCL-C
+
+### 基本情報（Basic Information）
+
+Behavior Change 文書:
+- URL: https://developer.android.com/about/versions/17/behavior-changes-17
+- Section: Static final fields are now unmodifiable
+- Section: Safer Native DCL-C
+
+Original statement:
+> Android 17 以上で targetSdkVersion 37 以上のアプリは static final field を reflection / JNI で変更できない。また、targetSdkVersion 37 以上では `System.load()` で読み込む native file が read-only である必要があり、条件を満たさない場合は `UnsatisfiedLinkError` になる、という趣旨の公式説明。
+
+調査対象 Android バージョン:
+- From: android-16.0.0_r4
+- To: android-17.0.0_r1
+
+### 対象アプリとの関係（Relevance to Target App）
+
+関連するアプリ機能:
+- 古いアプリ / SDK の runtime patching。
+- 画像・動画処理 SDK、codec、AI / ML delegate、ネットワーク処理 SDK。
+- 実行時に native library を download / generate / extract / update して `System.load()` する機能。
+- JNI で static final field を変更する初期化処理。
+
+関連する API / permission / component:
+- Java reflection `Field.set*()`
+- JNI `SetStatic*Field()`
+- `System.load(path)`
+- `Runtime.load0()`
+- `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL`
+
+アプリが該当する可能性:
+- Conditional。通常の Camera API / Camera2 API 利用だけでは該当しない。古い SDK、native plugin、画像・動画処理 module、ネットワーク処理 module が reflection / JNI write または writable native file loading を行う場合に該当する。
+
+確認したアプリ実装:
+- File / module: 未確認。
+- Symbol / entry point: `Field.set*()`、`SetStatic*Field()`、`System.load()` 利用有無は未確認。
+- Manifest / permission: 該当なし。
+- Runtime condition: targetSdkVersion 37 以上で該当コードパスが実行される場合。
+
+### 適用条件分類（Applicability Classification）
+
+主分類（Primary classification）:
+- TARGET_SDK_37_CONDITIONAL
+
+早見表（At-a-glance impact）:
+
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| --- | --- | --- |
+| Android 17 に OS アップデートしただけで適用されるか | 原則 No | static final は ART targetSdkVersion gate、Native DCL-C は compat ChangeId `463348571`。 |
+| targetSdkVersion 37 以上が必要か | Yes | static final は ART / runtime gate、Native DCL-C は `@EnabledSince(CINNAMON_BUN)`。 |
+| 追加の実行時条件があるか | Yes | static final field write、または writable native file の `System.load()`。 |
+| Compat Change ID が関係するか | 一部 Yes | Static final は compat ChangeId 未確認。Native DCL-C は `THROW_ERROR_FOR_WRITABLE_DCL = 463348571`。 |
+
+必要な実行時条件（Required runtime conditions）:
+- Android version: Android 17 以上。
+- targetSdkVersion: 37 以上。
+- API/component condition: reflection / JNI による `static final` field write、または `System.load(path)` による dynamic native loading。
+- File condition: `System.load()` で読み込む native file が read-only でない場合。
+- App state/process condition: アプリ起動時、SDK 初期化時、画像・動画処理 module / native plugin 初期化時。
+
+Compat framework:
+- Static final fields:
+  - Change ID: 確認されず。
+  - Default state: ART runtime targetSdkVersion / SDK version gate。
+- Safer Native DCL-C:
+  - Change ID: `463348571`
+  - Change name: `THROW_ERROR_FOR_WRITABLE_DCL`
+  - Default state: `@EnabledSince(targetSdkVersion = CINNAMON_BUN)`
+  - Toggleable for testing: compat change / runtime flags により切り替え可能。
+
+### AOSP 調査（AOSP Investigation）
+
+関連ファイル:
+- `platform/art/runtime/art_field-inl.h`
+- `platform/art/runtime/native/java_lang_reflect_Field.cc`
+- `platform/art/runtime/jni/jni_internal.cc`
+- `platform/art/test/2396-unmodifiable-final-fields`
+- `platform/libcore/ojluni/src/main/java/java/lang/Runtime.java`
+- `platform/libcore/libart/src/main/java/dalvik/system/VMRuntime.java`
+
+確認したソース文脈（Source Context Reviewed）:
+
+| ファイル / シンボル（File / symbol） | Android 16 の基準挙動（baseline） | Android 17 の挙動 | このコードパスを根拠にする理由 |
+| --- | --- | --- | --- |
+| `ArtField::IsUnmodifiable()` | 汎用 static final target 37 gate なし | targetSdkVersion / SDK version を見て static final field を unmodifiable と判断 | reflection / JNI の static final write rejection の中心。 |
+| `java_lang_reflect_Field.cc` | static final の汎用 write rejection なし | `IsUnmodifiable()` の場合に `IllegalAccessException` | 公式文書の reflection failure path。 |
+| `jni_internal.cc` / `SetStatic*Field()` | static final の汎用変更検出なし | `EnsureModifiable()` で static final write attempt を検出 | 公式文書の JNI crash / fatal path。 |
+| `Runtime.load0()` | writable native file は warning 中心 | writable file を検出し、条件を満たすと `UnsatisfiedLinkError` | `System.load(path)` の app-facing failure path。 |
+| `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL` | ChangeId なし | `463348571` / `@EnabledSince(CINNAMON_BUN)` | Native DCL-C の targetSdkVersion 37 gate。 |
+
+差分解釈（Diff Interpretation）:
+- Added behavior: reflection / JNI の static final field write rejection。
+- Added enforcement: `System.load(path)` で writable native file を拒否する path。
+- Changed condition / gate: Android 17 runtime + targetSdkVersion 37 以上、または `THROW_ERROR_FOR_WRITABLE_DCL` enabled。
+- No behavior change found: 通常の Camera API / Camera2 API 呼び出し自体には直接関係しない。
+
+適用ゲート根拠（Applicability Gate Evidence）:
+- targetSdkVersion gate: static final は ART runtime targetSdkVersion / SDK version gate。Native DCL-C は `@EnabledSince(CINNAMON_BUN)`。
+- CompatChanges.isChangeEnabled / ChangeId: Native DCL-C は `463348571`。Static final は ChangeId 未確認。
+- Build.VERSION / SDK_INT gate: Android 17 runtime が前提。
+- Gate conclusion: Android 17 / targetSdkVersion 37 以上で、static final field write または writable native file `System.load()` を行う場合に適用。
+
+### 事実・観察・仮説・結論（Facts / Observations / Hypotheses / Conclusion）
+
+事実（Facts）:
+- Static final fields は ART / libcore 側で reflection / JNI write が拒否される。
+- Safer Native DCL-C は libcore `Runtime.load0()` と `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL` で確認できる。
+
+観察（Observations）:
+- カメラ連携アプリでも、画像・動画処理、codec、AI / ML delegate、ネットワーク処理 SDK は native library を含む可能性がある。
+- 古い SDK では reflection / JNI による内部値変更や、実行時展開した `.so` の load path を持つ可能性がある。
+
+仮説（Hypotheses）:
+- 対象アプリが native plugin を実行時に展開・更新して `System.load()` している場合、targetSdkVersion 37 更新後に `UnsatisfiedLinkError` が起きる可能性がある。
+- 古い SDK が `static final` field を reflection / JNI で変更している場合、起動時または SDK 初期化時に失敗する可能性がある。
+
+結論（Conclusion）:
+- カメラ連携アプリでは要確認。通常のカメラ撮影 API だけではなく、同梱 SDK / native module / plugin 更新処理を含めて棚卸しする必要がある。
+
+### アプリ影響（App Impact）
+
+想定される影響:
+- アプリ起動時または SDK 初期化時の crash / initialization failure。
+- 画像・動画処理、codec、AI / ML delegate、ネットワーク処理 module の読み込み失敗。
+- `System.load()` 時の `UnsatisfiedLinkError`。
+- reflection では `IllegalAccessException`、JNI では fatal crash path。
+
+ユーザー影響:
+- アプリ起動失敗。
+- ライブビュー、画像転送、動画処理、サムネイル生成、クラウド連携などの一部機能が使えない。
+
+開発者影響:
+- `Field.set*()` / `setAccessible(true)` / JNI `SetStatic*Field()` の棚卸し。
+- `System.load()` / native library 展開・更新処理の棚卸し。
+- `System.load()` 前に native file を read-only にし、その後に書き換えない実装への変更。
+
+推奨対応候補:
+- アプリコードと SDK で `System.load(`、`Field.set`、`SetStatic`、`.so` 展開処理を検索する。
+- dynamic native loading を避け、APK / App Bundle 配布時点の native library に寄せる。
+- どうしても動的読み込みが必要な場合は、write 完了後に read-only 化してから `System.load()` する。
+- `UnsatisfiedLinkError` と reflection failure を起動 / 機能初期化の failure として検出できるようにする。
+
+### Confidence
+
+Confidence:
+- High
+
+Confidence の根拠:
+- Static final fields は ART / libcore evidence、Safer Native DCL-C は libcore `Runtime.load0()` / `VMRuntime` evidence を確認済み。
+
+不足している根拠:
+- 対象アプリおよび同梱 SDK の reflection / JNI / native loading 実装。
+- 実際の targetSdkVersion 37 ビルドでの起動・画像 / 動画処理・転送テスト。
+
+---
+
 # 顧客向け説明（Customer-facing Explanation）
 
 対象アプリ種別では、Android 17 の影響は主に「カメラとの接続」と「ネットワーク通信」に集中します。
