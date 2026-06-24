@@ -275,6 +275,38 @@ git -C frameworks-base tag --list android-17.0.0_r1
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Spotify / YouTube Music / Audible の background playback
+
+- 具体サービス例: Spotify、YouTube Music、Audible、radiko。
+- 影響を受ける実装パターン: visible activity や適切な foreground service なしに、background worker / receiver から audio focus を取得し再生を開始・継続する実装。
+- 発生条件: Android 17 上で background audio interaction が AppOps / process capability により許可されない場合。
+- ユーザーに見える症状: 再生が始まらない、途中で無音になる、再生ボタンを押しても音が出ない可能性。
+- 技術的に起きていること: audio focus は `AUDIOFOCUS_REQUEST_FAILED`、playback は hardening event により mute、volume API は silent no-op になる。
+- 推奨対応シーン: media playback service、notification playback control、boot / receiver 起点の再生。
+- 検証観点: visible activity 有無、`mediaPlayback` FGS、Media3 `MediaSessionService`、focus request return value、`AudioHardening` log。
+- 根拠: 公式文書、`HardeningEnforcer`、`AudioService.requestAudioFocus()`、`playbackHardeningEvent()`、foreground audio control capability evidence。
+- Confidence（信頼度）: Medium。playback mute の最終判定は native AudioPolicy 側にもまたがる。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は再生開始経路と FGS / MediaSession 実装に依存する。
+
+## 例2（Example 2）: Google Maps / Waze / Uber Driver のナビ・通知音
+
+- 具体サービス例: Google Maps、Waze、Uber Driver、DoorDash Dasher。
+- 影響を受ける実装パターン: background または画面非表示状態で音声案内、通知音、volume control、audio focus を扱う実装。
+- 発生条件: Android 17 で app が valid lifecycle / FGS / foreground audio control capability を満たさず audio API を呼ぶ場合。
+- ユーザーに見える症状: 音声案内や通知音が鳴らない、volume 調整が効かない、focus 取得に失敗する可能性。
+- 技術的に起きていること: AppOps と process state により background audio interaction が制限され、例外なしの silent failure として見えることがある。
+- 推奨対応シーン: navigation、driver / delivery、timer / reminder、background notification sound。
+- 検証観点: foreground service type、process state、screen off / app background、exact alarm 例外との違い。
+- 根拠: 公式文書と report の OS_UPDATE_ALL_APPS classification / AppOps / PSC evidence。
+- Confidence（信頼度）: Medium。
+- 注意: 上記サービスで発生確認した事実ではない。ナビ・配達アプリは user-visible flow で FGS を使うことが多く、実装ごとの確認が必要。
+
+---
+
 # 推奨アクション候補（Recommended Action Candidates）
 
 - background audio API 呼び出し箇所を棚卸しし、呼び出し時点の visible / FGS / process state をテストする。

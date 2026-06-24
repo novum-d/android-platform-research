@@ -258,6 +258,38 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: LINE / Slack / Gmail のメッセージ作成画面
+
+- 具体サービス例: LINE、Slack、Gmail、Microsoft Outlook。
+- 影響を受ける実装パターン: text field に focus がある状態で端末回転後、system の IME 自動復元に依存して compose field へ戻す実装。
+- 発生条件: Android 17 で app が configuration change を処理せず Activity が recreate され、IME 表示を明示 request していない場合。
+- ユーザーに見える症状: 返信やメール作成中に回転すると keyboard が閉じ、再度入力欄を tap する必要が出る可能性。
+- 技術的に起きていること: window focus は復元されても、変更前に表示されていた IME visibility を system が自動復元しない。
+- 推奨対応シーン: chat compose、email compose、comment input など入力継続性が重要な画面。
+- 検証観点: portrait / landscape 切替、Activity recreation、`windowSoftInputMode`、`WindowInsetsController.show()` の有無。
+- 根拠: 公式文書、`ImeVisibilityStateComputer.shouldRestoreImeVisibility()` / WindowManager IME restore path の AOSP source context。
+- Confidence（信頼度）: Medium。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は Activity lifecycle と IME 表示制御に依存する。
+
+## 例2（Example 2）: Google Docs / Microsoft Excel / Notion の編集画面
+
+- 具体サービス例: Google Docs、Microsoft Excel、Notion、Airtable。
+- 影響を受ける実装パターン: rotation 後も同じセル・段落・入力欄で keyboard が開いたままになることを前提にした編集 UI。
+- 発生条件: Android 17 で configuration change 後に focus / IME visibility を app が再適用しない場合。
+- ユーザーに見える症状: 表計算や文書入力中に keyboard が閉じ、連続入力が中断される可能性。
+- 技術的に起きていること: app が IME visibility を lifecycle 内で明示しないと、system は以前の keyboard 表示状態を既定では復元しない。
+- 推奨対応シーン: tablet / foldable / landscape 対応の編集画面、入力欄が多数ある業務フォーム。
+- 検証観点: focus restore、selection restore、keyboard visibility、hardware keyboard 接続時との差分。
+- 根拠: 公式文書と report の OS update behavior / recommended action。
+- Confidence（信頼度）: Medium。
+- 注意: 上記サービスで発生確認した事実ではない。入力画面の lifecycle 実装ごとに確認が必要。
+
+---
+
 # 推奨対応候補（Recommended Action Candidates）
 
 開発者向け対応候補:

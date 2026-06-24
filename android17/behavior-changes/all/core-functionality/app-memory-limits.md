@@ -362,29 +362,31 @@ git -C frameworks-base tag --list 'android-17*'
 このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。
 特定サービスで実際に発生確認した事実ではない。
 
-## 例1（Example 1）: 画像 / 動画編集アプリ
+## 例1（Example 1）: Google Photos / Adobe Lightroom / CapCut のような画像・動画編集機能
 
-- 対象サービス例: 画像加工、動画編集、メディア生成、大きな bitmap を扱う editor。
-- 影響を受ける実装パターン: 高解像度画像、一時 bitmap、decode 済み frame、native buffer を長時間保持する。
+- 具体サービス例: Google Photos の写真編集、Adobe Lightroom の RAW / 高解像度画像編集、CapCut の動画編集。
+- 影響を受ける実装パターン: 高解像度画像、一時 bitmap、decode 済み frame、native buffer、編集履歴を長時間保持する。
 - 発生条件: Android 17、memory limiter 対象端末、プロセス メモリが制限値に到達する。
 - ユーザーに見える症状: 編集中のアプリ再起動、作業中断、未保存状態の喪失。
+- 技術的に起きていること: anonymous memory + swap の使用量が端末設定の上限に達し、memory limiter が profiling trigger と delayed kill の対象にする。
 - 開発・運用への影響: メモリ使用量のベースライン測定、bitmap / native buffer lifecycle、autosave / restore path の確認が必要。
 - 推奨対応候補: heap dump、trigger-based profiling、大量割り当てコードパスの棚卸し、`ApplicationExitInfo` の収集。
 - 根拠: 公式文書は extreme memory leaks / outliers を対象とし、`MemoryLimiter:AnonSwap` で診断可能と説明している。
 - Confidence（信頼度）: High。発生有無は対象端末 / メモリ使用量に依存する。
-- 注意: 実サービスで発生確認した事実ではない。
+- 注意: 上記サービスで発生確認した事実ではない。実在サービスの機能パターンを元にした影響シーンである。
 
-## 例2（Example 2）: 長時間 background 同期 / cache 保持アプリ
+## 例2（Example 2）: Google Drive / Dropbox / Google Maps のような同期・オフライン cache 機能
 
-- 対象サービス例: ファイル同期、オフライン cache、document scanner、map / media cache。
+- 具体サービス例: Google Drive / Dropbox のファイル同期、Google Maps のオフライン map、OneDrive の camera upload。
 - 影響を受ける実装パターン: バックグラウンド プロセスが large cache、queue、native heap、decode 済みデータを保持し続ける。
 - 発生条件: Android 17、memory limiter 対象端末、表示中 / 非表示プロセスの制限値に到達する。
 - ユーザーに見える症状: バックグラウンド タスク中断、次回起動時の同期や処理のやり直し。
+- 技術的に起きていること: visible / perceptible / cached などの process state に応じた制限を超え、プロセス終了後に work queue の復旧が必要になる。
 - 開発・運用への影響: background work の checkpoint、idempotency、memory pressure handling の確認が必要。
 - 推奨対応候補: WorkManager / foreground work の状態復旧、cache eviction、memory leak monitoring、`am memory-limiter manual` を使った再現試験。
 - 根拠: 公式文書は status command が表示中 / 非表示プロセスのメモリ制限を報告すると説明している。
 - Confidence（信頼度）: High。プロセス状態別の制限値割り当ては AOSP 根拠で確認済み。
-- 注意: 実サービスで発生確認した事実ではない。
+- 注意: 上記サービスで発生確認した事実ではない。実在サービスの機能パターンを元にした影響シーンである。
 
 ---
 

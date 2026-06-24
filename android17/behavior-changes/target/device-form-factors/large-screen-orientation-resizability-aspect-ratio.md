@@ -250,6 +250,38 @@ Source context の補足:
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Instagram / TikTok / Snapchat の portrait 前提画面
+
+- 具体サービス例: Instagram Reels、TikTok、Snapchat、LINE VOOM のような縦長動画・投稿画面。
+- 影響を受ける実装パターン: `screenOrientation="portrait"`、固定 aspect ratio、`resizeableActivity=false`、Android 16 opt-out property に依存する実装。
+- 発生条件: Android 17 / targetSdkVersion 37 以上、大画面 `sw >= 600dp`、game 例外などに該当せず、orientation / aspect ratio / resizability restriction が無視される場合。
+- ユーザーに見える症状: tablet / foldable / desktop windowing で想定外の横長・可変サイズ表示になり、動画 crop、操作ボタンの位置ずれ、余白過多が起きる可能性。
+- 技術的に起きていること: Android 16 で導入された universal resizable default への opt-out が targetSdkVersion 37 で無効化される。
+- 推奨対応シーン: portrait 固定前提の feed / story / camera / editor 画面。
+- 検証観点: `sw >= 600dp`、fold / unfold、multi-window resize、desktop windowing、user aspect ratio setting。
+- 根拠: `UNIVERSAL_RESIZABLE_BY_DEFAULT`、`DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT`、`allowRestrictedResizability`、`DisplayContent.isLargeScreen` evidence。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は adaptive layout 実装と端末 policy に依存する。
+
+## 例2（Example 2）: PayPay / 銀行アプリ / 証券アプリの固定レイアウト認証画面
+
+- 具体サービス例: PayPay、三井住友銀行、楽天銀行、SBI証券など、本人確認・取引確認・QR 決済画面を持つアプリ。
+- 影響を受ける実装パターン: セキュリティ画面や QR / barcode 画面を portrait 固定・固定サイズ前提で設計している実装。
+- 発生条件: targetSdkVersion 37 で large screen 上の orientation / resize / aspect ratio 制限が維持されない場合。
+- ユーザーに見える症状: QR code が想定サイズより小さくなる、入力欄や確認ボタンが離れすぎる、本人確認画面のガイドが崩れる可能性。
+- 技術的に起きていること: manifest 上の制約や opt-out property よりも WindowManager の大画面 policy が優先される。
+- 推奨対応シーン: 決済、本人確認、カメラ撮影、QR / barcode、重要操作 confirmation。
+- 検証観点: tablet / foldable、split-screen、freeform / desktop window、font scale、gesture nav。
+- 根拠: 公式文書と AOSP の targetSdkVersion 37 opt-out removal / large screen runtime condition。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。金融・決済アプリは個別のセキュリティ policy と UX 検証が必要。
+
+---
+
 # テスト観点（Test Matrix）
 
 | 端末 OS | targetSdkVersion | Display | Opt-out property | 期待挙動 |

@@ -343,29 +343,31 @@ git -C frameworks-base tag --list 'android-17*'
 
 このセクションは、公式文書と AOSP 根拠 から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## 例1（Example 1）: 企業ネットワーク / TLS inspection 環境の業務アプリ
+## 例1（Example 1）: Microsoft 365 / Salesforce / Slack を使う企業ネットワーク環境
 
-- 対象サービス例: 社内 SaaS、MDM 管理端末、社内 proxy 経由の業務アプリ。
+- 具体サービス例: Microsoft 365、Salesforce、Slack などの SaaS を、MDM 管理端末や社内 proxy / TLS inspection 環境から利用する業務アプリ。
 - 影響を受ける実装パターン: ClientHello / SNI を network appliance が観測する前提の TLS inspection / routing / policy enforcement。
 - 発生条件: Android 17 で ECH が有効になり、network appliance が期待する hostname visibility が変わる場合。
 - ユーザーに見える症状: 社内ネットワークで接続失敗、proxy policy mismatch、特定 endpoint だけ接続できない可能性。
+- 技術的に起きていること: ECH により ClientHello の一部が暗号化され、SNI ベースの routing / allowlist / inspection が従来どおりに機能しない可能性がある。
 - 開発・運用への影響: network team と ECH 対応、DNS / HTTPS RR、proxy policy の確認が必要になる可能性。
 - 推奨対応候補: ECH 詳細ページと network policy を照合し、検証環境で endpoint 別接続テストを行う。
 - 根拠: 公式 Behavior Change statement、AOSP の domain encryption default gate、`<domainEncryption>` parser。
 - 信頼度: Medium
-- 注意: 実ネットワークでの発生確認ではない。ECH availability は DNS / server / network condition に依存する。
+- 注意: 上記 SaaS で発生確認した事実ではない。ECH availability は DNS / server / network condition に依存する。
 
-## 例2（Example 2）: 独自ネットワーク診断 / SNI ベース制御を持つアプリ
+## 例2（Example 2）: Cloudflare WARP / Zscaler / Netskope のようなネットワーク保護・診断連携
 
-- 対象サービス例: VPN app、network monitor、security app、developer diagnostics tool。
+- 具体サービス例: Cloudflare WARP、Zscaler Client Connector、Netskope Client、社内 network diagnostics tool。
 - 影響を受ける実装パターン: TLS handshake metadata や SNI を前提に接続先分類・診断を行う実装。
 - 発生条件: platform networking が ECH を使い、外部から見える handshake 情報が変わる場合。
 - ユーザーに見える症状: 診断結果が不正確になる、接続先分類が失敗する、policy 表示が変わる可能性。
+- 技術的に起きていること: app / network agent が観測できる TLS metadata が減り、SNI ベース分類の精度や説明可能性が変わる。
 - 開発・運用への影響: ECH 対応の telemetry / logging / support documentation 更新が必要になる可能性。
 - 推奨対応候補: public hostname 依存を減らし、app-layer / explicit config による診断へ寄せる。
 - 根拠: 公式 statement、AOSP の domain encryption mode API surface、Network Security Config policy。
 - 信頼度: Medium
-- 注意: 実際の可観測性は library / TLS stack / network path に依存する。
+- 注意: 上記サービスで発生確認した事実ではない。実際の可観測性は library / TLS stack / network path に依存する。
 
 ---
 

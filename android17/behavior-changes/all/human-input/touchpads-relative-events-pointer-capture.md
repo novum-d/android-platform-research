@@ -271,6 +271,38 @@ git -C frameworks-base tag --list 'android-17*'
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Chrome Remote Desktop / Microsoft Remote Desktop のような remote desktop
+
+- 具体サービス例: Chrome Remote Desktop、Microsoft Remote Desktop、Splashtop、Parsec。
+- 影響を受ける実装パターン: pointer capture 中の touchpad event を absolute coordinate として remote cursor へ送る実装。
+- 発生条件: Android 17 で touchpad pointer capture が relative event を返し、アプリが absolute coordinate 前提のまま処理する場合。
+- ユーザーに見える症状: remote cursor が飛ぶ、移動量が過大 / 過小になる、drag selection がずれる可能性。
+- 技術的に起きていること: captured touchpad event の default が relative delta になり、従来の座標変換処理と合わなくなる。
+- 推奨対応シーン: remote desktop / game streaming / VNC 系の pointer capture path を Android 17 touchpad で検証する。
+- 検証観点: touchpad、mouse、touchscreen を分け、absolute mode が必要な画面では `requestPointerCapture(int)` の利用可否を確認する。
+- 根拠: 公式文書の touchpad pointer capture default 変更、`View.requestPointerCapture(int)` / `InputManagerService.requestPointerCapture()` の AOSP source context。
+- Confidence（信頼度）: Low。レポート自体の AOSP 差分確認が限定的なため。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は pointer capture の利用有無と入力変換実装に依存する。
+
+## 例2（Example 2）: Minecraft / Roblox / GeForce NOW のような camera / viewport 操作
+
+- 具体サービス例: Minecraft、Roblox、GeForce NOW、Unity / Unreal Engine 製の 3D editor や game。
+- 影響を受ける実装パターン: captured pointer movement を camera rotation、viewport pan、aiming に使う実装。
+- 発生条件: touchpad event を relative delta として扱うべき場面で absolute coordinate 前提の補正を残している場合。
+- ユーザーに見える症状: camera rotation が急に速くなる / 遅くなる、視点移動が不安定になる、精密操作が難しくなる可能性。
+- 技術的に起きていること: input source / tool type ごとの movement model が変わり、mouse と touchpad を同一処理している箇所の前提が崩れる。
+- 推奨対応シーン: laptop / tablet + touchpad、desktop mode、external display での pointer capture QA。
+- 検証観点: touchpad captured event の座標系、delta scaling、API 17 未満との compatibility wrapper。
+- 根拠: 公式文書の relative event default と absolute mode 明示 request の説明。
+- Confidence（信頼度）: Low。
+- 注意: 上記サービスで発生確認した事実ではない。game engine / input library ごとの検証が必要。
+
+---
+
 # 対応候補（Recommended Action Candidates）
 
 ## 実装対応（Implementation）

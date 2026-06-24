@@ -185,6 +185,38 @@ Source context の補足:
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Salesforce / HubSpot / Sansan の account 別連絡先同期
+
+- 具体サービス例: Salesforce、HubSpot、Sansan、Eight、Microsoft Dynamics 365。
+- 影響を受ける実装パターン: `ContactsContract.Data` の projection に `ACCOUNT_NAME`、`ACCOUNT_TYPE`、`ACCOUNT_TYPE_AND_DATA_SET` を含め、連絡先を account 別に分類・同期する実装。
+- 発生条件: Android 17 / targetSdkVersion 37 以上で `ContactsContract.Data` data view から制限対象 PII columns を読む場合。
+- ユーザーに見える症状: account 別の連絡先分類ができない、同期対象 account の判定が失敗する、CRM 連携で一部連絡先が未分類になる可能性。
+- 技術的に起きていること: ContactsProvider が Data view の projection map から account PII columns を除外し、Data query から直接取得できなくなる。
+- 推奨対応シーン: CRM sync、business card import、contact deduplication、account grouping。
+- 検証観点: `getColumnIndex()`、projection mismatch、`RAW_CONTACT_ID` から `RawContacts` への追加 query、targetSdkVersion 36 / 37。
+- 根拠: `RESTRICT_DATA_URI_COLUMNS = 437318646L`、`@EnabledAfter(BAKLAVA)`、`ContactsProvider2.sRawContactColumnsRestricted`、`isDataProjectionRestricted()`。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は Data view projection の内容に依存する。
+
+## 例2（Example 2）: WhatsApp / Telegram / Outlook の連絡先候補・招待機能
+
+- 具体サービス例: WhatsApp、Telegram、Microsoft Outlook、Gmail。
+- 影響を受ける実装パターン: 連絡先候補や招待対象を account provider ごとに表示するため、Data view から account columns を直接読む実装。
+- 発生条件: targetSdkVersion 37 以上で Data view query の projection に制限対象 columns を含める場合。
+- ユーザーに見える症状: 「Google 連絡先」「Exchange 連絡先」など account 別表示が欠落する、候補の grouping が変わる可能性。
+- 技術的に起きていること: account PII は Data view ではなく RawContacts から `RAW_CONTACT_ID` 経由で取得する設計に移行する必要がある。
+- 推奨対応シーン: contacts picker replacement、invite screen、account-scoped sync。
+- 検証観点: RawContacts query fallback、permission state、cursor column handling、空 / missing column 時の UI。
+- 根拠: 公式文書の代替 path と AOSP の restricted projection map。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。platform / privileged app は一般アプリと条件が異なる可能性がある。
+
+---
+
 # 追加調査 TODO
 
 - 実機または provider test で `getColumnIndex()` / projection mismatch 時の app-visible cursor behavior を確認する。

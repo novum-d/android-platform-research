@@ -194,6 +194,38 @@ Source context の補足:
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Fitbit / Garmin Connect / Oura のような wearable companion
+
+- 具体サービス例: Fitbit、Garmin Connect、Oura、Galaxy Wearable。
+- 影響を受ける実装パターン: bond loss 時にアプリ独自の「一度ペアリング解除して再ペアリング」案内や key missing broadcast を前提に復旧 UI を出す実装。
+- 発生条件: Android 17 Bluetooth module で autonomous re-pairing が成功し、従来なら app が扱っていた key missing / manual recovery flow が system-managed flow で処理される場合。
+- ユーザーに見える症状: アプリ側の再ペアリング案内と system dialog / notification が重複する、または app 側が復旧完了を検知しにくい可能性。
+- 技術的に起きていること: pairing / bond state broadcast に `EXTRA_PAIRING_CONTEXT=PAIRING_CONTEXT_REPAIRING` が付与され、successful repairing では `ACTION_KEY_MISSING` の timing が従来前提と変わる。
+- 推奨対応シーン: wearable / health device / companion app の bond loss recovery。
+- 検証観点: successful repairing、failed repairing、user confirmation、app 独自 recovery UI、`ACTION_KEY_MISSING` 受信有無。
+- 根拠: 公式文書、`BluetoothDevice.EXTRA_PAIRING_CONTEXT`、`PAIRING_CONTEXT_REPAIRING`、`BondStateMachine` / `RemoteDevices` evidence。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は peripheral と companion app の recovery 実装に依存する。
+
+## 例2（Example 2）: Sony Headphones Connect / Bose / JBL のような Bluetooth audio companion
+
+- 具体サービス例: Sony Headphones Connect、Bose、JBL Headphones、Sennheiser Smart Control。
+- 影響を受ける実装パターン: headphones / earbuds の bond loss をアプリ側で検知し、firmware update、device settings、reconnect guidance を出す実装。
+- 発生条件: Android 17 が autonomous re-pairing を試み、pairing context や key missing broadcast の扱いが変わる場合。
+- ユーザーに見える症状: 接続復旧中の表示、設定画面の device state、再ペアリング案内が一時的に実状態とずれる可能性。
+- 技術的に起きていること: system が bond loss 後の re-pairing initiation を管理し、app-facing broadcast に repairing context を付ける。
+- 推奨対応シーン: headphones / earbuds companion の reconnect、firmware update 前後、multi-device pairing。
+- 検証観点: bond loss から復旧までの app state machine、system dialog と app UI の整合、failed recovery 時の fallback。
+- 根拠: Bluetooth module の autonomous repairing path と SettingsLib の pairing context handling。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。device firmware と Bluetooth stack の組み合わせで検証が必要。
+
+---
+
 # 追加調査 TODO
 
 - 実機または Bluetooth module test で successful re-pairing / failed re-pairing / user rejection の broadcast timing を確認する。

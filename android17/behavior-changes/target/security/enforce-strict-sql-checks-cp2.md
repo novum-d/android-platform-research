@@ -186,6 +186,38 @@ Source context の補足:
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Salesforce / HubSpot / Sansan のような CRM 連絡先連携
+
+- 具体サービス例: Salesforce、HubSpot、Sansan、Eight。
+- 影響を受ける実装パターン: `READ_CONTACTS` なしで `ContactsContract.Data` を query し、raw SQL 的な selection、projection expression、非許可 column を組み立てる実装。
+- 発生条件: Android 17 / targetSdkVersion 37 以上、`READ_CONTACTS` なし、`ContactsContract.Data` query、strict columns / strict grammar と互換性のない query。
+- ユーザーに見える症状: 連絡先候補の検索、名刺取り込み後の連絡先照合、CRM 連携が exception により失敗する可能性。
+- 技術的に起きていること: ContactsProvider が `SQLiteQueryBuilder#setStrictColumns(true)` / `setStrictGrammar(true)` を有効化し、許可されない SQL grammar を拒否する。
+- 推奨対応シーン: CRM / business card / sales enablement app の contacts query builder。
+- 検証観点: `READ_CONTACTS` あり / なし、targetSdkVersion 36 / 37、Data URI、Contact Picker Session URI、selection / sort order / projection。
+- 根拠: `ENFORCE_STRICT_SQL_CHECKS = 484953293L`、`@EnabledAfter(BAKLAVA)`、`ContactsProvider2.canEnforceStrictSqlChecksForQueries()`、Data query path の strict options。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は ContactsProvider query の組み立て方に依存する。
+
+## 例2（Example 2）: Google Contacts / Outlook / WhatsApp の連絡先検索・招待導線
+
+- 具体サービス例: Google Contacts、Microsoft Outlook、WhatsApp、Telegram の連絡先検索・招待 UI。
+- 影響を受ける実装パターン: permission を持たない状態でも限定的な contacts data を query しようとし、独自 SQL fragment を再利用する実装。
+- 発生条件: Android 17 / targetSdkVersion 37 で `READ_CONTACTS` が拒否・未付与のまま Data query を実行する場合。
+- ユーザーに見える症状: 連絡先候補が表示されない、招待候補検索が失敗する、fallback UI へ遷移する可能性。
+- 技術的に起きていること: permission なし path では strict SQL validation が適用され、従来許容されていた緩い query が拒否される。
+- 推奨対応シーン: permission denied fallback、Contact Picker 併用、連絡先候補表示。
+- 検証観点: permission grant / denied / revoked、exception handling、Contact Picker Session URI の selection 制限。
+- 根拠: 公式文書の `READ_CONTACTS` なし条件と ContactsProvider の targetSdkVersion gate。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。Google Contacts など privileged / platform app は一般アプリと条件が異なる可能性がある。
+
+---
+
 # 追加調査 TODO
 
 - `platform/packages/providers/ContactsProvider` の Android 16 / Android 17 tag を取得する。

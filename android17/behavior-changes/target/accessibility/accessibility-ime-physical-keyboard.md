@@ -308,6 +308,38 @@ git -C frameworks-base tag --list android-17.0.0_r1
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Google Docs / Microsoft Word / Notion のような文書編集アプリ
+
+- 具体サービス例: Google Docs、Microsoft Word、Notion、Evernote。
+- 影響を受ける実装パターン: 標準 `TextView` ではなく独自 editor / custom `InputConnection` で CJKV 変換入力を扱う実装。
+- 発生条件: Android 17 の TextView / InputConnection / AccessibilityEvent path で CJKV IME の text change type が伝わる一方、独自 editor が同等の event 情報を出さない場合。
+- ユーザーに見える症状: TalkBack などの読み上げで、変換中・候補選択・確定入力の違いが伝わりにくい可能性。
+- 技術的に起きていること: framework は `TextAttribute` / `AccessibilityEvent` の追加情報を扱うが、custom editor は明示的に対応しない限り新しい分類を伝えない。
+- 推奨対応シーン: 日本語・中国語・韓国語・ベトナム語入力を独自 editor で扱う文書編集機能。
+- 検証観点: TalkBack 有効時の CJKV composition、candidate selection、commit の読み上げ差分。
+- 根拠: `TextAttribute`、`EditableInputConnection`、`TextView`、`AccessibilityEvent` の AOSP source context。
+- Confidence（信頼度）: Medium。targetSdkVersion gate は未確認のため分類は未確定。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は custom editor 実装と accessibility event dispatch に依存する。
+
+## 例2（Example 2）: Gboard / Simeji / ATOK と TalkBack の組み合わせ
+
+- 具体サービス例: Gboard、Simeji、ATOK、Google TalkBack。
+- 影響を受ける実装パターン: IME または AccessibilityService が CJKV 変換中の text change type を使って feedback を最適化する実装。
+- 発生条件: Android 17 の新 API / flag-enabled path が有効で、IME / AccessibilityService が追加情報を送受信する場合。
+- ユーザーに見える症状: 変換候補の選択、composition 中の変更、確定入力の読み上げがより区別される可能性。未対応の組み合わせでは期待どおり改善しない可能性。
+- 技術的に起きていること: `TextAttribute` の suggestion selected field などが AccessibilityEvent に反映され、サービス側がそれを解釈できる。
+- 推奨対応シーン: IME、screen reader、入力支援 SDK の Android 17 対応確認。
+- 検証観点: 物理キーボード / ソフトキーボード、CJKV 各言語、標準 TextView / custom editor の組み合わせ。
+- 根拠: 公式 Behavior Change statement と AOSP の TextView / InputConnection / AccessibilityEvent path。
+- Confidence（信頼度）: Medium。
+- 注意: 上記サービスで発生確認した事実ではない。IME と AccessibilityService のバージョン差分を個別に確認する必要がある。
+
+---
+
 # 対応候補
 
 ## 必須対応（Must）

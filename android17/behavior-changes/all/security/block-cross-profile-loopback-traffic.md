@@ -253,6 +253,38 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Microsoft Intune / Android Enterprise の work profile 連携アプリ
+
+- 具体サービス例: Microsoft Intune Company Portal、Google Android Enterprise 管理下の work profile アプリ、VMware Workspace ONE。
+- 影響を受ける実装パターン: personal profile 側または work profile 側の companion / helper が `localhost` を profile 間通信路として使う設計。
+- 発生条件: Android 17 で cross-profile loopback traffic が default block され、同一 profile 内通信ではない場合。
+- ユーザーに見える症状: work profile 側の診断、認証補助、local helper 連携が接続失敗として見える可能性。
+- 技術的に起きていること: `127.0.0.1` / `::1` 宛てでも profile boundary を跨ぐ traffic は same-profile loopback と扱われず block 対象になる。
+- 推奨対応シーン: enterprise / DPC / managed profile 機能で localhost を使う箇所の棚卸し。
+- 検証観点: personal -> work、work -> personal、same-profile loopback を分けて Android 17 実機で確認する。
+- 根拠: 公式文書の cross-profile loopback block、report の permission / policy evidence。
+- Confidence（信頼度）: Medium。packet-level enforcement は追加 evidence が必要。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は profile 構成と通信設計に依存する。
+
+## 例2（Example 2）: Postman / Termux / 開発者向け local server 診断
+
+- 具体サービス例: Postman、Termux、HTTP Toolkit、社内 debug companion app。
+- 影響を受ける実装パターン: 片方の profile で起動した local HTTP server / proxy / debug endpoint に、別 profile の app から `localhost` で接続する実装。
+- 発生条件: Android 17 で cross-profile boundary を跨ぐ loopback 接続になる場合。
+- ユーザーに見える症状: local debug server が起動しているのに接続できない、proxy 設定や診断結果が失敗になる可能性。
+- 技術的に起きていること: loopback address は device-wide の共有通信路として使えず、profile 境界を跨ぐ access が制限される。
+- 推奨対応シーン: QA / enterprise debug / companion app の local server 利用手順。
+- 検証観点: 同一 profile では成功し、cross-profile では失敗するかを分離して確認する。
+- 根拠: 公式文書の same-profile exception と cross-profile block の説明。
+- Confidence（信頼度）: Medium。
+- 注意: 上記サービスで発生確認した事実ではない。debug tool の profile 配置とネットワーク経路に依存する。
+
+---
+
 # 推奨対応候補（Recommended Action Candidates）
 
 開発者向け対応候補:

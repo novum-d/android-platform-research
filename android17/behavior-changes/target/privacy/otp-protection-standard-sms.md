@@ -252,6 +252,38 @@ Source context の補足:
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: PayPay / LINE / メルカリの独自 SMS 文面 OTP
+
+- 具体サービス例: PayPay、LINE、メルカリ、Yahoo! JAPAN ID など、ログイン・本人確認で SMS OTP を使うサービス。
+- 影響を受ける実装パターン: SMS Retriever / WebOTP format ではない標準 SMS 文面から、`SMS_RECEIVED_ACTION` receiver または SMS provider query で OTP を抽出する実装。
+- 発生条件: Android 17 / targetSdkVersion 37 以上、generic OTP SMS、受信後 3 時間以内、trusted / exempted app ではない場合。
+- ユーザーに見える症状: OTP 自動入力が動作せず、ユーザーが SMS アプリから OTP を手入力する必要がある可能性。
+- 技術的に起きていること: `FILTER_GENERIC_OTP` compat change が有効になり、generic OTP の broadcast / provider access が一時的に制限される。
+- 推奨対応シーン: targetSdkVersion 37 更新前の認証フロー QA、旧式 SMS parser の棚卸し。
+- 検証観点: generic OTP、SMS Retriever OTP、WebOTP、trusted role / companion app、3 時間経過後の access。
+- 根拠: `SmsManager.FILTER_GENERIC_OTP = 437043173L`、`@EnabledSince(CINNAMON_BUN)`、`Telephony.Sms.CONTAINS_OTP`、trusted app 判定。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は SMS 文面と OTP 取得 API に依存する。
+
+## 例2（Example 2）: 銀行 / 証券 / クレジットカードのアカウント復旧 SMS
+
+- 具体サービス例: 三井住友銀行、楽天銀行、SBI証券、楽天カードなどの本人確認・アカウント復旧フロー。
+- 影響を受ける実装パターン: 独自 SMS parser や認証 SDK が標準 SMS を直接読み、OTP を自動入力する実装。
+- 発生条件: targetSdkVersion 37 のアプリが trusted / exempted category ではなく、受信直後に generic OTP SMS を読む場合。
+- ユーザーに見える症状: アカウント復旧や高リスク取引の確認で、自動入力ではなく手入力が必要になる可能性。
+- 技術的に起きていること: generic OTP は WebOTP / SMS Retriever subtype ではないため、targetSdkVersion 37 gate の対象になる。
+- 推奨対応シーン: 金融・決済・通信キャリア系の本人確認、端末変更、パスワード再設定。
+- 検証観点: SMS Retriever API / SMS User Consent API の採用可否、手入力 fallback、timeout 設計、role / app op exemption の有無。
+- 根拠: 公式文書の standard SMS OTP protection と AOSP の compat ChangeId / OTP metadata / AppOps evidence。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。金融サービスの実装は個別検証が必要。
+
+---
+
 # テスト観点（Test Matrix）
 
 | 端末 OS | targetSdkVersion | Message type | App state | 期待挙動 |

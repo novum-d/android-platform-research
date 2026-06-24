@@ -249,6 +249,38 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: 1Password / Bitwarden / enterprise password vault の credential 保存
+
+- 具体サービス例: 1Password、Bitwarden、Keeper、企業向け password vault / credential manager。
+- 影響を受ける実装パターン: account、vault item、device enrollment、credential record ごとに Android Keystore key を無制限に作成し、削除・再利用しない設計。
+- 発生条件: Android 17 上で app-owned key count が targetSdkVersion / app type ごとの limit に到達する場合。
+- ユーザーに見える症状: 新しい credential 登録、vault item 保存、device key 発行が失敗する可能性。
+- 技術的に起きていること: Keystore key creation が limit 超過で `KeyStoreException` になり、targetSdkVersion 37 以上の non-system app では `ERROR_TOO_MANY_KEYS` が返る。
+- 推奨対応シーン: secure storage、credential sync、device enrollment、per-record encryption の key lifecycle review。
+- 検証観点: app-owned key count、key deletion / rotation / reuse、targetSdkVersion 36 / 37、numeric error code handling。
+- 根拠: 公式文書の 50,000 / 200,000 key limit、`KeyStoreException.ERROR_TOO_MANY_KEYS` API surface。
+- Confidence（信頼度）: Medium。keystore2 service 側 enforcement 実装は追加確認が必要。
+- 注意: 上記サービスで発生確認した事実ではない。通常の key reuse 設計では影響しにくい。
+
+## 例2（Example 2）: E2EE メッセージ / ノート / 文書アプリの per-record encryption
+
+- 具体サービス例: Signal、WhatsApp、Standard Notes、Proton Drive のような暗号化データを扱うアプリ。
+- 影響を受ける実装パターン: conversation、file、note、attachment、session ごとに Android Keystore key を作り続ける独自暗号化設計。
+- 発生条件: 長期間利用、複数アカウント、同期・再登録の繰り返しで key count が増え、limit を超える場合。
+- ユーザーに見える症状: 新規チャット / ファイル / ノートの暗号化保存が失敗する、再登録や復元が進まない可能性。
+- 技術的に起きていること: app-owned key count limit により key generation / import が拒否される。
+- 推奨対応シーン: per-item key strategy、cleanup job、logout / account deletion / migration 時の key deletion。
+- 検証観点: synthetic large-account test、key alias naming、orphan key cleanup、error fallback。
+- 根拠: 公式文書の per-app key ownership limit と report の API usage / app state condition。
+- Confidence（信頼度）: Medium。
+- 注意: 上記サービスで発生確認した事実ではない。暗号化設計はサービスごとに異なるため個別確認が必要。
+
+---
+
 # 推奨対応候補（Recommended Action Candidates）
 
 開発者向け対応候補:

@@ -336,29 +336,31 @@ git -C frameworks-base tag --list 'android-17*'
 
 このセクションは、公式文書と AOSP 根拠 から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## 例1: Bluetooth プリンター / スキャナー連携
+## 例1: Square POS / Shopify POS のような Bluetooth レシートプリンター連携
 
-- 対象サービス例: モバイル POS、配送ラベル印刷、バーコードスキャナー、店舗端末連携。
+- 具体サービス例: Square Point of Sale、Shopify POS、スマレジなど、店舗端末で Bluetooth プリンターやバーコードスキャナーを使う POS アプリ。
 - 影響を受ける実装パターン: RFCOMM `BluetoothSocket` の read loop を `IOException` catch だけで終了する実装。
 - 発生条件: Android 17 / targetSdkVersion 37 で socket close / connection dropped 時に `read()` が `-1` を返す場合。
 - ユーザーに見える症状: 切断後も接続中表示のままになる、再接続できない、印刷 / 読み取り job が止まる可能性。
+- 技術的に起きていること: EOF が exception ではなく `-1` として返り、既存 loop が終了条件として扱わない。
 - 開発・運用への影響: read loop、thread cancellation、再接続 flow、device disconnect test の見直しが必要になる可能性。
 - 推奨対応候補: `bytesRead == -1` を EOF として扱い、socket close と reconnect 処理へ進む。
 - 根拠: 公式 statement と report の expected behavior。
 - 信頼度: 高
-- 注意: 実 device ごとの差異は実機検証が必要。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は利用プリンター / scanner SDK と read loop 実装に依存する。
 
-## 例2: IoT / embedded device の serial data transfer
+## 例2: OBDLink / 専用計測アプリのような Bluetooth SPP 相当通信
 
-- 対象サービス例: 計測器、医療周辺機器、車載 / 工場デバイス、Bluetooth SPP 相当通信。
+- 具体サービス例: OBDLink のような OBD-II adapter 連携アプリ、工場・医療・物流向けの専用計測アプリ。
 - 影響を受ける実装パターン: remote disconnect 時に exception が必ず発生すると仮定した parser / protocol loop。
 - 発生条件: `read()` が `-1` を返し、アプリがそれを data length として扱う、または無視する場合。
 - ユーザーに見える症状: データ更新が止まる、切断検出が遅れる、再接続操作が効かない可能性。
+- 技術的に起きていること: serial protocol の受信 loop が EOF と異常終了を区別できず、state machine が connected のまま残る。
 - 開発・運用への影響: protocol state machine、EOF handling、device firmware 別 regression test が必要になる可能性。
 - 推奨対応候補: `>0` data、`-1` EOF、`IOException` abnormal error を分けて処理する。
 - 根拠: 公式 statement と report の action candidates。
 - 信頼度: 高
-- 注意: 実 device ごとの差異は実機検証が必要。
+- 注意: 上記サービスで発生確認した事実ではない。実 device / firmware / SDK ごとの差異は実機検証が必要。
 
 ---
 

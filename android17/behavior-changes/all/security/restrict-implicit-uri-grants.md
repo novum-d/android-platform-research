@@ -257,6 +257,38 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Google Photos / LINE / Slack への画像共有
+
+- 具体サービス例: Google Photos、LINE、Slack、Gmail へ画像・PDF・添付ファイルを共有するアプリ。
+- 影響を受ける実装パターン: `ACTION_SEND` / `ACTION_SEND_MULTIPLE` で content URI を渡すが、`FLAG_GRANT_READ_URI_PERMISSION` を明示していない実装。
+- 発生条件: Android 17 では StrictMode / logcat detection、有効化設定によって violation として検出される。将来 enforcement では target app が URI を読めない可能性がある。
+- ユーザーに見える症状: Android 17 では通常は開発時 warning。将来 release では共有先で添付ファイルが開けない、送信に失敗する可能性。
+- 技術的に起きていること: system による暗黙 URI grant に依存しており、明示 grant flag が欠落している。
+- 推奨対応シーン: share sheet、chat attachment、email attachment、document export。
+- 検証観点: StrictMode `detectImplicitUriPermissionGrant()`、`detectAll()`、read grant flag、複数 URI、FileProvider 設定。
+- 根拠: 公式文書、`StrictMode.VmPolicy.Builder.detectImplicitUriPermissionGrant()`、`Intent.ACTION_SEND` / `ACTION_SEND_MULTIPLE` warning path。
+- Confidence（信頼度）: Medium。Android 17 は detection / migration period が中心。
+- 注意: 上記サービスで発生確認した事実ではない。共有元アプリの intent flags と provider 設定に依存する。
+
+## 例2（Example 2）: カメラアプリ連携でプロフィール画像や本人確認画像を撮影する flow
+
+- 具体サービス例: メルカリ、PayPay、銀行アプリ、保険アプリなどのプロフィール画像・本人確認書類撮影 flow。
+- 影響を受ける実装パターン: `MediaStore.ACTION_IMAGE_CAPTURE` に output URI を渡すが、read / write grant flag を明示しない実装。
+- 発生条件: Android 17 で StrictMode detection を有効化したテスト、または将来 release の implicit grant restriction が有効な場合。
+- ユーザーに見える症状: 将来 enforcement では camera app が output URI に書き込めない、撮影後の画像取得に失敗する可能性。
+- 技術的に起きていること: camera app へ必要な URI permission が明示されず、従来の implicit grant に依存している。
+- 推奨対応シーン: identity verification、receipt capture、expense report、profile image capture。
+- 検証観点: `FLAG_GRANT_READ_URI_PERMISSION` と `FLAG_GRANT_WRITE_URI_PERMISSION`、camera app 差分、Android 17 StrictMode。
+- 根拠: 公式文書と AOSP の image capture path warning / StrictMode API。
+- Confidence（信頼度）: Medium。
+- 注意: 上記サービスで発生確認した事実ではない。Android 17 時点の主要目的は Android 18 enforcement への移行準備である。
+
+---
+
 # 推奨対応候補（Recommended Action Candidates）
 
 開発者向け対応候補:

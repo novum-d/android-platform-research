@@ -330,29 +330,31 @@ git -C frameworks-base tag --list 'android-17*'
 
 このセクションは、公式文書と AOSP 根拠 から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## 例1: 設定値を reflection で差し替えるアプリ / SDK
+## 例1: Firebase Remote Config / LaunchDarkly を使う feature flag 周辺実装
 
-- 対象サービス例: A/B test SDK、feature flag framework、社内 debug tool。
+- 具体サービス例: Firebase Remote Config、LaunchDarkly、Optimizely Feature Experimentation を利用するアプリの独自 adapter / debug tool。
 - 影響を受ける実装パターン: `static final` fields を reflection / Unsafe / instrumentation で書き換える実装。
 - 発生条件: Android 17 / targetSdkVersion 37 で `static final` fields が unmodifiable と扱われる場合。
 - ユーザーに見える症状: feature flag が切り替わらない、debug menu の変更が反映されない、初期化時に例外が出る可能性。
+- 技術的に起きていること: 本来 immutable な `static final` constant を runtime に差し替える処理が拒否され、fallback なしなら初期化失敗や機能停止につながる。
 - 開発・運用への影響: runtime patching 前提の設定更新、テスト環境の差し替え、SDK initialization の見直しが必要になる可能性。
 - 推奨対応候補: mutable holder / DI / build-time config に移行し、`static final` 直接変更を避ける。
 - 根拠: 公式 Behavior Change statement と ART / libcore evidence。
 - 信頼度: 高
-- 注意: 実際の影響は該当 SDK が static final field を実行時変更しているかに依存する。
+- 注意: 上記サービス本体で発生確認した事実ではない。実際の影響は、アプリ側または周辺 SDK が `static final` field を実行時変更しているかに依存する。
 
-## 例2: テスト / mocking framework に依存するアプリ
+## 例2: Mockito / MockK / Robolectric を使う Android テスト基盤
 
-- 対象サービス例: 大規模 Android app の instrumented test、E2E test、SDK integration test。
+- 具体サービス例: Mockito、MockK、Robolectric、社内 E2E test runner を使う大規模 Android アプリの検証 pipeline。
 - 影響を受ける実装パターン: production code の `static final` constant を test runtime で書き換える test utility。
 - 発生条件: targetSdkVersion 37 の test build / app process で static final mutation が拒否される場合。
 - ユーザーに見える症状: 直接の本番ユーザー影響は限定的だが、テスト失敗により release validation が詰まる可能性。
+- 技術的に起きていること: test double / instrumentation が constant を直接書き換える設計だと、Android 17 の runtime 制限で例外または native crash になる。
 - 開発・運用への影響: test fixture、mocking strategy、CI の Android 17 対応が必要になる可能性。
 - 推奨対応候補: constructor injection、interface abstraction、test-only build variants に移行する。
 - 根拠: 公式 statement と ART / libcore evidence。
 - 信頼度: 高
-- 注意: 実サービス障害ではなく開発・検証 pipeline への影響例。
+- 注意: 上記 framework で一律に発生するという意味ではない。実サービス障害ではなく、該当する test utility / instrumentation pattern がある場合の開発・検証 pipeline への影響例。
 
 ---
 

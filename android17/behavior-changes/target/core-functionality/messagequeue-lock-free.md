@@ -330,29 +330,31 @@ git -C frameworks-base tag --list 'android-17*'
 
 このセクションは、公式文書と AOSP 根拠 から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## 例1: UI 操作が多い一般アプリ
+## 例1: LINE / Slack / Instagram のような高頻度 UI 更新アプリ
 
-- 対象サービス例: チャット、SNS、EC、ニュースなど、メインスレッドで UI 更新とイベント処理が多いアプリ。
+- 具体サービス例: LINE / Slack のチャット画面、Instagram / X の feed、メルカリ / Amazon Shopping の商品一覧。
 - 影響を受ける実装パターン: `Handler` / `Looper` / `MessageQueue` の待機・dispatch timing に暗黙依存している実装。
 - 発生条件: Android 17 の MessageQueue 実装変更が、アプリの timing assumption とずれる場合。
 - ユーザーに見える症状: スクロール、タップ反応、画面遷移、アニメーションの timing が変わる可能性。
+- 技術的に起きていること: message enqueue / dispatch / idle callback の timing 前提が変わり、race condition や flaky test が表面化する。
 - 開発・運用への影響: flaky な UI test、race condition、main thread timing に依存した処理の再検証が必要になる可能性。
 - 推奨対応候補: main thread blocking、busy wait、implicit ordering 依存を棚卸しし、Android 17 で UI / instrumentation test を実施する。
 - 根拠: 公式 Behavior Change statement、`USE_NEW_MESSAGEQUEUE` compat gate、`Handler` / `Looper` / `MessageQueue` の AOSP source context。
 - 信頼度: Medium
-- 注意: 実サービスで発生確認した事実ではない。具体的な timing regression は個別アプリ / SDK のテストで確認する必要がある。
+- 注意: 上記サービスで発生確認した事実ではない。具体的な timing regression は個別アプリ / SDK のテストで確認する必要がある。
 
-## 例2: SDK / framework が Looper timing に依存するアプリ
+## 例2: Sentry / Datadog / Firebase Performance を組み込む監視・計測連携
 
-- 対象サービス例: analytics SDK、広告 SDK、リアルタイム通信 SDK、独自 UI framework を組み込むアプリ。
+- 具体サービス例: Sentry、Datadog Real User Monitoring、Firebase Performance Monitoring、New Relic Mobile を組み込むアプリ。
 - 影響を受ける実装パターン: `postAtFrontOfQueue`、synchronous barrier、idle handler、message ordering に強く依存する処理。
 - 発生条件: MessageQueue の lock-free 化により、従来の timing / ordering 前提が露呈する場合。
 - ユーザーに見える症状: callback の順序違い、初期化遅延、画面表示直後のイベント欠落。
+- 技術的に起きていること: SDK 側の main-thread instrumentation が private timing 前提を持つ場合、イベント収集や frame timing の順序が変わる。
 - 開発・運用への影響: SDK vendor への確認、race condition test、Android 17 beta / preview での回帰確認が必要になる可能性。
 - 推奨対応候補: SDK 更新、callback ordering を明示した test、メインスレッド依存の削減。
 - 根拠: MessageQueue behavior change の公式説明、`mMessages` の legacy 互換境界、`USE_NEW_MESSAGEQUEUE` gate。
 - 信頼度: Medium
-- 注意: 具体的な broken pattern は SDK 実装と実機検証で確認する必要がある。
+- 注意: 上記 SDK で発生確認した事実ではない。具体的な broken pattern は SDK 実装と実機検証で確認する必要がある。
 
 ---
 

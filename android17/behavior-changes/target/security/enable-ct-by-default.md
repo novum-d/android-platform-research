@@ -321,29 +321,31 @@ git -C frameworks-base tag --list 'android-17*'
 
 このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## 例1（Example 1）: Public API backend への HTTPS 通信
+## 例1（Example 1）: Stripe / PayPal / Firebase Auth と並行して使う自社 HTTPS API
 
-- 対象サービス例: ログイン API、決済 API、コンテンツ配信 API。
+- 具体サービス例: Stripe / PayPal 決済、Firebase Auth ログイン、Cloudflare / Fastly 配下の自社 API を同じアプリから呼び出す構成。
 - 影響を受ける実装パターン: CT 要件を満たさない公開証明書チェーンを使う endpoint に platform TLS で接続する実装。
 - 発生条件: Android 17 / targetSdkVersion 37 で CT がデフォルト有効になり、証明書チェーンが CT policy を満たさない場合。
 - ユーザーに見える症状: API 通信失敗、ログイン不能、決済失敗、コンテンツ取得失敗の可能性。
+- 技術的に起きていること: platform TLS の certificate transparency policy が default enabled になり、対象 host の公開証明書チェーンが CT 要件を満たさないと handshake が失敗する。
 - 開発・運用への影響: 証明書発行、CT log inclusion、証明書更新手順の確認が必要になる可能性。
 - 推奨対応候補: 接続先証明書の CT 対応を棚卸しし、Android 16 opt-in または Android 17 環境で事前検証する。
 - 根拠: 公式 statement とレポートの期待挙動。
 - 信頼度: Medium
-- 注意: 実サービスで発生確認した事実ではない。接続先証明書と Network Security Config に依存する。
+- 注意: Stripe / PayPal / Firebase Auth で発生確認した事実ではない。実際のリスクは、アプリが接続する各 host の証明書と Network Security Config に依存する。
 
-## 例2（Example 2）: Staging / private PKI 環境
+## 例2（Example 2）: Okta / Microsoft Entra ID 連携アプリの staging / private PKI 環境
 
-- 対象サービス例: QA 環境、社内 API、private CA を使う検証環境。
+- 具体サービス例: Okta / Microsoft Entra ID で認証し、その後に private CA の staging API や社内 API へ接続する業務アプリ。
 - 影響を受ける実装パターン: public CT log に載らない証明書や private trust anchor を使う接続。
 - 発生条件: Android 17 / targetSdkVersion 37 で CT デフォルト ポリシーが staging endpoint にも適用される場合。
 - ユーザーに見える症状: 社内検証や beta build でだけ通信失敗する可能性。
+- 技術的に起きていること: production IdP への接続は成功しても、アプリ固有の staging / private endpoint で CT policy または Network Security Config の扱いが異なり接続に失敗する。
 - 開発・運用への影響: Network Security Config、debug overrides、private PKI 例外条件の確認が必要になる可能性。
 - 推奨対応候補: staging 証明書運用を見直し、CT policy 対象外条件があるか Android 17 AOSP tag 後に確認する。
 - 根拠: 公式 statement、AOSP の CT デフォルト ゲート、Network Security Config の CT policy path。
 - 信頼度: Medium
-- 注意: private CA / user-added CA / debug override の扱いは Network Security Config と証明書設定ごとの確認が必要。
+- 注意: Okta / Microsoft Entra ID で発生確認した事実ではない。private CA / user-added CA / debug override の扱いは Network Security Config と証明書設定ごとの確認が必要。
 
 ---
 

@@ -269,6 +269,38 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: PayPay / LINE / メルカリのような SMS 認証ログイン
+
+- 具体サービス例: PayPay、LINE、メルカリ、Yahoo! JAPAN ID など、SMS OTP をログイン・本人確認に使うサービス。
+- 影響を受ける実装パターン: WebOTP format message を SMS inbox / `SMS_RECEIVED_ACTION` / SMS provider から直接読み、intended recipient 判定に頼らず OTP を抽出する実装。
+- 発生条件: Android 17 で WebOTP message の intended recipient ではないアプリが、受信後 3 時間以内に SMS を programmatically read しようとする場合。
+- ユーザーに見える症状: OTP 自動入力が出ない、ログイン時に SMS を手入力する必要がある、認証 timeout が増える可能性。
+- 技術的に起きていること: WebOTP subtype / domain verification / trusted package 判定により、対象外アプリへの broadcast と provider query が一時的に制限される。
+- 推奨対応シーン: SMS 本文を直接読む OTP helper、認証 SDK、旧式の auto-fill fallback を持つログイン画面。
+- 検証観点: WebOTP format、domain verification、intended recipient、3 時間以内 / 以後、SMS Retriever / User Consent API への移行状態。
+- 根拠: 公式文書の WebOTP protection、`TextClassifier.TYPE_SMS_WEB_OTP`、`Telephony.Sms.OTP_SUBTYPE_WEB_OTP`、`DomainVerificationManager`、`SmsManager.isAppTrustedForSmsOtp()`。
+- Confidence（信頼度）: Medium。runtime enforcement 本体は Telephony provider / module 側の追加確認が必要。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は SMS 文面形式、domain verification、OTP 取得 API に依存する。
+
+## 例2（Example 2）: 銀行 / 証券 / クレジットカードアプリの本人確認 SMS
+
+- 具体サービス例: 三井住友銀行、楽天銀行、SBI証券、楽天カードなどの SMS 本人確認フロー。
+- 影響を受ける実装パターン: 自社アプリ以外の補助アプリや連携 SDK が SMS read permission を使って OTP を抽出する実装。
+- 発生条件: Android 17 で WebOTP message の intended recipient ではない caller が、受信直後に SMS provider query または broadcast から OTP を取得しようとする場合。
+- ユーザーに見える症状: SMS が届いているのに自動入力されない、認証補助アプリだけが OTP を読めない可能性。
+- 技術的に起きていること: trusted / exempted category ではないアプリに対し、OTP SMS の programmatic access が 3 時間遅延される。
+- 推奨対応シーン: 金融・決済系の SMS OTP 自動入力、端末移行時認証、アカウント復旧。
+- 検証観点: default SMS app / companion app / role holder 例外、SMS Retriever API、SMS User Consent API、手入力 fallback。
+- 根拠: 公式文書の exempted app 説明と `SmsManager.getSmsOtpTrustedPackages()` / `OP_READ_OTP_SMS` evidence。
+- Confidence（信頼度）: Medium。
+- 注意: 上記サービスで発生確認した事実ではない。金融サービスの実装は公開情報だけでは判断できないため、実アプリ検証が必要。
+
+---
+
 # 推奨対応候補（Recommended Action Candidates）
 
 開発者向け対応候補:

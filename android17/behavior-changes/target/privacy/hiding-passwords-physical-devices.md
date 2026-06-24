@@ -331,29 +331,31 @@ git -C frameworks-base tag --list 'android-17*'
 
 このセクションは、公式文書と AOSP 根拠 から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
 
-## 例1（Example 1）: 外部キーボード利用が多いログイン画面
+## 例1（Example 1）: Google Workspace / Microsoft 365 / Salesforce のログイン画面
 
-- 対象サービス例: tablet / Chromebook 向け業務アプリ、教育アプリ、金融・認証画面。
+- 具体サービス例: Google Workspace、Microsoft 365、Salesforce、Okta 連携アプリを tablet / Chromebook / DeX など外部キーボード環境で使うケース。
 - 影響を受ける実装パターン: password field で最後に入力した文字の一時表示をユーザー確認として期待している UI。
 - 発生条件: Android 17 / targetSdkVersion 37 で physical input device 使用中に `show_passwords_physical` が適用される場合。
 - ユーザーに見える症状: 外部キーボード入力時に password character が一切表示されず、入力ミス確認の体感が変わる可能性。
+- 技術的に起きていること: physical input device 経由の password 入力では、最後の入力文字を一時表示する従来挙動が抑制される。
 - 開発・運用への影響: support 文言、ログイン失敗率、keyboard 利用 QA の確認が必要になる可能性。
 - 推奨対応候補: password visibility toggle、error feedback、physical keyboard / touchscreen 別テストを整備する。
 - 根拠: 公式 statement、`ShowSecretsSetting` の Change ID、`PasswordTransformationMethod` の physical input 判定、physical setting default。
 - 信頼度: Medium
-- 注意: 実サービスで発生確認した事実ではない。ユーザー影響は入力環境と password UI に依存する。
+- 注意: 上記サービスで発生確認した事実ではない。ユーザー影響は入力環境と password UI に依存する。
 
-## 例2（Example 2）: Custom password field を持つアプリ
+## 例2（Example 2）: 1Password / Bitwarden / 独自認証 SDK の custom password field
 
-- 対象サービス例: password manager、認証 SDK、独自 design system を持つアプリ。
+- 具体サービス例: 1Password、Bitwarden、Okta / Auth0 連携の独自ログイン UI、社内 design system の password component。
 - 影響を受ける実装パターン: platform password field ではなく custom masking / reveal behavior を実装している UI。
 - 発生条件: platform setting と custom field の表示方針がずれる場合。
 - ユーザーに見える症状: 標準 password field と custom field で表示挙動が違い、ユーザーが混乱する可能性。
+- 技術的に起きていること: platform の `PasswordTransformationMethod` は physical input device 向け設定を反映するが、custom field は独自実装のため同じ policy に追従しない可能性がある。
 - 開発・運用への影響: design system component の見直し、security review、UI test 更新が必要になる可能性。
 - 推奨対応候補: platform setting に合わせる、または custom reveal の security rationale を明確にする。
 - 根拠: 公式 statement、AOSP の split show-password settings、platform password transformation path。
 - 信頼度: Medium
-- 注意: custom field が platform setting を読むかどうかはアプリ実装ごとの確認が必要。
+- 注意: 上記サービスで発生確認した事実ではない。custom field が platform setting を読むかどうかはアプリ実装ごとの確認が必要。
 
 ---
 

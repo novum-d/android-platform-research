@@ -271,6 +271,38 @@ Source context の補足:
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Uber Driver / DoorDash Dasher の緊急画面・注文画面起動
+
+- 具体サービス例: Uber Driver、DoorDash Dasher、出前館配達員アプリ、タクシー配車ドライバーアプリ。
+- 影響を受ける実装パターン: background service / receiver がユーザー操作なしで Activity を前面起動する、または broad `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` に依存する PendingIntent を渡す実装。
+- 発生条件: Android 17 / targetSdkVersion 37 以上で `ASM_RESTRICTIONS` が有効になり、caller / real caller が visible ではないのに `ALLOW_IF_VISIBLE` 相当の flow で Activity 起動しようとする場合。
+- ユーザーに見える症状: 新規注文、緊急確認、デバイス接続 prompt などが自動で前面表示されず、通知経由の操作が必要になる可能性。
+- 技術的に起きていること: BAL privileges が granular mode で評価され、visible window を持たない caller には `ALLOW_IF_VISIBLE` での background Activity start が許可されない。
+- 推奨対応シーン: driver / delivery / field service の high-priority prompt、connected device prompt、alarm / reminder 起動。
+- 検証観点: notification tap 直結の Activity PendingIntent、broadcast / service trampoline、caller visible / background、`ALLOW_ALWAYS` が本当に必要な flow。
+- 根拠: `ASM_RESTRICTIONS` `@EnabledAfter(BAKLAVA)`、`ALLOW_IF_VISIBLE` / `ALLOW_ALWAYS` branch、Activity security guide。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。通知タップから直接 Activity PendingIntent を開く flow は通常影響が限定的。
+
+## 例2（Example 2）: Google Calendar / Slack / Microsoft Teams の通知タップ・リマインダー
+
+- 具体サービス例: Google Calendar、Slack、Microsoft Teams、Todoist。
+- 影響を受ける実装パターン: notification action や reminder から直接 Activity PendingIntent ではなく、broadcast receiver / service を挟んで後から Activity を起動する notification trampoline 型実装。
+- 発生条件: targetSdkVersion 37 で background component が user-mediated exception から外れた状態で Activity を起動する場合。
+- ユーザーに見える症状: 通知をタップしても対象画面が開かない、非同期処理後の確認画面が前面表示されない可能性。
+- 技術的に起きていること: system-sent notification PendingIntent 自体は許可例外になり得るが、receiver / service を挟んで再度 background start すると BAL 判定対象になる。
+- 推奨対応シーン: notification contentIntent / action、calendar reminder、chat call / meeting join、auth prompt。
+- 検証観点: Activity PendingIntent 直結か、trampoline か、非同期処理後の startActivity か、`ALLOW_IF_VISIBLE` で足りるか。
+- 根拠: 公式 Activity security guide、report の notification tap 例外整理、AOSP の real caller / caller visibility branch。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。通知設計と PendingIntent 実行経路を個別に確認する必要がある。
+
+---
+
 # テスト観点（Test Matrix）
 
 | 端末 OS | targetSdkVersion | BAL mode | Caller state | 期待挙動 |

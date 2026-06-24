@@ -255,6 +255,38 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Google Home / TP-Link Tapo / Canon PRINT のような local HTTP device setup
+
+- 具体サービス例: Google Home、TP-Link Tapo、Canon PRINT、Epson Smart Panel、Nature Remo。
+- 影響を受ける実装パターン: 初期設定中の device AP / LAN endpoint へ `http://192.168.x.x` や `http://device.local` で接続し、`usesCleartextTraffic="true"` だけで許可している実装。
+- 発生条件: Android 17 / targetSdkVersion 37 以上、feature flag + compat change が有効、Network Security Config を明示していない場合。
+- ユーザーに見える症状: IoT 機器、プリンター、カメラの初期設定や LAN 操作で HTTP 接続が失敗する可能性。
+- 技術的に起きていること: manifest の `usesCleartextTraffic` fallback が Network Security Config の default policy に反映されず、cleartext が許可されない。
+- 推奨対応シーン: local device onboarding、LAN device control、printer / camera / hub 連携。
+- 検証観点: Network Security Config の domain / base-config、private IP / `.local`、targetSdkVersion 36 / 37、minSdkVersion < 24 互換。
+- 根拠: 公式文書、`DEPRECATE_USES_CLEARTEXT_TRAFFIC` compat change、`ManifestConfigSource` evidence。
+- Confidence（信頼度）: Medium。release flag default は未解決。
+- 注意: 上記サービスで発生確認した事実ではない。Network Security Config を明示済みなら影響は限定的。
+
+## 例2（Example 2）: 社内 API / legacy partner API を使う業務アプリ
+
+- 具体サービス例: Salesforce Field Service 連携、SAP Fiori Client 連携、社内 warehouse / POS / logistics アプリ。
+- 影響を受ける実装パターン: 閉域網や legacy partner endpoint への HTTP cleartext を、manifest の `usesCleartextTraffic` だけで許可している実装。
+- 発生条件: Android 17 target 37 移行時に manifest fallback が無視され、Network Security Config がない場合。
+- ユーザーに見える症状: 社内 API への同期、在庫照会、POS 連携、配送端末連携が接続失敗になる可能性。
+- 技術的に起きていること: app-wide manifest flag ではなく、Network Security Config による明示 domain policy が必要になる。
+- 推奨対応シーン: enterprise / B2B / warehouse / retail / closed-network integration。
+- 検証観点: HTTPS 化可否、domain-specific cleartext allow、API 24 未満 fallback、debug / staging config。
+- 根拠: 公式文書の deprecation plan と AOSP の feature flag + compat gated behavior。
+- Confidence（信頼度）: Medium。
+- 注意: 上記サービスで発生確認した事実ではない。将来 release plan のため、Android 17 では flag / compat default を確認する必要がある。
+
+---
+
 # 推奨対応候補（Recommended Action Candidates）
 
 開発者向け対応候補:

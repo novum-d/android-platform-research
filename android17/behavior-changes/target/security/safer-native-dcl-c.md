@@ -225,6 +225,38 @@ Source context の補足:
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Unity / Unreal Engine / Roblox の native plugin 配信
+
+- 具体サービス例: Unity 製ゲーム、Unreal Engine 製ゲーム、Roblox のような runtime extension / asset delivery を持つアプリ。
+- 影響を受ける実装パターン: `.so` をダウンロード、展開、patch、生成した後、書き込み可能なまま `System.load(path)` する実装。
+- 発生条件: Android 17 / targetSdkVersion 37 以上、non-root/system/shell UID、writable native file、compat change `THROW_ERROR_FOR_WRITABLE_DCL` が有効な場合。
+- ユーザーに見える症状: game plugin、codec、anti-cheat、renderer、feature module の初期化に失敗し、起動失敗や該当機能停止になる可能性。
+- 技術的に起きていること: `Runtime.load0()` が writable file を検出し、`UnsatisfiedLinkError` を投げる。
+- 推奨対応シーン: dynamic native module、hot update、asset-delivered native extension、game engine plugin。
+- 検証観点: file permission / mode、download 完了後の read-only 化、atomic rename、`System.loadLibrary()` と `System.load(path)` の使い分け、targetSdkVersion 36 / 37。
+- 根拠: libcore `Runtime.load0()` writable file throw path、`VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL = 463348571`、`@EnabledSince(CINNAMON_BUN)`。
+- Confidence（信頼度）: High。
+- 注意: 上記サービスで発生確認した事実ではない。通常の APK / App Bundle 同梱 native library は対象外になりやすい。
+
+## 例2（Example 2）: TensorFlow Lite / OpenCV / FFmpegKit を動的配布する ML・メディア機能
+
+- 具体サービス例: TensorFlow Lite delegate、OpenCV、FFmpegKit、画像・動画編集 SDK をアプリ起動後に展開する機能。
+- 影響を受ける実装パターン: device ABI や feature flag に応じて native library を後から取得し、書き込み可能な cache / files directory から `System.load(path)` する実装。
+- 発生条件: targetSdkVersion 37 以上で、load 対象 `.so` が writable のまま残っている場合。
+- ユーザーに見える症状: ML inference、画像処理、動画変換、音声処理、暗号処理など特定機能だけ初期化に失敗する可能性。
+- 技術的に起きていること: DCL-C の safer native loading policy により、改ざん可能な native code file のロードが拒否される。
+- 推奨対応シーン: ML delegate download、codec pack、plugin SDK、A/B 配信の native module。
+- 検証観点: library extraction 後に read-only にする順序、checksum / signature verification、fallback to bundled library、`UnsatisfiedLinkError` handling。
+- 根拠: 公式文書の read-only requirement と libcore / VMRuntime compat evidence。
+- Confidence（信頼度）: High。
+- 注意: 上記ライブラリで発生確認した事実ではない。実際の影響は配布・展開・load 実装に依存する。
+
+---
+
 # 追加調査 TODO
 
 - ART/libcore の `System.load()` / `Runtime.load0()` path を Android 16 / Android 17 tag で比較する。

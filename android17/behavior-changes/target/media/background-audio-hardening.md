@@ -272,6 +272,38 @@ git -C frameworks-base tag --list android-17.0.0_r1
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Spotify / Pocket Casts / Audible の targetSdkVersion 37 更新
+
+- 具体サービス例: Spotify、Pocket Casts、Audible、YouTube Music。
+- 影響を受ける実装パターン: targetSdkVersion 37 へ更新後、background state で audio focus / playback / volume API を使うが、foreground audio control capability を満たさない実装。
+- 発生条件: Android 17 / targetSdkVersion 37 以上、background audio interaction、`mediaPlayback` FGS や MediaSessionService などの条件が不足する場合。
+- ユーザーに見える症状: targetSdkVersion 更新後だけ、バックグラウンド再生開始や再開が失敗する、無音になる、focus を取れない可能性。
+- 技術的に起きていること: pre-CINNAMON_BUN 向けの partial 緩和から外れ、strict level の hardening 判定に進む。
+- 推奨対応シーン: targetSdkVersion 37 への移行前の media playback regression test。
+- 検証観点: targetSdkVersion 36 / 37 比較、FGS 開始タイミング、audio focus return value、hardening override を使った再現。
+- 根拠: `HardeningEnforcer.blockFocusMethod()` / `blockVolumeMethod()` の `targetSdk < CINNAMON_BUN` 分岐、公式 target-side statement。
+- Confidence（信頼度）: High for Java focus / volume path、Medium for playback mute。
+- 注意: 上記サービスで発生確認した事実ではない。適切な media FGS / MediaSession を使う実装では影響しない可能性が高い。
+
+## 例2（Example 2）: Google Clock / Todoist / 医療リマインダーの alarm 音
+
+- 具体サービス例: Google Clock、Todoist、Medisafe のような medication reminder、カレンダー / reminder アプリ。
+- 影響を受ける実装パターン: alarm / reminder 用の音を background から鳴らすが、exact alarm permission または `AudioAttributes.USAGE_ALARM` を満たさない実装。
+- 発生条件: Android 17 / targetSdkVersion 37 以上で background audio interaction が strict 判定になり、alarm exception に入らない場合。
+- ユーザーに見える症状: reminder 音が鳴らない、volume 変更が効かない、通知だけ表示され音が出ない可能性。
+- 技術的に起きていること: focus path では exact alarm eligibility と `USAGE_ALARM` が partial 緩和条件になり、不足すると full block に進みうる。
+- 推奨対応シーン: alarm、timer、medication reminder、calendar reminder の target 37 対応。
+- 検証観点: exact alarm permission、`USAGE_ALARM`、notification channel sound、FGS / visible state、targetSdkVersion 36 / 37 比較。
+- 根拠: `HardeningEnforcer.blockFocusMethod()` の alarm exception、official bg-audio guidance。
+- Confidence（信頼度）: High for focus exception evidence。
+- 注意: 上記サービスで発生確認した事実ではない。Google Clock など platform / privileged 実装は一般アプリと条件が異なる可能性がある。
+
+---
+
 # 推奨アクション候補
 
 - targetSdkVersion 37 へ上げる前に、background audio interaction をすべて棚卸しする。

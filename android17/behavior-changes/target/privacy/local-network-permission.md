@@ -276,6 +276,38 @@ Source context の補足:
 
 ---
 
+# サービス影響例
+
+このセクションは、公式文書と AOSP 根拠から導いた「起こりうる影響例」を記録する。特定サービスで実際に発生確認した事実ではない。
+
+## 例1（Example 1）: Google Home / Philips Hue / SwitchBot のようなスマートホーム設定
+
+- 具体サービス例: Google Home、Philips Hue、SwitchBot、Nature Remo、TP-Link Tapo。
+- 影響を受ける実装パターン: mDNS / NSD / `.local` / private IP へ直接アクセスして device discovery、初期設定、local control を行う実装。
+- 発生条件: Android 17 / targetSdkVersion 37 で `ACCESS_LOCAL_NETWORK` が未許可、かつ system-mediated picker ではなく direct local network access を行う場合。
+- ユーザーに見える症状: デバイス検出に失敗する、初期設定が進まない、同じ Wi-Fi 上の機器を操作できない可能性。
+- 技術的に起きていること: broadcast-capable local network への direct access が runtime permission gate の対象になり、未許可時に socket / discovery / resolution が拒否される。
+- 推奨対応シーン: IoT onboarding、LAN device discovery、local-only control、permission denied / revoked handling。
+- 検証観点: permission 未許可 / 許可済み / 取り消し、Wi-Fi / Ethernet、mDNS / HTTP / WebSocket、picker path との比較。
+- 根拠: 公式文書の local network permission、`ACCESS_LOCAL_NETWORK`、`RESTRICT_LOCAL_NETWORK` compat change、BPF permission map evidence。
+- Confidence（信頼度）: Medium。connectivity module 側の追加確認 TODO が残る。
+- 注意: 上記サービスで発生確認した事実ではない。実際の影響は discovery 方式と permission 実装に依存する。
+
+## 例2（Example 2）: Sonos / Spotify Connect / Chromecast built-in のような LAN メディア連携
+
+- 具体サービス例: Sonos、Spotify Connect、Chromecast built-in 対応アプリ、Plex。
+- 影響を受ける実装パターン: local network 上の speaker / TV / media server を探索し、private IP endpoint へ直接接続する実装。
+- 発生条件: targetSdkVersion 37 で local network permission がない状態で、NSD / mDNS / direct socket / WebView から LAN endpoint にアクセスする場合。
+- ユーザーに見える症状: キャスト先が表示されない、再生先選択に失敗する、LAN 内 media server に接続できない可能性。
+- 技術的に起きていること: `INTERNET` permission だけでは direct local network access の許可として扱われず、明示 permission と runtime grant が必要になる。
+- 推奨対応シーン: cast / media routing / NAS / printer / camera 連携。
+- 検証観点: Android 17 targetSdkVersion 36 と 37 の差、system picker 利用時、permission revoke 後の recovery。
+- 根拠: 公式文書、report の targetSdkVersion 37 conditional classification、manifest / permission / compat evidence。
+- Confidence（信頼度）: Medium。
+- 注意: 上記サービスで発生確認した事実ではない。Google Cast など system-mediated path は direct LAN access と分けて確認する必要がある。
+
+---
+
 # テスト観点（Test Matrix）
 
 | 端末 OS | targetSdkVersion | Permission state | 期待挙動 |
