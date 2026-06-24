@@ -88,7 +88,7 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 | BC-003 | Consistent BluetoothSocket read() behavior for RFCOMM | Bluetooth Classic / RFCOMM / SPP 相当の通信 | TARGET_SDK_37_CONDITIONAL | 要確認。RFCOMM 利用時は影響あり | read loop で `-1` を EOF / disconnect として扱う | High |
 | BC-004 | Enable CT by default | HTTPS API、クラウド連携、証明書 pinning、staging endpoint | TARGET_SDK_37_CONDITIONAL | 要確認 | 接続先証明書チェーンと Network Security Config を確認 | High |
 | BC-005 | ECH enabled | HTTPS / TLS、CDN、企業ネットワーク、通信監視環境 | TARGET_SDK_37_CONDITIONAL | 影響軽微から要確認 | networking library / server ECH support と `<domainEncryption>` 方針を確認 | High |
-| BC-006 | Activity Security | 通知、PendingIntent / IntentSender、バックグラウンドからの画面起動 | TARGET_SDK_37_CONDITIONAL | 要確認 | background activity launch 箇所を棚卸し | High |
+| BC-006 | Activity Security | 通知、popup、PendingIntent / IntentSender、古いアプリから新しいアプリへの推奨導線、バックグラウンドからの画面起動 | TARGET_SDK_37_CONDITIONAL | ユーザータップ経由なら影響限定的。background 自動起動は要確認 | PendingIntent 実行が user-mediated path か棚卸し | High |
 | BC-007 | Large screen orientation / resizability / aspect ratio restrictions ignored | 固定向き UI、リモート操作画面、ライブビュー、画像一覧 | TARGET_SDK_37_CONDITIONAL | 要確認 | tablet / foldable / multi-window で検証 | High |
 | BC-008 | App memory limits | 画像 / 動画一覧、サムネイル生成、転送、キャッシュ | OS_UPDATE_ALL_APPS | 影響軽微から要確認 | memory baseline と `ApplicationExitInfo` 収集 | High |
 | BC-009 | Background audio hardening | 音声再生 / 音声アラーム | OS_UPDATE_ALL_APPS / TARGET_SDK_37_CONDITIONAL | 影響なしの可能性が高い | 音声バックグラウンド再生がある場合のみ確認 | Medium |
@@ -114,7 +114,7 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 | RFCOMM `BluetoothSocket.read()` EOF | targetSdkVersion 37 以上 | RFCOMM-based `BluetoothSocket`、socket close / disconnect、read loop | `IOException` だけで read loop を終了している場合、切断処理が期待通り動かない可能性。 | `bytesRead == -1` を EOF / disconnect として処理しているか確認する。 |
 | Certificate transparency default enabled | targetSdkVersion 37 以上 | platform TLS / HTTPS、証明書チェーン、Network Security Config | CT 要件を満たさない endpoint で HTTPS 接続が失敗する可能性。 | production / staging / test / device-local HTTPS endpoint の証明書チェーンを確認する。 |
 | ECH enabled | targetSdkVersion 37 以上 | TLS connection、ECH 対応 library / server、`<domainEncryption>` | SNI 前提の network inspection / filtering 環境で観測・制御の前提が変わる可能性。 | 通信先、library、CDN、enterprise network 条件を確認し、必要なら domain encryption policy を決める。 |
-| Activity Security | targetSdkVersion 37 以上 | PendingIntent / IntentSender 経由の background activity start、visible state | background から接続画面や復旧画面を直接開く設計が制限される可能性。 | 通知、外部アプリ連携、ペアリング復旧、接続復旧の起動経路を棚卸しする。 |
+| Activity Security | targetSdkVersion 37 以上 | PendingIntent / IntentSender 経由の background activity start、visible state、ユーザー操作の有無、通知 PendingIntent の種類 | 表示中 popup または通知をユーザーがタップし、Activity PendingIntent を直接実行して新しいアプリを起動する flow では影響は限定的。background service / receiver がユーザー操作なしで接続画面や推奨画面を直接開く設計、または通知タップ後に broadcast / service を挟む trampoline 型は制限される可能性。 | 通知、popup、外部アプリ連携、ペアリング復旧、接続復旧の起動経路を棚卸しする。 |
 | Large screen restrictions ignored | targetSdkVersion 37 以上 | `sw >= 600dp`、固定向き / non-resizable / aspect ratio 制約、game 以外 | tablet / foldable / desktop windowing でリモート操作 UI やライブビューが想定外サイズになる可能性。 | `sw >= 600dp`、multi-window、fold / unfold、rotation を検証する。 |
 
 ## 影響なし、または影響軽微と判断した項目（No or Low Impact）
@@ -133,7 +133,7 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 | Local network permission | manifest、local network API usage、system picker 利用有無、direct socket / HTTP / mDNS / NSD 利用有無 | APK / source で local network access 箇所を検索し、Android 17 / targetSdkVersion 37 で permission denied / granted をテストする。 | 対象アプリ実装未確認 |
 | RFCOMM read EOF | Bluetooth Classic / RFCOMM / SPP 利用有無、read loop 実装 | `BluetoothSocket`、`createRfcommSocketToServiceRecord`、`InputStream.read()` 周辺を確認する。 | 対象アプリ実装未確認 |
 | CT / ECH | 通信先一覧、Network Security Config、certificate pinning、利用 networking library | production / staging / device-local endpoint の証明書と ECH support を確認する。 | 通信先・設定未確認 |
-| Activity Security | PendingIntent / IntentSender 経由の Activity 起動箇所 | 通知、ペアリング復旧、接続復旧、外部アプリ連携の起動経路を確認する。 | 対象アプリ実装未確認 |
+| Activity Security | PendingIntent / IntentSender 経由の Activity 起動箇所、古いアプリから新しいアプリへの推奨 PendingIntent flow、通知 `contentIntent` / action の種類 | 通知、popup、ペアリング復旧、接続復旧、外部アプリ連携の起動経路を確認する。特にユーザータップ直後に Activity PendingIntent を直接実行するか、broadcast / service / 非同期 callback を挟むか、background 自動実行かを分ける。 | 対象アプリ実装未確認 |
 | Large screen | manifest の orientation / resizability / aspect ratio 設定、UI の adaptive 対応 | tablet / foldable / multi-window で主要画面を確認する。 | 対象アプリ実装未確認 |
 | Static final fields / Safer Native DCL-C | 古い reflection / JNI 実装、native library の動的展開・更新・読み込み処理、画像・動画処理 / ネットワーク処理 SDK の実装 | `static final` field write、`System.load()`、download / generate / extract した `.so` の file mode を確認する。 | 対象アプリ実装・SDK 実装未確認 |
 
@@ -862,6 +862,9 @@ Behavior Change 文書:
 - URL: https://developer.android.com/about/versions/17/behavior-changes-17
 - Section: Activity Security
 
+参考 URL:
+- https://developer.android.com/guide/components/activities/secure-bal
+
 Original statement:
 > PendingIntent / IntentSender 経由の Background Activity Launch がより厳格になる、という趣旨の公式説明。
 
@@ -873,6 +876,7 @@ Original statement:
 
 関連するアプリ機能:
 - 通知からの画面起動。
+- 表示中 popup / dialog からの推奨アプリ起動。
 - カメラ接続復旧後の画面表示。
 - ペアリング / Wi-Fi 接続案内。
 - 外部アプリ / system UI / PendingIntent 経由の起動。
@@ -884,7 +888,7 @@ Original statement:
 - Background Activity Launch mode
 
 アプリが該当する可能性:
-- Unknown / Conditional。background から Activity を直接起動する経路がある場合に該当。
+- Unknown / Conditional。background から Activity を直接起動する経路がある場合に該当。表示中 popup または通知をユーザーが明示的にタップし、Activity PendingIntent を直接実行する flow では影響は限定的と考えられる。通知タップ後に broadcast / service / 非同期 callback を挟んで Activity を起動する場合は別途確認が必要。
 
 ### 適用条件分類（Applicability Classification）
 
@@ -903,7 +907,7 @@ Original statement:
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17。
 - targetSdkVersion: 37 以上。
-- App state/process condition: background activity start。
+- App state/process condition: background activity start。caller / real caller が visible か、ユーザー操作直後かを確認する必要がある。
 - Permission/API/component condition: PendingIntent / IntentSender。
 
 Compat framework:
@@ -938,30 +942,50 @@ Compat framework:
 
 事実（Facts）:
 - `ASM_RESTRICTIONS` は targetSdkVersion 37 以上で enabled。
+- 公式 Activity security guide は、system が送信した notification `PendingIntent` から Activity が起動される場合を background activity start が許可される例外として説明している。
+- 同 guide は、`PendingIntent` / `IntentSender` では creator または sender が BAL privileges を opt-in し、かつその app が BAL exception を満たす必要があると説明している。
+- 同 guide は、sender 側 opt-in では `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` を推奨しており、この mode は `PendingIntent` 送信時に sender app が画面上で visible な場合だけ許可する。
 
 観察（Observations）:
 - 接続復旧やペアリング案内を background から直接 Activity 起動する設計は制限される可能性がある。
+- 古いカメラ連携アプリと新しいカメラ連携アプリの両方に対応するカメラへ接続した際、古いアプリが表示中 popup で新しいアプリの利用を推奨し、ユーザーのタップ後に PendingIntent で新しいアプリを起動する flow は、user-mediated / visible flow として扱える可能性が高い。
+- ユーザーが他アプリを操作中でも、Foreground Service notification または push notification をタップし、通知の `contentIntent` / action が新しいアプリの Activity PendingIntent を直接起動する flow であれば、公式 guide の notification `PendingIntent` 例外に近い user-mediated launch として影響は限定的と考えられる。
 
 仮説（Hypotheses）:
 - 対象アプリが background service や receiver から接続画面を直接開く場合、Android 17 / targetSdkVersion 37 で起動が抑制される可能性。
+- 同じ推奨導線でも、カメラ接続検知後に background service / receiver がユーザー操作なしで PendingIntent を実行し、新しいアプリの Activity を自動表示する実装であれば、Android 17 / targetSdkVersion 37 で制限対象になる可能性がある。
+- 通知タップ後に receiver / service で接続状態確認や互換性判定を行い、その後で Activity を起動する notification trampoline 型または遅延 background 起動の実装では、通知タップがあっても制限対象になる可能性がある。
 
 結論（Conclusion）:
-- PendingIntent / IntentSender / background Activity start を棚卸しし、通知など user-mediated path に寄せる。
+- PendingIntent / IntentSender / background Activity start を棚卸しし、通知や表示中 popup など user-mediated path に寄せる。
+- 今回の推奨アプリ起動シナリオは、ユーザーが popup / 通知を明示的にタップし、Activity PendingIntent が直接実行される限り影響は限定的と考えられる。ただし、ユーザー操作なしの background 自動起動、または通知タップ後に receiver / service / 非同期処理を挟む起動であれば要対応候補になる。
+- `PendingIntent` / `IntentSender` の sender 側では、Android 17 / targetSdkVersion 37 の検証時に `ActivityOptions#setPendingIntentBackgroundActivityStartMode()` と `ALLOW_IF_VISIBLE` の利用可否を確認する。creator 側が privileges を delegate する必要がある設計かどうかも分けて確認する。
 
 ### アプリ影響（App Impact）
 
 想定される影響:
 - background からの接続画面・復旧画面起動が失敗する可能性。
+- 古いカメラ連携アプリから新しいカメラ連携アプリへの推奨導線で、ユーザー操作なしに Activity を自動表示している場合、起動が拒否される可能性。
 
 ユーザー影響:
 - ペアリングや再接続の案内が表示されない、または通知経由操作が必要になる可能性。
+- 表示中 popup または通知をタップして新しいアプリへ遷移する設計であれば、ユーザー影響は限定的と見込まれる。
+- 他アプリ操作中に通知をタップする flow でも、通知が直接 Activity PendingIntent を起動する設計であれば、ユーザー影響は限定的と見込まれる。
 
 開発者影響:
 - `ALLOW_IF_VISIBLE` / `ALLOW_ALWAYS` の使い分けと通知導線の設計。
+- 推奨アプリ起動の PendingIntent が、ユーザータップ直後に実行されているか、background service / receiver から自動実行されているかを分けて確認する必要がある。
+- 通知経由の起動では、notification の `contentIntent` / action が Activity PendingIntent か、broadcast / service trampoline かを分けて確認する必要がある。
 
 推奨対応候補:
 - legacy `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` 利用を検索する。
-- background 状態では通知経由にする。
+- `PendingIntent.send()`、`Context.startIntentSender()`、`IntentSender.sendIntent()`、`ActivityResultLauncher<IntentSenderRequest>` の利用箇所を検索する。
+- 表示中 popup / dialog / Activity のボタン押下、または通知タップから Activity PendingIntent を直接実行する flow では、`ALLOW_IF_VISIBLE` 相当で足りるかを確認する。
+- sender 側で `ActivityOptions#setPendingIntentBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE)` を付与できるか確認する。
+- creator 側で `PendingIntent` を作成して他 component / 他 app に渡している場合は、creator privileges の opt-in が必要な flow か確認する。
+- 通知 `contentIntent` / action が broadcast / service を指している場合は、Activity PendingIntent へ直接つなげる設計に変更できるか確認する。
+- background 状態でユーザー操作なしに起動している場合は、通知または visible UI 経由に変更する。
+- Android 17 / targetSdkVersion 37 で、popup 表示中のタップ、通知タップからの直接 Activity 起動、通知タップ後の receiver / service 経由起動、background 自動実行の 4 ケースを分けてテストする。
 
 ### Confidence
 

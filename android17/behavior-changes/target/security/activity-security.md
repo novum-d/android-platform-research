@@ -22,6 +22,7 @@
 https://developer.android.com/about/versions/17/behavior-changes-17
 
 関連文書:
+- https://developer.android.com/guide/components/activities/secure-bal
 - https://developer.android.com/reference/android/app/ActivityOptions#MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 - https://developer.android.com/reference/android/app/ActivityOptions#MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
 - https://developer.android.com/reference/android/app/ActivityOptions#MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE
@@ -41,6 +42,8 @@ https://developer.android.com/about/versions/17/behavior-changes-17
 公式文書からの適用条件判断:
 - 公式文書は、Android 17 で Activity 起動まわりを secure-by-default に近づけ、Background Activity Launch (BAL) restrictions を refined し、IntentSender にも protection を拡張すると説明している。
 - 開発者は legacy `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` から、`MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` や `MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` のような granular controls へ移行する必要がある。
+- Activity security guide は、foreground ではない app、visible activity を持たない app、または他 app から受け取った `PendingIntent` が Activity を起動しようとする場合を BAL と説明している。また、通知タップのように system が送信した `PendingIntent` からの起動は、background activity start が許可される例外として説明している。
+- Activity security guide は、`PendingIntent` / `IntentSender` による起動では creator または sender のどちらかが BAL privileges を明示的に opt-in し、かつその app が BAL exception を満たす必要があると説明している。通常はユーザーが直接操作している sender 側が `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` を使うことが推奨される。
 - AOSP では `BackgroundActivityStartController.ASM_RESTRICTIONS = 230590090L` が `@EnabledAfter(targetSdkVersion = BAKLAVA)` として定義され、Android 17 target 相当から activity security rules が有効になることを示す。
 
 早見表（At-a-glance impact）:
@@ -88,6 +91,7 @@ Compat framework:
 
 分類根拠（Classification evidence）:
 - 公式 Behavior Change 文書は Activity Security / BAL / IntentSender hardening を Android 17 target changes として説明している。
+- 公式 Activity security guide は、通知タップを system-sent `PendingIntent` による BAL exception の例として示し、sender 側 opt-in では `ALLOW_IF_VISIBLE` を推奨している。
 - AOSP `ActivityOptions` は `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` を deprecated とし、`ALLOW_IF_VISIBLE` / `ALLOW_ALWAYS` への移行を明記している。
 - AOSP `BackgroundActivityStartController` は `ASM_RESTRICTIONS` ChangeId を `@EnabledAfter(BAKLAVA)` として定義する。
 - AOSP `BackgroundActivityStartController` は `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` の場合に caller / real caller の visible / foreground 系 check に限定する。
@@ -123,9 +127,20 @@ AOSP では `BackgroundActivityStartController.ASM_RESTRICTIONS = 230590090L` �
 - BAL restrictions が refined され、protections が `IntentSender` に拡張される。
 - 開発者は legacy `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` から、`MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` などの granular controls へ移行する必要がある。
 
+参考 URL:
+- https://developer.android.com/guide/components/activities/secure-bal
+
+参考 URL から確認した補足:
+- BAL は、foreground ではない app、visible activity を持たない app、または他 app から受け取った `PendingIntent` が Activity を起動しようとする場合に発生する。
+- Background activity start が許可される例外には、app が visible window を持つ場合、system が送信した `PendingIntent` から Activity が起動される場合、launcher / widget などユーザー操作に基づく場合が含まれる。
+- `PendingIntent` / `IntentSender` による Activity 起動では、creator または sender が BAL privileges を opt-in しており、かつその app が BAL exception を満たす必要がある。
+- sender 側 opt-in では `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` が推奨される。この mode は、`PendingIntent` 送信時に sender app が画面上で visible な場合だけ許可するため、ユーザー操作に紐づく起動であることを強める。
+
 ## 解釈（Interpretation）
 
-この変更は、background から Activity を起動できる条件を targetSdkVersion 37 以上でより限定する Activity launch security change である。ユーザーに見えている文脈からの起動は `ALLOW_IF_VISIBLE` で許可し、visible でない状態からの起動は通知や foreground service など、より明示的な user interaction path に寄せることが求められる。
+この変更は、background から Activity を起動できる条件を targetSdkVersion 37 以上でより限定する Activity launch security change である。ユーザーに見えている文脈からの起動は `ALLOW_IF_VISIBLE` で許可し、visible でない状態からの起動は通知タップなど、より明示的な user interaction path に寄せることが求められる。
+
+通知タップについては、system が通知の `PendingIntent` を送信する flow であり、公式 guide 上も許可例外として扱われる。そのため、他アプリ操作中に Foreground Service notification や push notification をユーザーがタップし、通知の Activity `PendingIntent` が直接 Activity を起動する場合は、通常 BAL 制限の主な問題ではない。一方、通知タップ後に broadcast receiver / service / 非同期 callback を挟み、その component から改めて Activity を起動する実装では、system-sent notification tap の例外から外れる可能性があるため、別途確認が必要である。
 
 ---
 
@@ -136,6 +151,8 @@ AOSP では `BackgroundActivityStartController.ASM_RESTRICTIONS = 230590090L` �
 - BAL restrictions が refined され、IntentSender に protection が拡張される。
 - `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` 依存から granular controls への移行が必要。
 - `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` は calling app が visible な場合に activity start を限定する。
+- Activity security guide は、通知タップを system-sent `PendingIntent` による許可例外として扱う。
+- `PendingIntent` / `IntentSender` では、creator または sender が BAL privileges を opt-in し、かつその app が visible window などの BAL exception を満たす必要がある。
 - strict mode / lint checks により legacy pattern の検出が推奨される。
 
 AOSP で確認した変更点:
@@ -230,6 +247,8 @@ Source context の補足:
 - この Behavior Change は `TARGET_SDK_37_CONDITIONAL` と分類する。
 - PendingIntent / IntentSender 経由で background activity start を許可しているアプリは、targetSdkVersion 37 で `ALLOW_IF_VISIBLE` または `ALLOW_ALWAYS` への明示的な移行判断が必要。
 - 通常用途では `ALLOW_IF_VISIBLE` を優先し、visible でない状態からの画面起動は通知などの user-mediated path へ寄せるべきである。
+- Foreground Service や通知を使っていても、それ自体が background Activity 起動を常に許可するわけではない。ユーザーが通知、popup、visible Activity 上のボタンを明示的にタップして PendingIntent / IntentSender を実行する flow では影響は限定的と考えられる一方、service / receiver がユーザー操作なしで Activity を前面表示しようとする flow は制限対象になり得る。
+- 他アプリを操作中に Foreground Service notification や push notification をユーザーがタップする flow は、通知 `contentIntent` / action の PendingIntent が直接 Activity を開く限り user-mediated launch として扱えるため、通常は BAL 制限の主な問題ではない。ただし、通知タップ後に broadcast receiver / service を挟み、その component から改めて Activity を起動する notification trampoline 型の実装や、tap 後に非同期処理を経て background から起動する実装は別途制限対象になり得る。
 - 信頼度は High。AOSP targetSdk gate、API deprecation、visible-only enforcement branch が確認できた。
 
 ---
@@ -246,6 +265,8 @@ Source context の補足:
 - `MODE_BACKGROUND_ACTIVITY_START_ALLOWED` の利用箇所を棚卸しする。
 - ほとんどの user-visible flow では `MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE` に移行する。
 - connected device prompt など visible でなくても直ちに画面起動が必要な特殊用途だけ `MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS` を検討する。
+- 通知タップ、表示中 popup、表示中 Activity のボタン押下など、ユーザー操作に直結する PendingIntent 実行は `ALLOW_IF_VISIBLE` で足りるかを優先確認する。Foreground Service からユーザー操作なしで Activity を直接起動する設計は、通知経由などの user-mediated path へ変更する。
+- 通知経由の起動は、notification の `contentIntent` / action が Activity PendingIntent か、broadcast / service trampoline かを分けて確認する。前者は影響限定的、後者は設計変更候補として扱う。
 - targetSdkVersion 37 で caller visible / background、real caller visible / background、permission / allowlist ありなしを分けてテストする。
 
 ---
