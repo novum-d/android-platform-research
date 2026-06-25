@@ -71,9 +71,9 @@ To:
 
 # エグゼクティブサマリー（Executive Summary）
 
-対象アプリは、カメラとの Bluetooth / Wi-Fi 接続、ローカルネットワーク上の機器探索・接続、画像 / 動画転送、リモート操作を行う可能性が高い。そのため Android 17 では、特に `ACCESS_LOCAL_NETWORK`、Bluetooth bond loss recovery、RFCOMM `BluetoothSocket.read()`、TLS 周辺の変更を優先確認すべきである。加えて、古いアプリ / SDK の reflection と、画像・動画処理またはネットワーク処理 native library の dynamic loading は、Static final fields / Safer Native DCL-C の 1 項目として確認する。
+対象アプリは、カメラとの Bluetooth / Wi-Fi 接続、ローカルネットワーク上の機器探索・接続、画像 / 動画転送、リモート操作を行う可能性が高い。そのため Android 17 では、特に `ACCESS_LOCAL_NETWORK`、Bluetooth bond loss recovery、RFCOMM `BluetoothSocket.read()`、TLS 周辺の変更を優先確認すべきである。加えて、古いアプリ / SDK の reflection と、画像・動画処理またはネットワーク処理 native library の dynamic loading は、それぞれ Static final fields と Safer Native DCL-C として分けて確認する。
 
-OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後の autonomous re-pairing と app memory limits である。targetSdkVersion 37 更新時に影響しうる項目は、ローカルネットワーク権限、RFCOMM read EOF、certificate transparency、ECH、Activity Security、大画面制約無視、Static final fields / Safer Native DCL-C である。
+OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後の autonomous re-pairing と app memory limits である。targetSdkVersion 37 更新時に影響しうる項目は、ローカルネットワーク権限、RFCOMM read EOF、certificate transparency、ECH、Activity Security、大画面制約無視、Safer Native DCL-C、Static final fields である。
 
 現時点では対象アプリの manifest / API usage を直接確認していないため、アプリ固有影響は「要確認」を含む。特にカメラとの直接 Wi-Fi 接続、mDNS / NSD / `.local` 解決、ローカル IP への socket / HTTP 接続がある場合、Android 17 / targetSdkVersion 37 で runtime permission UX と接続失敗時の fallback を設計する必要がある。
 
@@ -92,7 +92,8 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 | BC-007 | Large screen orientation / resizability / aspect ratio restrictions ignored | 固定向き UI、リモート操作画面、ライブビュー、画像一覧 | TARGET_SDK_37_CONDITIONAL | 要確認 | tablet / foldable / multi-window で検証 | High |
 | BC-008 | App memory limits | 画像 / 動画一覧、サムネイル生成、転送、キャッシュ | OS_UPDATE_ALL_APPS | 影響軽微から要確認 | memory baseline と `ApplicationExitInfo` 収集 | High |
 | BC-009 | Background audio hardening | 音声再生 / 音声アラーム | OS_UPDATE_ALL_APPS / TARGET_SDK_37_CONDITIONAL | 影響なしの可能性が高い | 音声バックグラウンド再生がある場合のみ確認 | Medium |
-| BC-010 | Static final fields / Safer Native DCL-C | 古いアプリ / SDK の reflection、JNI、画像・動画処理 native library、ネットワーク処理 native library、native dynamic loading | TARGET_SDK_37_CONDITIONAL | 要確認。古い SDK や native plugin 構成では該当可能性あり | reflection / JNI による `static final` 書き換え、`System.load()` 前の read-only 化、native library 展開処理を棚卸し | High |
+| BC-010 | Safer Native DCL-C | 画像・動画処理 native library、ネットワーク処理 native library、native dynamic loading | TARGET_SDK_37_CONDITIONAL | 要確認。native plugin / 動的 `.so` 展開構成では該当可能性あり | `System.load()` 前の read-only 化、native library 展開処理を棚卸し | High |
+| BC-011 | Static final fields are now unmodifiable | 古いアプリ / SDK の reflection、JNI、runtime patching | TARGET_SDK_37_CONDITIONAL | 要確認。古い SDK が `static final` を書き換える場合は該当可能性あり | reflection / JNI による `static final` 書き換えを棚卸し | High |
 
 ---
 
@@ -110,7 +111,8 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 | Behavior Change | targetSdkVersion 条件 | 追加条件 | 想定されるアプリ影響 | 推奨確認 |
 | --- | --- | --- | --- | --- |
 | Local network permission required for apps targeting Android 17 | targetSdkVersion 37 以上 | direct local network access、LAN device discovery / connection、system picker 利用有無、`ACCESS_LOCAL_NETWORK` grant state | カメラ探索、接続、画像転送、リモート制御が permission denied 時に失敗する可能性。 | local network API / socket / HTTP / mDNS / NSD / `.local` 利用を棚卸しする。system picker でユーザー許可を取得しない direct access では、manifest への `ACCESS_LOCAL_NETWORK` 追記と runtime permission request 実装が必要。 |
-| Static final fields / Safer Native DCL-C | targetSdkVersion 37 以上 | reflection / JNI による `static final` field write、または `System.load()` で writable native file を読み込む場合 | 古いアプリ / SDK の runtime patching、画像・動画処理やネットワーク処理の native module 動的差し替えで初期化失敗や crash が起きる可能性。 | 古い reflection 実装、JNI field write、native library の download / generate / extract / update / load 処理を棚卸しする。`System.load()` 前に対象 `.so` を read-only にし、その後に書き換えない。 |
+| Safer Native DCL-C | targetSdkVersion 37 以上 | `System.load()` で writable native file を読み込む場合 | 画像・動画処理やネットワーク処理の native module 動的差し替えで `UnsatisfiedLinkError` が起きる可能性。 | native library の download / generate / extract / update / load 処理を棚卸しする。`System.load()` 前に対象 `.so` を read-only にし、その後に書き換えない。 |
+| Static final fields are now unmodifiable | targetSdkVersion 37 以上 | reflection / JNI による `static final` field write | 古いアプリ / SDK の runtime patching や初期化処理で例外・crash が起きる可能性。 | 古い reflection 実装、JNI field write、`Field.set*()` / `SetStatic*Field()` を棚卸しする。 |
 | RFCOMM `BluetoothSocket.read()` EOF | targetSdkVersion 37 以上 | RFCOMM-based `BluetoothSocket`、socket close / disconnect、read loop | `IOException` だけで read loop を終了している場合、切断処理が期待通り動かない可能性。 | `bytesRead == -1` を EOF / disconnect として処理しているか確認する。 |
 | Certificate transparency default enabled | targetSdkVersion 37 以上 | platform TLS / HTTPS、証明書チェーン、Network Security Config | CT 要件を満たさない endpoint で HTTPS 接続が失敗する可能性。 | production / staging / test / device-local HTTPS endpoint の証明書チェーンを確認する。 |
 | ECH enabled | targetSdkVersion 37 以上 | TLS connection、ECH 対応 library / server、`<domainEncryption>` | SNI 前提の network inspection / filtering 環境で観測・制御の前提が変わる可能性。 | 通信先、library、CDN、enterprise network 条件を確認し、必要なら domain encryption policy を決める。 |
@@ -124,7 +126,6 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 | Contacts Provider PII / strict SQL checks | 影響なしの可能性が高い | カメラ連携アプリの主要機能と Contacts Provider data view query の関連が薄い。ただし連絡先共有機能がある場合は要確認。 | Medium |
 | SMS OTP protection | 影響なしの可能性が高い | SMS OTP 受信・読み取りが主要機能に見えない。アカウント認証で SMS Retriever / SMS User Consent を使う場合は要確認。 | Medium |
 | Background audio hardening | 影響なしから軽微 | カメラ連携・画像転送が主用途で、background audio playback が主機能ではない想定。 | Medium |
-| Static final fields / Safer Native DCL-C | 要確認 | カメラ連携アプリでも、古い SDK が reflection / JNI で `static final` を書き換える場合や、画像・動画処理、ネットワーク処理、codec、AI / ML delegate などの native library を実行時に展開・更新して `System.load()` する場合は影響し得る。 | High |
 
 ## 要確認の項目（Needs More Evidence）
 
@@ -135,7 +136,8 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 | CT / ECH | 通信先一覧、Network Security Config、certificate pinning、利用 networking library | production / staging / device-local endpoint の証明書と ECH support を確認する。 | 通信先・設定未確認 |
 | Activity Security | PendingIntent / IntentSender 経由の Activity 起動箇所、古いアプリから新しいアプリへの推奨 PendingIntent flow、通知 `contentIntent` / action の種類 | 通知、popup、ペアリング復旧、接続復旧、外部アプリ連携の起動経路を確認する。特にユーザータップ直後に Activity PendingIntent を直接実行するか、broadcast / service / 非同期 callback を挟むか、background 自動実行かを分ける。 | 対象アプリ実装未確認 |
 | Large screen | manifest の orientation / resizability / aspect ratio 設定、UI の adaptive 対応 | tablet / foldable / multi-window で主要画面を確認する。 | 対象アプリ実装未確認 |
-| Static final fields / Safer Native DCL-C | 古い reflection / JNI 実装、native library の動的展開・更新・読み込み処理、画像・動画処理 / ネットワーク処理 SDK の実装 | `static final` field write、`System.load()`、download / generate / extract した `.so` の file mode を確認する。 | 対象アプリ実装・SDK 実装未確認 |
+| Safer Native DCL-C | native library の動的展開・更新・読み込み処理、画像・動画処理 / ネットワーク処理 SDK の実装 | `System.load()`、download / generate / extract した `.so` の file mode を確認する。 | 対象アプリ実装・SDK 実装未確認 |
+| Static final fields are now unmodifiable | 古い reflection / JNI 実装、runtime patching、SDK 初期化処理 | `static final` field write、`Field.set*()`、JNI `SetStatic*Field()` を確認する。 | 対象アプリ実装・SDK 実装未確認 |
 
 ---
 
@@ -1405,17 +1407,16 @@ Confidence の根拠:
 
 ---
 
-## BC-010: Static final fields / Safer Native DCL-C
+## BC-010: Safer Native DCL-C
 
 ### 基本情報（Basic Information）
 
 Behavior Change 文書:
 - URL: https://developer.android.com/about/versions/17/behavior-changes-17
-- Section: Static final fields are now unmodifiable
 - Section: Safer Native DCL-C
 
 Original statement:
-> Android 17 以上で targetSdkVersion 37 以上のアプリは static final field を reflection / JNI で変更できない。また、targetSdkVersion 37 以上では `System.load()` で読み込む native file が read-only である必要があり、条件を満たさない場合は `UnsatisfiedLinkError` になる、という趣旨の公式説明。
+> targetSdkVersion 37 以上では、`System.load()` で読み込む native file が read-only である必要があり、条件を満たさない場合は `UnsatisfiedLinkError` になる、という趣旨の公式説明。
 
 調査対象 Android バージョン:
 - From: android-16.0.0_r4
@@ -1424,24 +1425,20 @@ Original statement:
 ### 対象アプリとの関係（Relevance to Target App）
 
 関連するアプリ機能:
-- 古いアプリ / SDK の runtime patching。
 - 画像・動画処理 SDK、codec、AI / ML delegate、ネットワーク処理 SDK。
 - 実行時に native library を download / generate / extract / update して `System.load()` する機能。
-- JNI で static final field を変更する初期化処理。
 
 関連する API / permission / component:
-- Java reflection `Field.set*()`
-- JNI `SetStatic*Field()`
 - `System.load(path)`
 - `Runtime.load0()`
 - `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL`
 
 アプリが該当する可能性:
-- Conditional。通常の Camera API / Camera2 API 利用だけでは該当しない。古い SDK、native plugin、画像・動画処理 module、ネットワーク処理 module が reflection / JNI write または writable native file loading を行う場合に該当する。
+- Conditional。通常の Camera API / Camera2 API 利用だけでは該当しない。native plugin、画像・動画処理 module、ネットワーク処理 module が writable native file loading を行う場合に該当する。
 
 確認したアプリ実装:
 - File / module: 未確認。
-- Symbol / entry point: `Field.set*()`、`SetStatic*Field()`、`System.load()` 利用有無は未確認。
+- Symbol / entry point: `System.load()` 利用有無は未確認。
 - Manifest / permission: 該当なし。
 - Runtime condition: targetSdkVersion 37 以上で該当コードパスが実行される場合。
 
@@ -1454,35 +1451,27 @@ Original statement:
 
 | 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 17 に OS アップデートしただけで適用されるか | 原則 No | static final は ART targetSdkVersion gate、Native DCL-C は compat ChangeId `463348571`。 |
-| targetSdkVersion 37 以上が必要か | Yes | static final は ART / runtime gate、Native DCL-C は `@EnabledSince(CINNAMON_BUN)`。 |
-| 追加の実行時条件があるか | Yes | static final field write、または writable native file の `System.load()`。 |
-| Compat Change ID が関係するか | 一部 Yes | Static final は compat ChangeId 未確認。Native DCL-C は `THROW_ERROR_FOR_WRITABLE_DCL = 463348571`。 |
+| Android 17 に OS アップデートしただけで適用されるか | 原則 No | Native DCL-C は compat ChangeId `463348571` の targetSdkVersion 37 gate。 |
+| targetSdkVersion 37 以上が必要か | Yes | `@EnabledSince(CINNAMON_BUN)`。 |
+| 追加の実行時条件があるか | Yes | writable native file を `System.load()` する場合。 |
+| Compat Change ID が関係するか | Yes | `THROW_ERROR_FOR_WRITABLE_DCL = 463348571`。 |
 
 必要な実行時条件（Required runtime conditions）:
 - Android version: Android 17 以上。
 - targetSdkVersion: 37 以上。
-- API/component condition: reflection / JNI による `static final` field write、または `System.load(path)` による dynamic native loading。
+- API/component condition: `System.load(path)` による dynamic native loading。
 - File condition: `System.load()` で読み込む native file が read-only でない場合。
 - App state/process condition: アプリ起動時、SDK 初期化時、画像・動画処理 module / native plugin 初期化時。
 
 Compat framework:
-- Static final fields:
-  - Change ID: 確認されず。
-  - Default state: ART runtime targetSdkVersion / SDK version gate。
-- Safer Native DCL-C:
-  - Change ID: `463348571`
-  - Change name: `THROW_ERROR_FOR_WRITABLE_DCL`
-  - Default state: `@EnabledSince(targetSdkVersion = CINNAMON_BUN)`
-  - Toggleable for testing: compat change / runtime flags により切り替え可能。
+- Change ID: `463348571`
+- Change name: `THROW_ERROR_FOR_WRITABLE_DCL`
+- Default state: `@EnabledSince(targetSdkVersion = CINNAMON_BUN)`
+- Toggleable for testing: compat change / runtime flags により切り替え可能。
 
 ### AOSP 調査（AOSP Investigation）
 
 関連ファイル:
-- `platform/art/runtime/art_field-inl.h`
-- `platform/art/runtime/native/java_lang_reflect_Field.cc`
-- `platform/art/runtime/jni/jni_internal.cc`
-- `platform/art/test/2396-unmodifiable-final-fields`
 - `platform/libcore/ojluni/src/main/java/java/lang/Runtime.java`
 - `platform/libcore/libart/src/main/java/dalvik/system/VMRuntime.java`
 
@@ -1490,37 +1479,31 @@ Compat framework:
 
 | ファイル / シンボル（File / symbol） | Android 16 の基準挙動（baseline） | Android 17 の挙動 | このコードパスを根拠にする理由 |
 | --- | --- | --- | --- |
-| `ArtField::IsUnmodifiable()` | 汎用 static final target 37 gate なし | targetSdkVersion / SDK version を見て static final field を unmodifiable と判断 | reflection / JNI の static final write rejection の中心。 |
-| `java_lang_reflect_Field.cc` | static final の汎用 write rejection なし | `IsUnmodifiable()` の場合に `IllegalAccessException` | 公式文書の reflection failure path。 |
-| `jni_internal.cc` / `SetStatic*Field()` | static final の汎用変更検出なし | `EnsureModifiable()` で static final write attempt を検出 | 公式文書の JNI crash / fatal path。 |
 | `Runtime.load0()` | writable native file は warning 中心 | writable file を検出し、条件を満たすと `UnsatisfiedLinkError` | `System.load(path)` の app-facing failure path。 |
 | `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL` | ChangeId なし | `463348571` / `@EnabledSince(CINNAMON_BUN)` | Native DCL-C の targetSdkVersion 37 gate。 |
 
 差分解釈（Diff Interpretation）:
-- Added behavior: reflection / JNI の static final field write rejection。
 - Added enforcement: `System.load(path)` で writable native file を拒否する path。
 - Changed condition / gate: Android 17 runtime + targetSdkVersion 37 以上、または `THROW_ERROR_FOR_WRITABLE_DCL` enabled。
 - No behavior change found: 通常の Camera API / Camera2 API 呼び出し自体には直接関係しない。
 
 適用ゲート根拠（Applicability Gate Evidence）:
-- targetSdkVersion gate: static final は ART runtime targetSdkVersion / SDK version gate。Native DCL-C は `@EnabledSince(CINNAMON_BUN)`。
-- CompatChanges.isChangeEnabled / ChangeId: Native DCL-C は `463348571`。Static final は ChangeId 未確認。
+- targetSdkVersion gate: `@EnabledSince(CINNAMON_BUN)`。
+- CompatChanges.isChangeEnabled / ChangeId: `463348571`。
 - Build.VERSION / SDK_INT gate: Android 17 runtime が前提。
-- Gate conclusion: Android 17 / targetSdkVersion 37 以上で、static final field write または writable native file `System.load()` を行う場合に適用。
+- Gate conclusion: Android 17 / targetSdkVersion 37 以上で、writable native file `System.load()` を行う場合に適用。
 
 ### 事実・観察・仮説・結論（Facts / Observations / Hypotheses / Conclusion）
 
 事実（Facts）:
-- Static final fields は ART / libcore 側で reflection / JNI write が拒否される。
 - Safer Native DCL-C は libcore `Runtime.load0()` と `VMRuntime.THROW_ERROR_FOR_WRITABLE_DCL` で確認できる。
 
 観察（Observations）:
 - カメラ連携アプリでも、画像・動画処理、codec、AI / ML delegate、ネットワーク処理 SDK は native library を含む可能性がある。
-- 古い SDK では reflection / JNI による内部値変更や、実行時展開した `.so` の load path を持つ可能性がある。
+- 古い SDK では実行時展開した `.so` の load path を持つ可能性がある。
 
 仮説（Hypotheses）:
 - 対象アプリが native plugin を実行時に展開・更新して `System.load()` している場合、targetSdkVersion 37 更新後に `UnsatisfiedLinkError` が起きる可能性がある。
-- 古い SDK が `static final` field を reflection / JNI で変更している場合、起動時または SDK 初期化時に失敗する可能性がある。
 
 結論（Conclusion）:
 - カメラ連携アプリでは要確認。通常のカメラ撮影 API だけではなく、同梱 SDK / native module / plugin 更新処理を含めて棚卸しする必要がある。
@@ -1531,22 +1514,20 @@ Compat framework:
 - アプリ起動時または SDK 初期化時の crash / initialization failure。
 - 画像・動画処理、codec、AI / ML delegate、ネットワーク処理 module の読み込み失敗。
 - `System.load()` 時の `UnsatisfiedLinkError`。
-- reflection では `IllegalAccessException`、JNI では fatal crash path。
 
 ユーザー影響:
 - アプリ起動失敗。
 - ライブビュー、画像転送、動画処理、サムネイル生成、クラウド連携などの一部機能が使えない。
 
 開発者影響:
-- `Field.set*()` / `setAccessible(true)` / JNI `SetStatic*Field()` の棚卸し。
 - `System.load()` / native library 展開・更新処理の棚卸し。
 - `System.load()` 前に native file を read-only にし、その後に書き換えない実装への変更。
 
 推奨対応候補:
-- アプリコードと SDK で `System.load(`、`Field.set`、`SetStatic`、`.so` 展開処理を検索する。
+- アプリコードと SDK で `System.load(`、`.so` 展開処理を検索する。
 - dynamic native loading を避け、APK / App Bundle 配布時点の native library に寄せる。
 - どうしても動的読み込みが必要な場合は、write 完了後に read-only 化してから `System.load()` する。
-- `UnsatisfiedLinkError` と reflection failure を起動 / 機能初期化の failure として検出できるようにする。
+- `UnsatisfiedLinkError` を起動 / 機能初期化の failure として検出できるようにする。
 
 ### Confidence
 
@@ -1554,11 +1535,149 @@ Confidence:
 - High
 
 Confidence の根拠:
-- Static final fields は ART / libcore evidence、Safer Native DCL-C は libcore `Runtime.load0()` / `VMRuntime` evidence を確認済み。
+- libcore `Runtime.load0()` / `VMRuntime` evidence を確認済み。
 
 不足している根拠:
-- 対象アプリおよび同梱 SDK の reflection / JNI / native loading 実装。
+- 対象アプリおよび同梱 SDK の native loading 実装。
 - 実際の targetSdkVersion 37 ビルドでの起動・画像 / 動画処理・転送テスト。
+
+---
+
+## BC-011: Static final fields are now unmodifiable
+
+### 基本情報（Basic Information）
+
+Behavior Change 文書:
+- URL: https://developer.android.com/about/versions/17/behavior-changes-17
+- Section: Static final fields are now unmodifiable
+
+Original statement:
+> Android 17 以上で targetSdkVersion 37 以上のアプリは static final field を reflection / JNI で変更できない、という趣旨の公式説明。
+
+調査対象 Android バージョン:
+- From: android-16.0.0_r4
+- To: android-17.0.0_r1
+
+### 対象アプリとの関係（Relevance to Target App）
+
+関連するアプリ機能:
+- 古いアプリ / SDK の runtime patching。
+- SDK 初期化時の feature flag / constant / debug setting 差し替え。
+- JNI で static final field を変更する初期化処理。
+
+関連する API / permission / component:
+- Java reflection `Field.set*()`
+- `setAccessible(true)`
+- JNI `SetStatic*Field()`
+
+アプリが該当する可能性:
+- Conditional。通常の Camera API / Camera2 API 利用だけでは該当しない。古い SDK、debug tool、runtime patching 実装が reflection / JNI で `static final` field を書き換える場合に該当する。
+
+確認したアプリ実装:
+- File / module: 未確認。
+- Symbol / entry point: `Field.set*()`、`SetStatic*Field()` 利用有無は未確認。
+- Manifest / permission: 該当なし。
+- Runtime condition: targetSdkVersion 37 以上で該当コードパスが実行される場合。
+
+### 適用条件分類（Applicability Classification）
+
+主分類（Primary classification）:
+- TARGET_SDK_37_CONDITIONAL
+
+早見表（At-a-glance impact）:
+
+| 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
+| --- | --- | --- |
+| Android 17 に OS アップデートしただけで適用されるか | 原則 No | ART runtime の targetSdkVersion / SDK version gate。 |
+| targetSdkVersion 37 以上が必要か | Yes | Android 17 runtime + targetSdkVersion 37 以上で static final が unmodifiable と扱われる。 |
+| 追加の実行時条件があるか | Yes | reflection / JNI による `static final` field write。 |
+| Compat Change ID が関係するか | 未確認 | static final 側の compat ChangeId は確認できない。 |
+
+必要な実行時条件（Required runtime conditions）:
+- Android version: Android 17 以上。
+- targetSdkVersion: 37 以上。
+- API/component condition: reflection / JNI による `static final` field write。
+- App state/process condition: アプリ起動時、SDK 初期化時、debug / test hook 実行時。
+
+Compat framework:
+- Change ID: 確認されず。
+- Default state: ART runtime targetSdkVersion / SDK version gate。
+- Toggleable for testing: compat ChangeId は未確認。
+
+### AOSP 調査（AOSP Investigation）
+
+関連ファイル:
+- `platform/art/runtime/art_field-inl.h`
+- `platform/art/runtime/native/java_lang_reflect_Field.cc`
+- `platform/art/runtime/jni/jni_internal.cc`
+- `platform/art/test/2396-unmodifiable-final-fields`
+
+確認したソース文脈（Source Context Reviewed）:
+
+| ファイル / シンボル（File / symbol） | Android 16 の基準挙動（baseline） | Android 17 の挙動 | このコードパスを根拠にする理由 |
+| --- | --- | --- | --- |
+| `ArtField::IsUnmodifiable()` | 汎用 static final target 37 gate なし | targetSdkVersion / SDK version を見て static final field を unmodifiable と判断 | reflection / JNI の static final write rejection の中心。 |
+| `java_lang_reflect_Field.cc` | static final の汎用 write rejection なし | `IsUnmodifiable()` の場合に `IllegalAccessException` | 公式文書の reflection failure path。 |
+| `jni_internal.cc` / `SetStatic*Field()` | static final の汎用変更検出なし | `EnsureModifiable()` で static final write attempt を検出 | 公式文書の JNI crash / fatal path。 |
+
+差分解釈（Diff Interpretation）:
+- Added behavior: reflection / JNI の static final field write rejection。
+- Changed condition / gate: Android 17 runtime + targetSdkVersion 37 以上。
+- No behavior change found: 通常の Camera API / Camera2 API 呼び出し自体には直接関係しない。
+
+適用ゲート根拠（Applicability Gate Evidence）:
+- targetSdkVersion gate: ART runtime targetSdkVersion / SDK version gate。
+- CompatChanges.isChangeEnabled / ChangeId: 確認できず。
+- Build.VERSION / SDK_INT gate: Android 17 runtime が前提。
+- Gate conclusion: Android 17 / targetSdkVersion 37 以上で、static final field write を行う場合に適用。
+
+### 事実・観察・仮説・結論（Facts / Observations / Hypotheses / Conclusion）
+
+事実（Facts）:
+- Static final fields は ART 側で reflection / JNI write が拒否される。
+- reflection では `IllegalAccessException`、JNI では fatal crash path になり得る。
+
+観察（Observations）:
+- カメラ連携アプリ自体の Camera API 利用とは直接関係しない。
+- 古い SDK では reflection / JNI による内部値変更を持つ可能性がある。
+
+仮説（Hypotheses）:
+- 古い SDK が `static final` field を reflection / JNI で変更している場合、起動時または SDK 初期化時に失敗する可能性がある。
+
+結論（Conclusion）:
+- カメラ連携アプリでは要確認。通常のカメラ撮影 API だけではなく、同梱 SDK / debug tool / runtime patching 実装を含めて棚卸しする必要がある。
+
+### アプリ影響（App Impact）
+
+想定される影響:
+- アプリ起動時または SDK 初期化時の crash / initialization failure。
+- reflection では `IllegalAccessException`、JNI では fatal crash path。
+- debug menu、feature flag、SDK internal constant の runtime patching が動作しない可能性。
+
+ユーザー影響:
+- アプリ起動失敗。
+- ライブビュー、画像転送、動画処理、クラウド連携など、該当 SDK に依存する一部機能が使えない可能性。
+
+開発者影響:
+- `Field.set*()` / `setAccessible(true)` / JNI `SetStatic*Field()` の棚卸し。
+- runtime patching ではなく DI、mutable holder、build-time config などへの移行。
+
+推奨対応候補:
+- アプリコードと SDK で `Field.set`、`SetStatic`、`static final` 書き換え処理を検索する。
+- reflection / JNI failure を起動 / 機能初期化の failure として検出できるようにする。
+- 該当 SDK がある場合は Android 17 / targetSdkVersion 37 対応版へ更新する。
+
+### Confidence
+
+Confidence:
+- High
+
+Confidence の根拠:
+- ART runtime evidence を確認済み。
+
+不足している根拠:
+- 対象アプリおよび同梱 SDK の reflection / JNI 実装。
+- 実際の targetSdkVersion 37 ビルドでの起動・SDK 初期化テスト。
 
 ---
 
@@ -1570,7 +1689,7 @@ OS アップデートだけで確認すべき点は、Bluetooth の bond loss �
 
 targetSdkVersion 37 に更新する場合は、ローカルネットワーク権限が最重要です。カメラ探索、Wi-Fi 接続、ローカル IP や `.local` への通信、画像 / 動画転送、リモート操作が direct local network access に該当する場合、system picker でユーザー許可を取得する経路を使えるか確認してください。system picker を使わない direct / persistent access では、`ACCESS_LOCAL_NETWORK` の manifest 宣言、runtime permission request、拒否・取り消し時の案内が必要になります。
 
-古いアプリや組み込み SDK では、`static final` field を reflection / JNI で書き換える実装、または画像・動画処理、ネットワーク処理、codec、AI / ML delegate などの native library を実行時に展開・更新して `System.load()` する実装も確認対象です。Native DCL-C では、`System.load()` 前に読み込む native file を read-only にしておく必要があります。
+古いアプリや組み込み SDK では、2種類の互換性リスクを分けて確認してください。1つ目は、`static final` field を reflection / JNI で書き換える実装です。2つ目は、画像・動画処理、ネットワーク処理、codec、AI / ML delegate などの native library を実行時に展開・更新して `System.load()` する実装です。Native DCL-C では、`System.load()` 前に読み込む native file を read-only にしておく必要があります。
 
 Bluetooth Classic / RFCOMM を使っている場合は、切断時の `InputStream.read()` が `-1` を返す挙動に対応してください。`IOException` だけで read loop を終了している実装は、Android 17 / targetSdkVersion 37 で切断処理が期待通り動かない可能性があります。
 
@@ -1587,14 +1706,16 @@ HTTPS 通信については、certificate transparency の default enabled と E
 - 高優先: RFCOMM `BluetoothSocket.read()` EOF `-1`。
 - 中優先: CT default enabled / ECH。
 - 中優先: Activity Security と large screen。
-- 要確認: 古い reflection / JNI の `static final` 書き換え、画像・動画処理 / ネットワーク処理 native library の dynamic loading。
+- 要確認: Safer Native DCL-C。画像・動画処理 / ネットワーク処理 native library の dynamic loading。
+- 要確認: Static final fields。古い reflection / JNI の `static final` 書き換え。
 - OS update impact: app memory limits。
 
 ## 対応要否
 
 - 必須対応候補: local network access 棚卸し、system picker または `ACCESS_LOCAL_NETWORK` runtime permission UX、Bluetooth read loop / pairing recovery 確認。
 - 推奨対応: HTTPS endpoint / certificate / ECH 方針、large screen UI、memory baseline。
-- 追加確認: `System.load()` 前の native file read-only 化、古い reflection / JNI 実装の有無。
+- 追加確認: `System.load()` 前の native file read-only 化。
+- 追加確認: 古い reflection / JNI 実装の有無。
 - 不要候補: Contacts / SMS / background audio は該当 API usage がなければ優先度低。
 
 ## 顧客に伝えるべき要点
@@ -1602,6 +1723,7 @@ HTTPS 通信については、certificate transparency の default enabled と E
 - targetSdkVersion 37 更新時は、カメラとのローカル接続に runtime permission が関係する可能性がある。
 - system picker で許可を得ない direct local network access は、manifest とコードの runtime permission 対応が必要。
 - Native DCL-C は、`System.load()` 前に対象 native file を read-only にしておく必要がある。
+- Static final fields は、targetSdkVersion 37 以上で reflection / JNI による書き換えが拒否される可能性がある。
 - Android 17 OS 更新だけでも、Bluetooth 再ペアリングと memory limits は確認対象。
 - 実装未確認のため、最終判断には manifest / API usage / 実機テストが必要。
 
