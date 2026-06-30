@@ -70,7 +70,8 @@ targetSdkVersion 36 以上に加えて、端末条件、権限、API 利用、ma
 
 | Report | Summary | Evidence section | One page summary | Status |
 | --- | --- | --- | --- | --- |
-| まだありません |  |  |  |  |
+| [Edge to edge opt-out going away](target/user-experience-and-system-ui/edge-to-edge-opt-out-going-away.md) | Android 16 / targetSdkVersion 36 以上で edge-to-edge opt-out 属性が無効化される | [Applicability](target/user-experience-and-system-ui/edge-to-edge-opt-out-going-away.md#適用条件applicability) / [Gate evidence](target/user-experience-and-system-ui/edge-to-edge-opt-out-going-away.md#適用ゲート根拠applicability-gate-evidence) | [Summary](../summaries/target/user-experience-and-system-ui/edge-to-edge-opt-out-going-away-summary.md) | Draft |
+| [Migration or opt-out required for predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md) | Android 16 / targetSdkVersion 36 以上で predictive back が default enabled になる | [Applicability](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md#適用条件applicability) / [Gate evidence](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md#適用ゲート根拠applicability-gate-evidence) | [Summary](../summaries/target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-summary.md) | Draft |
 
 ## Mainline / Play System Update
 
