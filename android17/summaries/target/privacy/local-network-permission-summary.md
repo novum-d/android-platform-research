@@ -45,6 +45,14 @@ Android 17 では、targetSdkVersion 37 以上のアプリが LAN 上の device 
 - system-mediated picker で要件を満たせる場合は、広い runtime permission request を避けられる。
 - system picker でユーザー許可を取得しない direct / persistent access では、manifest への `ACCESS_LOCAL_NETWORK` 宣言、コード上の runtime permission request、denial / revocation handling が必要。
 
+## Picker と Runtime Permission の違い
+
+- system-mediated picker は、ユーザーが選択した device / service への接続をシステムが仲介する path。broad な `ACCESS_LOCAL_NETWORK` runtime permission prompt を避けられるが、LAN 全体への direct / persistent access を許可するものではない。
+- `ACCESS_LOCAL_NETWORK` runtime permission は、direct / persistent / broad local network access が必要な場合の path。manifest に明示宣言し、runtime request して grant されれば、direct local network access が許可される想定。
+- picker の許可は `ACCESS_LOCAL_NETWORK` request の前提条件ではない。両者は用途別の代替経路として扱う。
+- `ACCESS_LOCAL_NETWORK` の formal な manifest `permissionGroup` は `android.permission-group.UNDEFINED` であり、`NEARBY_DEVICES` group に直接属するわけではない。ただし AOSP の permission policy / migration / default grant handling では nearby devices 系 permission set に含められる。
+- 既に nearby devices 系 permission が許可済みの場合、`ACCESS_LOCAL_NETWORK` request 時の追加 prompt が省略される可能性がある。ただしこれは formal permission group 所属ではなく内部 permission set / state handling による可能性として扱い、アプリ実装としては grant / denied / revoked handling を明示的に持つ必要がある。
+
 ## 対応要否
 
 - 必須対応候補: local network access 箇所を棚卸しし、system picker path と runtime permission path のどちらを採用するか決める。system picker を使わない direct access は manifest とコードの permission 対応を実装する。
@@ -64,6 +72,7 @@ Android 17 では、targetSdkVersion 37 以上のアプリが LAN 上の device 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-17
 - Permission reference: https://developer.android.com/reference/android/Manifest.permission#ACCESS_LOCAL_NETWORK
 - AOSP: `core/res/AndroidManifest.xml` に `ACCESS_LOCAL_NETWORK` dangerous permission が追加。
+- AOSP: `core/res/AndroidManifest.xml` 上の `ACCESS_LOCAL_NETWORK` の `permissionGroup` は `android.permission-group.UNDEFINED`。
 - AOSP: `core/api/current.txt` に `Manifest.permission.ACCESS_LOCAL_NETWORK` が追加。
 - AOSP: `core/java/android/app/AppOpsManager.java` に `OPSTR_ACCESS_LOCAL_NETWORK` と permission linkage が追加。
 - AOSP: `AppIdPermissionPolicy.kt` / `DefaultPermissionGrantPolicy.java` が nearby devices permission set に `ACCESS_LOCAL_NETWORK` を含める。

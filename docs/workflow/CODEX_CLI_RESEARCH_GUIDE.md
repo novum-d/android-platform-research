@@ -59,6 +59,19 @@ docs/workflow/AOSP_CHECKOUT.md
 - 追加条件、例外、opt-out が書かれている段落
 - 関連リンクがあれば URL
 
+詳細な調査依頼を作る場合は、以下の項目名を使って構造化します。既存の最小入力フォーマットと意味は同じですが、Codex が original statement、applicability、関連リンク、追加調査観点を取り違えないように分離します。
+
+| 詳細入力項目 | 内容 |
+| --- | --- |
+| 調査対象 | version / tag / targetSdkVersion / section title / URL / category / output paths |
+| 公式ドキュメント抜粋 | page title / page URL / page type / page category / parent section title / section title / subsections |
+| Original statements to verify | 公式文書の検証対象 statement。複数ある場合は bullet list |
+| Applicability details | OS 条件、targetSdkVersion 条件、permission / API / device / app state などの適用条件 |
+| Related links | 公式関連ページ、API reference、compat framework、blog、migration guide など |
+| Additional notes | 初期分類仮説、AOSP で必ず確認する項目、必須 matrix、影響対象アプリ種別、テスト観点、Facts / Observations / Hypotheses / Conclusions の要求、Human decision placeholder 要求 |
+
+詳細入力では、`Parent section title` と `Subsections` は該当する場合だけ入れます。サブセクション単体を調査する場合は、親セクションの base behavior と当該サブセクションの論点を分けて書きます。
+
 ## 最小入力フォーマット
 
 以下だけをコピーし、値を埋めて Codex CLI に貼り付けます。
@@ -93,9 +106,125 @@ Additional notes:
 <related links, exceptions, opt-out, migration notes, or "none">
 ```
 
-## Android 17 用の最小入力テンプレート
+## 詳細入力フォーマット
 
-Android 17 調査では、ルートの `android17-prompt-template.md` を使います。
+詳細な調査依頼を作る場合は、以下のフォーマットを使います。最小入力フォーマットより長くなりますが、複雑な Behavior Change、サブセクション、例外、opt-in / opt-out、将来 release plan を扱う調査ではこちらを優先します。
+
+```text
+以下の内容で調査してください。
+
+調査対象
+
+Android version: <android-version>
+
+Version directory: <version-dir>
+
+From tag: <from-tag>
+
+To tag: <to-tag>
+
+Previous targetSdkVersion: <previous-target-api>
+
+Target targetSdkVersion: <target-api>
+
+Behavior Change section title: <section-title>
+
+Official documentation URL: <behavior-change-url>
+
+Official documentation category: <official-category>
+
+Report output file: <report-file>
+
+Summary output file: <summary-file>
+
+
+公式ドキュメント抜粋
+
+Page title: <page-title>
+
+Page URL: <page-url>
+
+Page type: all apps / apps targeting Android <version> / compat framework changes
+
+Page category: <official-category>
+
+Parent section title: <parent-section-title, if applicable>
+
+Section title: <section-title>
+
+Subsections:
+- <subsection, if applicable>
+
+
+Original statements to verify:
+
+"<official statement 1>"
+
+"<official statement 2>"
+
+
+Applicability details:
+
+Applies to <OS / targetSdkVersion / permission / API / device / app state conditions>.
+
+Potentially affects apps that:
+- <affected app/API/pattern 1>
+- <affected app/API/pattern 2>
+
+The investigation must separate:
+- <scenario 1>
+- <scenario 2>
+- <scenario 3>
+
+
+Related links:
+
+<official doc URL>
+
+<API reference URL>
+
+<compat framework URL>
+
+
+Additional notes:
+
+初期分類仮説は <classification hypothesis>。
+
+ただし、利用可能な分類ラベルは <version-dir>/behavior-changes/APPLICABILITY_CLASSIFICATION.md に従うこと。
+
+調査開始時に Official documentation URL の該当セクションを再確認し、Original statements / Applicability details が最新の公式本文と一致しているか確認する。差分があれば report に記録する。
+
+AOSP では少なくとも以下を確認する:
+- <required AOSP evidence 1>
+- <required AOSP evidence 2>
+- <required AOSP evidence 3>
+
+Android <version> / targetSdkVersion <previous-target-api>、Android <version> / targetSdkVersion <target-api>、baseline OS / targetSdkVersion <target-api> の期待挙動マトリクスを必ず作る。
+
+さらに以下のマトリクスを必ず作る:
+- <detailed matrix row 1>
+- <detailed matrix row 2>
+
+顧客向け説明では「OS アップデートしただけの影響」と「targetSdkVersion を上げた時の影響」を混ぜない。
+
+影響対象は以下のアプリ種別に分けて書く:
+- <app type 1>
+- <app type 2>
+
+テスト観点として以下を明示する:
+- <test focus 1>
+- <test focus 2>
+
+調査結果では Facts / Observations / Hypotheses / Conclusions を分ける。
+
+Report と Summary は日本語で作成する。
+
+One page summary には Human decision placeholder を必ず残す。
+```
+
+## Android 17 用の調査依頼テンプレート
+
+Android 17 調査では、ルートの `android17-prompt-template.md` を使います。単純な項目では最小入力として使い、複雑な項目では詳細入力フォーマットとして使います。
 
 ```text
 android17-prompt-template.md

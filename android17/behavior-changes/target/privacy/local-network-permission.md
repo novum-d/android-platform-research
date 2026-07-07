@@ -128,6 +128,8 @@ Android 17 では、targetSdkVersion 37 以上のアプリが LAN 上の device 
 
 この変更は、targetSdkVersion 37 以上のアプリが direct local network access を行う場合に permission gate を追加する挙動変更である。アプリが system-mediated picker だけで要件を満たせる場合は broad runtime permission を避けられる。一方、持続的または広範な LAN access が必要な場合は `ACCESS_LOCAL_NETWORK` の manifest declaration、runtime request、denial / revocation handling が必要になる。
 
+補足: system-mediated picker と `ACCESS_LOCAL_NETWORK` runtime request は、local network access を維持するための代替経路であり、picker の許可が runtime permission request の前提になるわけではない。picker path は、システムが discovery / selection を仲介し、ユーザーが選択した device / service に限定して接続させる privacy-preserving path である。`ACCESS_LOCAL_NETWORK` runtime permission path は、アプリが direct / persistent / broad local network access を必要とする場合の path であり、manifest に明示宣言して runtime request し、grant された場合に direct local network access が許可される想定である。
+
 ---
 
 # 変更内容（What Changed）
@@ -135,12 +137,13 @@ Android 17 では、targetSdkVersion 37 以上のアプリが LAN 上の device 
 公式文書上の変更点:
 - Android 17 は `ACCESS_LOCAL_NETWORK` runtime permission を導入する。
 - targetSdkVersion 37 以上では local network access が default block になり、picker または runtime permission grant が必要になる。
-- permission は nearby devices 系の runtime permission として扱われる。
+- `ACCESS_LOCAL_NETWORK` は dangerous runtime permission である。AOSP manifest 上の formal な `permissionGroup` は `android.permission-group.UNDEFINED` だが、permission policy / migration / default grant handling では nearby devices 系 permission set に含められる。
 - Android 16 では opt-in test が可能だったが、Android 17 target では mandatory enforcement になる。
+- system-mediated picker は broad runtime permission prompt を避ける経路であり、`ACCESS_LOCAL_NETWORK` runtime request は direct / persistent local network access 向けの別経路として説明されている。
 
 AOSP で確認した変更点:
 - `Manifest.permission.ACCESS_LOCAL_NETWORK` が API surface に追加された。
-- `core/res/AndroidManifest.xml` に dangerous permission として追加された。
+- `core/res/AndroidManifest.xml` に dangerous permission として追加された。formal な `permissionGroup` は `android.permission-group.UNDEFINED` であり、`android.permission-group.NEARBY_DEVICES` ではない。
 - `AppOpsManager` に local network access 用 app op が追加された。
 - permission policy / default grant policy / upgrade path が `ACCESS_LOCAL_NETWORK` を nearby devices permission set に含める。
 - `PermissionBpfMap` と `PermissionManagerLocal` が permission state を BPF map に配布するための仕組みを追加し、`ACCESS_LOCAL_NETWORK` が許可対象に含まれる。
@@ -191,7 +194,7 @@ git -C frameworks-base tag --list android-17.0.0_r1
 | File / symbol | Android 16 baseline | Android 17 behavior | 関連性 |
 | --- | --- | --- | --- |
 | `core/api/current.txt` / `Manifest.permission.ACCESS_LOCAL_NETWORK` | permission なし | `@FlaggedApi("android.permission.flags.access_local_network_permission_enabled")` として API surface に追加 | 開発者が manifest / permission request で参照する public API。 |
-| `core/res/AndroidManifest.xml` / `ACCESS_LOCAL_NETWORK` | permission なし | dangerous permission として定義。local network を Wi-Fi / Ethernet 等の broadcast-capable interface と説明し、WWAN / VPN を除外 | Behavior Change の permission 本体。 |
+| `core/res/AndroidManifest.xml` / `ACCESS_LOCAL_NETWORK` | permission なし | dangerous permission として定義。formal な `permissionGroup` は `android.permission-group.UNDEFINED`。local network を Wi-Fi / Ethernet 等の broadcast-capable interface と説明し、WWAN / VPN を除外 | Behavior Change の permission 本体。nearby devices group に直接属する permission ではないことを示す。 |
 | `core/java/android/permission/flags.aconfig` / `access_local_network_permission_enabled` | flag なし | exported / fixed read-only flag として追加。説明文は local network protection 用 permission と明記 | release flag による有効化条件。 |
 | `core/java/android/app/AppOpsManager.java` / `OPSTR_ACCESS_LOCAL_NETWORK` | local network 用 app op なし | `ACCESS_LOCAL_NETWORK` permission と app op を関連付け、nearby device op collection に含める | runtime permission grant と app op state を結び付ける。 |
 | `AppIdPermissionPolicy.kt` / `NEARBY_DEVICES_PERMISSIONS` | local network permission なし | flag 有効時に `ACCESS_LOCAL_NETWORK` を nearby devices permission set に追加 | permission group / user flag handling の文脈。 |
@@ -230,7 +233,7 @@ Source context の補足:
 
 - `frameworks-base` の `android-16.0.0_r4` と `android-17.0.0_r1` tag は存在し、調査時点の working tree は clean。
 - Android 17 tag の API surface には `Manifest.permission.ACCESS_LOCAL_NETWORK` が存在する。
-- Android 17 tag の manifest は `ACCESS_LOCAL_NETWORK` を dangerous permission として定義する。
+- Android 17 tag の manifest は `ACCESS_LOCAL_NETWORK` を dangerous permission として定義する。formal な `permissionGroup` は `android.permission-group.UNDEFINED` である。
 - Android 17 tag の AppOps は `OPSTR_ACCESS_LOCAL_NETWORK` を定義し、flag 有効時に `Manifest.permission.ACCESS_LOCAL_NETWORK` と関連付ける。
 - Android 17 tag の permission policy は `ACCESS_LOCAL_NETWORK` を nearby devices permission set に含める。
 - Android 17 tag の permission service は `ACCESS_LOCAL_NETWORK` を BPF permission map に配布可能な permission として扱う。
@@ -269,10 +272,25 @@ Source context の補足:
 
 必要な対応候補:
 - local network access 箇所を棚卸しする。
-- system-mediated picker で要件を満たせる機能は picker path を優先する。
-- system-mediated picker でユーザー許可を取得しない direct / persistent access では、`ACCESS_LOCAL_NETWORK` を manifest に宣言し、コードで runtime permission request と denied / revoked handling を実装する。
+- ユーザーが接続先 device / service を明示選択する UX で要件を満たせる機能は、system-mediated picker path を優先する。この場合、アプリは LAN 全体への broad permission を持たず、picker で選択された endpoint への接続に限定される。
+- system-mediated picker で要件を満たせない direct / persistent / broad access では、`ACCESS_LOCAL_NETWORK` を manifest に宣言し、コードで runtime permission request と denied / revoked handling を実装する。BLE / Nearby devices 権限と個別に request する構成でも、`ACCESS_LOCAL_NETWORK` 自体の runtime grant があれば direct local network access は許可される想定である。
 - targetSdkVersion 37 で、permission 未許可時、許可後、取り消し後、旧 targetSdkVersion 互換時の挙動をテストする。
 - Android 16 opt-in / compat change で事前検証できる場合は regression test を作る。
+
+## System-mediated picker と runtime permission path の違い
+
+| 観点 | System-mediated picker path | `ACCESS_LOCAL_NETWORK` runtime permission path |
+| --- | --- | --- |
+| 目的 | システム UI でユーザーが選択した device / service へ接続する | direct / persistent / broad local network access を許可する |
+| ユーザー同意 | device / service selection として表現される | runtime permission prompt として表現される。ただし既に nearby devices 系 permission が許可済みの場合、追加 prompt が省略される可能性がある |
+| アクセス範囲 | picker で選択された endpoint に限定される想定 | local network 上の raw socket、TCP / UDP、mDNS / NSD、`.local` resolution、HTTP / WebSocket など広い access に影響する |
+| 適した用途 | media output / casting device selection、mDNS service picker など、ユーザーが接続先を選ぶ UX | smart home / IoT 管理、複数 device の探索・監視、独自 discovery、継続的な LAN communication |
+| 未許可 / 未選択時 | picker で選択されていない endpoint への direct access は許可されない想定 | permission denied / revoked の場合、direct local network traffic は block される想定 |
+
+解釈:
+- picker path は `ACCESS_LOCAL_NETWORK` runtime permission の前提条件ではなく、broad permission を避けるための privacy-preserving alternative である。
+- runtime permission path では、アプリが `ACCESS_LOCAL_NETWORK` を明示的に宣言・request する。formal な permission group は `UNDEFINED` だが、内部 permission policy では nearby devices 系 permission set として扱われるため、ユーザーに表示される prompt や追加 prompt の有無は nearby devices 系 permission state に影響される可能性がある。アプリ実装としては暗黙許可を期待せず、grant / denied / revoked を明示的に扱う必要がある。
+- `INTERNET` から `ACCESS_LOCAL_NETWORK` への split permission は legacy app の移行互換を支える仕組みであり、targetSdkVersion 37 以上の direct local network access 実装で runtime request を省略できる根拠ではない。
 
 ---
 
