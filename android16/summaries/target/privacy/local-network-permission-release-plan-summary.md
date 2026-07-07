@@ -22,8 +22,8 @@ Android 16 r4 AOSP には `RESTRICT_LOCAL_NETWORK` compat change、25Q2 BPF enfo
 
 ### Applicability Classification
 
-- Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
-- Confidence: Medium
+- Primary classification: `OPT_IN_ONLY`
+- Confidence: High
 
 理由:
 
@@ -31,7 +31,7 @@ Android 16 r4 AOSP には `RESTRICT_LOCAL_NETWORK` compat change、25Q2 BPF enfo
 - Android 16 r4 AOSP の `RESTRICT_LOCAL_NETWORK` は Change ID `365139289L`。
 - `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` で、targetSdkVersion 36 では default-enabled ではない。
 - Future enforcement の infrastructure は確認できるが、final release / permission UX / target gate は未確定。
-- 許可済み分類に「current opt-in testing + future enforcement release plan」を表す label がない。
+- `OPT_IN_ONLY` は current opt-in testing と future enforcement plan のうち、現時点で実効影響を持つ opt-in 条件を表す分類である。
 
 ### Facts
 

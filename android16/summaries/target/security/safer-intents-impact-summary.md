@@ -8,7 +8,7 @@ Impact セクションの要点は、Android 16 では既存アプリ破壊リ�
 
 ## Applicability
 
-- Classification: `TARGET_SDK_36_CONDITIONAL`
+- Classification: `OPT_IN_ONLY`
 - Practical runtime conditions:
   - Android 16 以上
   - `enable_intent_matching_flags` feature flag が有効

@@ -13,12 +13,12 @@
 - Official documentation category: Privacy
 - Report output file: `android16/behavior-changes/target/privacy/local-network-permission-impact.md`
 - Summary output file: `android16/summaries/target/privacy/local-network-permission-impact-summary.md`
-- Applicability classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
-- Confidence: Medium
+- Applicability classification: `OPT_IN_ONLY`
+- Confidence: High
 
 Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり公開済み Android 16 tag として `android-16.0.0_r4` を使用した。
 
-Classification note: Impact セクションは Android 16 targeting apps ページにあるが、本文は current stage を opt-in feature と明記している。AOSP `android-16.0.0_r4` の `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 では default-enabled ではない。現在の影響は `RESTRICT_LOCAL_NETWORK` force-enable に依存するため、許可済み分類では `UNKNOWN_NEEDS_MORE_EVIDENCE` を primary label とし、current opt-in / future enforcement / permission-gated behavior を追加条件として記録する。
+Classification note: Impact セクションは Android 16 targeting apps ページにあるが、本文は current stage を opt-in feature と明記している。AOSP `android-16.0.0_r4` の `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 では default-enabled ではない。現在の影響は `RESTRICT_LOCAL_NETWORK` force-enable に依存するため、`OPT_IN_ONLY` を primary label とし、current opt-in / future enforcement / permission-gated behavior を追加条件として記録する。
 
 ## Official Documentation Review
 
@@ -306,7 +306,7 @@ NsdManager は公式 Impact section では影響対象だが、current opt-in gu
 
 ## Applicability Classification
 
-Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
+Primary classification: `OPT_IN_ONLY`
 
 理由:
 
@@ -314,15 +314,15 @@ Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
 - Android 16 r4 の current impact は `RESTRICT_LOCAL_NETWORK` force-enable に依存する。
 - `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 では default-enabled ではない。
 - Future enforcement は公式文書と AOSP infrastructure で方向性を確認できるが、final release / target gate / permission UX は未確定。
-- 許可済み分類に "current opt-in testing behavior with future permission enforcement" を表す label がない。
+- `OPT_IN_ONLY` は current opt-in testing behavior を表す分類であり、future permission enforcement は別 release の計画として分ける。
 
 Compat framework:
 
 - Change name: `RESTRICT_LOCAL_NETWORK`
 - Change ID: `365139289L`
 - AOSP state in Android 16 r4: `@EnabledAfter(targetSdkVersion = 36)`
-- Android 16 / targetSdkVersion 35: default-disabled
-- Android 16 / targetSdkVersion 36: default-disabled
+- Android 16 / targetSdkVersion 35: default では有効化されない
+- Android 16 / targetSdkVersion 36: default では有効化されない
 - Force-enable / force-disable: `adb shell am compat enable|disable RESTRICT_LOCAL_NETWORK <package>` による testing が公式 guidance と一致する。
 - Official Android 16 compat page: `RESTRICT_LOCAL_NETWORK` / `365139289` の掲載は確認できなかった。
 

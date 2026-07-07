@@ -13,12 +13,12 @@
 - Official documentation category: Privacy
 - Report output file: `android16/behavior-changes/target/privacy/local-network-permission.md`
 - Summary output file: `android16/summaries/target/privacy/local-network-permission-summary.md`
-- Applicability classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
-- Confidence: Medium
+- Applicability classification: `OPT_IN_ONLY`
+- Confidence: High
 
 Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり `android-16.0.0_r4` を使用した。
 
-Classification note: 現在の Android 16 evidence では、Local Network Protections は `RESTRICT_LOCAL_NETWORK` compat change による opt-in testing behavior として実装されており、default は disabled である。targetSdkVersion 36 gate は確認できない。一方、将来 release で runtime permission enforcement される計画が公式文書と TODO に存在する。許可済み分類に「targetSdk 非依存の opt-in-only compat testing behavior」に対応する label がないため、primary label は `UNKNOWN_NEEDS_MORE_EVIDENCE` とし、実質条件を追加条件として記録する。
+Classification note: 現在の Android 16 evidence では、Local Network Protections は `RESTRICT_LOCAL_NETWORK` compat change による opt-in testing behavior として実装されており、targetSdkVersion 36 では default-enabled ではない。一方、将来 release で runtime permission enforcement される計画が公式文書と TODO に存在する。公式文書と AOSP gate が current opt-in-only behavior と一致するため、primary label は `OPT_IN_ONLY` とし、実質条件を追加条件として記録する。
 
 ## Official Documentation Review
 
@@ -71,7 +71,7 @@ Checkout hygiene:
 
 Compat official page note:
 
-- 公式 compat framework changes ページを `curl` で確認する tool call は環境側の自動承認で拒否されたため、公式 compat page 上の掲載有無は未確認。
+- 2026-07-07 に公式 compat framework changes ページを確認したが、`RESTRICT_LOCAL_NETWORK` / `365139289` の掲載は見つからなかった。
 - AOSP の `ConnectivityCompatChanges.java` では Change ID、default state、targetSdk gate annotation を確認した。
 
 ## Facts
@@ -86,7 +86,7 @@ Reviewed source:
 Android 16 `android-16.0.0_r4` では次が定義されている。
 
 - `@ChangeId`
-- `@Disabled`
+- `@EnabledAfter(targetSdkVersion = 36)`
 - `public static final long RESTRICT_LOCAL_NETWORK = 365139289L`
 - comment: local network access を制限し、Android V より後の release を target する app では local network access に permission が必要になる予定。
 - TODO: target SDK version が final になったら更新する。
@@ -98,9 +98,9 @@ AOSP source context:
 - Entry point / caller: `PermissionMonitor.Dependencies.shouldEnforceLocalNetRestrictions(uid)`
 - Why relevant: opt-in flag / compat change が有効な UID だけ local network restriction の permission / BPF block map 更新対象になる。
 - Baseline Android behavior: Android 15 に `RESTRICT_LOCAL_NETWORK` はない。
-- Target Android behavior: Android 16 に Change ID はあるが `@Disabled` default。
-- Diff kind: added behavior, disabled by default。
-- Classification support: targetSdkVersion 36 gate ではなく、current stage は compat opt-in gate。
+- Target Android behavior: Android 16 に Change ID があり、`@EnabledAfter(targetSdkVersion = 36)` のため targetSdkVersion 36 では default-enabled ではない。
+- Diff kind: added behavior, future target gate / current opt-in testing gate。
+- Classification support: targetSdkVersion 36 だけでは有効にならず、current stage は compat opt-in gate。
 
 ### Android 16 で `restrict_local_network` feature flag が追加されている
 
@@ -286,7 +286,7 @@ AOSP evidence:
 
 ### Android 16 current stage は targetSdkVersion 36 ではなく opt-in compat flag が実質 gate
 
-`RESTRICT_LOCAL_NETWORK` は Android 16 tag で `@Disabled` であり、`@EnabledSince(targetSdkVersion = 36)` や `@EnabledAfter(targetSdkVersion = 35)` ではない。`PermissionMonitor` も `CompatChanges.isChangeEnabled(RESTRICT_LOCAL_NETWORK, uid)` を見ている。
+`RESTRICT_LOCAL_NETWORK` は Android 16 tag で `@EnabledAfter(targetSdkVersion = 36)` であり、`@EnabledSince(targetSdkVersion = 36)` や `@EnabledAfter(targetSdkVersion = 35)` ではない。`PermissionMonitor` も `CompatChanges.isChangeEnabled(RESTRICT_LOCAL_NETWORK, uid)` を見ている。
 
 したがって、Android 16 / targetSdkVersion 35 と Android 16 / targetSdkVersion 36 の差分は、current opt-in stage では確認できない。差分を作るのは `adb shell am compat enable RESTRICT_LOCAL_NETWORK <package>` と 25Q2 以降 build 条件である。
 
@@ -333,14 +333,14 @@ AOSP evidence:
 
 ## Applicability Classification
 
-Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
+Primary classification: `OPT_IN_ONLY`
 
 理由:
 
 - 公式文書は Android 16 targeting apps ページに掲載されているが、current stage は opt-in feature と明記している。
-- AOSP `RESTRICT_LOCAL_NETWORK` は Android 16 tag で `@Disabled` であり、targetSdkVersion 36 gate は確認できない。
+- AOSP `RESTRICT_LOCAL_NETWORK` は Android 16 tag で `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 は default-enable 条件ではない。
 - Android 16 に BPF enforcement infrastructure と `ACCESS_LOCAL_NETWORK` flagged API は追加されているが、current default behavior と future enforcement behavior が分かれている。
-- 許可済み分類に「default disabled compat opt-in testing behavior」を表す label がない。
+- `OPT_IN_ONLY` が current opt-in testing behavior を表す分類である。
 
 実質適用条件:
 
@@ -354,8 +354,8 @@ Compat framework:
 
 - Change name: `RESTRICT_LOCAL_NETWORK`
 - Change ID: `365139289L`
-- AOSP default state: `@Disabled`
-- AOSP target gate: Android 16 tag では targetSdkVersion 36 gate なし。comment / TODO は future target SDK update を示す。
+- AOSP state in Android 16 r4: `@EnabledAfter(targetSdkVersion = 36)`
+- AOSP target gate: Android 16 tag では targetSdkVersion 36 default-enable gate なし。comment / TODO は future target SDK update を示す。
 - Force-enable / force-disable: `adb shell am compat enable|disable RESTRICT_LOCAL_NETWORK <package>` による opt-in / opt-out testing が公式 guidance と一致する。
 
 ## Expected Behavior Matrix
@@ -490,7 +490,7 @@ Compat framework:
 ## Conclusions
 
 - Android 16 の Local Network Permission は、現在の release stage では default-on の targetSdkVersion 36 behavior change ではなく、`RESTRICT_LOCAL_NETWORK` compat flag による opt-in testing behavior である。
-- AOSP `ConnectivityCompatChanges.RESTRICT_LOCAL_NETWORK` は Change ID `365139289L`、default `@Disabled` で、targetSdkVersion 36 gate は確認できない。
+- AOSP `ConnectivityCompatChanges.RESTRICT_LOCAL_NETWORK` は Change ID `365139289L`、default state `@EnabledAfter(targetSdkVersion = 36)` で、targetSdkVersion 36 は default-enable 条件ではない。
 - Android 16 には `ACCESS_LOCAL_NETWORK` permission / AppOp / BPF maps / packet drop path が追加されており、future runtime permission enforcement の infrastructure は存在する。
 - current opt-in phase では `NEARBY_WIFI_DEVICES` grant が local network access restore に使われる実装が確認できる。
 - local network restriction は BPF の UID block map と local address prefix map によって packet level で実現されるため、native sockets、managed sockets、OkHttp、Cronet、WebView など app UID から出る networking API に横断的に影響し得る。

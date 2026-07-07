@@ -8,7 +8,7 @@ Android 16 初期時点では opt-in 方式のため、既存アプリ破壊リ�
 
 ## Applicability
 
-- Classification: `TARGET_SDK_36_CONDITIONAL`
+- Classification: `OPT_IN_ONLY`
 - Practical conditions:
   - Android 16 以上
   - `enable_intent_matching_flags` feature flag が有効

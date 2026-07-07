@@ -12,12 +12,12 @@
 - Parent section: Safer Intents
 - Official documentation URL: https://developer.android.com/about/versions/16/behavior-changes-16#impact
 - Official documentation category: Security
-- Applicability classification: `TARGET_SDK_36_CONDITIONAL`
-- Confidence: Medium
+- Applicability classification: `OPT_IN_ONLY`
+- Confidence: High
 
 Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり `android-16.0.0_r4` を使用した。
 
-Confidence note: 公式文書は apps targeting Android 16 or higher のページに掲載されているが、AOSP の `intentMatchingFlags` enforcement path では明示的な targetSdkVersion gate を確認できなかった。実装上の直接条件は Android 16 の feature flag、manifest opt-in、cross-app intent resolution である。この差分のため confidence は Medium とする。
+Confidence note: 公式文書は Android 16 初期 impact を manifest opt-in に限定している。AOSP でも `android:intentMatchingFlags` / feature flag / cross-app resolution が実効 gate であり、targetSdkVersion 36 だけでは有効にならないことを確認できるため、`OPT_IN_ONLY` として High confidence とする。
 
 ## Official Documentation Review
 
@@ -138,7 +138,7 @@ AOSP の `intentMatchingFlags` path では、component の resolved flags に `e
 
 AOSP の `enforceIntentFilterMatchingWithIntentMatchingFlags(...)` および manifest parsing path では、targetSdkVersion 36 を直接確認する gate は見つからなかった。
 
-公式ページは Android 16 targeting apps 向けの behavior changes として掲載しているため、本レポートの primary classification は許可済みラベルの中で最も近い `TARGET_SDK_36_CONDITIONAL` とする。ただし、実装上の直接 gate は targetSdkVersion ではなく `android:intentMatchingFlags` opt-in である点を customer-facing explanation で混同しない。
+公式ページは Android 16 targeting apps 向けの behavior changes として掲載しているが、本文は Android 16 初期 impact を opt-in と説明している。AOSP の直接 gate も targetSdkVersion ではなく `android:intentMatchingFlags` opt-in であるため、primary classification は `OPT_IN_ONLY` とする。
 
 ### Future roadmap
 
@@ -156,7 +156,7 @@ AOSP の `enforceIntentFilterMatchingWithIntentMatchingFlags(...)` および man
 
 ## Applicability Classification
 
-Primary classification: `TARGET_SDK_36_CONDITIONAL`
+Primary classification: `OPT_IN_ONLY`
 
 追加条件:
 
@@ -169,7 +169,7 @@ Primary classification: `TARGET_SDK_36_CONDITIONAL`
 Classification caveat:
 
 - AOSP evidence では targetSdkVersion 36 gate は確認できなかった。
-- `TARGET_SDK_36_CONDITIONAL` は、公式 behavior change page の対象範囲と Android 16 SDK で attr が public final になる点に基づく最も近い許可済みラベルである。
+- `OPT_IN_ONLY` は、公式文書の opt-in statement と AOSP manifest opt-in gate に直接対応する分類である。
 - 実装上の主 gate は manifest opt-in であり、「targetSdkVersion 36 にしただけ」では impact は発生しない。
 
 Compat framework:

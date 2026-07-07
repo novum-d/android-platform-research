@@ -6,11 +6,11 @@ Android 16 の Local Network Permission / Errors は、Local Network Protection 
 
 ## Classification
 
-Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
+Primary classification: `OPT_IN_ONLY`
 
 理由: r4 AOSP では `RESTRICT_LOCAL_NETWORK = 365139289` が `@EnabledAfter(targetSdkVersion = 36)` で定義されており、targetSdkVersion 36 では default enabled ではない。current stage は 25Q2+ build で AppCompat flag を明示 enable する opt-in testing behavior として扱うのが妥当である。BPF drop path は確認できたが、`EPERM` / `ECONNABORTED` の完全な syscall-to-Java exception mapping は未確認。
 
-Confidence: Medium
+Confidence: High
 
 ## Key Facts
 

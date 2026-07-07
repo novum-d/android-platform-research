@@ -34,7 +34,7 @@
 
 ## Applicability Classification
 
-Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
+Primary classification: `OPT_IN_ONLY`
 
 理由:
 
@@ -49,7 +49,7 @@ Customer wording:
 - Android 16 25Q2 Beta 3 以降相当の build で `RESTRICT_LOCAL_NETWORK` をアプリに対して enable し、reboot 後、該当 UID が local network block map に入り、LAN 宛て socket operation を実行した場合に、公式文書の例のような socket error が返る可能性がある。
 - 将来の enforcement では、新しい Nearby devices group の runtime permission によって同種の error behavior が一般化する可能性があるが、r4 AOSP では最終 permission 名・targetSdk gate は未確定である。
 
-Confidence: Medium
+Confidence: High
 
 ## AOSP Evidence
 
@@ -71,7 +71,7 @@ Interpretation:
 
 - r4 source shows a compat Change ID for the feature.
 - `@EnabledAfter(targetSdkVersion = 36)` means targetSdkVersion 36 is not enough for default enablement. The current Android 16 testing behavior depends on explicit compat enablement.
-- This supports `UNKNOWN_NEEDS_MORE_EVIDENCE` rather than `TARGET_SDK_36`.
+- This supports `OPT_IN_ONLY` rather than `TARGET_SDK_36`.
 
 ### Current opt-in phase gate
 

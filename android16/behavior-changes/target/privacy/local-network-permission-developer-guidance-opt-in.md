@@ -13,12 +13,12 @@
 - Official documentation category: Privacy
 - Report output file: `android16/behavior-changes/target/privacy/local-network-permission-developer-guidance-opt-in.md`
 - Summary output file: `android16/summaries/target/privacy/local-network-permission-developer-guidance-opt-in-summary.md`
-- Applicability classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
-- Confidence: Medium
+- Applicability classification: `OPT_IN_ONLY`
+- Confidence: High
 
 Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり公開済み Android 16 tag として `android-16.0.0_r4` を使用した。
 
-Classification note: Developer Guidance (Opt-in) は、Android 16 current stage の developer testing 手順を説明する項目である。AOSP `android-16.0.0_r4` の `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 では default-enabled ではない。現在の影響は `RESTRICT_LOCAL_NETWORK` force-enable と reboot / permission state に依存するため、許可済み分類では `UNKNOWN_NEEDS_MORE_EVIDENCE` を primary label とし、current opt-in / future enforcement / AppCompat flag testing behavior を追加条件として記録する。
+Classification note: Developer Guidance (Opt-in) は、Android 16 current stage の developer testing 手順を説明する項目である。AOSP `android-16.0.0_r4` の `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 では default-enabled ではない。現在の影響は `RESTRICT_LOCAL_NETWORK` force-enable と reboot / permission state に依存するため、`OPT_IN_ONLY` を primary label とし、current opt-in / future enforcement / AppCompat flag testing behavior を追加条件として記録する。
 
 ## Official Documentation Review
 
@@ -279,7 +279,7 @@ Future enforcement:
 
 ## Applicability Classification
 
-Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
+Primary classification: `OPT_IN_ONLY`
 
 理由:
 
@@ -293,8 +293,8 @@ Compat framework:
 - Change name: `RESTRICT_LOCAL_NETWORK`
 - Change ID: `365139289L`
 - AOSP state in Android 16 r4: `@EnabledAfter(targetSdkVersion = 36)`
-- Android 16 / targetSdkVersion 35: default-disabled
-- Android 16 / targetSdkVersion 36: default-disabled
+- Android 16 / targetSdkVersion 35: default では有効化されない
+- Android 16 / targetSdkVersion 36: default では有効化されない
 - Force-enable / force-disable: `adb shell am compat enable|disable RESTRICT_LOCAL_NETWORK <package>` による testing が公式 guidance と一致する。
 
 Current opt-in testing conditions:

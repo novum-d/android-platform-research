@@ -22,8 +22,8 @@ AOSP Android 16 r4 では、公式文書に列挙された IPv4 ranges、multica
 
 ### Applicability Classification
 
-- Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
-- Confidence: Medium
+- Primary classification: `OPT_IN_ONLY`
+- Confidence: High
 
 理由:
 

@@ -22,8 +22,8 @@ Current testing impact は、25Q2 以降相当 build で app を install し、`
 
 ### Applicability Classification
 
-- Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
-- Confidence: Medium
+- Primary classification: `OPT_IN_ONLY`
+- Confidence: High
 
 理由:
 

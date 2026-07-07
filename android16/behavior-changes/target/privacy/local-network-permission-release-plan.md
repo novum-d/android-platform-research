@@ -13,12 +13,12 @@
 - Official documentation category: Privacy
 - Report output file: `android16/behavior-changes/target/privacy/local-network-permission-release-plan.md`
 - Summary output file: `android16/summaries/target/privacy/local-network-permission-release-plan-summary.md`
-- Applicability classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
-- Confidence: Medium
+- Applicability classification: `OPT_IN_ONLY`
+- Confidence: High
 
 Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり公開済み Android 16 tag として `android-16.0.0_r4` を使用した。
 
-Classification note: Release plan セクションは、Android 16 時点の default-on behavior ではなく、25Q2 opt-in phase と later Android release enforcement への移行計画を説明している。AOSP `android-16.0.0_r4` では `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 では default-enabled ではない。現在の developer testing は compat flag force-enable に依存するため、許可済み分類では `UNKNOWN_NEEDS_MORE_EVIDENCE` を primary label とし、opt-in / future enforcement 条件を追加条件として記録する。
+Classification note: Release plan セクションは、Android 16 時点の default-on behavior ではなく、25Q2 opt-in phase と later Android release enforcement への移行計画を説明している。AOSP `android-16.0.0_r4` では `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 では default-enabled ではない。現在の developer testing は compat flag force-enable に依存するため、`OPT_IN_ONLY` を primary label とし、opt-in / future enforcement 条件を追加条件として記録する。
 
 ## Official Documentation Review
 
@@ -263,11 +263,11 @@ Android 16 r4 には `ACCESS_LOCAL_NETWORK` permission / AppOp / BPF infrastruct
 
 ## Applicability Classification
 
-Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
+Primary classification: `OPT_IN_ONLY`
 
 理由:
 
-- Release plan は Android 16 current behavior と future release enforcement をまたぐ計画であり、許可済み分類の単一 label にきれいに収まらない。
+- Release plan は Android 16 current opt-in behavior と future release enforcement をまたぐ計画である。Android 16 current impact は `OPT_IN_ONLY` に分類し、future enforcement は別 release の再確認事項として扱う。
 - Android 16 r4 の current developer testing は `RESTRICT_LOCAL_NETWORK` compat flag force-enable に依存する。
 - `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` で、targetSdkVersion 36 では default-enabled ではない。
 - Future permission enforcement は公式文書と AOSP infrastructure で方向性を確認できるが、final release / target gate / permission UX は未確定。
@@ -277,8 +277,8 @@ Compat framework:
 - Change name: `RESTRICT_LOCAL_NETWORK`
 - Change ID: `365139289L`
 - AOSP default state in Android 16 r4: `@EnabledAfter(targetSdkVersion = 36)`
-- Android 16 / targetSdkVersion 36: default-disabled
-- Android 16 / targetSdkVersion 35: default-disabled
+- Android 16 / targetSdkVersion 36: default では有効化されない
+- Android 16 / targetSdkVersion 35: default では有効化されない
 - Force-enable / force-disable: `adb shell am compat enable|disable RESTRICT_LOCAL_NETWORK <package>` による opt-in testing が公式 guidance と一致する。
 
 実質適用条件 current opt-in:

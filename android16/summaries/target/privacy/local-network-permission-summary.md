@@ -21,21 +21,21 @@ Android 16 AOSP には `ACCESS_LOCAL_NETWORK` permission / AppOp / BPF maps / pa
 
 ### Applicability Classification
 
-- Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
-- Confidence: Medium
+- Primary classification: `OPT_IN_ONLY`
+- Confidence: High
 
 理由:
 
-- `RESTRICT_LOCAL_NETWORK` は Android 16 tag で Change ID `365139289L` として存在するが `@Disabled`。
-- targetSdkVersion 36 gate は確認できない。
+- `RESTRICT_LOCAL_NETWORK` は Android 16 tag で Change ID `365139289L` として存在し、`@EnabledAfter(targetSdkVersion = 36)` が付く。
+- targetSdkVersion 36 は default-enable 条件ではない。
 - current stage は opt-in feature で、future enforcement は別 release として公式文書に記載されている。
-- 許可済み分類に default-disabled compat opt-in testing behavior を表す label がない。
+- `OPT_IN_ONLY` は current opt-in testing behavior を表す分類である。
 
 ### Facts
 
 - 公式文書は current stage を opt-in feature と説明する。
 - opt-in 手順は 25Q2 Beta 3 以降 build、`adb shell am compat enable RESTRICT_LOCAL_NETWORK <package>`、reboot。
-- Android 16 `ConnectivityCompatChanges.RESTRICT_LOCAL_NETWORK` は `365139289L` / `@Disabled`。
+- Android 16 `ConnectivityCompatChanges.RESTRICT_LOCAL_NETWORK` は `365139289L` / `@EnabledAfter(targetSdkVersion = 36)`。targetSdkVersion 36 では default-enabled ではない。
 - Android 16 では `ACCESS_LOCAL_NETWORK` が flagged dangerous permission として追加されている。
 - current opt-in phase の restore access は `NEARBY_WIFI_DEVICES` grant を確認する実装。
 - BPF `local_net_access_map` / `local_net_blocked_uid_map` と packet drop path が Android 16 に追加されている。

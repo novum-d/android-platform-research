@@ -64,6 +64,26 @@ Required evidence:
 Customer wording:
 - targetSdkVersion 36 以上に加えて、特定の端末条件、API 利用、権限、manifest 設定などを満たす場合に影響する。
 
+### OPT_IN_ONLY
+
+Use when the official Android 16 documentation describes the current behavior as explicitly opt-in, and AOSP evidence shows that the behavior is not enabled by OS update alone or targetSdkVersion 36 alone.
+
+Examples of opt-in gates:
+- manifest attribute or manifest property
+- app compat flag force-enable
+- developer testing flag
+- feature flag plus explicit app / component configuration
+
+Required evidence:
+- Official documentation states the opt-in nature or current opt-in stage.
+- AOSP evidence identifies the exact opt-in gate.
+- AOSP evidence shows that the default path does not apply the behavior without opt-in.
+- Android 16 / targetSdkVersion 35 and Android 16 / targetSdkVersion 36 expected behavior are both stated.
+- The report separates current Android 16 opt-in behavior from future default enforcement plans.
+
+Customer wording:
+- Android 16 の現時点では、OS アップデートや targetSdkVersion 36 化だけでは有効にならず、manifest 設定、compat flag、developer testing 手順などで明示的に opt-in した場合に影響する。
+
 ### MAINLINE_OR_PLAY_SYSTEM_UPDATE
 
 Use when the change is delivered through a Mainline module or Google Play system update and is not strictly tied to the Android 16 platform image.
@@ -134,6 +154,7 @@ Record facts in this order:
 
 - Do not classify an item as `TARGET_SDK_36` only because it appears on Android 16 pages. Confirm the specific page and wording.
 - Do not classify an item as `OS_UPDATE_ALL_APPS` only because the implementation changed in AOSP. Check whether the implementation is behind a targetSdkVersion or compat gate.
+- Do not force opt-in-only behavior into `TARGET_SDK_36_CONDITIONAL` when AOSP does not show a targetSdkVersion 36 runtime gate.
 - Do not treat a new API as a Behavior Change unless existing behavior changes.
 - Do not ignore opt-out, exception, device form factor, or permission conditions.
 - Do not use High confidence when the AOSP checkout is unavailable.

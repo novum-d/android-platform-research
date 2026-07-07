@@ -8,7 +8,7 @@ AOSP では、この warning は `blockIntent = true` の branch で出力され
 
 ## Applicability
 
-- Classification: `TARGET_SDK_36_CONDITIONAL`
+- Classification: `OPT_IN_ONLY`
 - Practical conditions:
   - Android 16 以上
   - `enable_intent_matching_flags` feature flag が有効

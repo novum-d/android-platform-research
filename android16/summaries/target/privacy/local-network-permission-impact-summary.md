@@ -22,8 +22,8 @@ Local Network Permission の Impact は、Android 16 current stage では opt-in
 
 ### Applicability Classification
 
-- Primary classification: `UNKNOWN_NEEDS_MORE_EVIDENCE`
-- Confidence: Medium
+- Primary classification: `OPT_IN_ONLY`
+- Confidence: High
 
 理由:
 
