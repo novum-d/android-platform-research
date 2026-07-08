@@ -62,6 +62,7 @@ Use:
 ```text
 android16/templates/customer-report-template.md
 android16/templates/one-page-summary-template.md
+android16/templates/implementation-examples-template.md
 ```
 
 Write outputs under:
@@ -70,6 +71,15 @@ Write outputs under:
 android16/behavior-changes/
 android16/summaries/
 ```
+
+When a Behavior Change needs concrete code examples, framework-specific migration examples, or temporary opt-out examples, create a companion implementation examples file from:
+
+```text
+android16/templates/implementation-examples-template.md
+```
+
+Keep primary reports focused on evidence, applicability, impact, and action candidates.
+Place only short representative snippets and a link to the implementation examples file in the primary report.
 
 Human decisions belong in:
 

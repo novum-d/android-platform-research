@@ -53,6 +53,23 @@ Confidence:
 - AndroidX Activity / Navigation / Compose BackHandler の対応版へ移行する。
 - `OnBackInvokedCallback` path を確認する。
 - temporary opt-out は対象 Activity に限定する。
+- 実装例は [Predictive back implementation examples](../../../behavior-changes/target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-implementation-examples.md) を参照する。
+
+代表例:
+
+```kotlin
+onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+    override fun handleOnBackPressed() {
+        if (viewModel.hasUnsavedChanges) {
+            showDiscardConfirmDialog()
+            return
+        }
+
+        isEnabled = false
+        onBackPressedDispatcher.onBackPressed()
+    }
+})
+```
 
 ## テスト観点
 

@@ -275,6 +275,9 @@ targetSdkVersion、compat framework、OS version、device condition のいずれ
 
 # 対応候補（Required Actions）
 
+コード例、framework 別移行例、temporary opt-out 例が複数必要な場合は、`android16/templates/implementation-examples-template.md` を使って companion implementation examples file を作成する。
+この section には代表的な短い snippet と companion file へのリンクだけを置く。
+
 ## 必須対応（Must）
 
 必須対応。

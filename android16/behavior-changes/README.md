@@ -22,7 +22,12 @@ Use:
 
 ```text
 android16/templates/customer-report-template.md
+android16/templates/implementation-examples-template.md
 ```
+
+Implementation examples:
+- 複数のコード例、framework 別移行例、temporary opt-out の具体例が必要な場合は、`android16/templates/implementation-examples-template.md` を使って companion implementation examples file を作成する。
+- primary report の「対応候補」には、代表的な短い snippet と companion file へのリンクだけを置く。
 
 ## Status Wording
 

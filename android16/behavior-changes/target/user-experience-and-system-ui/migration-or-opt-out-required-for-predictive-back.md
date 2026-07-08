@@ -274,17 +274,44 @@ For apps targeting Android 16 (API level 36) or higher and running on an Android
 
 # 対応候補（Required Actions）
 
+実装例:
+- [Predictive back implementation examples](migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
+
 ## 必須対応（Must）
 
 - `onBackPressed`, `KEYCODE_BACK`, `dispatchKeyEvent`, `onKeyDown`, `onKeyUp` の back handling 利用箇所を棚卸しする。
 - Android 16 / targetSdkVersion 36 で back-to-home、cross-task、cross-activity、dialog、nested navigation の挙動を確認する。
 - back event を intercept している箇所は `OnBackInvokedCallback` または AndroidX の supported back navigation APIs に移行する。
 
+代表例:
+
+```kotlin
+onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+    override fun handleOnBackPressed() {
+        if (viewModel.hasUnsavedChanges) {
+            showDiscardConfirmDialog()
+            return
+        }
+
+        isEnabled = false
+        onBackPressedDispatcher.onBackPressed()
+    }
+})
+```
+
 ## 推奨対応（Recommended）
 
 - 一時回避が必要な Activity には `android:enableOnBackInvokedCallback="false"` を限定的に設定し、移行計画と削除予定を記録する。
 - UI test / manual test に 3-button navigation と gesture navigation の両方を含める。
 - 「戻るで確認 dialog を出す」「戻るで内部 stack を pop する」「戻るで task / home に遷移する」ケースを分けて検証する。
+
+一時 opt-out 例:
+
+```xml
+<activity
+    android:name=".LegacyFlowActivity"
+    android:enableOnBackInvokedCallback="false" />
+```
 
 ## 任意対応（Optional）
 

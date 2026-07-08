@@ -146,9 +146,13 @@ Evidence は以下の単位で整理してください。
 | --- | --- |
 | Android Behavior Changes | `android<version>/templates/customer-report-template.md` |
 | Android one-page summary | `android<version>/templates/one-page-summary-template.md` |
+| Android implementation examples | Use the version-specific implementation examples template when present, for example `android16/templates/implementation-examples-template.md` |
 | Build System version diff | `build-system/templates/version-diff-template.md` |
 | Build System one-page summary | `build-system/templates/one-page-summary-template.md` |
 | Build System migration checklist | `build-system/templates/migration-checklist-template.md` |
+
+Behavior Change の対応候補に複数のコード例、framework 別実装例、temporary opt-out の具体例を載せる場合は、primary report へ長いコードを直接集約しない。
+version directory に implementation examples template がある場合は、そのテンプレートを使って実装例ファイルを作成し、primary report の「対応候補」には代表的な短い例と実装例ファイルへのリンクを置く。
 
 ## Investigation Exit Criteria
 
