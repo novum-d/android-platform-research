@@ -27,6 +27,7 @@ Android 16 Behavior Change:
 - primary report の「対応候補」には、代表的な短いコード例とこのファイルへのリンクだけを置く。
 - フレームワーク別、画面別、テスト補助用など複数パターンの実装例はこのファイルに集約する。
 - 実装例はそのまま貼り付ける完成コードではなく、移行方針を具体化するためのサンプルとして扱う。
+- 各例は「既存実装で探す箇所」「移行前」「移行後」「移行手順」「確認観点」をセットで書く。
 - opt-out 例を載せる場合は、一時対応であること、適用範囲、削除条件、リスクを明記する。
 
 ## 対応方針（Implementation Strategy）
@@ -40,14 +41,55 @@ Android 16 Behavior Change:
 避けるべき方針:
 - `<legacy API / risky workaround>`
 
+## 移行対象の見つけ方（Finding Existing Code）
+
+探すコード:
+- `<legacy API / manifest / config / behavior pattern>`
+
+```bash
+# Example search command
+```
+
+分類:
+
+| 既存実装（Existing pattern） | 移行先（Migration target） | 優先度 | Notes |
+| --- | --- | --- | --- |
+| `<legacy pattern>` | `<recommended API / pattern>` | Must / Recommended / Optional | `<why>` |
+
+## 移行マップ（Migration Map）
+
+| Before | After | 目的 |
+| --- | --- | --- |
+| `<existing implementation>` | `<new implementation>` | `<what changes>` |
+| `<temporary workaround>` | `<planned final state>` | `<when to remove>` |
+
 ## 例 1: [Scenario]
 
 目的:
 - `<what this example demonstrates>`
 
+既存実装で探す箇所:
+- `<what to search in current code>`
+
+移行前:
+
 ```kotlin
-// Example code
+// Before
 ```
+
+移行後:
+
+```kotlin
+// After
+```
+
+移行手順:
+1. `<step>`
+2. `<step>`
+3. `<step>`
+
+確認観点:
+- `<how to verify this migration>`
 
 注意点:
 - `<caveat>`
@@ -57,9 +99,28 @@ Android 16 Behavior Change:
 目的:
 - `<what this example demonstrates>`
 
+既存実装で探す箇所:
+- `<what to search in current code>`
+
+移行前:
+
 ```xml
-<!-- Example manifest or resources -->
+<!-- Before -->
 ```
+
+移行後:
+
+```xml
+<!-- After -->
+```
+
+移行手順:
+1. `<step>`
+2. `<step>`
+3. `<step>`
+
+確認観点:
+- `<how to verify this migration>`
 
 注意点:
 - `<caveat>`
