@@ -49,6 +49,44 @@ API 選択:
 - Navigation Event API は、Navigation 3 や独自 navigation layer で back gesture lifecycle を扱う場合に検討する。既存 navigation library が predictive back をサポートしている場合は、その built-in support を優先する。
 - opt-out は API 移行までの一時対応とし、Activity 単位に限定する。
 
+## 移行時の重要ポイント（Important Migration Notes）
+
+非推奨 API を使わない:
+- `Activity.onBackPressed()` override、`super.onBackPressed()`、`onBackPressed()` の直接呼び出しは移行対象として扱う。
+- `KEYCODE_BACK` を `dispatchKeyEvent()` / `onKeyDown()` / `onKeyUp()` で恒久的に処理しない。
+- 移行後は `OnBackPressedCallback` を登録し、必要に応じて `onBackPressedDispatcher.onBackPressed()` または `NavController.navigateUp()` / `popBackStack()` に委譲する。
+
+挙動を統一する:
+- 端末の戻る操作、toolbar back、custom close button を同じ処理経路にしたい場合は `onBackPressedDispatcher.onBackPressed()` を使う。
+- toolbar / app bar の Up 操作として Navigation graph 上の親へ戻したい場合は `NavController.navigateUp()` を優先する。
+- Fragment back stack を明示的に 1 つ戻したい場合は `NavController.popBackStack()` を使う。
+- `finish()` へ直接置き換えると、Fragment / Navigation Component / registered callback を飛ばす可能性があるため、既存挙動と一致するか確認する。
+
+`setEnabled(false)` が必要な背景:
+- `OnBackPressedDispatcher` は enabled な callback を探して呼ぶ。
+- callback の中から `onBackPressedDispatcher.onBackPressed()` を呼ぶと、同じ callback がまだ enabled の場合、再び同じ callback が選ばれる。
+- そのため「この callback では処理せず次の handler / fallback に渡す」場合は、自分自身を一時的に disabled にしてから dispatcher に委譲する。
+
+```kotlin
+isEnabled = false
+try {
+    onBackPressedDispatcher.onBackPressed()
+} finally {
+    isEnabled = true
+}
+```
+
+設定しない場合に起きること:
+- 同じ `OnBackPressedCallback` が再度呼ばれ、無限再帰または stack overflow になる可能性がある。
+- fallback したつもりでも、次の callback / Activity fallback に到達しない。
+- handler の優先順が見えにくくなり、toolbar back と system back の挙動差分を見落としやすい。
+
+`setEnabled(false)` が不要なケース:
+- callback 内で処理を完結し、dispatcher に委譲しない場合。
+- `NavController.navigateUp()` / `popBackStack()` を直接呼ぶ場合。
+- helper / toolbar click など callback 外から `onBackPressedDispatcher.onBackPressed()` を呼ぶ場合。
+- UI state に応じて callback の enabled 状態を事前に管理している場合。
+
 ## 移行対象の見つけ方（Finding Existing Code）
 
 探すコード:
@@ -67,6 +105,7 @@ rg -n "KEYCODE_BACK|onBackPressed|dispatchKeyEvent|onKeyDown|onKeyUp|OnBackPress
 | --- | --- | --- | --- |
 | `Activity.onBackPressed()` override | `OnBackPressedDispatcher` / Navigation Component | Must | targetSdkVersion 36 で呼ばれない前提で移行する |
 | `onBackPressed()` 内で `super.onBackPressed()` を fallback として呼ぶ | `OnBackPressedCallback` を一時的に無効化して dispatcher に戻す | Must | legacy override の fallback 経路を dispatcher 経由に置き換える |
+| override ではない helper / click handler で `super.onBackPressed()` を呼ぶ | `onBackPressedDispatcher.onBackPressed()` または `NavController.navigateUp()` | Must | system back と同じ経路に戻すのか、navigation graph の up として扱うのかを分ける |
 | `KEYCODE_BACK` を `dispatchKeyEvent()` で処理 | `OnBackPressedCallback` / `BackHandler` | Must | key event ではなく back navigation callback として扱う |
 | Compose 画面で Activity 側の back handler に依存 | `BackHandler` | Recommended | 画面状態と back intercept 条件を Composable 側で明示する |
 | Compose 画面で back gesture 進捗に合わせた animation が必要 | `PredictiveBackHandler` | Recommended | `BackEventCompat.progress` を使い、完了 / cancel を分ける |
@@ -80,6 +119,7 @@ rg -n "KEYCODE_BACK|onBackPressed|dispatchKeyEvent|onKeyDown|onKeyUp|OnBackPress
 | --- | --- | --- |
 | `onBackPressed()` override で確認 dialog を出す | `OnBackPressedCallback` で確認 dialog を出す | legacy callback 依存をなくす |
 | `super.onBackPressed()` で通常 back に委譲する | callback を `isEnabled = false` にして `onBackPressedDispatcher.onBackPressed()` へ委譲する | fallback 経路を dispatcher に戻す |
+| helper / toolbar click から `super.onBackPressed()` を呼ぶ | `onBackPressedDispatcher.onBackPressed()` または `NavController.navigateUp()` を呼ぶ | 呼び出し元の意図を保ったまま unsupported API 依存をなくす |
 | `dispatchKeyEvent(KEYCODE_BACK)` で内部 stack を pop する | Navigation Component / `OnBackPressedDispatcher` で pop する | key dispatch ではなく navigation stack に責務を寄せる |
 | Compose 画面が Activity の back 処理に依存する | Composable 内で `BackHandler(enabled = ...)` を使う | 画面状態に応じた intercept 条件を明示する |
 | Compose custom animation を back 完了後だけ実行する | `PredictiveBackHandler` で progress / completed / cancelled を分ける | gesture 中の preview と cancel reset に対応する |
@@ -283,7 +323,65 @@ class MainActivity : AppCompatActivity() {
 - Activity 終了や navigation stack pop で callback owner が破棄される場合、`isEnabled = true` に戻す処理が不要または到達しないケースがある。画面構造に合わせて扱う。
 - fallback 先を直接 `finish()` に置き換えると、Navigation Component や fragment back stack を飛ばす可能性がある。
 
-## 例 4: Navigation Component で内部 stack を pop する
+## 例 4: override ではない関数の `super.onBackPressed()` を置き換える
+
+目的:
+- `override fun onBackPressed()` ではない helper / click handler / callback から `super.onBackPressed()` を呼んでいる箇所を、意図に応じて dispatcher または Navigation Component に移行する。
+
+既存実装で探す箇所:
+- `private fun closeOrBack()`、`onToolbarBackClicked()`、`onCancelClicked()` などから `super.onBackPressed()` を呼んでいる箇所。
+- toolbar の戻るボタン、dialog の cancel、custom UI の back affordance が system back と同じ処理を呼びたい箇所。
+
+移行前:
+
+```kotlin
+private fun closeOrBack() {
+    if (selectionMode) {
+        exitSelectionMode()
+    } else {
+        super.onBackPressed()
+    }
+}
+```
+
+移行後: system back と同じ経路に委譲する場合
+
+```kotlin
+private fun closeOrBack() {
+    if (selectionMode) {
+        exitSelectionMode()
+    } else {
+        onBackPressedDispatcher.onBackPressed()
+    }
+}
+```
+
+移行後: Navigation graph の up/back として扱う場合
+
+```kotlin
+private fun onToolbarBackClicked() {
+    val handled = findNavController(R.id.nav_host_fragment).navigateUp()
+    if (!handled) {
+        onBackPressedDispatcher.onBackPressed()
+    }
+}
+```
+
+移行手順:
+1. その関数が「system back と同じ経路」を呼びたいのか、「toolbar up / navigation graph の戻る」を実行したいのかを分類する。
+2. system back と同じ経路なら `onBackPressedDispatcher.onBackPressed()` に置き換える。
+3. Navigation Component の toolbar / app bar 操作なら `NavController.navigateUp()` または `popBackStack()` を優先し、必要な場合だけ dispatcher に fallback する。
+
+確認観点:
+- toolbar back、cancel button、custom close button が従来と同じ destination へ戻る。
+- `OnBackPressedCallback` が登録されている画面では、dispatcher 経由で同じ callback が呼ばれる。
+- Navigation graph の top-level destination で `navigateUp()` が false になった場合の fallback が期待通りである。
+
+注意点:
+- back callback の中から dispatcher に委譲する場合は、例 3 のように現在の callback を一時的に disable して無限再帰を避ける。
+- toolbar up は system back と完全に同じ意味ではない場合があるため、常に `onBackPressedDispatcher.onBackPressed()` に置き換えればよいとは限らない。
+
+## 例 5: Navigation Component で内部 stack を pop する
 
 目的:
 - Activity や Fragment の `onBackPressed()` override ではなく、Navigation Component の stack 管理へ戻る処理を寄せる。
@@ -336,7 +434,7 @@ onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
 - nested navigation、dialog destination、bottom sheet などを使う場合は、画面ごとの stack 状態をテストする。
 - Fragment 側で個別 callback を追加する場合は、Activity 側の broad callback と競合しないように責務を分ける。
 
-## 例 5: Compose で gesture progress に合わせた animation を行う
+## 例 6: Compose で gesture progress に合わせた animation を行う
 
 目的:
 - back gesture の完了後だけ UI を切り替えるのではなく、swipe 中の `progress` に合わせて custom in-app animation を行う。
@@ -393,7 +491,7 @@ fun DetailScreen(onNavigateBack: () -> Unit) {
 - 単純な確認 dialog や stack pop だけなら `BackHandler` で足りる。
 - `CancellationException` は gesture cancel として扱い、UI state を戻す。
 
-## 例 6: Views で gesture progress に合わせた animation を行う
+## 例 7: Views で gesture progress に合わせた animation を行う
 
 目的:
 - View ベースの画面で、default animation では足りない custom transition を back gesture の進捗に合わせて動かす。
@@ -459,7 +557,7 @@ onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
 - AndroidX Activity の progress callbacks が使える version を確認する。
 - default system animation や Material Component animation で十分な画面には custom progress animation を追加しない。
 
-## 例 7: Navigation Event API で back gesture lifecycle を扱う
+## 例 8: Navigation Event API で back gesture lifecycle を扱う
 
 目的:
 - Navigation Event API を採用する画面で、back gesture の started / progressed / completed / cancelled を明示的に分ける。
@@ -520,7 +618,7 @@ navigationEventDispatcher.addHandler(handler)
 - すでに Navigation 3 など built-in predictive back support を使っている場合は、独自実装を追加する前に既存機能で足りるか確認する。
 - handler lifecycle を画面 lifecycle と合わせ、不要になった handler は削除する。
 
-## 例 8: 一時 opt-out を Activity に限定する
+## 例 9: 一時 opt-out を Activity に限定する
 
 目的:
 - 移行が間に合わない legacy flow だけ一時的に旧 back behavior を維持する。
@@ -559,7 +657,7 @@ navigationEventDispatcher.addHandler(handler)
 - issue / TODO / migration plan に削除条件を残す。
 - Android 16 / targetSdkVersion 36 の検証では、opt-out あり / なしの両方を比較する。
 
-## 例 9: 旧 `KEYCODE_BACK` 処理の置き換え対象を見つける
+## 例 10: 旧 `KEYCODE_BACK` 処理の置き換え対象を見つける
 
 目的:
 - 移行前の棚卸しで、Android 16 / targetSdkVersion 36 で呼ばれなくなる可能性がある back handling を特定する。
