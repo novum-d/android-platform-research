@@ -87,6 +87,20 @@ try {
 - helper / toolbar click など callback 外から `onBackPressedDispatcher.onBackPressed()` を呼ぶ場合。
 - UI state に応じて callback の enabled 状態を事前に管理している場合。
 
+dispatcher 移行後の処理順:
+- legacy `Activity.onBackPressed()` override では、Activity の override が戻る処理の中心になり、その中から `super.onBackPressed()`、FragmentManager、Navigation Component、`finish()` などへ流していた。
+- `OnBackPressedDispatcher` へ移行すると、dispatcher が enabled な `OnBackPressedCallback` を登録順の逆順で探して呼ぶ。つまり、後から登録された enabled callback が先に処理される。
+- Activity に broad callback を常時 enabled で登録すると、Fragment / Navigation Component / dialog / bottom sheet などの callback より先に back を消費し、従来呼ばれていた処理をブロックする可能性がある。
+- 画面固有の back handling は Fragment の `onViewCreated()` で `viewLifecycleOwner` に紐付け、Activity callback は Activity 全体の責務に限定する。
+- callback が処理すべき状態でない場合は、事前に `setEnabled(false)` にしておくか、callback 内で一時的に disabled にして dispatcher に委譲する。
+
+処理順のテスト観点:
+- Activity callback、Fragment callback、Navigation Component の callback がある画面で、どれが先に呼ばれるかを確認する。
+- Fragment 遷移後、前画面の callback が残っていないことを確認する。
+- drawer / dialog / bottom sheet / selection mode など、先に閉じるべき UI が Fragment navigation や Activity finish より先に処理されることを確認する。
+- toolbar back / custom close button / system back が同じ経路を期待する画面では、同じ callback 順で処理されることを確認する。
+- callback が常時 enabled になっていて、他の callback や Navigation Component の back handling を塞いでいないことを確認する。
+
 ## 移行対象の見つけ方（Finding Existing Code）
 
 探すコード:
@@ -106,6 +120,7 @@ rg -n "KEYCODE_BACK|onBackPressed|dispatchKeyEvent|onKeyDown|onKeyUp|OnBackPress
 | `Activity.onBackPressed()` override | `OnBackPressedDispatcher` / Navigation Component | Must | targetSdkVersion 36 で呼ばれない前提で移行する |
 | `onBackPressed()` 内で `super.onBackPressed()` を fallback として呼ぶ | `OnBackPressedCallback` を一時的に無効化して dispatcher に戻す | Must | legacy override の fallback 経路を dispatcher 経由に置き換える |
 | override ではない helper / click handler で `super.onBackPressed()` を呼ぶ | `onBackPressedDispatcher.onBackPressed()` または `NavController.navigateUp()` | Must | system back と同じ経路に戻すのか、navigation graph の up として扱うのかを分ける |
+| 親クラスの `super.onBackPressed()` に共通 back logic がある | 親クラスの共通処理を `protected` method または親側 callback に切り出す | Must | dispatcher には親クラスの戻る処理だけを直接呼ぶ API はない |
 | `KEYCODE_BACK` を `dispatchKeyEvent()` で処理 | `OnBackPressedCallback` / `BackHandler` | Must | key event ではなく back navigation callback として扱う |
 | Compose 画面で Activity 側の back handler に依存 | `BackHandler` | Recommended | 画面状態と back intercept 条件を Composable 側で明示する |
 | Compose 画面で back gesture 進捗に合わせた animation が必要 | `PredictiveBackHandler` | Recommended | `BackEventCompat.progress` を使い、完了 / cancel を分ける |
@@ -120,6 +135,7 @@ rg -n "KEYCODE_BACK|onBackPressed|dispatchKeyEvent|onKeyDown|onKeyUp|OnBackPress
 | `onBackPressed()` override で確認 dialog を出す | `OnBackPressedCallback` で確認 dialog を出す | legacy callback 依存をなくす |
 | `super.onBackPressed()` で通常 back に委譲する | callback を `isEnabled = false` にして `onBackPressedDispatcher.onBackPressed()` へ委譲する | fallback 経路を dispatcher に戻す |
 | helper / toolbar click から `super.onBackPressed()` を呼ぶ | `onBackPressedDispatcher.onBackPressed()` または `NavController.navigateUp()` を呼ぶ | 呼び出し元の意図を保ったまま unsupported API 依存をなくす |
+| 親クラスの `super.onBackPressed()` だけを呼びたい | `protected performDefaultBack()` などに親の共通処理を切り出して呼ぶ | dispatcher chain と親クラス共通処理を混同しない |
 | `dispatchKeyEvent(KEYCODE_BACK)` で内部 stack を pop する | Navigation Component / `OnBackPressedDispatcher` で pop する | key dispatch ではなく navigation stack に責務を寄せる |
 | Compose 画面が Activity の back 処理に依存する | Composable 内で `BackHandler(enabled = ...)` を使う | 画面状態に応じた intercept 条件を明示する |
 | Compose custom animation を back 完了後だけ実行する | `PredictiveBackHandler` で progress / completed / cancelled を分ける | gesture 中の preview と cancel reset に対応する |
@@ -381,7 +397,100 @@ private fun onToolbarBackClicked() {
 - back callback の中から dispatcher に委譲する場合は、例 3 のように現在の callback を一時的に disable して無限再帰を避ける。
 - toolbar up は system back と完全に同じ意味ではない場合があるため、常に `onBackPressedDispatcher.onBackPressed()` に置き換えればよいとは限らない。
 
-## 例 5: Navigation Component で内部 stack を pop する
+## 例 5: 親クラスの共通 back 処理を切り出す
+
+目的:
+- `super.onBackPressed()` が親クラスの共通戻る処理を実行していた場合に、dispatcher から「親クラスだけ」を直接呼ぼうとせず、共通処理を明示的な method / callback に移す。
+
+既存実装で探す箇所:
+- `BaseActivity.onBackPressed()` に全画面共通の close / analytics / navigation fallback がある。
+- 子 Activity の `onBackPressed()` override が条件付きで `super.onBackPressed()` を呼んでいる。
+- dispatcher 移行後も「親クラスの共通処理だけ」を呼びたい箇所。
+
+移行前:
+
+```java
+public abstract class BaseActivity extends AppCompatActivity {
+    @Override
+    public void onBackPressed() {
+        if (closeGlobalOverlayIfNeeded()) {
+            return;
+        }
+
+        super.onBackPressed();
+    }
+}
+
+public final class DetailActivity extends BaseActivity {
+    @Override
+    public void onBackPressed() {
+        if (hasUnsavedChanges()) {
+            showDiscardConfirmDialog();
+        } else {
+            super.onBackPressed();
+        }
+    }
+}
+```
+
+移行後: 親クラスの共通処理を `protected` method にする
+
+```java
+public abstract class BaseActivity extends AppCompatActivity {
+    protected boolean performDefaultBack() {
+        if (closeGlobalOverlayIfNeeded()) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+public final class DetailActivity extends BaseActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (hasUnsavedChanges()) {
+                    showDiscardConfirmDialog();
+                    return;
+                }
+
+                if (performDefaultBack()) {
+                    return;
+                }
+
+                setEnabled(false);
+                try {
+                    getOnBackPressedDispatcher().onBackPressed();
+                } finally {
+                    setEnabled(true);
+                }
+            }
+        });
+    }
+}
+```
+
+移行手順:
+1. 親クラスの `onBackPressed()` に入っている共通処理を `protected` method に切り出す。
+2. 子クラスの `OnBackPressedCallback` から、その共通処理を明示的に呼ぶ。
+3. 親の共通処理で消費しない場合だけ、dispatcher chain に委譲する。
+
+確認観点:
+- 親クラスの global overlay / common cleanup が従来通り先に処理される。
+- 親クラスの共通処理が消費しない時だけ、Fragment / Navigation / Activity fallback に進む。
+- dispatcher へ委譲する時に現在の callback を disabled にして、同じ callback が再帰しない。
+
+注意点:
+- `onBackPressedDispatcher.onBackPressed()` は親クラスだけを呼ぶ API ではない。enabled callback chain に back を流す API として扱う。
+- 親クラスに共通 callback を登録する設計も可能だが、子クラス callback との登録順と enabled 状態を必ずテストする。
+- 親クラス共通処理が Activity finish を直接呼ぶ場合は、Fragment / Navigation Component の back stack を飛ばしてよいか確認する。
+
+## 例 6: Navigation Component で内部 stack を pop する
 
 目的:
 - Activity や Fragment の `onBackPressed()` override ではなく、Navigation Component の stack 管理へ戻る処理を寄せる。
@@ -434,7 +543,7 @@ onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
 - nested navigation、dialog destination、bottom sheet などを使う場合は、画面ごとの stack 状態をテストする。
 - Fragment 側で個別 callback を追加する場合は、Activity 側の broad callback と競合しないように責務を分ける。
 
-## 例 6: Compose で gesture progress に合わせた animation を行う
+## 例 7: Compose で gesture progress に合わせた animation を行う
 
 目的:
 - back gesture の完了後だけ UI を切り替えるのではなく、swipe 中の `progress` に合わせて custom in-app animation を行う。
@@ -491,7 +600,7 @@ fun DetailScreen(onNavigateBack: () -> Unit) {
 - 単純な確認 dialog や stack pop だけなら `BackHandler` で足りる。
 - `CancellationException` は gesture cancel として扱い、UI state を戻す。
 
-## 例 7: Views で gesture progress に合わせた animation を行う
+## 例 8: Views で gesture progress に合わせた animation を行う
 
 目的:
 - View ベースの画面で、default animation では足りない custom transition を back gesture の進捗に合わせて動かす。
@@ -557,7 +666,7 @@ onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
 - AndroidX Activity の progress callbacks が使える version を確認する。
 - default system animation や Material Component animation で十分な画面には custom progress animation を追加しない。
 
-## 例 8: Navigation Event API で back gesture lifecycle を扱う
+## 例 9: Navigation Event API で back gesture lifecycle を扱う
 
 目的:
 - Navigation Event API を採用する画面で、back gesture の started / progressed / completed / cancelled を明示的に分ける。
@@ -618,7 +727,7 @@ navigationEventDispatcher.addHandler(handler)
 - すでに Navigation 3 など built-in predictive back support を使っている場合は、独自実装を追加する前に既存機能で足りるか確認する。
 - handler lifecycle を画面 lifecycle と合わせ、不要になった handler は削除する。
 
-## 例 9: 一時 opt-out を Activity に限定する
+## 例 10: 一時 opt-out を Activity に限定する
 
 目的:
 - 移行が間に合わない legacy flow だけ一時的に旧 back behavior を維持する。
@@ -657,7 +766,7 @@ navigationEventDispatcher.addHandler(handler)
 - issue / TODO / migration plan に削除条件を残す。
 - Android 16 / targetSdkVersion 36 の検証では、opt-out あり / なしの両方を比較する。
 
-## 例 10: 旧 `KEYCODE_BACK` 処理の置き換え対象を見つける
+## 例 11: 旧 `KEYCODE_BACK` 処理の置き換え対象を見つける
 
 目的:
 - 移行前の棚卸しで、Android 16 / targetSdkVersion 36 で呼ばれなくなる可能性がある back handling を特定する。
@@ -677,6 +786,132 @@ rg -n "KEYCODE_BACK|onBackPressed|dispatchKeyEvent|onKeyDown|onKeyUp|OnBackPress
 - Android 16 / targetSdkVersion 36 + migration: `onBackPressed` / `KEYCODE_BACK` 依存なしで確認 dialog、internal stack pop、task exit が期待通り動くことを確認する。
 - Android 16 / targetSdkVersion 36 + temporary opt-out: opt-out 対象 Activity だけ legacy behavior になることを確認する。
 - gesture navigation と 3-button navigation の両方で戻る操作を確認する。
+
+## テストコード例（Test Code Examples）
+
+目的:
+- `OnBackPressedDispatcher` 移行後の callback 順、enabled 制御、fallback 委譲を unit test で確認する。
+- 実機の predictive back animation 自体は instrumentation / manual test で確認し、callback の business logic は JVM / Robolectric test で分離して検証する。
+
+### callback は後から登録した enabled callback が先に呼ばれる
+
+```java
+@Test
+public void dispatcherCallsLastEnabledCallbackFirst() {
+    List<String> events = new ArrayList<>();
+    OnBackPressedDispatcher dispatcher =
+            new OnBackPressedDispatcher(() -> events.add("fallback"));
+
+    OnBackPressedCallback activityCallback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            events.add("activity");
+        }
+    };
+
+    OnBackPressedCallback fragmentCallback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            events.add("fragment");
+        }
+    };
+
+    dispatcher.addCallback(activityCallback);
+    dispatcher.addCallback(fragmentCallback);
+
+    dispatcher.onBackPressed();
+
+    assertEquals(Collections.singletonList("fragment"), events);
+
+    fragmentCallback.setEnabled(false);
+    dispatcher.onBackPressed();
+
+    assertEquals(Arrays.asList("fragment", "activity"), events);
+}
+```
+
+確認できること:
+- 後から登録された `fragmentCallback` が先に呼ばれる。
+- `fragmentCallback.setEnabled(false)` 後は `activityCallback` に処理が進む。
+
+### callback 内で fallback する場合は自分を一時的に disabled にする
+
+```java
+@Test
+public void callbackCanDelegateToFallbackWithoutRecursion() {
+    List<String> events = new ArrayList<>();
+    OnBackPressedDispatcher dispatcher =
+            new OnBackPressedDispatcher(() -> events.add("fallback"));
+
+    OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            events.add("callback");
+
+            setEnabled(false);
+            try {
+                dispatcher.onBackPressed();
+            } finally {
+                setEnabled(true);
+            }
+        }
+    };
+
+    dispatcher.addCallback(callback);
+
+    dispatcher.onBackPressed();
+
+    assertEquals(Arrays.asList("callback", "fallback"), events);
+    assertTrue(callback.isEnabled());
+}
+```
+
+確認できること:
+- callback が dispatcher に委譲しても、同じ callback が再帰的に呼ばれない。
+- fallback 後に callback が enabled に戻る。
+
+### UI state に応じて enabled を事前管理する
+
+```java
+@Test
+public void selectionModeCallbackOnlyRunsWhenEnabled() {
+    List<String> events = new ArrayList<>();
+    OnBackPressedDispatcher dispatcher =
+            new OnBackPressedDispatcher(() -> events.add("fallback"));
+
+    OnBackPressedCallback selectionCallback = new OnBackPressedCallback(false) {
+        @Override
+        public void handleOnBackPressed() {
+            events.add("exit-selection");
+            setEnabled(false);
+        }
+    };
+
+    dispatcher.addCallback(selectionCallback);
+
+    dispatcher.onBackPressed();
+    assertEquals(Collections.singletonList("fallback"), events);
+
+    selectionCallback.setEnabled(true);
+    dispatcher.onBackPressed();
+    assertEquals(Arrays.asList("fallback", "exit-selection"), events);
+
+    dispatcher.onBackPressed();
+    assertEquals(Arrays.asList("fallback", "exit-selection", "fallback"), events);
+}
+```
+
+確認できること:
+- selection mode でない時は callback が呼ばれず fallback に進む。
+- selection mode 中だけ callback が戻る操作を消費する。
+- callback が処理後に自分を disabled に戻すと、次回 back は fallback に進む。
+
+### UI test / instrumentation で確認すること
+
+- `ActivityScenario` / `FragmentScenario` で対象画面を起動し、`activity.getOnBackPressedDispatcher().onBackPressed()` を呼んで UI state が変わることを確認する。
+- Navigation Component を使う画面では、`TestNavHostController` などで current destination が期待通り変わることを確認する。
+- predictive back gesture の progress animation、3-button navigation long press、gesture cancel は emulator / device 上の instrumentation または manual test で確認する。
+- `android:enableOnBackInvokedCallback="false"` の一時 opt-out は、対象 Activity と移行済み Activity の両方を起動して差分を確認する。
 
 ## References
 
