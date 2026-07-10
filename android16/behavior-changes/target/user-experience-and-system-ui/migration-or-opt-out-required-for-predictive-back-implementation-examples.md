@@ -90,12 +90,20 @@ try {
 dispatcher 移行後の処理順:
 - legacy `Activity.onBackPressed()` override では、Activity の override が戻る処理の中心になり、その中から `super.onBackPressed()`、FragmentManager、Navigation Component、`finish()` などへ流していた。
 - `OnBackPressedDispatcher` へ移行すると、dispatcher が enabled な `OnBackPressedCallback` を登録順の逆順で探して呼ぶ。つまり、後から登録された enabled callback が先に処理される。
+- 親 Activity が先に callback を登録し、子 Activity が後で callback を登録する構造では、通常は子 callback が先に呼ばれる。子 callback が処理しない場合に自分を disabled にして dispatcher に委譲すると、次の候補として親 callback に進める。
 - Activity に broad callback を常時 enabled で登録すると、Fragment / Navigation Component / dialog / bottom sheet などの callback より先に back を消費し、従来呼ばれていた処理をブロックする可能性がある。
 - 画面固有の back handling は Fragment の `onViewCreated()` で `viewLifecycleOwner` に紐付け、Activity callback は Activity 全体の責務に限定する。
 - callback が処理すべき状態でない場合は、事前に `setEnabled(false)` にしておくか、callback 内で一時的に disabled にして dispatcher に委譲する。
 
+`onBackPressedDispatcher.onBackPressed()` の意味:
+- `onBackPressedDispatcher.onBackPressed()` は、子クラスの `onBackPressed()` 相当の method call ではない。
+- 現在の Activity の dispatcher に back event を投入し、その時点で enabled な callback chain を先頭から処理させる操作である。
+- 子 callback が最後に登録され、かつ enabled の場合は、結果として子 callback が呼ばれるため「子の戻る処理」のように見える。ただし実際には dispatcher の callback selection の結果であり、親 callback、Fragment callback、Navigation callback、Activity fallback に進む可能性もある。
+- 子 callback の中からそのまま `onBackPressedDispatcher.onBackPressed()` を呼ぶと、子 callback 自身が再選択され得る。親 callback に進めたい場合は、子 callback を一時的に disabled にしてから dispatcher に委譲する。
+
 処理順のテスト観点:
 - Activity callback、Fragment callback、Navigation Component の callback がある画面で、どれが先に呼ばれるかを確認する。
+- 親 callback 登録後に子 callback を登録する構成では、子 callback が先に呼ばれ、子が disabled になった時だけ親 callback に進むことを確認する。
 - Fragment 遷移後、前画面の callback が残っていないことを確認する。
 - drawer / dialog / bottom sheet / selection mode など、先に閉じるべき UI が Fragment navigation や Activity finish より先に処理されることを確認する。
 - toolbar back / custom close button / system back が同じ経路を期待する画面では、同じ callback 順で処理されることを確認する。
