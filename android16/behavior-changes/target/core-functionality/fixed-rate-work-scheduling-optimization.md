@@ -33,20 +33,20 @@ Section:
 | 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
 | Android 16 に OS アップデートしただけで適用されるか | No | 公式文書は apps targeting Android 16 / API level 36 の Behavior Change として掲載。公開 compat page も Change ID 288912692 を Android 16 target 以上で enabled と説明 |
-| targetSdkVersion 36 以上が必要か | Yes | AOSP libcore の `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` は `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)`。Android 15 = 35 の後、つまり targetSdkVersion 36 以上で default enabled |
-| 追加の実行時条件があるか | Yes | `ScheduledThreadPoolExecutor#scheduleAtFixedRate` を使い、CPU suspend / Cached Apps Freezer / frozen state 等で fixed-rate period を複数回 missed した後に復帰する場合に実質影響が出る |
-| Compat Change ID が関係するか | Yes | `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 288912692。公開 compat page に掲載あり |
+| targetSdkVersion 36 以上が必要か | Yes | AOSP libcore の STPE Change ID 288912692 と Timer Change ID 351566728 はどちらも `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)`。Android 15 = 35 の後、つまり targetSdkVersion 36 以上で default enabled |
+| 追加の実行時条件があるか | Yes | `ScheduledExecutorService` / `ScheduledThreadPoolExecutor` または `Timer` の `scheduleAtFixedRate` を使い、CPU suspend / Cached Apps Freezer / frozen state 等で fixed-rate period を複数回 missed した後に復帰する場合に実質影響が出る |
+| Compat Change ID が関係するか | Yes | STPE: `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 288912692。Timer: `SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 351566728。公開 compat page に掲載されているのは STPE 側 |
 
 ### 調査日（Investigation Date）
 
-2026-07-01
+2026-07-01（2026-07-16 Timer 調査・実装例追記）
 
 ### 信頼度（Confidence）
 
 - High
 
 理由:
-- 公式 Behavior Change 文、公開 compat framework changes、AOSP libcore の Change ID / targetSdkVersion gate / `scheduleAtFixedRate` 再スケジュール実装が一致している。
+- 公式 Behavior Change 文、公開 compat framework changes、AOSP libcore の STPE / Timer 両方の Change ID、targetSdkVersion gate、`scheduleAtFixedRate` 再スケジュール実装が一致している。
 - Android 15 r36 tag にも同じ libcore 実装は存在するため、指定 tag 間の純粋な実装 diff ではなく、compat default state と targetSdkVersion 36 policy として説明する必要がある。この点は report に明記した。
 
 ### 適用条件分類（Applicability Classification）
@@ -63,7 +63,7 @@ Section:
 - Android version: 公式 Behavior Change としては Android 16 以上。Android 15 r36 tag にも同じ libcore gate が存在するため、Android 15 / targetSdkVersion 36 の実機挙動は環境条件つきで確認対象。
 - targetSdkVersion: 36 以上。
 - Device/form factor: 条件なし。
-- Permission/API/component condition: `ScheduledThreadPoolExecutor#scheduleAtFixedRate` または `ScheduledExecutorService#scheduleAtFixedRate` の fixed-rate periodic task。
+- Permission/API/component condition: `ScheduledThreadPoolExecutor#scheduleAtFixedRate`、`ScheduledExecutorService#scheduleAtFixedRate`、または `Timer#scheduleAtFixedRate` の fixed-rate periodic task。
 - App state/process condition: process が CPU suspend、Cached Apps Freezer、frozen state 等により複数 period の実行機会を missed し、その後実行可能状態へ戻ること。
 
 Compat framework:
@@ -71,6 +71,9 @@ Compat framework:
 - Change name: `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS`
 - Default state: Android Developers の compat page では Android 16 / API level 36 以上を target するアプリで enabled。AOSP annotation は `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)`。
 - Toggleable for testing: Yes。公式文書は app compatibility framework で `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` を enabled にしてテストできると説明している。
+- Timer の AOSP Change ID: 351566728
+- Timer の AOSP Change name: `SKIP_MULTIPLE_MISSED_PERIODIC_TASKS`
+- Timer の AOSP default state: `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)`。公開 Android 16 compat page には個別項目として掲載されていない。
 
 分類信頼度（Classification confidence）:
 - High
@@ -78,14 +81,14 @@ Compat framework:
 分類根拠（Classification evidence）:
 - Official documentation page: `behavior-changes-16` の `Core functionality` セクション。
 - Original applicability statement: targeting Android 16 では missed `scheduleAtFixedRate` execution の即時実行が最大 1 回になる。
-- AOSP targetSdk gate: `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)` on Change ID 288912692。
+- AOSP targetSdk gate: `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)` on STPE Change ID 288912692 and Timer Change ID 351566728。
 - Compat framework entry: 公開 compat page に `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 288912692、default enabled for apps targeting Android 16 / API level 36 or higher と掲載あり。
 
 ---
 
 # エグゼクティブサマリー（Executive Summary）
 
-Android 16 では、targetSdkVersion 36 以上のアプリで `ScheduledThreadPoolExecutor#scheduleAtFixedRate` の missed execution catch-up が抑制される。
+Android 16 では、targetSdkVersion 36 以上のアプリで `ScheduledThreadPoolExecutor` / `ScheduledExecutorService` と `Timer` の `scheduleAtFixedRate` missed execution catch-up が抑制される。
 従来は process が freeze / suspend 等から戻ったときに複数回分の missed fixed-rate task が連続実行され得たが、新挙動では即時に実行される missed execution は最大 1 回になる。
 Android 16 へ OS アップデートしただけで targetSdkVersion 35 以下のアプリに適用される変更ではない。
 影響があるのは、fixed-rate の backlog catch-up を業務ロジックとして期待している polling、sync、metrics upload、retry、cleanup 等である。
@@ -118,14 +121,20 @@ You can also test by using the app compatibility framework and enabling the STPE
 
 公式文書は、targetSdkVersion 36 化により `scheduleAtFixedRate` の catch-up 実行回数が変わることを説明している。
 対象は fixed-rate periodic task であり、`scheduleWithFixedDelay` は同じ catch-up モデルではない。
-「valid process lifecycle」は libcore の `ScheduledThreadPoolExecutor` が直接 lifecycle state を問い合わせる意味ではなく、AOSP 実装コメントでは CPU suspend や Cached Apps Freezer により app process が scheduled periods を missed する状況として説明されている。
+「valid process lifecycle」は libcore の executor / Timer が直接 lifecycle state を問い合わせる意味ではなく、AOSP 実装コメントでは CPU suspend や Cached Apps Freezer により app process が scheduled periods を missed する状況として説明されている。
+
+追加の公式 API reference:
+- https://developer.android.com/reference/java/util/Timer#scheduleAtFixedRate(java.util.TimerTask,long,long)
+- Android `Timer` API reference も API level 36 以降の fixed-rate behavior として、復帰時の catch-up が最大 1 回になることを説明している。
 
 ---
 
 # 変更内容（What Changed）
 
 - `ScheduledThreadPoolExecutor` に Change ID `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 288912692 があり、targetSdkVersion 36 以上で default enabled になる。
+- `Timer` に Change ID `SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 351566728 があり、同じく targetSdkVersion 36 以上で default enabled になる。
 - fixed-rate task の `setNextRunTime()` は、従来どおり `time += period` した後、新 compat change が enabled の場合、次回 scheduled time が現在時刻より 1 period 以上過去なら「最後に missed した period」に補正する。
+- `TimerThread#mainLoop()` も、fixed-rate task の次回時刻が複数 period 過去に残る場合、次回時刻を最新の missed period に補正する。
 - この補正により、freeze / suspend から復帰した直後に複数回分の fixed-rate task を連続実行して過去の全 period に追いつく挙動が抑制される。
 - `scheduleWithFixedDelay` は `period` が負値として扱われ、`setNextRunTime()` では `triggerTime(-p)` により「前回実行終了から delay 後」に再スケジュールされる。fixed-rate の missed catch-up 補正対象ではない。
 - public API signature の差分は確認していない。挙動変更は既存 API の runtime scheduling behavior である。
@@ -148,9 +157,9 @@ You can also test by using the app compatibility framework and enabling the STPE
 
 - device/form factor: 条件なし。
 - permission: 条件なし。
-- API usage: `scheduleAtFixedRate` を利用する fixed-rate periodic task。
+- API usage: `ScheduledExecutorService` / `ScheduledThreadPoolExecutor` または `Timer` の `scheduleAtFixedRate` を利用する fixed-rate periodic task。
 - manifest attribute: 条件なし。
-- component boundary: app process の Java executor / libcore runtime 内。WorkManager、JobScheduler、AlarmManager は直接この `ScheduledThreadPoolExecutor` fixed-rate catch-up 仕様に依存しないが、内部やアプリコードで STPE を併用している場合は別途確認が必要。
+- component boundary: app process の Java executor / Timer / libcore runtime 内。WorkManager、JobScheduler、AlarmManager は本件の fixed-rate catch-up 仕様に直接依存しないが、内部やアプリコードで executor / Timer を併用している場合は別途確認が必要。
 
 ---
 
@@ -159,6 +168,7 @@ You can also test by using the app compatibility framework and enabling the STPE
 ## 関連ファイル（Related Files）
 
 - `platform/libcore/ojluni/src/main/java/java/util/concurrent/ScheduledThreadPoolExecutor.java`
+- `platform/libcore/ojluni/src/main/java/java/util/Timer.java`
 - `platform/libcore/libcore.aconfig`
 - `platform/libcore/api/current.txt`
 - `frameworks-base/core/java/android/app/ActivityManager.java`
@@ -171,20 +181,23 @@ You can also test by using the app compatibility framework and enabling the STPE
 | ファイル / シンボル（File / symbol） | Android 15 の基準挙動（baseline） | Android 16 の挙動 | このコードパスを根拠にする理由 |
 | --- | --- | --- | --- |
 | `ScheduledThreadPoolExecutor.STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` | Android 15 r36 tag にも Change ID 288912692 と `@EnabledAfter(VANILLA_ICE_CREAM)` が存在 | 同じ。公開 compat page では Android 16 target 以上で default enabled | targetSdkVersion 36 gate の直接根拠 |
+| `Timer.SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` | Android 15 r36 tag にも Change ID 351566728 と `@EnabledAfter(VANILLA_ICE_CREAM)` が存在 | 同じ | Timer 側の targetSdkVersion 36 gate の直接根拠 |
 | `skipMultipleMissedPeriodicTasks()` | compat change または `Flags.scheduleAtFixedRateNewBehavior()` が enabled なら true | 同じ | compat override と force-enable aconfig flag の入口 |
 | `ScheduledFutureTask#setNextRunTime()` | fixed-rate (`p > 0`) で `time += p`。change enabled 時は過去に残った next schedule を最後の missed period へ補正 | 同じ | 複数 missed execution の catch-up を抑制する実装本体 |
-| `scheduleAtFixedRate()` | positive period の `ScheduledFutureTask` を作る | 同じ。API doc に API 36 の説明あり | 変更対象 API の entry point |
+| `ScheduledThreadPoolExecutor#scheduleAtFixedRate()` | positive period の `ScheduledFutureTask` を作る | 同じ。API doc に API 36 の説明あり | executor 側の entry point |
 | `scheduleWithFixedDelay()` | negative period の `ScheduledFutureTask` を作る | 同じ | fixed-delay は `triggerTime(-p)` 経路で、fixed-rate catch-up 補正対象ではない |
+| `TimerThread#mainLoop()` | fixed-rate (`p > 0`) で次回時刻を計算し、change enabled 時は最新の missed period へ補正 | 同じ | Timer の複数 catch-up を抑制する実装本体 |
+| `Timer#scheduleAtFixedRate()` | positive period の task を `sched()` へ渡す | 同じ。Android API reference に API 36 の説明あり | Timer 側の entry point |
 | `libcore.aconfig` / `schedule_at_fixed_rate_new_behavior` | Android 15 r36 tag に flag 定義あり | Android 16 r4 tag にも flag 定義あり | AppCompat flag / SDK_INT に関係なく新挙動を force-enable するための flag |
 | `ActivityManager.PROCESS_CAPABILITY_CPU_TIME` | process が CPU time を保証され、freeze されない capability と説明 | 同じ | process freeze / CPU availability が missed periods の背景条件であることの補助根拠 |
 | `Freezer#setProcessFrozen()` | process freeze/unfreeze を `Process.setProcessFrozen` に委譲 | 同じ | Cached Apps Freezer が process execution を止め得る補助文脈 |
 | `OomAdjuster#getFreezePolicy()` | cached adj / CPU capability などから freeze policy を決める | 同じ | cached process が freeze 対象になり得る補助文脈 |
 
 必須記入項目（Required context）:
-- Entry point / caller: app code -> `ScheduledExecutorService#scheduleAtFixedRate()` -> `ScheduledThreadPoolExecutor#scheduleAtFixedRate()` -> `ScheduledFutureTask#run()` -> `setNextRunTime()` -> `reExecutePeriodic()`。
-- Relevant class or service responsibility: `ScheduledThreadPoolExecutor` は delayed / periodic task の実行時刻と queue への再投入を管理する。`Freezer` / `OomAdjuster` は app process が frozen state に入る背景条件を管理するが、STPE の catch-up 回数を直接決めるわけではない。
-- Runtime path from app API / system event to changed code: fixed-rate task が実行されるたびに `runAndReset()` 後、次回時刻を `setNextRunTime()` で計算する。process が frozen / suspended で複数 period を missed した場合、復帰後の `now` と `time` の差により補正が入る。
-- Why unrelated code paths were excluded: WorkManager / JobScheduler / AlarmManager は OS scheduling API であり、本件の `ScheduledThreadPoolExecutor#scheduleAtFixedRate` の missed execution catch-up 仕様を直接決めないため、主証拠から除外した。`Timer#scheduleAtFixedRate` も別 API であり、今回の Change ID の対象ではない。
+- Entry point / caller: executor path は app code -> `ScheduledExecutorService#scheduleAtFixedRate()` -> `ScheduledThreadPoolExecutor#scheduleAtFixedRate()` -> `ScheduledFutureTask#run()` -> `setNextRunTime()` -> `reExecutePeriodic()`。Timer path は app code -> `Timer#scheduleAtFixedRate()` -> `sched()` -> `TimerThread#mainLoop()` -> `TaskQueue#rescheduleMin()`。
+- Relevant class or service responsibility: `ScheduledThreadPoolExecutor` と `TimerThread` は periodic task の実行時刻と queue への再投入を管理する。`Freezer` / `OomAdjuster` は app process が frozen state に入る背景条件を管理するが、catch-up 回数を直接決めるわけではない。
+- Runtime path from app API / system event to changed code: executor は fixed-rate task の `runAndReset()` 後に `setNextRunTime()`、Timer は task 実行前の `TimerThread#mainLoop()` で次回時刻を計算する。process が frozen / suspended で複数 period を missed した場合、復帰後の `now` と scheduled time の差により補正が入る。
+- Why unrelated code paths were excluded: WorkManager / JobScheduler / AlarmManager は OS scheduling API であり、本件の executor / Timer `scheduleAtFixedRate` missed execution catch-up 仕様を直接決めないため、主証拠から除外した。`Timer#scheduleAtFixedRate` は別 Change ID 351566728 で同じ最適化の対象となるため、除外対象から調査対象へ訂正した。
 
 ## 差分解釈（Diff Interpretation）
 
@@ -193,11 +206,13 @@ You can also test by using the app compatibility framework and enabling the STPE
 | Android 15 r36 と Android 16 r4 の該当 libcore 実装は同じ | No behavior change found between selected tags for core implementation | 指定 tag 間の実装 diff ではなく、targetSdkVersion 36 の compat default として説明される | High |
 | `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)` | Changed condition / gate | targetSdkVersion 36 以上で default enabled | High |
 | `setNextRunTime()` が change enabled 時に `time` を最後の missed period へ補正 | Changed behavior | 復帰時の immediate catch-up を最大 1 missed execution に抑制する | High |
+| `TimerThread#mainLoop()` が change enabled 時に次回時刻を最新の missed period へ補正 | Changed behavior | Timer の復帰時 immediate catch-up も最大 1 missed execution に抑制する | High |
 | `scheduleWithFixedDelay()` は negative period 経路 | No behavior change found for fixed-delay catch-up | fixed-delay は本件の fixed-rate missed period catch-up とは別挙動 | High |
 | `api/current.txt` の public signatures に差分なし | No API surface change | 既存 API の runtime behavior change | High |
 
 必須分類（Required interpretation）:
 - Added behavior: `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` が enabled の場合、fixed-rate の next run time を最後の missed period へ補正する。
+- Added behavior: Timer Change ID 351566728 が enabled の場合も、`TimerThread#mainLoop()` が次回時刻を最新の missed period へ補正する。
 - Removed behavior: targetSdkVersion 36 以上では、複数 missed periods をすべて即時 catch-up する挙動が抑制される。
 - Changed condition / gate: `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)`。Android 15 / API 35 より後、つまり targetSdkVersion 36 以上。
 - Changed default: targetSdkVersion 36 以上で compat change が default enabled。
@@ -207,18 +222,21 @@ You can also test by using the app compatibility framework and enabling the STPE
 
 - 公式文書は、この項目を apps targeting Android 16 / API level 36 の Behavior Change として掲載している。
 - 公開 compat page は `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 288912692 を掲載し、Android 16 / API level 36 以上を target するアプリで default enabled と説明している。
+- Android `Timer` API reference は API level 36 以降の fixed-rate task で catch-up が最大 1 回になることを説明している。
 - AOSP libcore の `ScheduledThreadPoolExecutor` は Change ID 288912692 を持ち、`@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)` が付いている。
+- AOSP libcore の `Timer` は Change ID 351566728 を持ち、同じ `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)` が付いている。
 - Android 16 の `Build.VERSION_CODES.VANILLA_ICE_CREAM` は 35、`BAKLAVA` は 36。
-- `skipMultipleMissedPeriodicTasks()` は `Compatibility.isChangeEnabled(STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS)` または `Flags.scheduleAtFixedRateNewBehavior()` が true のとき true を返す。
+- executor の `skipMultipleMissedPeriodicTasks()` は Change ID 288912692、Timer の同名 method は Change ID 351566728 を確認し、どちらも各 compat change または `Flags.scheduleAtFixedRateNewBehavior()` が true のとき true を返す。
 - fixed-rate task は `period > 0`、fixed-delay task は `period < 0` として内部表現される。
 - fixed-rate では change enabled 時、次回時刻が過去に残っている場合に最後の missed period へ補正する。
+- Timer の fixed-rate path でも change enabled 時、`TimerThread#mainLoop()` が次回時刻を最新の missed period へ補正する。
 - Android 15 r36 tag にも同じ libcore 実装と aconfig flag が存在する。
 
 ## 観察（Observations）
 
-- `ScheduledThreadPoolExecutor` は Activity lifecycle callback や process state API を直接参照していない。
+- `ScheduledThreadPoolExecutor` と `Timer` は Activity lifecycle callback や process state API を直接参照していない。
 - 「outside a valid process lifecycle」の実装上の具体例は、libcore コメント上は CPU suspend と Cached Apps Freezer である。
-- AOSP の framework 側には process freeze/unfreeze を管理する `Freezer`、freeze policy を決める `OomAdjuster`、CPU time capability を示す `ActivityManager.PROCESS_CAPABILITY_CPU_TIME` があるが、STPE の catch-up 回数の最終判断は libcore 内の `setNextRunTime()` が行う。
+- AOSP の framework 側には process freeze/unfreeze を管理する `Freezer`、freeze policy を決める `OomAdjuster`、CPU time capability を示す `ActivityManager.PROCESS_CAPABILITY_CPU_TIME` があるが、catch-up 回数の最終判断は executor の `setNextRunTime()` または Timer の `mainLoop()` が行う。
 - `scheduleAtFixedRate` の missed backlog を「実行されなかった回数分の処理」として意味づけているアプリでは、処理回数が減る。
 
 ## 仮説（Hypotheses）
@@ -236,7 +254,7 @@ You can also test by using the app compatibility framework and enabling the STPE
 ## 適用ゲート根拠（Applicability Gate Evidence）
 
 - targetSdkVersion gate: `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)`。Android 15 / API 35 より後、targetSdkVersion 36 以上で enabled。
-- CompatChanges.isChangeEnabled / ChangeId: `Compatibility.isChangeEnabled(STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS)` / 288912692。
+- CompatChanges.isChangeEnabled / ChangeId: executor は `Compatibility.isChangeEnabled(STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS)` / 288912692、Timer は `Compatibility.isChangeEnabled(SKIP_MULTIPLE_MISSED_PERIODIC_TASKS)` / 351566728。
 - @EnabledAfter / @EnabledSince / default state: 公開 compat page は Android 16 / API level 36 以上を target するアプリで default enabled と説明。
 - Build.VERSION / SDK_INT gate: libcore 実装上の明示的 `SDK_INT` 分岐は確認していない。compat framework と aconfig flag による gate。
 - DeviceConfig / resources config: `libcore.aconfig` に `schedule_at_fixed_rate_new_behavior` があり、AppCompat flag / SDK_INT に関係なく force-enable する説明がある。
@@ -244,7 +262,7 @@ You can also test by using the app compatibility framework and enabling the STPE
 - Manifest/property gate: 該当なし。
 - No gate found: OS update only / all apps を示す primary gate は確認していない。
 - Gate conclusion: Android 16 以上かつ targetSdkVersion 36 以上、さらに `scheduleAtFixedRate` の missed fixed-rate periods が発生する場合。
-- Reasoning from source context: app API が `scheduleAtFixedRate()` で positive period の task を作り、復帰後の `setNextRunTime()` で compat change enabled 時に次回時刻を最後の missed period へ補正するため、複数 missed executions の連続 catch-up が抑制される。
+- Reasoning from source context: executor は復帰後の `setNextRunTime()`、Timer は `TimerThread#mainLoop()` で compat change enabled 時に次回時刻を最新の missed period へ補正するため、複数 missed executions の連続 catch-up が抑制される。
 
 ---
 
@@ -253,6 +271,7 @@ You can also test by using the app compatibility framework and enabling the STPE
 ## 影響を受けるアプリ（Affected Apps）
 
 - `ScheduledThreadPoolExecutor#scheduleAtFixedRate` を使うアプリ。
+- `Timer#scheduleAtFixedRate` を使うアプリ。
 - periodic task の missed execution がまとめて実行されることに依存しているアプリ。
 - missed execution の backlog を「実行回数」として処理する設計のアプリ。
 - 定期 polling、sync、metrics upload、retry、cleanup を fixed-rate で実装しているアプリ。
@@ -262,7 +281,7 @@ You can also test by using the app compatibility framework and enabling the STPE
 
 - `scheduleAtFixedRate` を使っていないアプリ。
 - `scheduleWithFixedDelay` を使い、前回完了から一定 delay 後の実行で問題ないアプリ。
-- WorkManager / JobScheduler / AlarmManager のみで periodic work を実装しているアプリ。ただし内部で STPE を併用している場合は確認が必要。
+- WorkManager / JobScheduler / AlarmManager のみで periodic work を実装しているアプリ。ただし内部で executor / Timer の fixed-rate task を併用している場合は確認が必要。
 - fixed-rate task が idempotent で、missed period ごとの catch-up を必要としないアプリ。
 
 ## アプリ種別別の影響
@@ -270,6 +289,7 @@ You can also test by using the app compatibility framework and enabling the STPE
 | アプリ種別 | 影響 |
 | --- | --- |
 | `ScheduledThreadPoolExecutor#scheduleAtFixedRate` 利用 | targetSdkVersion 36 以上で復帰時 catch-up 回数が最大 1 回になる |
+| `Timer#scheduleAtFixedRate` 利用 | 別 Change ID 351566728 により同じく復帰時 catch-up 回数が最大 1 回になる |
 | missed execution をまとめて処理する前提 | 処理回数が減り、polling / retry / cleanup 等の設計見直しが必要になる可能性 |
 | backlog を業務データとして扱う | missed period 数を別途計算・保存する必要がある可能性 |
 | WorkManager / JobScheduler / AlarmManager 利用 | 本件 API の直接影響は小さい |
@@ -292,11 +312,21 @@ You can also test by using the app compatibility framework and enabling the STPE
 
 # 推奨対応候補（Recommended Action Candidates）
 
-- `ScheduledThreadPoolExecutor#scheduleAtFixedRate` の利用箇所を棚卸しする。
-- missed period の回数自体が必要な処理は、executor の catch-up 回数に依存せず、現在時刻と最終処理時刻から明示的に差分計算する。
+- `ScheduledExecutorService` / `ScheduledThreadPoolExecutor` と `Timer` の `scheduleAtFixedRate` 利用箇所を棚卸しする。
+- missed period の回数自体が必要な処理は、callback の catch-up 回数に依存せず、現在時刻と最終処理時刻から明示的に差分計算する。
 - network、DB、UI 更新、file I/O を fixed-rate task で行う場合、復帰直後の連続実行がなくなっても正しいか確認する。
 - idempotent でない periodic task は、最大 1 回実行でもデータ欠落や retry 不足にならないか確認する。
 - periodic background work は必要に応じて WorkManager / JobScheduler / AlarmManager への移行を検討する。
+- 詳細な Before / After、Timer、Java、テストコードは [Fixed rate work scheduling optimization - 実装例](fixed-rate-work-scheduling-optimization-implementation-examples.md) を参照する。
+
+代表例:
+
+```kotlin
+// missed callback 回数ではなく、最後に成功した時刻から必要な処理量を求める。
+executor.scheduleAtFixedRate({
+    reconciler.reconcile(lastSuccessfulAt = checkpoint.read(), now = clock.instant())
+}, 0, periodSeconds, TimeUnit.SECONDS)
+```
 
 ---
 
@@ -307,10 +337,11 @@ You can also test by using the app compatibility framework and enabling the STPE
 | Android 15 | 35 | default | missed fixed-rate tasks が複数回 catch-up され得る |
 | Android 16 | 35 | default | 旧挙動が維持される想定 |
 | Android 16 | 36 | default | missed fixed-rate task の即時 catch-up は最大 1 回 |
-| Android 16 | 35/36 | compat flag enabled / disabled | 新旧挙動を切り替えて比較 |
+| Android 16 | 35/36 | executor 288912692 / Timer 351566728 enabled / disabled | executor / Timer の新旧挙動を個別に比較 |
 
 確認対象:
 - app を Cached Apps Freezer / suspend 相当の状態に置き、復帰時に `scheduleAtFixedRate` task が何回実行されるか。
+- executor path と `Timer#scheduleAtFixedRate` path の両方で復帰時の実行回数を確認する。
 - `scheduleAtFixedRate` と `scheduleWithFixedDelay` の比較。
 - fixed-rate task が idempotent でない場合のデータ整合性。
 - fixed-rate task が network、DB、UI 更新、file I/O を行う場合の負荷と欠落。
@@ -323,8 +354,8 @@ You can also test by using the app compatibility framework and enabling the STPE
 - Investigated Android versions: `android-15.0.0_r36` -> `android-16.0.0_r4`
 - Related Behavior Change document: https://developer.android.com/about/versions/16/behavior-changes-16#schedule-at-fixed-rate
 - Original statement being verified: 上記「公式ドキュメント確認」に記載。
-- Evidence from AOSP source: `ScheduledThreadPoolExecutor.java`、`libcore.aconfig`、`api/current.txt`、`ActivityManager.java`、`Freezer.java`、`OomAdjuster.java`。
-- AOSP source context reviewed: app API -> `ScheduledThreadPoolExecutor` fixed-rate task -> `setNextRunTime()` -> compat gate。
+- Evidence from AOSP source: `ScheduledThreadPoolExecutor.java`、`Timer.java`、`libcore.aconfig`、`api/current.txt`、`ActivityManager.java`、`Freezer.java`、`OomAdjuster.java`。
+- AOSP source context reviewed: executor path は app API -> `ScheduledThreadPoolExecutor` -> `setNextRunTime()` -> Change ID 288912692、Timer path は app API -> `TimerThread#mainLoop()` -> Change ID 351566728。
 - Diff interpretation: changed behavior、changed condition / gate、changed default、no public API surface change、no core implementation diff between selected tags。
 - Applicability classification: `TARGET_SDK_36_CONDITIONAL`
 - Confidence level: High
