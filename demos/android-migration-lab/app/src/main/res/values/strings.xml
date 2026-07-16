@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Android Migration Lab</string>
+    <string name="legacy_back_title">Legacy back only</string>
+    <string name="modern_back_title">Modern predictive back</string>
+    <string name="temporary_opt_out_title">Temporary opt-out</string>
+</resources>

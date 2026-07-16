@@ -58,6 +58,7 @@ Release Notes / Entry Point
 | `.codex/prompts/` | 再利用する調査プロンプトと設計プロンプト |
 | `android<version>/` | Android バージョン固有の調査成果物 |
 | `build-system/` | AGP、Gradle、Kotlin、NDK、CI などの Build System 更新調査 |
+| `demos/` | Behavior Change の説明・再現補助用デモ。調査根拠そのものとしては扱わない |
 | `docs/` | バージョン非依存の調査手順、記録、知識、メモ |
 | `frameworks-base/` | Git 管理しない一時的な AOSP source checkout |
 | `scripts/` | ローカル補助スクリプト |
@@ -75,6 +76,7 @@ Release Notes / Entry Point
 | Build System 更新調査 | `build-system/<area>/versions/` |
 | Build System 1ページ要約 | `build-system/<area>/summaries/` |
 | Build System 共通テンプレート | `build-system/templates/` |
+| OS / targetSdkVersion 別の移行デモ | `demos/android-migration-lab/` |
 | 共通調査プロンプト | `.codex/prompts/investigation.md` |
 | バージョン横断の調査ルール | `docs/workflow/` |
 | バージョン横断の情報源ポリシー・用語 | `docs/overview/` |
