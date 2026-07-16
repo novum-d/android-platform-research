@@ -103,7 +103,7 @@ Android 16 の Local Network Permission は Android 17 と異なり、現時点�
 | BC-012 | Predictive back default enabled | setup wizard、camera connection flow、image viewer、custom back | TARGET_SDK_36_CONDITIONAL | legacy back handling 依存なら影響あり | OnBackInvoked / AndroidX back APIs へ移行 | High |
 | BC-013 | MediaStore version lockdown | 端末内写真 / 動画 cache、MediaStore sync | TARGET_SDK_36_CONDITIONAL | `MediaStore#getVersion()` 利用時のみ要確認 | opaque token として扱い、format parse をやめる | High |
 | BC-014 | GPU syscall filtering | live view / rendering / native graphics / profiling SDK | OS_UPDATE_ALL_APPS | 通常 API 利用は低リスク。direct Mali ioctl は要注意 | Pixel Mali device で SELinux denial を確認 | Medium |
-| BC-015 | Fixed rate work scheduling optimization | camera status polling、接続監視、同期、retry、cleanup、metrics upload | TARGET_SDK_36_CONDITIONAL | executor / Timer の `scheduleAtFixedRate` missed backlog に依存する場合は処理回数が減る | API 利用箇所を棚卸しし、freeze / suspend 復帰時の実行回数を Change ID 288912692 / 351566728 enabled / disabled で比較 | High |
+| BC-015 | Fixed rate work scheduling optimization | camera status polling、接続監視、同期、retry、cleanup、metrics upload | TARGET_SDK_36_CONDITIONAL | executor / Timer の `scheduleAtFixedRate` missed backlog に依存する場合は処理回数が減る。API は `@Deprecated` ではないが Lint `DiscouragedApi` と同じ問題領域 | API 利用箇所を棚卸しし、fixed-delay 移行可否と Change ID 288912692 / 351566728 enabled / disabled を確認 | High |
 
 ---
 
@@ -209,6 +209,7 @@ Bluetooth については、Android 16 OS update だけで remote bond loss hand
 targetSdkVersion 36 へ移行する場合は、large screen / edge-to-edge / predictive back が UI に直接影響する。カメラ live view、remote control、image viewer、setup wizard は fixed orientation、system bar avoidance、legacy back handling への依存が表に出やすいため、Android 16 / targetSdkVersion 36 の実機確認が必要である。
 
 定期処理については、executor または `Timer#scheduleAtFixedRate` で camera status polling、接続監視、同期、retry、cleanup 等を実装している場合、targetSdkVersion 36 では freeze / suspend 復帰時に missed execution が最大 1 回しか即時実行されない。missed period 数だけ処理する設計は callback の catch-up 回数に依存させず、最終処理時刻と現在時刻から必要量を明示的に計算する必要がある。
+Android Studio の `DiscouragedApi` 警告はこの Behavior Change と無関係ではない。短周期 polling は、前回の実際の開始時刻基準でよければ `Timer#schedule(..., period)`、前回処理完了から一定間隔を空けたければ `ScheduledExecutorService#scheduleWithFixedDelay`、process death 後も必要な deferrable work は WorkManager / JobScheduler を移行候補とする。
 
 Native / SDK については、16 KB page-size device、ART internal changes、GPU syscall filtering を分けて確認する。画像・動画処理、codec、ML、暗号化、DB、monitoring / profiling / anti-tamper SDK が bundled native library や runtime internals に依存している場合、OS update だけでも互換性リスクになり得る。
 

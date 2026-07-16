@@ -49,6 +49,7 @@ Android 16 Behavior Change:
 - `Timer` の single-thread、例外処理、cancel 管理が問題の場合は `ScheduledExecutorService`。
 
 重要:
+- `scheduleAtFixedRate` は `@Deprecated` API ではないが、Android Lint は cached process 復帰時の大量 catch-up を理由に `DiscouragedApi` として警告する。この警告は本 Behavior Change と同じ問題領域を扱う。
 - `Timer#scheduleAtFixedRate` から `ScheduledExecutorService#scheduleAtFixedRate` へ置き換えるだけでは、この Behavior Change を回避できない。Android 16 では両方が missed catch-up 最大 1 回の対象である。
 - `scheduleWithFixedDelay` への変更は cadence semantics を変える。絶対時刻基準の fixed-rate が本当に必要かを確認してから選択する。
 - WorkManager / JobScheduler への移行も単なる API 置換ではなく、実行保証、制約、間隔、process death の要件を再定義する設計変更として扱う。
@@ -72,9 +73,9 @@ rg -n "scheduleAtFixedRate|ScheduledExecutorService|ScheduledThreadPoolExecutor|
 | callback ごとに最新 camera state を取得 | 1 回の idempotent reconciliation | Recommended | missed 回数を補う必要はない |
 | callback ごとに retry count を加算 | deadline / current connection state ベース | Must | callback 回数を retry semantics にしない |
 | callback ごとに 1 period 分のデータを確定 | checkpoint + elapsed period calculation | Must | logical period を明示的に計算する |
-| `Timer#scheduleAtFixedRate` | Timer を維持し business logic を時刻ベースへ変更 | Must | Timer 自体も Behavior Change 対象 |
-| Timer の single-thread / cancel / exception handling が複雑 | `ScheduledExecutorService` | Recommended | Behavior Change 回避ではなく保守性改善 |
-| 前回完了から一定 delay で十分 | `scheduleWithFixedDelay` | Optional | fixed-rate から semantics が変わる |
+| `Timer#scheduleAtFixedRate`、前回の実際の開始時刻を基準にしてよい | `Timer#schedule(..., period)` | Recommended | 最小差分。fixed-delay になり backlog を作らない |
+| Timer の single-thread / cancel / exception handling も見直す | `ScheduledExecutorService#scheduleWithFixedDelay` | Recommended | fixed-delay 化と lifecycle 制御を同時に行う |
+| absolute-time fixed-rate が必須 | fixed-rate を維持し business logic を時刻ベースへ変更 | Conditional | Lint 警告理由と Android 15 以下を含むリスク受容が必要 |
 | process death 後も必要な deferrable work | WorkManager / JobScheduler | Conditional | background execution 要件を別途確認 |
 
 ## 移行マップ（Migration Map）
@@ -84,6 +85,7 @@ rg -n "scheduleAtFixedRate|ScheduledExecutorService|ScheduledThreadPoolExecutor|
 | missed callback 1 回を retry 1 回として数える | 現在の接続状態と deadline から retry 要否を決める | callback 回数依存をなくす |
 | missed callback 1 回を 1 period 分の処理として数える | checkpoint と現在時刻から未処理 period 数を計算する | 論理処理の欠落を防ぐ |
 | Timer を executor に置き換えるだけ | scheduling API と business semantics を分けて見直す | 同じ Behavior Change を別 API へ移すだけにしない |
+| Timer の fixed-rate polling | Timer の fixed-delay `schedule`、または executor の `scheduleWithFixedDelay` | cached process 復帰時の backlog を作らない |
 | 復帰直後に無制限 catch-up | bounded batch + checkpoint | CPU / network / DB の集中負荷を防ぐ |
 
 ## 例 1: 最新 camera state を 1 回で同期する
@@ -189,20 +191,19 @@ executor.scheduleAtFixedRate(
 - `Instant` / wall clock は時刻補正の影響を受ける。経過時間だけが必要で process 内に閉じる処理は `SystemClock.elapsedRealtime()` も検討する。
 - `elapsedRealtime()` は reboot を跨いで永続化する checkpoint には使わない。
 
-## 例 3: `Timer#scheduleAtFixedRate` を維持して対応する
+## 例 3: `Timer#scheduleAtFixedRate` を `Timer#schedule` へ最小差分で移行する
 
 目的:
-- Timer を使い続けながら、missed callback の連続実行に依存する business logic を修正する。
+- Timer を使い続けながら fixed-rate を fixed-delay に変え、cached process 復帰時の backlog を作らない。
 
 移行前:
 
 ```kotlin
-val timer = Timer("camera-retry", true)
+val timer = Timer("camera-poll", true)
 
 timer.scheduleAtFixedRate(object : TimerTask() {
     override fun run() {
-        retryCameraConnection()
-        retryCount += 1
+        cameraRepository.poll()
     }
 }, 0L, 5_000L)
 ```
@@ -210,12 +211,12 @@ timer.scheduleAtFixedRate(object : TimerTask() {
 移行後:
 
 ```kotlin
-val timer = Timer("camera-reconcile", true)
+val timer = Timer("camera-poll", true)
 
-timer.scheduleAtFixedRate(object : TimerTask() {
+timer.schedule(object : TimerTask() {
     override fun run() {
         runCatching {
-            connectionReconciler.reconcileNow()
+            cameraRepository.reconcileCurrentState()
         }.onFailure { logger.warn(it) }
     }
 }, 0L, 5_000L)
@@ -224,12 +225,12 @@ timer.scheduleAtFixedRate(object : TimerTask() {
 Java:
 
 ```java
-Timer timer = new Timer("camera-reconcile", true);
-timer.scheduleAtFixedRate(new TimerTask() {
+Timer timer = new Timer("camera-poll", true);
+timer.schedule(new TimerTask() {
     @Override
     public void run() {
         try {
-            connectionReconciler.reconcileNow();
+            cameraRepository.reconcileCurrentState();
         } catch (RuntimeException error) {
             logger.warn(error);
         }
@@ -238,24 +239,27 @@ timer.scheduleAtFixedRate(new TimerTask() {
 ```
 
 移行手順:
-1. `TimerTask#run()` の呼び出し回数を retry count として扱う処理を削除する。
-2. 現在の接続状態、最後の成功時刻、deadline から必要な処理を判断する reconciler に置き換える。
-3. owner の終了時に `timer.cancel()` を呼ぶ。
-4. task 内の例外が Timer thread を終了させないように failure handling を明示する。
+1. 要件が「初回予定時刻を基準に 5 秒ごと」ではなく「前回の実際の開始時刻を基準に 5 秒ごと」でよいことを確認する。
+2. `scheduleAtFixedRate(task, delay, period)` を `schedule(task, delay, period)` へ置き換える。
+3. callback 回数依存を削除し、現在状態を取得する idempotent な処理へ変更する。
+4. owner の終了時に `timer.cancel()` を呼ぶ。
+5. task 内の未処理例外で Timer thread が終了しないように failure handling を明示する。
 
 確認観点:
-- Android 16 / targetSdkVersion 36 で復帰時 callback が最大 1 回でも reconnect が正しく収束する。
+- task が 2 秒かかった場合、次回開始は前回開始から約 5 秒後、つまり完了から約 3 秒後になることを確認する。
+- cached / uncached 復帰後に missed period 数の連続実行が発生しないことを確認する。
 - task failure 後も、設計した retry / reschedule 経路が維持される。
 - Activity / service 終了後に Timer thread が残らない。
 
 注意点:
-- Timer の 2 つの `scheduleAtFixedRate` overload はどちらも fixed-rate path を使うため、`delay` 版と `Date firstTime` 版の双方を棚卸しする。
+- Timer の `schedule` は fixed-delay と呼ばれるが、executor の `scheduleWithFixedDelay` と違い、前回 task の完了時刻ではなく実際の開始時刻を基準にする。task が period より長い場合、完了直後に次回が開始され得る。完了後に必ず delay を空けたい場合は `scheduleWithFixedDelay` を使う。
+- 初回予定時刻を基準とする絶対時刻同期が必要な処理には使わない。
+- `delay` 版と `Date firstTime` 版の双方を棚卸しする。
 
-## 例 4: Timer を `ScheduledExecutorService` へ移行する Java 例
+## 例 4: Timer を `ScheduledExecutorService#scheduleWithFixedDelay` へ移行する Java 例
 
 目的:
-- Timer の single-thread、cancel、例外処理を executor の lifecycle 管理へ移す。
-- この移行は Android 16 behavior の回避ではなく、実装の制御性を改善するために行う。
+- fixed-delay 化に加え、Timer の single-thread、cancel、例外処理を executor の lifecycle 管理へ移す。
 
 移行前:
 
@@ -275,7 +279,7 @@ timer.scheduleAtFixedRate(new TimerTask() {
 ScheduledExecutorService executor =
         Executors.newSingleThreadScheduledExecutor();
 
-ScheduledFuture<?> polling = executor.scheduleAtFixedRate(
+ScheduledFuture<?> polling = executor.scheduleWithFixedDelay(
         () -> {
             try {
                 cameraRepository.reconcileCurrentState();
@@ -296,12 +300,12 @@ executor.shutdown();
 1. `TimerTask` の処理を `Runnable` へ移す。
 2. `Timer#cancel()` の lifecycle を `ScheduledFuture#cancel()` と `ExecutorService#shutdown()` に分ける。
 3. periodic task 内の未処理例外を捕捉し、次回実行を止めるか継続するかを明示する。
-4. callback 回数依存の logic は同時に reconciliation / checkpoint 方式へ変更する。
+4. `scheduleAtFixedRate` ではなく `scheduleWithFixedDelay` を選び、callback 回数依存の logic は reconciliation / checkpoint 方式へ変更する。
 
 確認観点:
 - cancel 後に polling が継続しない。
 - 例外時の次回実行方針が要件どおりである。
-- targetSdkVersion 36 では executor でも missed catch-up は最大 1 回である。
+- cached / uncached 復帰後に backlog が連続実行されない。
 
 ## 例 5: fixed-delay が要件に合う場合だけ切り替える
 
@@ -326,6 +330,29 @@ executor.scheduleWithFixedDelay({
 
 注意点:
 - fixed-rate から fixed-delay へ変えると実行開始間隔が変わる。Android 16 対応という理由だけで機械的に置き換えない。
+
+## 例 6: fixed-rate を維持できる例外条件
+
+次をすべて満たす場合に限り、`scheduleAtFixedRate` の維持を検討する。
+
+1. absolute-time の周期、複数 task 間の同期、または固定回数を一定時間内に完了する要件が明文化されている。
+2. Android 15 以下で長時間 cached になった後の大量 catch-up を許容または独自に抑制できる。
+3. Android 16 / targetSdkVersion 36 で catch-up が最大 1 回になっても業務結果が壊れない。
+4. callback は idempotent で、復帰時の CPU、network、DB 負荷に上限がある。
+5. Lint suppression を使う場合、理由、対象範囲、対応 OS のテストがコードレビュー可能な形で残っている。
+
+Lint suppression は移行ではない。まず fixed-delay へ変更できない理由を確認し、必要な呼び出しだけに局所化する。
+
+## process lifecycle を跨ぐ場合の移行先
+
+| 要件 | 移行先 | 理由 |
+| --- | --- | --- |
+| 画面表示中 / 接続中だけ数秒間隔で polling | lifecycle owner が cancel する coroutine loop、または `scheduleWithFixedDelay` | Activity / service の終了に合わせて停止できる |
+| process 終了後も再実行したい deferrable work | WorkManager | 永続化、制約、retry を OS 管理へ移せる |
+| JobScheduler を直接管理する既存基盤がある | JobScheduler | process lifecycle から切り離せる |
+| user-visible な正確な時刻通知 | AlarmManager を要件と権限制約込みで検討 | exact alarm は periodic polling の代替ではない |
+
+WorkManager の periodic work は短周期 polling の置換先ではない。接続中だけ必要な短周期処理は lifecycle-bound、process death を跨ぐ同期や cleanup は WorkManager、というように責務を分ける。
 
 ## テスト観点（Verification）
 

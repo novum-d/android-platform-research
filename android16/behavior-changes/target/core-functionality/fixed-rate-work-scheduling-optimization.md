@@ -93,6 +93,8 @@ Android 16 では、targetSdkVersion 36 以上のアプリで `ScheduledThreadPo
 Android 16 へ OS アップデートしただけで targetSdkVersion 35 以下のアプリに適用される変更ではない。
 影響があるのは、fixed-rate の backlog catch-up を業務ロジックとして期待している polling、sync、metrics upload、retry、cleanup 等である。
 
+`scheduleAtFixedRate` は API として `@Deprecated` にはなっていない。一方、Android Lint は `DiscouragedApi` として、cached process が uncached に戻った際の大量連続実行を理由に使用を強く非推奨としている。この Lint 警告と Android 16 Behavior Change は無関係ではなく、同じ missed execution の catch-up 問題を扱う。Android 16 / targetSdkVersion 36 の変更は大量 catch-up を最大 1 回へ抑える緩和策だが、古い OS、targetSdkVersion 35 以下、fixed-rate の意味論、process lifecycle との不整合は残るため、Lint 警告を無視してよい根拠にはならない。
+
 ---
 
 # 公式ドキュメント確認（Original Documentation）
@@ -126,6 +128,19 @@ You can also test by using the app compatibility framework and enabling the STPE
 追加の公式 API reference:
 - https://developer.android.com/reference/java/util/Timer#scheduleAtFixedRate(java.util.TimerTask,long,long)
 - Android `Timer` API reference も API level 36 以降の fixed-rate behavior として、復帰時の catch-up が最大 1 回になることを説明している。
+
+## API の非推奨状態と Lint 警告
+
+確認結果:
+- `Timer#scheduleAtFixedRate` と `ScheduledExecutorService#scheduleAtFixedRate` は public API から削除予定の `@Deprecated` API ではない。
+- Android Studio / Lint の取り消し線は `DiscouragedApi` 警告であり、Java / Android API の formal deprecation とは異なる。
+- `Timer#scheduleAtFixedRate` の警告は `Timer#schedule(TimerTask, delay, period)`、executor の警告は `scheduleWithFixedDelay` を代替候補として示す。どちらも missed period の backlog を蓄積しないが、基準時刻は異なる。Timer の `schedule` は前回の実際の実行開始時刻、executor の `scheduleWithFixedDelay` は前回処理の完了時刻から次回を決める。
+- 警告の原因である cached process 復帰時の連続 catch-up と、本 Behavior Change が抑制する missed execution は同じ問題領域である。
+
+判断:
+- Behavior Change 調査から `Timer#scheduleAtFixedRate` を削除しない。
+- 新規実装では absolute-time fixed-rate が明確に必要な場合を除き、fixed-delay、lifecycle に紐づく one-shot rescheduling、または OS 管理の background work を優先する。
+- 既存実装を維持する場合も、callback 回数を retry 回数や論理 period 数として扱わず、Android 15 以下と Android 16 / targetSdkVersion 36 の両方をテストする。
 
 ---
 
@@ -313,6 +328,8 @@ You can also test by using the app compatibility framework and enabling the STPE
 # 推奨対応候補（Recommended Action Candidates）
 
 - `ScheduledExecutorService` / `ScheduledThreadPoolExecutor` と `Timer` の `scheduleAtFixedRate` 利用箇所を棚卸しする。
+- Lint `DiscouragedApi` を単に suppress せず、fixed-rate が必要な absolute-time 要件を確認する。
+- 前回の実際の開始時刻を基準にしてよい Timer task は `Timer#schedule(..., period)`、前回処理の完了から一定間隔を空けたい task は `ScheduledExecutorService#scheduleWithFixedDelay` へ移行する。
 - missed period の回数自体が必要な処理は、callback の catch-up 回数に依存せず、現在時刻と最終処理時刻から明示的に差分計算する。
 - network、DB、UI 更新、file I/O を fixed-rate task で行う場合、復帰直後の連続実行がなくなっても正しいか確認する。
 - idempotent でない periodic task は、最大 1 回実行でもデータ欠落や retry 不足にならないか確認する。

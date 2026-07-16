@@ -35,6 +35,7 @@ Note:
 
 targetSdkVersion 36 以上では、`ScheduledThreadPoolExecutor` / `ScheduledExecutorService` と `Timer` の `scheduleAtFixedRate` が missed period を複数回分まとめて即時 catch-up しない。
 復帰時に即時実行される missed execution は最大 1 回になり、復帰直後の負荷は下がるが、実行回数に依存する処理は見直しが必要。
+API は `@Deprecated` ではないが、Android Lint は同じ cached-process catch-up 問題を理由に `DiscouragedApi` として警告する。Android 16 の変更は警告理由を緩和するが、古い OS や fixed-rate semantics のリスクは残る。
 
 ## 顧客影響（Customer Impact）
 
@@ -55,6 +56,7 @@ targetSdkVersion 36 以上では、`ScheduledThreadPoolExecutor` / `ScheduledExe
 
 - 必須対応: missed execution の回数を業務ロジックとして扱っている場合は、最終処理時刻から明示的に差分計算する設計へ見直す。
 - 推奨対応: `scheduleAtFixedRate` 利用箇所を棚卸しし、compat flag enabled / disabled で復帰時の実行回数を比較する。
+- 移行候補: 前回の実際の開始時刻基準でよい場合は `Timer#schedule(..., period)`、前回処理完了から一定間隔を空ける場合は `ScheduledExecutorService#scheduleWithFixedDelay`。process death 後も必要な deferrable work は WorkManager / JobScheduler。
 - 不要: WorkManager / JobScheduler / AlarmManager のみを使い、executor / Timer の fixed-rate catch-up に依存していない場合。
 - 実装例: [Fixed rate work scheduling optimization - 実装例](../../../behavior-changes/target/core-functionality/fixed-rate-work-scheduling-optimization-implementation-examples.md) に Before / After、Timer、Java、テストコードを記載。
 

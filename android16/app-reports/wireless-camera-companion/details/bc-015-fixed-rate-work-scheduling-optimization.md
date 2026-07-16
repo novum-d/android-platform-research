@@ -66,6 +66,8 @@ targetSdkVersion 影響:
 
 推奨対応:
 - executor / Timer の `scheduleAtFixedRate` 利用箇所と wrapper / third-party SDK 内の利用を棚卸しする。
+- API は `@Deprecated` ではないが、Android Lint の `DiscouragedApi` は本 Behavior Change と同じ cached-process catch-up 問題を警告しているため、無関係として除外しない。
+- camera status polling / 接続監視は、前回の実際の開始時刻基準でよければ `Timer#schedule(..., period)`、前回処理完了から一定間隔を空けたければ `ScheduledExecutorService#scheduleWithFixedDelay` へ移行する。
 - missed period 数だけ処理する必要がある場合は、callback の catch-up 回数に依存せず、最終成功時刻と現在時刻から必要な処理量を計算する。
 - polling / retry / sync / cleanup が最大 1 回の immediate catch-up でも正しく収束するか確認する。
 - background periodic work は必要に応じて WorkManager / JobScheduler / AlarmManager を検討する。
