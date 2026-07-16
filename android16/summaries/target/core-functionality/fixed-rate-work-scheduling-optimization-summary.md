@@ -56,9 +56,11 @@ API は `@Deprecated` ではないが、Android Lint は同じ cached-process ca
 
 - 必須対応: missed execution の回数を業務ロジックとして扱っている場合は、最終処理時刻から明示的に差分計算する設計へ見直す。
 - 推奨対応: `scheduleAtFixedRate` 利用箇所を棚卸しし、compat flag enabled / disabled で復帰時の実行回数を比較する。
-- 移行候補: 前回の実際の開始時刻基準でよい場合は `Timer#schedule(..., period)`、前回処理完了から一定間隔を空ける場合は `ScheduledExecutorService#scheduleWithFixedDelay`。process death 後も必要な deferrable work は WorkManager / JobScheduler。
+- 移行候補: 前回の実際の開始時刻基準でよい場合は `Timer#schedule(..., period)`、前回処理完了から一定間隔を空ける場合は `ScheduledExecutorService#scheduleWithFixedDelay`。
+- Scope note: WorkManager / JobScheduler は本件の移行先ではない。process death 後も再実行するという別要件がある場合だけ、別の background work 設計として検討する。
 - 不要: WorkManager / JobScheduler / AlarmManager のみを使い、executor / Timer の fixed-rate catch-up に依存していない場合。
 - 実装例: [Fixed rate work scheduling optimization - 実装例](../../../behavior-changes/target/core-functionality/fixed-rate-work-scheduling-optimization-implementation-examples.md) に Before / After、Timer、Java、テストコードを記載。
+- 実行挙動比較: [Fixed rate work scheduling optimization - 実行挙動比較](../../../behavior-changes/target/core-functionality/fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md) に 5 秒周期、process 復帰、長時間 task のタイムラインを記載。
 
 ## テストマトリクス（Test Matrix）
 

@@ -209,7 +209,7 @@ Bluetooth については、Android 16 OS update だけで remote bond loss hand
 targetSdkVersion 36 へ移行する場合は、large screen / edge-to-edge / predictive back が UI に直接影響する。カメラ live view、remote control、image viewer、setup wizard は fixed orientation、system bar avoidance、legacy back handling への依存が表に出やすいため、Android 16 / targetSdkVersion 36 の実機確認が必要である。
 
 定期処理については、executor または `Timer#scheduleAtFixedRate` で camera status polling、接続監視、同期、retry、cleanup 等を実装している場合、targetSdkVersion 36 では freeze / suspend 復帰時に missed execution が最大 1 回しか即時実行されない。missed period 数だけ処理する設計は callback の catch-up 回数に依存させず、最終処理時刻と現在時刻から必要量を明示的に計算する必要がある。
-Android Studio の `DiscouragedApi` 警告はこの Behavior Change と無関係ではない。短周期 polling は、前回の実際の開始時刻基準でよければ `Timer#schedule(..., period)`、前回処理完了から一定間隔を空けたければ `ScheduledExecutorService#scheduleWithFixedDelay`、process death 後も必要な deferrable work は WorkManager / JobScheduler を移行候補とする。
+Android Studio の `DiscouragedApi` 警告はこの Behavior Change と無関係ではない。短周期 polling は、前回の実際の開始時刻基準でよければ `Timer#schedule(..., period)`、前回処理完了から一定間隔を空けたければ `ScheduledExecutorService#scheduleWithFixedDelay` を移行候補とする。WorkManager / JobScheduler は本件の移行先ではなく、process death 後も再実行する別の background work 要件がある場合に限って検討する。
 
 Native / SDK については、16 KB page-size device、ART internal changes、GPU syscall filtering を分けて確認する。画像・動画処理、codec、ML、暗号化、DB、monitoring / profiling / anti-tamper SDK が bundled native library や runtime internals に依存している場合、OS update だけでも互換性リスクになり得る。
 

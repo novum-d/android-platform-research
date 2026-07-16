@@ -11,6 +11,9 @@ Primary report:
 One-page summary:
 - [migration-or-opt-out-required-for-predictive-back-summary.md](../../../summaries/target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-summary.md)
 
+Runtime behavior comparison:
+- [migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md](migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md)
+
 ## 対象（Target）
 
 Android 16 Behavior Change:

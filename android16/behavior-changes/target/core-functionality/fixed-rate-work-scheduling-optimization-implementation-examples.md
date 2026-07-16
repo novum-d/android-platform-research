@@ -11,6 +11,9 @@ Primary report:
 One-page summary:
 - [fixed-rate-work-scheduling-optimization-summary.md](../../../summaries/target/core-functionality/fixed-rate-work-scheduling-optimization-summary.md)
 
+Runtime behavior comparison:
+- [fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md](fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md)
+
 ## 対象（Target）
 
 Android 16 Behavior Change:
@@ -45,14 +48,23 @@ Android 16 Behavior Change:
 
 条件付きの移行先:
 - 前回処理の完了から一定 delay 後でよい場合は `scheduleWithFixedDelay`。
-- process 終了後も継続すべき deferrable background work は WorkManager / JobScheduler。
 - `Timer` の single-thread、例外処理、cancel 管理が問題の場合は `ScheduledExecutorService`。
 
 重要:
 - `scheduleAtFixedRate` は `@Deprecated` API ではないが、Android Lint は cached process 復帰時の大量 catch-up を理由に `DiscouragedApi` として警告する。この警告は本 Behavior Change と同じ問題領域を扱う。
+- `scheduleAtFixedRate` を残したまま `run()` の中身だけを idempotent / reconciliation 方式へ変える対応は、Android 16 で callback 回数が変わっても業務結果を壊さないための互換性対応である。API 利用自体は残るため Lint 警告は消えず、古い OS で callback が連続投入される可能性も残る。
 - `Timer#scheduleAtFixedRate` から `ScheduledExecutorService#scheduleAtFixedRate` へ置き換えるだけでは、この Behavior Change を回避できない。Android 16 では両方が missed catch-up 最大 1 回の対象である。
 - `scheduleWithFixedDelay` への変更は cadence semantics を変える。絶対時刻基準の fixed-rate が本当に必要かを確認してから選択する。
-- WorkManager / JobScheduler への移行も単なる API 置換ではなく、実行保証、制約、間隔、process death の要件を再定義する設計変更として扱う。
+- WorkManager / JobScheduler は本 Behavior Change の移行先ではない。process death 後も再実行するという別要件がある場合のみ、実行保証、制約、間隔、retry を再定義する独立した設計変更として扱う。
+
+## 対応レベルと解消できる問題
+
+| 対応 | Android 16 の callback 回数変更への耐性 | 復帰時の高コスト処理集中 | Lint 警告 |
+| --- | --- | --- | --- |
+| `run()` を idempotent reconciliation に変更 | 改善する | 同じ処理を繰り返しても結果は壊れにくいが、呼び出し負荷は残る | 消えない |
+| `run()` に実時刻 throttle / coalescing を追加 | 改善する | 高コストな network / DB 処理を間引けるが、callback 自体は呼ばれる | 消えない |
+| `Timer#schedule` / `scheduleWithFixedDelay` へ移行 | 改善する設計へ変更可能 | fixed-rate backlog の根本原因を避ける | 対象 call site の警告は解消される |
+| `scheduleAtFixedRate` を維持して suppress | 実装次第 | fixed-rate risk は残る | 表示だけ消える。問題解消ではない |
 
 ## 移行対象の見つけ方（Finding Existing Code）
 
@@ -76,7 +88,7 @@ rg -n "scheduleAtFixedRate|ScheduledExecutorService|ScheduledThreadPoolExecutor|
 | `Timer#scheduleAtFixedRate`、前回の実際の開始時刻を基準にしてよい | `Timer#schedule(..., period)` | Recommended | 最小差分。fixed-delay になり backlog を作らない |
 | Timer の single-thread / cancel / exception handling も見直す | `ScheduledExecutorService#scheduleWithFixedDelay` | Recommended | fixed-delay 化と lifecycle 制御を同時に行う |
 | absolute-time fixed-rate が必須 | fixed-rate を維持し business logic を時刻ベースへ変更 | Conditional | Lint 警告理由と Android 15 以下を含むリスク受容が必要 |
-| process death 後も必要な deferrable work | WorkManager / JobScheduler | Conditional | background execution 要件を別途確認 |
+| process death 後も必要な deferrable work | 本件から分離し、WorkManager / JobScheduler を別途設計 | Separate concern | `scheduleAtFixedRate` の移行ではない |
 
 ## 移行マップ（Migration Map）
 
@@ -88,10 +100,11 @@ rg -n "scheduleAtFixedRate|ScheduledExecutorService|ScheduledThreadPoolExecutor|
 | Timer の fixed-rate polling | Timer の fixed-delay `schedule`、または executor の `scheduleWithFixedDelay` | cached process 復帰時の backlog を作らない |
 | 復帰直後に無制限 catch-up | bounded batch + checkpoint | CPU / network / DB の集中負荷を防ぐ |
 
-## 例 1: 最新 camera state を 1 回で同期する
+## 例 1: `scheduleAtFixedRate` を維持して業務ロジックを安全にする
 
 目的:
-- camera status polling は missed 回数を再現せず、復帰後の 1 回で現在状態へ収束させる。
+- absolute-time fixed-rate が必要な場合に、callback 回数を業務データとして扱わず、現在の camera state へ収束させる。
+- この例は Behavior Change 互換性を改善するが、Lint 警告を解消する API 移行ではない。
 
 既存実装で探す箇所:
 - polling callback ごとに sequence や retry count を増やしてから状態取得する処理。
@@ -105,7 +118,7 @@ executor.scheduleAtFixedRate({
 }, 0, 5, TimeUnit.SECONDS)
 ```
 
-移行後:
+対応後 A: 最小限の reconciliation 化
 
 ```kotlin
 executor.scheduleAtFixedRate({
@@ -116,14 +129,135 @@ executor.scheduleAtFixedRate({
 }, 0, 5, TimeUnit.SECONDS)
 ```
 
+この状態で解消できること:
+- Android 16 / targetSdkVersion 36 で missed callback が最大 1 回になっても、現在の camera state を取得できる。
+- callback 回数が減っても `retryCount` や sequence に欠番が生じる設計ではなくなる。
+- 同じ remote state を複数回取得しても `reconcile()` が idempotent なら、通知や DB 更新を重複させずに済む。
+
+この状態で解消できないこと:
+- `scheduleAtFixedRate` の Lint `DiscouragedApi` 警告。
+- Android 15 以下などで復帰時に callback が連続して呼ばれること。
+- 各 callback が network request を開始する場合の CPU / network 集中。
+
+対応後 B: API を維持する必要がある場合に高コスト処理も coalesce する
+
+```kotlin
+class CameraStatusReconciler(
+    private val cameraClient: CameraClient,
+    private val cameraRepository: CameraRepository,
+    private val minimumActualIntervalMillis: Long = 5_000L,
+    private val elapsedRealtime: () -> Long = SystemClock::elapsedRealtime,
+) {
+    private val nextAllowedAt = AtomicLong(0L)
+
+    fun runIfDue() {
+        val now = elapsedRealtime()
+
+        while (true) {
+            val currentNextAllowedAt = nextAllowedAt.get()
+            if (now < currentNextAllowedAt) {
+                return // 復帰直後の連続 callback では高コスト処理を繰り返さない。
+            }
+
+            if (nextAllowedAt.compareAndSet(
+                    currentNextAllowedAt,
+                    now + minimumActualIntervalMillis,
+                )
+            ) {
+                break
+            }
+        }
+
+        val remote = cameraClient.fetchCurrentStatus()
+        cameraRepository.reconcile(remote)
+    }
+}
+
+val reconciler = CameraStatusReconciler(
+    cameraClient = cameraClient,
+    cameraRepository = cameraRepository,
+)
+
+executor.scheduleAtFixedRate(
+    {
+        runCatching(reconciler::runIfDue)
+            .onFailure { logger.warn(it) }
+    },
+    0L,
+    5L,
+    TimeUnit.SECONDS,
+)
+```
+
+13 秒に process が復帰し、fixed-rate callback が短時間に複数回来た場合のイメージ:
+
+```text
+callback 1 at 13.0s -> nextAllowedAt を 18.0s に更新 -> cameraへ問い合わせ
+callback 2 at 13.1s -> 18.0s より前なので return
+callback 3 at 13.2s -> 18.0s より前なので return
+callback   at 18.0s -> cameraへ問い合わせ可能
+```
+
+注意:
+- callback 自体と Lint 警告は残る。間引かれるのは `runIfDue()` 内の高コスト処理である。
+- 同じ periodic task は通常 overlap しないが、別 scheduler / lifecycle source からも呼ばれる可能性を考え、例では `AtomicLong` で gate を共有している。
+- elapsed time は process 内の throttle に使う。reboot / process death を跨ぐ checkpoint には wall-clock policy を別途定義する。
+
+対応後 C: executor の fixed-rate が不要なら `scheduleWithFixedDelay` へ移行する
+
+```kotlin
+executor.scheduleWithFixedDelay(
+    {
+        runCatching {
+            val remote = cameraClient.fetchCurrentStatus()
+            cameraRepository.reconcile(remote)
+        }.onFailure { logger.warn(it) }
+    },
+    0L,
+    5L,
+    TimeUnit.SECONDS,
+)
+```
+
+- 前回の処理完了から 5 秒後に次回を開始する。
+- fixed-rate backlog を作らないため、対象 `scheduleAtFixedRate` call site の Lint 警告もなくなる。
+
+`Timer#scheduleAtFixedRate` に警告が出ている場合は、要件が合えば `Timer#schedule` へ置き換える。
+
+```kotlin
+val timer = Timer("camera-status", true)
+
+timer.schedule(
+    object : TimerTask() {
+        override fun run() {
+            runCatching {
+                val remote = cameraClient.fetchCurrentStatus()
+                cameraRepository.reconcile(remote)
+            }.onFailure { logger.warn(it) }
+        }
+    },
+    0L,
+    5_000L,
+)
+```
+
+- `Timer#schedule` は前回の実際の開始時刻から 5 秒後を次回基準にする。
+- `scheduleWithFixedDelay` の「前回完了から 5 秒後」とは異なる。
+- `Timer#scheduleAtFixedRate` の call site がなくなるため、質問にある `prefer using schedule` の Lint 警告は解消される。
+
 移行手順:
-1. callback 回数を status request の意味から外す。
-2. camera が返す現在状態を source of truth として local state を更新する。
-3. 同じ状態を複数回受け取っても副作用が重複しないようにする。
+1. fixed-rate が本当に必要かを確認する。不要なら executor は `scheduleWithFixedDelay`、Timer は `schedule` を選ぶ。
+2. 維持が必要なら callback 回数を status request / retry count の意味から外す。
+3. camera が返す現在状態を source of truth として local state を更新する。
+4. 同じ状態を複数回受け取っても副作用が重複しないようにする。
+5. 古い OS の連続 callback で network / DB 負荷が問題になるなら対応 B の実時刻 gate を追加する。
+6. Lint suppression を使う場合は、fixed-rate 要件と Android 15 以下を含む検証結果を理由として残す。
 
 確認観点:
 - freeze 前後で callback 回数が変わっても最終 camera state が一致する。
 - 同じ response を複数回処理しても transfer や通知が重複しない。
+- 対応 B では連続 callback が来ても、5 秒以内の camera request が 1 回だけになる。
+- 対応 A / B は Lint 警告が残り、対応 C では対象 call site の警告が消える。
 
 ## 例 2: missed period を checkpoint から計算する
 
@@ -343,7 +477,10 @@ executor.scheduleWithFixedDelay({
 
 Lint suppression は移行ではない。まず fixed-delay へ変更できない理由を確認し、必要な呼び出しだけに局所化する。
 
-## process lifecycle を跨ぐ場合の移行先
+## 別要件: process death 後も再実行する background work
+
+この section は本 Behavior Change の対応手順ではなく、棚卸し中に「process death 後も処理を再実行したい」という別要件が見つかった場合の設計分岐である。
+cached / frozen process は process と in-memory scheduler queue が残るが、process death では Timer / executor queue は失われる。両者を同じ復帰問題として扱わない。
 
 | 要件 | 移行先 | 理由 |
 | --- | --- | --- |
@@ -352,7 +489,7 @@ Lint suppression は移行ではない。まず fixed-delay へ変更できな�
 | JobScheduler を直接管理する既存基盤がある | JobScheduler | process lifecycle から切り離せる |
 | user-visible な正確な時刻通知 | AlarmManager を要件と権限制約込みで検討 | exact alarm は periodic polling の代替ではない |
 
-WorkManager の periodic work は短周期 polling の置換先ではない。接続中だけ必要な短周期処理は lifecycle-bound、process death を跨ぐ同期や cleanup は WorkManager、というように責務を分ける。
+WorkManager の periodic work は短周期 polling や `scheduleAtFixedRate` の等価な置換先ではない。接続中だけ必要な短周期処理は lifecycle-bound とし、process death を跨ぐ同期や cleanup という別要件がある場合だけ WorkManager 等へ責務を分ける。
 
 ## テスト観点（Verification）
 

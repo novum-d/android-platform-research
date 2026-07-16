@@ -11,6 +11,9 @@ Primary report:
 One-page summary:
 - `<relative path>`
 
+Runtime behavior comparison, if applicable:
+- `<relative path>`
+
 ## 対象（Target）
 
 Android 16 Behavior Change:

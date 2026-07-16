@@ -277,6 +277,7 @@ targetSdkVersion、compat framework、OS version、device condition のいずれ
 
 コード例、framework 別移行例、temporary opt-out 例が複数必要な場合は、`android16/templates/implementation-examples-template.md` を使って companion implementation examples file を作成する。
 この section には代表的な短い snippet と companion file へのリンクだけを置く。
+複数 API / 実装方式の実行時刻、callback 選択順、fallback、遅延・lifecycle 復帰後の差を説明する場合は、`android16/templates/runtime-behavior-comparison-template.md` を使って companion runtime behavior comparison file を作成する。
 
 ## 必須対応（Must）
 

@@ -23,11 +23,17 @@ Use:
 ```text
 android16/templates/customer-report-template.md
 android16/templates/implementation-examples-template.md
+android16/templates/runtime-behavior-comparison-template.md
 ```
 
 Implementation examples:
 - 複数のコード例、framework 別移行例、temporary opt-out の具体例が必要な場合は、`android16/templates/implementation-examples-template.md` を使って companion implementation examples file を作成する。
 - primary report の「対応候補」には、代表的な短い snippet と companion file へのリンクだけを置く。
+
+Runtime behavior comparisons:
+- 複数 API / 実装方式の実行時刻、callback 選択順、fallback、遅延・lifecycle 復帰後の差を説明する場合は、`android16/templates/runtime-behavior-comparison-template.md` を使う。
+- すべての比較対象へ同じ入力条件を与え、仕様から導く expected behavior と実機・テストの observed behavior を分ける。
+- runtime behavior comparison は primary report の classification / confidence / Human Decision を置き換えない。
 
 ## Status Wording
 

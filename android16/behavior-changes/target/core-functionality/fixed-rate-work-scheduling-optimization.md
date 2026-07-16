@@ -134,6 +134,7 @@ You can also test by using the app compatibility framework and enabling the STPE
 確認結果:
 - `Timer#scheduleAtFixedRate` と `ScheduledExecutorService#scheduleAtFixedRate` は public API から削除予定の `@Deprecated` API ではない。
 - Android Studio / Lint の取り消し線は `DiscouragedApi` 警告であり、Java / Android API の formal deprecation とは異なる。
+- `scheduleAtFixedRate` を残したまま `run()` の中身だけを idempotent / reconciliation 方式へ変更しても、Behavior Change に対する業務ロジックの耐性は改善するが、API 利用に対する Lint 警告は消えない。
 - `Timer#scheduleAtFixedRate` の警告は `Timer#schedule(TimerTask, delay, period)`、executor の警告は `scheduleWithFixedDelay` を代替候補として示す。どちらも missed period の backlog を蓄積しないが、基準時刻は異なる。Timer の `schedule` は前回の実際の実行開始時刻、executor の `scheduleWithFixedDelay` は前回処理の完了時刻から次回を決める。
 - 警告の原因である cached process 復帰時の連続 catch-up と、本 Behavior Change が抑制する missed execution は同じ問題領域である。
 
@@ -175,6 +176,7 @@ You can also test by using the app compatibility framework and enabling the STPE
 - API usage: `ScheduledExecutorService` / `ScheduledThreadPoolExecutor` または `Timer` の `scheduleAtFixedRate` を利用する fixed-rate periodic task。
 - manifest attribute: 条件なし。
 - component boundary: app process の Java executor / Timer / libcore runtime 内。WorkManager、JobScheduler、AlarmManager は本件の fixed-rate catch-up 仕様に直接依存しないが、内部やアプリコードで executor / Timer を併用している場合は別途確認が必要。
+- process freeze と process death の区別: 本件は process が生存し scheduler queue が残ったまま CPU 実行機会を missed し、復帰後に queue を再開する挙動を扱う。process death では Timer / executor とその in-memory queue 自体が失われるため、本件の catch-up 経路ではない。
 
 ---
 
@@ -333,8 +335,9 @@ You can also test by using the app compatibility framework and enabling the STPE
 - missed period の回数自体が必要な処理は、callback の catch-up 回数に依存せず、現在時刻と最終処理時刻から明示的に差分計算する。
 - network、DB、UI 更新、file I/O を fixed-rate task で行う場合、復帰直後の連続実行がなくなっても正しいか確認する。
 - idempotent でない periodic task は、最大 1 回実行でもデータ欠落や retry 不足にならないか確認する。
-- periodic background work は必要に応じて WorkManager / JobScheduler / AlarmManager への移行を検討する。
+- WorkManager / JobScheduler は本 Behavior Change の公式移行先でも、`scheduleAtFixedRate` の等価な置換 API でもない。process death 後も再実行するという別要件が確認された場合だけ、background work の別設計として検討する。
 - 詳細な Before / After、Timer、Java、テストコードは [Fixed rate work scheduling optimization - 実装例](fixed-rate-work-scheduling-optimization-implementation-examples.md) を参照する。
+- 5 秒周期での予定時刻、実開始、完了、process 復帰、長時間 task の違いは [Fixed rate work scheduling optimization - 実行挙動比較](fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md) を参照する。
 
 代表例:
 

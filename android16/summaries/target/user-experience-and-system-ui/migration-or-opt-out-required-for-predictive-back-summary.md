@@ -52,6 +52,7 @@ Android 16 では、targetSdkVersion 36 以上のアプリで predictive back sy
 - 推奨対応: `OnBackInvokedCallback` または AndroidX supported back navigation APIs へ移行する。
 - 一時対応: 必要な Activity / application に限定して `android:enableOnBackInvokedCallback="false"` を指定する。
 - 実装例: [Predictive back implementation examples](../../../behavior-changes/target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
+- 実行挙動比較: [Dispatcher 経由あり・なし](../../../behavior-changes/target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md)
 
 ## テストマトリクス（Test Matrix）
 

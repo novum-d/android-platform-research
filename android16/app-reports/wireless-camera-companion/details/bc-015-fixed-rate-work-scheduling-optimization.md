@@ -70,7 +70,7 @@ targetSdkVersion 影響:
 - camera status polling / 接続監視は、前回の実際の開始時刻基準でよければ `Timer#schedule(..., period)`、前回処理完了から一定間隔を空けたければ `ScheduledExecutorService#scheduleWithFixedDelay` へ移行する。
 - missed period 数だけ処理する必要がある場合は、callback の catch-up 回数に依存せず、最終成功時刻と現在時刻から必要な処理量を計算する。
 - polling / retry / sync / cleanup が最大 1 回の immediate catch-up でも正しく収束するか確認する。
-- background periodic work は必要に応じて WorkManager / JobScheduler / AlarmManager を検討する。
+- WorkManager / JobScheduler / AlarmManager は本件の等価な移行先として扱わない。process death 後の再実行など、camera polling とは別の background work 要件がある場合に限って別途設計する。
 - Before / After、Timer、Java、テストコードは [Fixed rate work scheduling optimization - 実装例](../../../behavior-changes/target/core-functionality/fixed-rate-work-scheduling-optimization-implementation-examples.md) を参照する。
 
 ## テスト観点

@@ -63,6 +63,7 @@ Use:
 android16/templates/customer-report-template.md
 android16/templates/one-page-summary-template.md
 android16/templates/implementation-examples-template.md
+android16/templates/runtime-behavior-comparison-template.md
 ```
 
 Write outputs under:
@@ -80,6 +81,14 @@ android16/templates/implementation-examples-template.md
 
 Keep primary reports focused on evidence, applicability, impact, and action candidates.
 Place only short representative snippets and a link to the implementation examples file in the primary report.
+
+When a Behavior Change needs a side-by-side explanation of runtime timing, callback selection, fallback, delayed execution, or lifecycle behavior, create a companion runtime behavior comparison file from:
+
+```text
+android16/templates/runtime-behavior-comparison-template.md
+```
+
+Use identical inputs and runtime conditions for every compared implementation. Separate expected behavior derived from official documentation / source from observed device or test results.
 
 Human decisions belong in:
 
