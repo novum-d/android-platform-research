@@ -10,6 +10,7 @@
 - Target targetSdkVersion: 36
 - Behavior Change section: GPU syscall filtering
 - Official documentation URL: https://developer.android.com/about/versions/16/behavior-changes-16#gpu-syscall-filtering
+- Camera app PM overview: [BC-014 GPU syscall filtering - PM向け概要](../../../app-reports/wireless-camera-companion/details/bc-014-gpu-syscall-filtering-pm-overview.md)
 - Official documentation category: Security
 - Applicability classification: `OS_UPDATE_ALL_APPS`
 - Confidence: Medium
@@ -71,6 +72,10 @@ system call は、userspace の app / library が Linux kernel に処理を依�
 | profiling / instrumentation IOCTL | shell process または debuggable app に限定 |
 
 通常の retail device で配布用 release app を動かす条件では、shell / debuggable app 向け例外を前提にしない。debug build だけで profiling 機能が動いても、non-debuggable release build では拒否される可能性があるため、両方を分けて確認する。
+
+## 理解補助資料
+
+shell command、syscall、IOCTL の関係、`ioctl` を使う app、IOCTL が許可・拒否された後の挙動は、primary report と分けた [GPU syscall filtering - 基礎概念 FAQ](gpu-syscall-filtering-concepts-faq.md) を参照する。
 
 ## AOSP Evidence Scope
 

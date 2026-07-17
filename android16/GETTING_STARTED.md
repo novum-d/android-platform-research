@@ -9,10 +9,11 @@
 3. [behavior-changes/APPLICABILITY_CLASSIFICATION.md](behavior-changes/APPLICABILITY_CLASSIFICATION.md) で適用条件分類を確認する
 4. [templates/customer-report-template.md](templates/customer-report-template.md) で調査レポートの書式を確認する
 5. [templates/one-page-summary-template.md](templates/one-page-summary-template.md) で 1ページ要約の書式を確認する
-6. コード例や framework 別移行例が必要な場合は [templates/implementation-examples-template.md](templates/implementation-examples-template.md) を使う
-7. 複数 API / 実装方式の実行時刻、callback 順、fallback を比較する場合は [templates/runtime-behavior-comparison-template.md](templates/runtime-behavior-comparison-template.md) を使う
-8. [summaries/README.md](summaries/README.md) で要約一覧を確認する
-9. [decisions/DECISION_LOG.md](decisions/DECISION_LOG.md) で人間の判断ログを確認する
+6. 読者向け FAQ が必要な場合は [templates/behavior-change-faq-template.md](templates/behavior-change-faq-template.md) を使い、primary report と別ファイルにする
+7. コード例や framework 別移行例が必要な場合は [templates/implementation-examples-template.md](templates/implementation-examples-template.md) を使う
+8. 複数 API / 実装方式の実行時刻、callback 順、fallback を比較する場合は [templates/runtime-behavior-comparison-template.md](templates/runtime-behavior-comparison-template.md) を使う
+9. [summaries/README.md](summaries/README.md) で要約一覧を確認する
+10. [decisions/DECISION_LOG.md](decisions/DECISION_LOG.md) で人間の判断ログを確認する
 
 ## 計画とバックログ
 

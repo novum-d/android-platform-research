@@ -8,7 +8,9 @@ Behavior Change 文書:
 
 既存調査:
 - [android16/behavior-changes/target/security/gpu-syscall-filtering.md](../../../behavior-changes/target/security/gpu-syscall-filtering.md)
+- [GPU syscall filtering - 基礎概念 FAQ](../../../behavior-changes/target/security/gpu-syscall-filtering-concepts-faq.md)
 - [android16/summaries/target/security/gpu-syscall-filtering-summary.md](../../../summaries/target/security/gpu-syscall-filtering-summary.md)
+- [BC-014 GPU syscall filtering - PM向け概要](bc-014-gpu-syscall-filtering-pm-overview.md)
 
 ## 対象アプリとの関係
 
@@ -54,6 +56,8 @@ Confidence:
 - native SDK / graphics middleware で `/dev/mali0` direct access がないか確認する。
 - Pixel Mali device / Android 16 production build で logcat / avc denial を確認する。
 - supported graphics APIs へ移行する。
+
+PM向けの変更概要、用語、カメラアプリ影響予測、具体的な調査方法は [PM向け概要](bc-014-gpu-syscall-filtering-pm-overview.md) を参照する。
 
 ## テスト観点
 

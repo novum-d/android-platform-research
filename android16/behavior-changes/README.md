@@ -22,9 +22,15 @@ Use:
 
 ```text
 android16/templates/customer-report-template.md
+android16/templates/behavior-change-faq-template.md
 android16/templates/implementation-examples-template.md
 android16/templates/runtime-behavior-comparison-template.md
 ```
+
+FAQ companions:
+- 読者向けの複数質問をFAQとして整理する場合は、`android16/templates/behavior-change-faq-template.md` を使い、primary report と別ファイルにする。
+- primary report にはFAQ本文を重複掲載せず、位置づけとFAQ companionへのリンクを置く。
+- classification / confidence / evidence / Human Decision はprimary reportを正とする。
 
 Implementation examples:
 - 複数のコード例、framework 別移行例、temporary opt-out の具体例が必要な場合は、`android16/templates/implementation-examples-template.md` を使って companion implementation examples file を作成する。
@@ -86,6 +92,7 @@ Android 16 へ OS アップデートすると、targetSdkVersion を変更して
 | [Adapting to varying OEM implementations of bond loss](target/connectivity/adapting-to-varying-oem-implementations-bond-loss.md) | [Summary](../summaries/target/connectivity/adapting-to-varying-oem-implementations-bond-loss-summary.md) | Target-page subsection, OEM variability / all-app runtime context | Runtime context verified / High confidence |
 | [GPU syscall filtering](target/security/gpu-syscall-filtering.md) | [Summary](../summaries/target/security/gpu-syscall-filtering-summary.md) | Target-page item, but classified as OS_UPDATE_ALL_APPS | SEPolicy mechanism verified / High confidence |
 | [GPU syscall filtering FAQ](target/security/gpu-syscall-filtering-faq.md) | [Summary](../summaries/target/security/gpu-syscall-filtering-faq-summary.md) | Documentation / FAQ companion | FAQ scope verified / High confidence |
+| [GPU syscall filtering - 基礎概念 FAQ](target/security/gpu-syscall-filtering-concepts-faq.md) | [Parent summary](../summaries/target/security/gpu-syscall-filtering-summary.md) | Reader questions / terminology FAQ companion | Concept scope documented / High confidence |
 
 ## targetSdkVersion 36
 

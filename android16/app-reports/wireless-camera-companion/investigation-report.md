@@ -193,7 +193,7 @@ Android 16 の Local Network Permission は Android 17 と異なり、現時点�
 | BC-011 | Edge-to-edge opt-out going away | [details/bc-011-edge-to-edge-opt-out.md](details/bc-011-edge-to-edge-opt-out.md) |
 | BC-012 | Predictive back default enabled | [details/bc-012-predictive-back.md](details/bc-012-predictive-back.md) |
 | BC-013 | MediaStore version lockdown | [details/bc-013-mediastore-version-lockdown.md](details/bc-013-mediastore-version-lockdown.md) |
-| BC-014 | GPU syscall filtering | [details/bc-014-gpu-syscall-filtering.md](details/bc-014-gpu-syscall-filtering.md) |
+| BC-014 | GPU syscall filtering | [Details](details/bc-014-gpu-syscall-filtering.md) / [PM向け概要](details/bc-014-gpu-syscall-filtering-pm-overview.md) |
 | BC-015 | Fixed rate work scheduling optimization | [details/bc-015-fixed-rate-work-scheduling-optimization.md](details/bc-015-fixed-rate-work-scheduling-optimization.md) |
 
 ---

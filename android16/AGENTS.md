@@ -62,6 +62,7 @@ Use:
 ```text
 android16/templates/customer-report-template.md
 android16/templates/one-page-summary-template.md
+android16/templates/behavior-change-faq-template.md
 android16/templates/implementation-examples-template.md
 android16/templates/runtime-behavior-comparison-template.md
 ```
@@ -81,6 +82,14 @@ android16/templates/implementation-examples-template.md
 
 Keep primary reports focused on evidence, applicability, impact, and action candidates.
 Place only short representative snippets and a link to the implementation examples file in the primary report.
+
+When reader questions require a FAQ, create a separate companion FAQ from:
+
+```text
+android16/templates/behavior-change-faq-template.md
+```
+
+Do not place a multi-question FAQ inside the primary report. Keep the primary report as the source of truth for classification, confidence, evidence, and Human Decision, and link to the FAQ companion.
 
 When a Behavior Change needs a side-by-side explanation of runtime timing, callback selection, fallback, delayed execution, or lifecycle behavior, create a companion runtime behavior comparison file from:
 

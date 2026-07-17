@@ -6,6 +6,8 @@ Android 16 の GPU syscall filtering は、Mali GPU の deprecated / development
 
 通常の Vulkan / OpenGL 利用は影響しないとされる。影響が疑われるのは、app や native library が `/dev/mali0` に直接 IOCTL を発行している場合。
 
+カメラアプリ向けの変更概要、用語、影響予測、調査方法は [BC-014 GPU syscall filtering - PM向け概要](../../../app-reports/wireless-camera-companion/details/bc-014-gpu-syscall-filtering-pm-overview.md) を参照する。
+
 Mali は Arm が設計し、SoC / device vendor が chip に組み込む GPU IP の名称である。通常の app は Mali を直接操作せず、`app -> Vulkan / OpenGL ES / EGL -> userspace driver -> /dev/mali0 kernel driver -> GPU` という supported path を使う。今回の filtering は GPU access や `ioctl` 全体を止めるのではなく、deprecated / development-only / profiling などの IOCTL command を category 単位で制限する。
 
 ## Applicability

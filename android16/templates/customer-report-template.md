@@ -275,6 +275,8 @@ targetSdkVersion、compat framework、OS version、device condition のいずれ
 
 # 対応候補（Required Actions）
 
+読者向けの用語、前提、処理経路、よくある誤解を複数の質問として整理する場合は、`android16/templates/behavior-change-faq-template.md` を使い、FAQ companion を primary report と別ファイルにする。
+この report には FAQ 本文を重複掲載せず、FAQ の位置づけと companion file へのリンクだけを置く。
 コード例、framework 別移行例、temporary opt-out 例が複数必要な場合は、`android16/templates/implementation-examples-template.md` を使って companion implementation examples file を作成する。
 この section には代表的な短い snippet と companion file へのリンクだけを置く。
 複数 API / 実装方式の実行時刻、callback 選択順、fallback、遅延・lifecycle 復帰後の差を説明する場合は、`android16/templates/runtime-behavior-comparison-template.md` を使って companion runtime behavior comparison file を作成する。

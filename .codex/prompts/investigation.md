@@ -146,6 +146,7 @@ Evidence は以下の単位で整理してください。
 | --- | --- |
 | Android Behavior Changes | `android<version>/templates/customer-report-template.md` |
 | Android one-page summary | `android<version>/templates/one-page-summary-template.md` |
+| Android FAQ companion | Use the version-specific FAQ template when present, for example `android16/templates/behavior-change-faq-template.md` |
 | Android implementation examples | Use the version-specific implementation examples template when present, for example `android16/templates/implementation-examples-template.md` |
 | Android runtime behavior comparison | Use the version-specific runtime behavior comparison template when present, for example `android16/templates/runtime-behavior-comparison-template.md` |
 | Build System version diff | `build-system/templates/version-diff-template.md` |
@@ -154,6 +155,9 @@ Evidence は以下の単位で整理してください。
 
 Behavior Change の対応候補に複数のコード例、framework 別実装例、temporary opt-out の具体例を載せる場合は、primary report へ長いコードを直接集約しない。
 version directory に implementation examples template がある場合は、そのテンプレートを使って実装例ファイルを作成し、primary report の「対応候補」には代表的な短い例と実装例ファイルへのリンクを置く。
+
+Behavior Change を読む際の用語、前提、処理経路、よくある誤解を複数の質問として整理する場合は、FAQ を primary report と別ファイルにする。
+version directory に FAQ template がある場合は、そのテンプレートを使い、primary report には FAQ の位置づけと companion file へのリンクだけを置く。classification、confidence、evidence、Human Decision は primary report を正とする。
 
 複数 API / 実装方式について、実行時刻、callback 選択順、fallback、遅延・lifecycle 復帰後の差を説明する必要がある場合は、version directory の runtime behavior comparison template を使って companion comparison file を作成する。
 比較には共通条件、expected timeline / flow、Expected / Observed、実装選択マップ、テスト仕様を含め、primary report の適用条件や根拠を重複して再判定しない。
