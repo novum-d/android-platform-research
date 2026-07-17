@@ -20,7 +20,7 @@ Confidence note: 公式文書は Pixel Mali / production build / platform-level 
 
 ## Official Documentation Review
 
-2026-07-03 に公式ドキュメントの GPU syscall filtering セクションを再確認した。対象ページは 2026-07-01 UTC 更新として表示されていた。
+2026-07-03 の確認に加え、2026-07-17 に公式ドキュメントの GPU syscall filtering セクションを再確認した。対象ページは 2026-07-14 UTC 更新として表示されていた。
 
 確認した公式記述:
 
@@ -35,6 +35,42 @@ Confidence note: 公式文書は Pixel Mali / production build / platform-level 
 - blocked IOCTL が必要な場合は bug を filed し `android-partner-security@google.com` に assign する。
 
 依頼文の Original statements / Applicability details と公式本文に実質差分は見つからなかった。
+
+## 補足: Mali GPU と GPU syscall filtering の位置づけ
+
+### Mali GPU とは
+
+GPU は画面描画、3D rendering、画像処理などを並列実行する processor である。Mali は [Arm の GPU 製品](https://www.arm.com/products)であり、SoC vendor / device vendor が chip へ組み込む GPU IP の名称で、Android 固有の API 名ではない。すべての Android device が Mali GPU を使うわけではない。
+
+今回の公式 scope は、Mali GPU を搭載する Pixel 6-9 である。Pixel 以外の Mali device では OEM / SoC vendor が同等 policy に opt-in しているかによって適用が変わり、non-Mali GPU は今回確認した公式 scope 外である。
+
+通常、app は Mali GPU や device node を直接操作せず、次の supported graphics API path を使う。
+
+```text
+app / game / graphics framework
+  -> Vulkan / OpenGL ES / EGL
+  -> Mali userspace driver
+  -> ioctl system call
+  -> /dev/mali0 kernel driver
+  -> Mali GPU
+```
+
+Vulkan / OpenGL ES / EGL を使用していても driver 内部では IOCTL が使われ得るが、今回の変更は GPU device へのアクセス全体や `ioctl` system call 全体を禁止するものではない。通常描画に必要な IOCTL を許可し、deprecated / development-only / profiling などの category を command 単位で制限する仕組みである。そのため、supported graphics APIs だけを使う通常 app は影響しない、という公式説明と整合する。
+
+### syscall と IOCTL
+
+system call は、userspace の app / library が Linux kernel に処理を依頼する interface である。`ioctl` はその一種で、file descriptor に対して device 固有の control command を送る。Mali の場合は `/dev/mali0` を open した後、`ioctlcmd` で GPU driver の操作を指定する。
+
+「GPU syscall filtering」という名称だが、実際の policy は GPU 関連 system call を一律拒否するのではなく、SELinux extended permission により `ioctlcmd` ごとに許可・拒否を分ける。
+
+| IOCTL category | Android 16 での想定 |
+|---|---|
+| 通常 graphics API に必要な unprivileged / allowed IOCTL | 許可 |
+| deprecated IOCTL | production build で block |
+| GPU development-only / restricted IOCTL | production build で block |
+| profiling / instrumentation IOCTL | shell process または debuggable app に限定 |
+
+通常の retail device で配布用 release app を動かす条件では、shell / debuggable app 向け例外を前提にしない。debug build だけで profiling 機能が動いても、non-debuggable release build では拒否される可能性があるため、両方を分けて確認する。
 
 ## AOSP Evidence Scope
 
@@ -278,6 +314,69 @@ Compat framework:
 - `avc: denied { ioctl }` の `ioctlcmd`, `scontext`, `tcontext`, `tclass`, package name を記録する。
 - supported graphics API で代替できる場合は Vulkan / OpenGL / EGL 経由に移行する。
 - blocked IOCTL が業務上必要な場合は、再現手順と denial log を添えて bug を file し、`android-partner-security@google.com` に assign する。
+
+## 確認方法
+
+### 1. Source code / bundled native library の静的確認
+
+まず、app 本体だけでなく、bundled SDK、graphics middleware、profiling、benchmark、anti-cheat などの native component を対象にする。
+
+```bash
+rg -n -i '/dev/mali0|ioctl\s*\(|mali|gpu_device' <native-source-or-sdk-directory>
+rg -a -n -i '/dev/mali0|mali' <directory-containing-so-files>
+```
+
+`ioctl(` だけでは GPU 用か判断できないため、該当 call の file descriptor が `/dev/mali0` 由来か、Mali vendor library 経由かを call site まで追う。`.so` に文字列がない場合でも direct IOCTL を否定できないため、依存 SDK の仕様確認と実機検証を併用する。
+
+### 2. Device / build 条件の確認
+
+Pixel 6-9 の Android 16 production build を主対象とし、比較用に Android 15、debuggable app、可能なら non-Mali device を用意する。
+
+```bash
+adb shell getprop ro.product.model
+adb shell getprop ro.build.version.release
+adb shell getprop ro.build.version.sdk
+adb shell getprop ro.build.type
+adb shell getprop ro.hardware.egl
+adb shell getprop ro.hardware.vulkan
+```
+
+`ro.build.type=user` は retail production build の確認材料になる。GPU property が空の場合は `adb shell dumpsys SurfaceFlinger` などの renderer 情報も確認し、端末型番と合わせて Mali device か判断する。
+
+### 3. Release app での denial log 確認
+
+debuggable app には profiling / instrumentation IOCTL の例外があるため、配布相当の non-debuggable release build を必ず含める。対象操作の直前に log を clear し、再現後の denial を取得する。
+
+```bash
+adb logcat -c
+# GPU rendering / profiling / SDK feature などの対象操作を実行
+adb logcat -d | rg 'avc: denied.*ioctl|/dev/mali0|gpu_device'
+```
+
+主な判定 signal:
+
+- `{ ioctl }`
+- `path="/dev/mali0"`
+- `tcontext=u:object_r:gpu_device:s0`
+- `tclass=chr_file`
+- `ioctlcmd=...`
+- `scontext=...` と package name
+
+device 権限上取得できる場合は kernel / audit log も補助確認する。denial が見つかったら、時刻、package、操作手順、`ioctlcmd`、app の debuggable 状態、device / build を一組で記録する。
+
+### 4. 実影響と適用条件の切り分け
+
+同じ操作を、少なくとも次の組み合わせで比較する。
+
+| 比較 | 確認目的 |
+|---|---|
+| Android 15 vs Android 16 | OS update による差か |
+| targetSdkVersion 35 vs 36 | target SDK 固有ではないことを確認できるか |
+| debug build vs non-debuggable release build | profiling / instrumentation exception の差か |
+| 通常 Vulkan / OpenGL rendering vs direct native feature | supported API path は正常で direct IOCTL path だけ失敗するか |
+| Mali device vs non-Mali device | Mali policy に依存する差か |
+
+denial の有無だけで customer impact を確定せず、対応する機能が crash、feature failure、graceful fallback、diagnostic-only failure のどれになるかまで確認する。denial がなく対象機能も正常なら、その device / build / app version / 操作範囲では影響を検出しなかった、と記録する。全 IOCTL や全 device で非影響と一般化はしない。
 
 ## Test Considerations
 

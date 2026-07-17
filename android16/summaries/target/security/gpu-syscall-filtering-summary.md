@@ -6,6 +6,8 @@ Android 16 の GPU syscall filtering は、Mali GPU の deprecated / development
 
 通常の Vulkan / OpenGL 利用は影響しないとされる。影響が疑われるのは、app や native library が `/dev/mali0` に直接 IOCTL を発行している場合。
 
+Mali は Arm が設計し、SoC / device vendor が chip に組み込む GPU IP の名称である。通常の app は Mali を直接操作せず、`app -> Vulkan / OpenGL ES / EGL -> userspace driver -> /dev/mali0 kernel driver -> GPU` という supported path を使う。今回の filtering は GPU access や `ioctl` 全体を止めるのではなく、deprecated / development-only / profiling などの IOCTL command を category 単位で制限する。
+
 ## Applicability
 
 - Classification: `OS_UPDATE_ALL_APPS`
@@ -61,6 +63,22 @@ Android 16 の GPU syscall filtering は、Mali GPU の deprecated / development
 - denial の `ioctlcmd`, `scontext`, `tcontext`, `tclass`, package name を記録する。
 - supported graphics API で代替できる場合は Vulkan / OpenGL / EGL 経由にする。
 - blocked IOCTL が必要な場合は bug を file し、`android-partner-security@google.com` に assign する。
+
+Quick verification:
+
+```bash
+rg -n -i '/dev/mali0|ioctl\s*\(|mali|gpu_device' <native-source-or-sdk-directory>
+rg -a -n -i '/dev/mali0|mali' <directory-containing-so-files>
+
+adb shell getprop ro.product.model
+adb shell getprop ro.build.version.release
+adb shell getprop ro.build.type
+adb logcat -c
+# release app で対象操作を実行
+adb logcat -d | rg 'avc: denied.*ioctl|/dev/mali0|gpu_device'
+```
+
+debuggable app では profiling / instrumentation IOCTL が許可される可能性があるため、non-debuggable release build を必ず含める。denial が出た場合は、Android 15 / 16、targetSdkVersion 35 / 36、debug / release、通常 graphics API / direct native feature を比較し、crash、feature failure、graceful fallback、diagnostic-only failure のどれになるかまで確認する。詳細手順は [primary report の「確認方法」](../../../behavior-changes/target/security/gpu-syscall-filtering.md#確認方法)を参照する。
 
 ## Human Decision Placeholder
 
