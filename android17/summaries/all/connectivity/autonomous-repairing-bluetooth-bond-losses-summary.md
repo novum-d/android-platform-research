@@ -25,6 +25,8 @@ Android 17 では、Bluetooth bond loss 後に system が autonomous re-pairing 
 
 Bluetooth module では `EXTRA_PAIRING_CONTEXT`、`PAIRING_CONTEXT_REPAIRING`、bond loss 検出後の autonomous repairing、失敗時の `ACTION_KEY_MISSING` broadcast path を確認した。targetSdkVersion ゲートは見つからないため、OS 更新で Bluetooth bond loss recovery flow に影響する all-apps change と扱う。
 
+公式文書によると、既存のセキュリティ鍵が置き換えられるのは、再ペアリングに成功し、新しい接続が以前の bond と同等以上のセキュリティレベルを満たす場合に限られる。セキュリティレベルの比較と鍵の置き換え条件については、Bluetooth module と周辺機器を使った検証が残っている。
+
 ## 根拠（Evidence）
 
 - 公式ドキュメント: https://developer.android.com/about/versions/17/behavior-changes-all
@@ -38,9 +40,18 @@ Bluetooth module では `EXTRA_PAIRING_CONTEXT`、`PAIRING_CONTEXT_REPAIRING`、
 
 ## 対応候補（Action Candidates）
 
-- manual unpair / re-pair guidance を棚卸しする。
-- `EXTRA_PAIRING_CONTEXT` で standard pairing と autonomous re-pairing attempt を区別する。
-- `ACTION_KEY_MISSING` が failed autonomous re-pairing 時だけ届く前提でテストする。
+- 手動でのペアリング解除 / 再ペアリング手順を棚卸しする。
+- `EXTRA_PAIRING_CONTEXT` を使い、通常のペアリングと自動再ペアリングを区別する。
+- `ACTION_KEY_MISSING` は自動再ペアリングに失敗した場合だけ届くことを前提にテストする。
+- `ACTION_BOND_STATE_CHANGED` / `getBondState()` から `BOND_NONE`、`BOND_BONDING`、`BOND_BONDED` の全分岐を確認する。特に、`BOND_NONE` で即座に `createBond()` や独自のペアリング UI を開始する実装は、システムによる自動修復と競合する可能性がある。
+- ペアリング / 復旧に関する broadcast や独自 UI を持たない一般的なアプリは、コード変更が必要になる可能性が低い。連携アプリでは、自動修復の成功 / 失敗、ユーザーによる拒否、システム UI とアプリ UI が重複しないことを確認する。
+
+## カメラ連携アプリの例
+
+- LUMIX Sync は、Bluetooth ペアリング、登録済みカメラ、Bluetooth を起点とした Wi-Fi 接続、スリープ復帰後の再接続を公開仕様としている。そのため、Android の Bluetooth bond を作成する機種では優先して確認する必要がある。
+- Panasonic Image App は、Wi-Fi のみで接続する機種では直接影響を受けにくい。Bluetooth ペアリングを使う機種は、LUMIX Sync と同様に確認対象となる。
+- カメラ側のペアリング情報だけを削除し、Bluetooth の自動修復後に、Wi-Fi 接続への引き継ぎ、リモート撮影、画像転送、手動登録への切り替えが正常に動くことを確認する。
+- Panasonic アプリのソースコードは未確認であり、公開されている接続仕様に基づく影響の仮説である。
 
 ## 人間の判断欄（Human Decision）
 

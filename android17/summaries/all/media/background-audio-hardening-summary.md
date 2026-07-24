@@ -42,6 +42,8 @@ Android 17 Behavior Change
 
 Android 17 では、background からの audio playback、audio focus request、volume / ringer mode API が audio hardening の対象になる。AOSP では `HardeningEnforcer`、`AudioService`、AppOps、foreground audio control capability の連携が確認できる。
 
+公式の全アプリ向けページと targetSdkVersion 37 向けページの両方に、同じ変更が掲載される二層構造である。全アプリ向けの共通条件として、ユーザーに表示されている Activity、または `SHORT_SERVICE` 以外の実行中の FGS が必要になる。targetSdkVersion 37 以上では、バックグラウンドの FGS に WIU capability があること、または exact alarm permission と `USAGE_ALARM` の例外を満たすことが追加で求められる。
+
 ## 顧客影響
 
 - background から audio focus を取得する処理は `AUDIOFOCUS_REQUEST_FAILED` を受ける可能性がある。
@@ -67,6 +69,10 @@ Android 17 では、background からの audio playback、audio focus request、
 | Android 16 | 36 | baseline を確認。 |
 | Android 17 | 36 | background 条件次第で playback mute、volume no-op、focus failure。 |
 | Android 17 | 37 | 上記に加えて strict level の追加条件を確認。 |
+
+追加ケースとして、ユーザーに表示されている Activity、FGS なし、targetSdkVersion 36 + FGS、targetSdkVersion 37 + ユーザー操作から開始した WIU capability ありの FGS、targetSdkVersion 37 + バックグラウンドから開始した WIU capability なしの FGS、targetSdkVersion 37 + exact alarm / `USAGE_ALARM` を比較する。`AudioHardening` ログの `partial` は FGS がない状態、`full` は FGS があっても WIU capability が不足している状態を識別する手掛かりになる。
+
+`adb shell cmd audio set-enable-hardening enable|disable|throw` は、強制的な再現に利用できる。ただし、`enable` / `throw` はすべてのアプリに WIU の要件を強制し、アラーム用途の例外も無効化する。そのため、targetSdkVersion 36 / 37 とアラーム用途の例外は、hardening override を強制していない既定状態で比較する。
 
 ## 顧客向け説明
 

@@ -2,50 +2,50 @@
 
 ## 調査メタデータ
 
-- Android version: Android 16
-- Version directory: `android16`
-- From tag: `android-15.0.0_r36`
-- To tag: `android-16.0.0_r4`
-- Previous targetSdkVersion: 35
-- Target targetSdkVersion: 36
-- Behavior Change section: GPU syscall filtering
-- Official documentation URL: https://developer.android.com/about/versions/16/behavior-changes-16#gpu-syscall-filtering
-- Camera app PM overview: [BC-014 GPU syscall filtering - PM向け概要](../../../app-reports/wireless-camera-companion/details/bc-014-gpu-syscall-filtering-pm-overview.md)
-- Official documentation category: Security
-- Applicability classification: `OS_UPDATE_ALL_APPS`
+- Android バージョン: Android 16
+- バージョンディレクトリ: `android16`
+- 比較元タグ: `android-15.0.0_r36`
+- 比較先タグ: `android-16.0.0_r4`
+- 以前の targetSdkVersion: 35
+- 対象 targetSdkVersion: 36
+- Behavior Change セクション: GPU syscall filtering
+- 公式ドキュメント URL: https://developer.android.com/about/versions/16/behavior-changes-16#gpu-syscall-filtering
+- カメラアプリの PM 向け概要: [BC-014 GPU syscall filtering - PM向け概要](../../../app-reports/wireless-camera-companion/details/bc-014-gpu-syscall-filtering-pm-overview.md)
+- 公式ドキュメントの分類: Security
+- 適用条件分類: `OS_UPDATE_ALL_APPS`
 - Confidence: Medium
 
-Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり `android-16.0.0_r4` を使用した。
+スコープ注記: `android16/AGENTS.md` では比較先タグを `android-16.0.0_r1` としているが、本調査では依頼どおり `android-16.0.0_r4` を使用した。
 
-Confidence note: 公式文書は Pixel Mali / production build / platform-level policy を述べており、targetSdkVersion gate は述べていない。AOSP public `system/sepolicy` では IOCTL xperm filter mechanism を確認できたが、Pixel Mali 用の具体的 IOCTL category list / allowlist / denylist は公開 checkout 内では確認できなかった。そのため confidence は Medium とする。
+Confidence の注記: 公式文書は、Pixel の Mali GPU、製品版ビルド、プラットフォーム単位の policy を対象としており、targetSdkVersion の gate は示していない。公開されている AOSP の `system/sepolicy` では IOCTL xperm filter mechanism を確認できたが、Pixel Mali 用の具体的な IOCTL 分類、allowlist、denylist は公開 checkout 内で確認できなかった。そのため Confidence は Medium とする。
 
-## Official Documentation Review
+## 公式ドキュメントの確認
 
 2026-07-03 の確認に加え、2026-07-17 に公式ドキュメントの GPU syscall filtering セクションを再確認した。対象ページは 2026-07-14 UTC 更新として表示されていた。
 
 確認した公式記述:
 
-- Mali GPU surface を harden するため、deprecated または GPU development-only の Mali GPU IOCTL が production builds で block される。
-- GPU profiling 用 IOCTL は shell process または debuggable applications に制限される。
-- 詳細は SAC update の platform-level policy を参照する。
-- 対象は Mali GPU を使う Pixel devices、具体的には Pixel 6-9。
+- Mali GPU の攻撃対象領域を堅牢化するため、非推奨または GPU 開発専用の Mali GPU IOCTL が製品版ビルドで拒否される。
+- GPU profiling 用 IOCTL は、shell process または debuggable application に制限される。
+- 詳細は SAC update のプラットフォーム単位の policy を参照する。
+- 対象は Mali GPU を使う Pixel 端末で、具体的には Pixel 6〜9 である。
 - Arm r54p2 release の `Documentation/ioctl-categories.rst` に IOCTL categorization がある。
-- supported graphics APIs、Vulkan、OpenGL には影響しない想定。
+- 正式に対応している graphics API、Vulkan、OpenGL には影響しない想定である。
 - Streamline Performance Analyzer と Android GPU Inspector は影響しない想定。
 - `/dev/mali0` に対する SELinux `avc: denied { ioctl }` が出た場合、影響を受けている可能性がある。
-- blocked IOCTL が必要な場合は bug を filed し `android-partner-security@google.com` に assign する。
+- 制限対象の IOCTL が必要な場合は不具合を報告し、`android-partner-security@google.com` を担当に指定する。
 
-依頼文の Original statements / Applicability details と公式本文に実質差分は見つからなかった。
+依頼文に記載された原文と適用条件の詳細について、公式本文との実質的な差は見つからなかった。
 
 ## 補足: Mali GPU と GPU syscall filtering の位置づけ
 
 ### Mali GPU とは
 
-GPU は画面描画、3D rendering、画像処理などを並列実行する processor である。Mali は [Arm の GPU 製品](https://www.arm.com/products)であり、SoC vendor / device vendor が chip へ組み込む GPU IP の名称で、Android 固有の API 名ではない。すべての Android device が Mali GPU を使うわけではない。
+GPU は、画面描画、3D rendering、画像処理などを並列実行するプロセッサである。Mali は [Arm の GPU 製品](https://www.arm.com/products)であり、SoC ベンダーや端末メーカーがチップへ組み込む GPU IP の名称である。Android 固有の API 名ではなく、すべての Android 端末が Mali GPU を使うわけではない。
 
-今回の公式 scope は、Mali GPU を搭載する Pixel 6-9 である。Pixel 以外の Mali device では OEM / SoC vendor が同等 policy に opt-in しているかによって適用が変わり、non-Mali GPU は今回確認した公式 scope 外である。
+今回公式に示された対象は、Mali GPU を搭載する Pixel 6〜9 である。Pixel 以外の Mali 搭載端末では、OEM / SoC ベンダーが同等の policy に opt-in しているかによって適用が変わる。Mali 以外の GPU は、今回確認した公式な対象外である。
 
-通常、app は Mali GPU や device node を直接操作せず、次の supported graphics API path を使う。
+通常、アプリは Mali GPU や device node を直接操作せず、次の正式に対応している graphics API の経路を使う。
 
 ```text
 app / game / graphics framework
@@ -56,7 +56,7 @@ app / game / graphics framework
   -> Mali GPU
 ```
 
-Vulkan / OpenGL ES / EGL を使用していても driver 内部では IOCTL が使われ得るが、今回の変更は GPU device へのアクセス全体や `ioctl` system call 全体を禁止するものではない。通常描画に必要な IOCTL を許可し、deprecated / development-only / profiling などの category を command 単位で制限する仕組みである。そのため、supported graphics APIs だけを使う通常 app は影響しない、という公式説明と整合する。
+Vulkan / OpenGL ES / EGL を使用していても、driver 内部では IOCTL が使われる場合がある。ただし、今回の変更は GPU device へのアクセス全体や `ioctl` system call 全体を禁止するものではない。通常描画に必要な IOCTL を許可し、非推奨、開発専用、profiling 用などの分類を command 単位で制限する仕組みである。そのため、正式に対応している graphics API だけを使う通常のアプリには影響しない、という公式説明と整合する。
 
 ### syscall と IOCTL
 
@@ -411,10 +411,10 @@ denial の有無だけで customer impact を確定せず、対応する機能�
 - non-Mali GPU 端末での比較
 - OEM opt-in 端末 / non-opt-in 端末での比較
 
-## Conclusions
+## 結論
 
-- GPU syscall filtering は targetSdkVersion 36 固有の API behavior change ではなく、Pixel Mali production build の platform-level SELinux / IOCTL policy hardening として説明するのが適切である。
-- Android 16 `system/sepolicy` には `set_xperm_filter` macro が追加され、restricted IOCTL と instrumentation IOCTL を appdomain に対して command 単位で制限できる仕組みが確認できる。
-- Pixel device repos は Mali EGL/Vulkan stack と `/dev/mali0` を示し、公式 Pixel Mali scope と整合する。
-- 具体的な Mali IOCTL category list と Pixel production policy invocation は公開 AOSP checkout では確認できなかったため、deprecated / development-only / profiling IOCTL の個別判定は実機 denial、vendor policy、Arm r54p2 documentation で追加確認が必要。
-- supported Vulkan / OpenGL usage は公式文書上は影響なし。影響が疑われるのは direct Mali IOCTL 使用、特に production non-debuggable app からの restricted / instrumentation IOCTL 使用である。
+- GPU syscall filtering は targetSdkVersion 36 固有の API 挙動変更ではなく、Mali GPU を搭載した Pixel の製品版ビルドに対する、プラットフォーム単位の SELinux / IOCTL policy 強化として説明するのが適切である。
+- Android 16 の `system/sepolicy` には `set_xperm_filter` macro が追加され、制限対象の IOCTL と instrumentation 用 IOCTL を、appdomain に対して command 単位で制限できる仕組みを確認できる。
+- Pixel の device repository は Mali EGL/Vulkan stack と `/dev/mali0` を示しており、公式に示された Pixel Mali の対象範囲と整合する。
+- 具体的な Mali IOCTL の分類一覧と、Pixel の製品版 policy から呼び出す箇所は、公開されている AOSP checkout では確認できなかった。そのため、非推奨、開発専用、profiling 用 IOCTL の個別判定には、実機の拒否ログ、vendor policy、Arm r54p2 の文書による追加確認が必要である。
+- 正式に対応している Vulkan / OpenGL の利用には、公式文書上は影響しない。影響が疑われるのは、Mali IOCTL の直接使用、特に non-debuggable の製品版アプリから制限対象または instrumentation 用 IOCTL を使用する場合である。

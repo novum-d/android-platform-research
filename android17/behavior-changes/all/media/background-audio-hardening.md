@@ -86,7 +86,7 @@ Compat framework:
 - Change ID: 確認できず
 - 変更名: 確認できず
 - 既定状態: audio flags / AppOps / native AudioPolicy 側の default に依存
-- テスト時に切り替え可能か: `AudioManager.setHardeningOverride()` / `cmd audio set-hardening` 相当の privileged override path は存在する
+- テスト時に切り替え可能か: `AudioManager.setHardeningOverride()` / `adb shell cmd audio set-enable-hardening` の privileged override path は存在する
 
 分類信頼度（Classification confidence）:
 - Medium
@@ -136,6 +136,27 @@ Android 17 では、background からの audio playback、audio focus request、
 ## 解釈（Interpretation）
 
 この変更は単一の targetSdkVersion ゲートではなく、二層の適用条件を持つ。第一層は Android 17 上の all apps に対する background audio hardening で、AppOps / process state / foreground service capability により audio interaction が許可されない場合に制限される。第二層は targetSdkVersion 37 以上の app に対する追加制限で、CINNAMON_BUN 以降の targetSdkVersion が strict level の判定に使われる。
+
+同じ `Background audio hardening` が、公式の `Behavior changes: all apps` と `Behavior changes: Apps targeting Android 17 or higher` の両方に掲載されている。これは独立した二つの変更ではなく、全アプリ共通の制限を土台として、targetSdkVersion 37 以上のアプリに追加条件が重なる構造である。
+
+一般的なアプリに対する概念上の判定は、次のように整理できる。実際の実装には AppOps、privileged caller、feature flag などの追加条件があるため、以下は AOSP の適用条件を完全に表したものではない。
+
+```text
+background audio interaction を許可
+  = visible activity
+    または
+    (
+      SHORT_SERVICE 以外の foreground service が running
+      かつ
+      (
+        targetSdkVersion < 37
+        または foreground service が WIU capability を持つ
+        または exact alarm permission + USAGE_ALARM exception
+      )
+    )
+```
+
+このため、Android 17 / targetSdkVersion 36 でも、foreground service を使わずにバックグラウンドから音声を扱う場合は共通制限の対象になる。一方、targetSdkVersion 37 以上では、foreground service が実行中でも、バックグラウンドから開始され、WIU capability を持たない場合は追加制限の対象になりうる。
 
 ---
 
@@ -314,6 +335,43 @@ git -C frameworks-base tag --list android-17.0.0_r1
 - audio focus request の戻り値を必ず確認し、`AUDIOFOCUS_REQUEST_FAILED` 時に再試行・UI 誘導・silent fallback を設計する。
 - volume / ringer mode 変更は background で成功すると仮定しない。
 - alarm use case では exact alarm permission と `AudioAttributes.USAGE_ALARM` の利用条件を target 37 側の追加条件と合わせて確認する。
+
+---
+
+# 検証計画（Testing）
+
+## 実行時条件の比較
+
+| Android / targetSdkVersion | Activity / service の状態 | 期待結果 |
+| --- | --- | --- |
+| Android 17 / 36 | ユーザーに表示されている Activity がある | 音声操作が許可されることを確認する。 |
+| Android 17 / 36 | バックグラウンド、FGS なし | 共通制限として、再生のミュート、audio focus の取得失敗、音量 / 着信モードの変更が反映されないことを確認する。 |
+| Android 17 / 36 | バックグラウンド、`SHORT_SERVICE` 以外の FGS が実行中 | 全アプリ共通のライフサイクル条件を満たすことを確認する。 |
+| Android 17 / 37 | ユーザーに見える操作、またはユーザー操作を起点に開始した、WIU capability を持つ FGS | 音声操作が許可されることを確認する。 |
+| Android 17 / 37 | バックグラウンドから開始された、WIU capability を持たない FGS | strict / full level の制限を確認する。 |
+| Android 17 / 37 | FGS + exact alarm permission + `USAGE_ALARM` | アラーム用途の例外を確認する。permission または usage の一方を外した失敗ケースも実施する。 |
+
+API ごとの観測項目:
+- 音声再生: 実際に音が出るか確認する。制限された場合は、API から例外が発生せず、音声がミュートされることを確認する。
+- audio focus: `requestAudioFocus()` の戻り値が `AUDIOFOCUS_REQUEST_FAILED` になることを確認する。
+- 音量 / 着信モード: 呼び出し前後の値を比較し、制限された場合は、例外が発生せず値も変更されないことを確認する。
+- 診断情報: `adb shell dumpsys audio` と `logcat` で、パッケージ名を含む `AudioHardening` の記録を確認する。`level: partial` は FGS がない状態、`level: full` は FGS があっても WIU capability が不足している状態を識別する手掛かりになる。
+
+## ADB による hardening の強制設定
+
+公式の強制テスト用コマンド:
+
+```bash
+adb shell cmd audio set-enable-hardening enable
+adb shell cmd audio set-enable-hardening disable
+adb shell cmd audio set-enable-hardening throw
+```
+
+- `enable`: すべてのアプリに hardening の制限を強制し、targetSdkVersion にかかわらず WIU の要件を適用する。強制テスト中は、exact alarm + `USAGE_ALARM` の例外も適用されない。
+- `disable`: hardening の制限を無効化し、症状が hardening に起因するかを比較する。
+- `throw`: `enable` と同じ条件を強制したうえで、音量 / audio focus では `IllegalStateException`、明示的な書き込みによる音声再生ではエラーコードを返すなど、表面化しにくい失敗を検出しやすい形に変える。
+
+`enable` / `throw` は targetSdkVersion 37 の適用条件とアラーム用途の例外を上書きするため、targetSdkVersion 36 / 37 の正式な比較や、アラーム用途の例外の確認には使用しない。これらは、hardening override を強制していない既定状態の Android 17 端末で別途確認する。
 
 ---
 

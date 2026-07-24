@@ -1,26 +1,26 @@
-# Fixed rate work scheduling optimization 調査レポート
+# 固定間隔処理のスケジューリング最適化（Fixed rate work scheduling optimization）調査レポート
 
 ## 基本情報（Metadata）
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-15.0.0_r36
 
-To:
+比較先:
 - android-16.0.0_r4
 
-Note:
-- `android16/AGENTS.md` の既定 scope は `android-16.0.0_r1` だが、この調査では依頼に従い、公開済み Android 16 tag として `android-16.0.0_r4` を使った。
-- `frameworks-base` checkout は clean。指定 tag `android-15.0.0_r36` / `android-16.0.0_r4` はどちらも存在する。
-- local `libcore` checkout は存在しなかったため、AOSP 公式 Gitiles の tag 指定 URL で `platform/libcore` を確認した。
+注記:
+- `android16/AGENTS.md` の既定の比較先は `android-16.0.0_r1` だが、この調査では依頼に従い、公開済みの Android 16 タグ `android-16.0.0_r4` を使った。
+- `frameworks-base` checkout に未コミットの変更はない。指定した `android-15.0.0_r36` / `android-16.0.0_r4` タグはどちらも存在する。
+- ローカルに `libcore` checkout がなかったため、AOSP 公式 Gitiles のタグ指定 URL で `platform/libcore` を確認した。
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 - https://developer.android.com/about/versions/16/behavior-changes-16#schedule-at-fixed-rate
 
-Section:
+セクション:
 - Fixed rate work scheduling optimization
 
 ### 分類スナップショット（Classification Snapshot）
@@ -32,10 +32,10 @@ Section:
 
 | 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 16 に OS アップデートしただけで適用されるか | No | 公式文書は apps targeting Android 16 / API level 36 の Behavior Change として掲載。公開 compat page も Change ID 288912692 を Android 16 target 以上で enabled と説明 |
-| targetSdkVersion 36 以上が必要か | Yes | AOSP libcore の STPE Change ID 288912692 と Timer Change ID 351566728 はどちらも `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)`。Android 15 = 35 の後、つまり targetSdkVersion 36 以上で default enabled |
-| 追加の実行時条件があるか | Yes | `ScheduledExecutorService` / `ScheduledThreadPoolExecutor` または `Timer` の `scheduleAtFixedRate` を使い、CPU suspend / Cached Apps Freezer / frozen state 等で fixed-rate period を複数回 missed した後に復帰する場合に実質影響が出る |
-| Compat Change ID が関係するか | Yes | STPE: `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 288912692。Timer: `SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 351566728。公開 compat page に掲載されているのは STPE 側 |
+| Android 16 に OS アップデートしただけで適用されるか | いいえ | 公式文書では、Android 16 / API level 36 以上を対象とするアプリの Behavior Change として掲載されている。公開 compat ページでも、Change ID 288912692 は Android 16 以上を対象とする場合に有効になると説明されている |
+| targetSdkVersion 36 以上が必要か | はい | AOSP libcore の STPE Change ID 288912692 と Timer Change ID 351566728 には、どちらも `@EnabledAfter(targetSdkVersion = VersionCodes.VANILLA_ICE_CREAM)` が付いている。つまり targetSdkVersion 36 以上で既定で有効になる |
+| 追加の実行時条件があるか | はい | `ScheduledExecutorService` / `ScheduledThreadPoolExecutor` または `Timer` の `scheduleAtFixedRate` を使い、CPU の一時停止、Cached Apps Freezer、プロセスの凍結などで複数周期を実行できないまま復帰した場合に、実質的な影響が出る |
+| Compat Change ID が関係するか | はい | STPE: `STPE_SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 288912692。Timer: `SKIP_MULTIPLE_MISSED_PERIODIC_TASKS` / 351566728。公開 compat ページに掲載されているのは STPE 側である |
 
 ### 調査日（Investigation Date）
 
@@ -88,12 +88,12 @@ Compat framework:
 
 # エグゼクティブサマリー（Executive Summary）
 
-Android 16 では、targetSdkVersion 36 以上のアプリで `ScheduledThreadPoolExecutor` / `ScheduledExecutorService` と `Timer` の `scheduleAtFixedRate` missed execution catch-up が抑制される。
-従来は process が freeze / suspend 等から戻ったときに複数回分の missed fixed-rate task が連続実行され得たが、新挙動では即時に実行される missed execution は最大 1 回になる。
+Android 16 では、targetSdkVersion 36 以上のアプリで、`ScheduledThreadPoolExecutor` / `ScheduledExecutorService` と `Timer` の `scheduleAtFixedRate` が、未実行分を復帰直後にまとめて実行する挙動が抑制される。
+従来は、プロセスが凍結や一時停止などから戻ったときに、複数回分の fixed-rate 処理が連続実行される可能性があった。新しい挙動では、復帰時に即時実行される未実行分は最大1回になる。
 Android 16 へ OS アップデートしただけで targetSdkVersion 35 以下のアプリに適用される変更ではない。
-影響があるのは、fixed-rate の backlog catch-up を業務ロジックとして期待している polling、sync、metrics upload、retry、cleanup 等である。
+影響があるのは、fixed-rate の未実行分がまとめて実行されることを業務ロジックとして期待している、ポーリング、同期、メトリクス送信、再試行、後処理などである。
 
-`scheduleAtFixedRate` は API として `@Deprecated` にはなっていない。一方、Android Lint は `DiscouragedApi` として、cached process が uncached に戻った際の大量連続実行を理由に使用を強く非推奨としている。この Lint 警告と Android 16 Behavior Change は無関係ではなく、同じ missed execution の catch-up 問題を扱う。Android 16 / targetSdkVersion 36 の変更は大量 catch-up を最大 1 回へ抑える緩和策だが、古い OS、targetSdkVersion 35 以下、fixed-rate の意味論、process lifecycle との不整合は残るため、Lint 警告を無視してよい根拠にはならない。
+`scheduleAtFixedRate` は API として `@Deprecated` にはなっていない。一方、Android Lint は `DiscouragedApi` として、cached process が通常状態へ戻った際の大量の連続実行を理由に、使用を強く非推奨としている。この Lint 警告と Android 16 Behavior Change は無関係ではなく、どちらも未実行分をまとめて処理する問題を扱っている。Android 16 / targetSdkVersion 36 の変更は、まとめて実行する回数を最大1回へ抑える緩和策である。しかし、古い OS、targetSdkVersion 35 以下、fixed-rate 固有の挙動、プロセスのライフサイクルとの不整合は残るため、Lint 警告を無視してよい根拠にはならない。
 
 ---
 
@@ -390,5 +390,5 @@ executor.scheduleAtFixedRate({
 判断（Decision）:
 - 未判断
 
-Owner notes:
-- 最終優先度、severity、release readiness、顧客 communication priority は repository owner が判断する。
+管理者向け注記:
+- 最終優先度、影響度、リリース判断、顧客通知の優先度は、リポジトリ管理者が判断する。

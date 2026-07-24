@@ -37,6 +37,8 @@ Android 17 Behavior Change
 
 Android 17 では、touchpad が pointer capture 中に default で relative motion event を deliver する。AOSP では `View.requestPointerCapture()` が `pointerCaptureModes()` と `relativeCaptureModeByDefault()` を確認し、条件を満たす場合に `POINTER_CAPTURE_MODE_RELATIVE` を request する。
 
+absolute mode がタッチパッド上の指の位置を通知するのに対し、relative mode は前回からの移動量を通知する。指が端に到達した後に持ち上げて中央へ置き直しても、カーソルやカメラを飛ばさずに同じ方向へ操作を続けられる。そのため、リモートデスクトップ、ゲーム内カメラ、viewport navigation に適している。正確な指の位置や独自のジェスチャーが必要な機能では、absolute mode を明示する。
+
 ## 顧客影響
 
 - pointer capture 中の touchpad event を absolute coordinate として扱うアプリでは、cursor movement、remote pointer mapping、drag / pan / selection の解釈が変わる可能性がある。
@@ -60,6 +62,8 @@ Android 17 では、touchpad が pointer capture 中に default で relative mot
 | Android 16 | 36 | baseline。touchpad + pointer capture の event coordinate behavior を確認。 |
 | Android 17 | 36 | touchpad captured event は default relative motion event として届くと公式文書は説明。 |
 | Android 17 | 37 | targetSdkVersion 36 と同じ期待。targetSdkVersion 条件は公式文書に記載なし。 |
+
+イベント単位のテストでは、1 本指での移動が `ACTION_MOVE` と相対値の `getX()` / `getY()`、2 本指でのスクロールが `ACTION_SCROLL` と `AXIS_VSCROLL` / `AXIS_HSCROLL` になること、およびイベントソースが `SOURCE_MOUSE_RELATIVE` になることを確認する。ユーザー操作単位のテストでは、タッチパッドの端から指を置き直したときに、カーソル、カメラ、ドラッグ、パン、選択位置が飛ばずに操作を続けられることを確認する。
 
 ## 顧客向け説明
 

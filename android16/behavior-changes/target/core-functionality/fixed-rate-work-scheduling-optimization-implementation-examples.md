@@ -1,29 +1,29 @@
-# Fixed rate work scheduling optimization - 実装例（Implementation Examples）
+# 固定間隔処理のスケジューリング最適化 - 実装例
 
 ## 位置づけ（Scope）
 
-このファイルは、Fixed rate work scheduling optimization の調査レポートに対する実装例である。
-根拠、適用条件、classification、confidence、Human Decision は primary report / one-page summary を正とする。
+このファイルは、固定間隔処理のスケジューリング最適化に関する調査レポートの実装例である。
+根拠、適用条件、分類、confidence、人間の判断は、主レポートと1ページ要約を正とする。
 
-Primary report:
+主レポート:
 - [fixed-rate-work-scheduling-optimization.md](fixed-rate-work-scheduling-optimization.md)
 
-One-page summary:
+1ページ要約:
 - [fixed-rate-work-scheduling-optimization-summary.md](../../../summaries/target/core-functionality/fixed-rate-work-scheduling-optimization-summary.md)
 
-Runtime behavior comparison:
+実行挙動の比較:
 - [fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md](fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md)
 
 ## 対象（Target）
 
 Android 16 Behavior Change:
-- Document: https://developer.android.com/about/versions/16/behavior-changes-16#schedule-at-fixed-rate
-- Section: Fixed rate work scheduling optimization
+- 文書: https://developer.android.com/about/versions/16/behavior-changes-16#schedule-at-fixed-rate
+- セクション: Fixed rate work scheduling optimization
 
 適用条件の要点:
-- OS アップデート / 全アプリ: No。targetSdkVersion 35 以下のアプリに OS アップデートだけで default 適用される根拠は確認していない。
-- targetSdkVersion 36 以上: Yes。executor 側 Change ID 288912692 と Timer 側 Change ID 351566728 はどちらも `@EnabledAfter(VANILLA_ICE_CREAM)`。
-- その他の必須条件: executor または Timer の `scheduleAtFixedRate` を使い、freeze / suspend 等で複数 period を missed した後に復帰すること。
+- OS アップデート / 全アプリ: いいえ。targetSdkVersion 35 以下のアプリに、OS アップデートだけで既定適用される根拠は確認していない。
+- targetSdkVersion 36 以上: はい。executor 側の Change ID 288912692 と Timer 側の Change ID 351566728 には、どちらも `@EnabledAfter(VANILLA_ICE_CREAM)` が付いている。
+- その他の必須条件: executor または Timer の `scheduleAtFixedRate` を使い、凍結や一時停止などで複数周期を実行できないまま復帰すること。
 
 対象 API:
 - `ScheduledExecutorService#scheduleAtFixedRate`
@@ -33,10 +33,10 @@ Android 16 Behavior Change:
 
 ## 使い方（How to Use）
 
-- この Behavior Change は API の単純置換を要求するものではない。まず「missed callback が複数回呼ばれること」を業務ロジックが必要としているかを判定する。
-- 最新状態を取得できればよい polling は、復帰後に 1 回だけ refresh して正しい状態へ収束する設計にする。
-- missed period ごとの処理が必要な場合は、callback 回数ではなく、最後に成功した時刻と現在時刻から論理 period 数を計算する。
-- 実装例はそのまま貼り付ける完成コードではない。永続化、排他制御、retry 上限、network 制約、process lifecycle に合わせて調整する。
+- この Behavior Change は、API の単純な置き換えを要求するものではない。まず、「実行できなかった分だけ callback が複数回呼ばれること」を業務ロジックが必要としているか判定する。
+- 最新状態を取得できればよいポーリングは、復帰後に1回だけ再取得し、正しい状態へ収束するよう設計する。
+- 実行できなかった周期ごとの処理が必要な場合は、callback の回数ではなく、最後に成功した時刻と現在時刻から論理的な周期数を計算する。
+- 実装例は、そのまま貼り付けて使う完成コードではない。永続化、排他制御、再試行上限、ネットワーク制約、プロセスのライフサイクルに合わせて調整する。
 
 ## 対応方針（Implementation Strategy）
 

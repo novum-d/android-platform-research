@@ -1,24 +1,24 @@
-# Migration or opt-out required for predictive back 調査レポート
+# Predictive Back への移行または opt-out が必要 - 調査レポート
 
 ## 基本情報（Metadata）
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-15.0.0_r36
 
-To:
+比較先:
 - android-16.0.0_r4
 
-Note:
-- `android16/AGENTS.md` の既定 scope は `android-16.0.0_r1` だが、この調査では依頼に従い、確認時点で利用可能な Android 16 最新 tag として `android-16.0.0_r4` を使った。
+注記:
+- `android16/AGENTS.md` の既定の比較先は `android-16.0.0_r1` だが、この調査では依頼に従い、確認時点で利用できる最新の Android 16 タグ `android-16.0.0_r4` を使った。
 
 ### Behavior Change 文書（Behavior Change Source）
 
-Document:
+文書:
 - https://developer.android.com/about/versions/16/behavior-changes-16#predictive-back
 
-Section:
+セクション:
 - Migration or opt-out required for predictive back
 
 ### 分類スナップショット（Classification Snapshot）
@@ -30,10 +30,10 @@ Section:
 
 | 確認項目（Question） | 回答（Answer） | 根拠（Evidence） |
 | --- | --- | --- |
-| Android 16 に OS アップデートしただけで適用されるか | No | 公式文書は apps targeting Android 16 / API level 36 or higher と明記。AOSP でも application manifest default が `targetSdk > VANILLA_ICE_CREAM` |
-| targetSdkVersion 36 以上が必要か | Yes | Android 16 の `ParsingPackageUtils` は `enableOnBackInvokedCallback` の default を targetSdkVersion 36 以上で true にする |
-| 追加の実行時条件があるか | Yes | Android 16 以上の端末上で実行され、back event を intercept する、または legacy `onBackPressed` / `KEYCODE_BACK` dispatch に依存する場合に実質影響が出る |
-| Compat Change ID が関係するか | No / Not found | 公開 compat framework changes ページと AOSP `@ChangeId` 検索では本件に対応する compat Change ID は確認できなかった。AOSP aconfig flag `predictive_back_stop_keycode_back_forwarding` は確認した |
+| Android 16 に OS アップデートしただけで適用されるか | いいえ | 公式文書には、Android 16 / API level 36 以上を対象とするアプリと明記されている。AOSP でも application manifest の既定値は `targetSdk > VANILLA_ICE_CREAM` で決まる |
+| targetSdkVersion 36 以上が必要か | はい | Android 16 の `ParsingPackageUtils` は、targetSdkVersion 36 以上で `enableOnBackInvokedCallback` の既定値を `true` にする |
+| 追加の実行時条件があるか | はい | Android 16 以上の端末上で動作し、Back イベントを独自に処理する、または従来の `onBackPressed` / `KEYCODE_BACK` の通知に依存する場合に、実質的な影響が出る |
+| Compat Change ID が関係するか | いいえ / 見つからない | 公開されている compat framework changes ページと AOSP の `@ChangeId` 検索では、本件に対応する compat Change ID は確認できなかった。AOSP の aconfig flag `predictive_back_stop_keycode_back_forwarding` は確認した |
 
 ### 調査日（Investigation Date）
 
@@ -83,8 +83,8 @@ Compat framework:
 
 # エグゼクティブサマリー（Executive Summary）
 
-Android 16 では、targetSdkVersion 36 以上のアプリで predictive back system animations が default enabled になる。
-この状態では legacy な `onBackPressed()` は呼ばれず、`KEYCODE_BACK` もアプリに通常 dispatch されなくなるため、back event を独自処理しているアプリは `OnBackInvokedCallback` などの対応 API に移行する必要がある。
+Android 16 では、targetSdkVersion 36 以上のアプリで Predictive Back のシステムアニメーションが既定で有効になる。
+この状態では、従来の `onBackPressed()` は呼ばれず、`KEYCODE_BACK` も通常はアプリへ通知されない。そのため、Back イベントを独自に処理しているアプリは、`OnBackInvokedCallback` などの対応 API へ移行する必要がある。
 一時的な回避策として、`android:enableOnBackInvokedCallback="false"` を application または activity に指定できる。
 OS アップデートだけで targetSdkVersion 35 以下のアプリへ同じ挙動が適用される根拠は確認していない。
 
@@ -111,8 +111,8 @@ For apps targeting Android 16 (API level 36) or higher and running on an Android
 ## 解釈（Interpretation）
 
 この変更は Android 16 の `behavior-changes-16` に掲載されているため、初期分類は targetSdkVersion 36 以上向けである。
-ただし、targetSdkVersion 36 だけではなく、Android 16 以上の端末上で実行され、かつ app が legacy back handling に依存している場合に実質影響が出る。
-公式文書は、未移行アプリに対し supported back navigation API への移行、または temporary opt-out として `android:enableOnBackInvokedCallback="false"` の設定を案内している。
+ただし、targetSdkVersion 36 以上であることに加えて、Android 16 以上の端末上で実行され、アプリが従来方式の Back 処理に依存している場合に、実質的な影響が出る。
+公式文書は、未移行のアプリに対し、対応する Back navigation API への移行、または一時的な opt-out として `android:enableOnBackInvokedCallback="false"` を設定する方法を案内している。
 
 ---
 
@@ -344,8 +344,8 @@ onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
 
 # 結論（Conclusion）
 
-この変更は、Android 16 端末上で targetSdkVersion 36 以上にしたアプリに対し、predictive back を default enabled にする。
-legacy `onBackPressed` / `KEYCODE_BACK` 依存の back handling は期待通り呼ばれなくなるため、supported back navigation APIs への移行が必要である。
+この変更は、Android 16 端末上で targetSdkVersion 36 以上にしたアプリに対し、Predictive Back を既定で有効にする。
+従来の `onBackPressed` / `KEYCODE_BACK` に依存する Back 処理は呼ばれなくなるため、対応する Back navigation API への移行が必要である。
 顧客向けには、OS アップデートだけの影響ではなく、targetSdkVersion 36 化に伴う条件付き影響として説明する。
 
 ---

@@ -1,29 +1,29 @@
-# Fixed rate work scheduling optimization - 実行挙動比較
+# 固定間隔処理のスケジューリング最適化 - 実行挙動比較
 
 ## 位置づけ（Scope）
 
-このファイルは、5 秒周期の同じ処理を次の 3 API で実装した場合の実行時刻、遅延後の再開、長時間処理、cancel を比較する companion document である。
-Behavior Change の根拠、適用条件、classification、confidence、Human Decision は primary report / one-page summary を正とする。
+このファイルは、5秒周期の同じ処理を次の3つの API で実装した場合について、実行時刻、遅延後の再開、長時間処理、キャンセルの違いを比較する補足資料である。
+Behavior Change の根拠、適用条件、分類、confidence、人間の判断は、主レポートと1ページ要約を正とする。
 
-Primary report:
+主レポート:
 - [fixed-rate-work-scheduling-optimization.md](fixed-rate-work-scheduling-optimization.md)
 
-One-page summary:
+1ページ要約:
 - [fixed-rate-work-scheduling-optimization-summary.md](../../../summaries/target/core-functionality/fixed-rate-work-scheduling-optimization-summary.md)
 
-Implementation examples:
+実装例:
 - [fixed-rate-work-scheduling-optimization-implementation-examples.md](fixed-rate-work-scheduling-optimization-implementation-examples.md)
 
 ## 対象（Target）
 
 Android 16 Behavior Change:
-- Document: https://developer.android.com/about/versions/16/behavior-changes-16#schedule-at-fixed-rate
-- Section: Fixed rate work scheduling optimization
+- 文書: https://developer.android.com/about/versions/16/behavior-changes-16#schedule-at-fixed-rate
+- セクション: Fixed rate work scheduling optimization
 
 適用条件の要点:
-- OS アップデート / 全アプリ: No。targetSdkVersion 35 以下へ OS アップデートだけで default 適用される変更ではない。
-- targetSdkVersion 36 以上: Yes。
-- その他の必須条件: `scheduleAtFixedRate` を使い、process freeze / suspend 等で複数 period を missed すること。
+- OS アップデート / 全アプリ: いいえ。targetSdkVersion 35 以下のアプリに、OS アップデートだけで既定適用される変更ではない。
+- targetSdkVersion 36 以上: はい。
+- その他の必須条件: `scheduleAtFixedRate` を使い、プロセスの凍結や一時停止などで複数周期を実行できない状態になること。
 
 ## 比較契約（Comparison Contract）
 
@@ -31,15 +31,15 @@ Android 16 Behavior Change:
 
 | 条件 | 値 |
 | --- | --- |
-| Initial delay | 0 秒 |
-| Period / delay | 5 秒 |
-| Thread | 1 thread |
-| Clock | 説明上は開始時点を 0 秒とする monotonic elapsed time |
-| Task | camera の現在状態を 1 回取得する idempotent task |
-| Overlap | 同じ periodic task の実行は重複しない |
+| 初回遅延 | 0秒 |
+| 周期 / 遅延 | 5秒 |
+| スレッド | 1スレッド |
+| 時刻 | 説明上は開始時点を0秒とする単調増加の経過時間 |
+| 処理 | カメラの現在状態を1回取得する冪等な処理 |
+| 重複実行 | 同じ定期処理の実行は重複しない |
 
-Scenario ごとに task duration、process pause、targetSdkVersion を上書きする。
-タイムラインは API 仕様を理解するための conceptual expected behavior であり、実機観測値ではない。
+シナリオごとに処理時間、プロセスの停止時間、targetSdkVersion を変更する。
+タイムラインは API 仕様を理解するための概念上の期待挙動であり、実機で観測した値ではない。
 
 ## 比較対象（Comparison Targets）
 
@@ -60,13 +60,13 @@ Scenario ごとに task duration、process pause、targetSdkVersion を上書き
 | Android 16 Behavior Change 対象 | Yes | No | No |
 | 主な用途 | absolute-time cadence / task 間同期 | Timer を維持する最小差分 | polling、network、完了後に休止が必要な処理 |
 
-## 用語（Terminology）
+## 用語
 
-- Planned time: scheduler が基準時刻から計算した実行予定時刻。
-- Actual start: task が実際に開始した時刻。
-- Actual end: task が完了した時刻。
-- Missed execution: process freeze / suspend 等により planned time に実行できなかった task。
-- Catch-up: missed execution を復帰後に連続して実行し、fixed-rate grid へ追いつくこと。
+- 予定時刻: scheduler が基準時刻から計算した実行予定時刻。
+- 実開始時刻: 処理が実際に開始した時刻。
+- 実終了時刻: 処理が完了した時刻。
+- 未実行処理: プロセスの凍結や一時停止などにより、予定時刻に実行できなかった処理。
+- 追いつき実行: 未実行処理を復帰後に連続して実行し、fixed-rate の予定へ追いつくこと。
 
 ## 共通コード（Common Task）
 

@@ -64,7 +64,7 @@
 
 ### 信頼度（Confidence）
 
-- Low
+- Medium
 
 ### 適用条件分類（Applicability Classification）
 
@@ -135,6 +135,21 @@ Android 17 では、touchpad input が pointer capture 中に default で relati
 この変更は、pointer capture 中に touchpad input が app へ渡される default mode を変える挙動変更である。touchpad の captured event を relative delta として処理する app には自然な挙動になる一方、absolute coordinate を前提にした app では入力解釈が変わる可能性がある。
 
 顧客向けには「pointer capture 全体が変わる」ではなく、「touchpad device の pointer capture default が relative event になる」と説明する必要がある。mouse、stylus、touchscreen など他 device source への影響範囲は AOSP tag で確認が必要である。
+
+### 利用イメージ（Interaction Model）
+
+absolute mode は、タッチパッド上の指の位置をそのまま伝える。例えば、`500 -> 600 -> 750` という座標列をカーソル移動に使うには、アプリ側で前回値との差分を計算する必要がある。指がタッチパッドの端に到達すると、それ以上同じ方向へ動かし続けられない。また、指を持ち上げて中央へ置き直したときに生じる `950 -> 400` のような座標変化を、実際の移動ではなく置き直しとして除外する処理も必要になる。
+
+relative mode は、指の位置ではなく、前回からの移動量をマウス移動と同じ形式で伝える。指を持ち上げて置き直してもカーソルやカメラを動かさず、その後も操作を続けられる。そのため、リモートデスクトップ、ゲーム内カメラ、viewport navigation のように、物理的なタッチパッドの端を越えて連続操作したい用途に適している。
+
+公式 API reference に記載されたイベントは次のとおりである。
+
+- 1 本指での移動: `MotionEvent.ACTION_MOVE`。X / Y 方向の相対移動量は `MotionEvent.getX()` / `getY()` から取得する。
+- 2 本指でのスクロール: `MotionEvent.ACTION_SCROLL`。スクロール量は `AXIS_VSCROLL` / `AXIS_HSCROLL` から取得する。
+- イベントソース: `InputDevice.SOURCE_MOUSE_RELATIVE`。
+- マウスイベント: capture mode にかかわらず、同じ形式で通知される。
+
+relative mode が常に適切とは限らない。タッチパッド上の正確な指の位置、生のタッチ情報、独自のジェスチャー認識を必要とする描画機能やカスタム入力では、`POINTER_CAPTURE_MODE_ABSOLUTE` を明示する必要がある。
 
 ---
 
@@ -233,10 +248,10 @@ git -C frameworks-base tag --list 'android-17*'
 
 | 確認した差分（Observed diff） | 解釈（Interpretation） | Behavior Change との関係 | 信頼度（Confidence） |
 | --- | --- | --- | --- |
-| Android 17 tag 未取得のため source diff 未確認 | 公式文書上は changed default / API addition with behavior mitigation と読める | touchpad pointer capture default が relative event に変わり、static mode を明示 request できると説明されている | Low |
+| `View.requestPointerCapture()` が既定の mode を選ぶ処理、`requestPointerCapture(int)`、`POINTER_CAPTURE_MODE_*`、mode を認識する `InputManagerService` が Android 17 tag に追加 | 既定値の変更 / 挙動を選択できる API の追加 | タッチパッドの pointer capture は relative mode が既定となり、absolute mode を明示的に要求できる | Medium。framework の境界までは確認済みだが、native 側での変換と製品版における flag の既定値は未確認。 |
 
 必須分類:
-- Added behavior: 未確認。`requestPointerCapture(int)` と pointer capture mode constants が追加された可能性がある。
+- Added behavior: `requestPointerCapture(int)` と pointer capture mode の定数が追加されたことを確認した。
 - Removed behavior: `requestPointerCapture()` が常に absolute mode 相当を request する挙動は、flag 条件下では relative mode default に置き換わる。
 - Changed condition: touchpad device かつ pointer capture 中、かつ `pointer_capture_modes` / `relative_capture_mode_by_default` が有効な場合に event mode が変わる。
 - Changed default: 該当。`View.requestPointerCapture()` の default mode が flag 条件下で `POINTER_CAPTURE_MODE_RELATIVE` になる。
@@ -285,7 +300,7 @@ git -C frameworks-base tag --list 'android-17*'
 - 推奨対応シーン: remote desktop / game streaming / VNC 系の pointer capture path を Android 17 touchpad で検証する。
 - 検証観点: touchpad、mouse、touchscreen を分け、absolute mode が必要な画面では `requestPointerCapture(int)` の利用可否を確認する。
 - 根拠: 公式文書の touchpad pointer capture default 変更、`View.requestPointerCapture(int)` / `InputManagerService.requestPointerCapture()` の AOSP source context。
-- Confidence（信頼度）: Low。レポート自体の AOSP 差分確認が限定的なため。
+- Confidence（信頼度）: Low。列挙した個別サービスの実装と発生有無は未確認のため。
 - 注意: 上記サービスで発生確認した事実ではない。実際の影響は pointer capture の利用有無と入力変換実装に依存する。
 
 ## 例2（Example 2）: Minecraft / Roblox / GeForce NOW のような camera / viewport 操作
@@ -296,7 +311,7 @@ git -C frameworks-base tag --list 'android-17*'
 - ユーザーに見える症状: camera rotation が急に速くなる / 遅くなる、視点移動が不安定になる、精密操作が難しくなる可能性。
 - 技術的に起きていること: input source / tool type ごとの movement model が変わり、mouse と touchpad を同一処理している箇所の前提が崩れる。
 - 推奨対応シーン: laptop / tablet + touchpad、desktop mode、external display での pointer capture QA。
-- 検証観点: touchpad captured event の座標系、delta scaling、API 17 未満との compatibility wrapper。
+- 検証観点: タッチパッドから取得したイベントの座標系、移動量のスケーリング、Android 17 未満との互換性を保つ wrapper。
 - 根拠: 公式文書の relative event default と absolute mode 明示 request の説明。
 - Confidence（信頼度）: Low。
 - 注意: 上記サービスで発生確認した事実ではない。game engine / input library ごとの検証が必要。
@@ -317,9 +332,14 @@ git -C frameworks-base tag --list 'android-17*'
 
 - Android 16 / targetSdkVersion 36 で pointer capture 中の touchpad event baseline を確認する。
 - Android 17 / targetSdkVersion 36 と Android 17 / targetSdkVersion 37 の両方で、touchpad pointer capture の event coordinates / axes / deltas を確認する。
-- `requestPointerCapture()` と `requestPointerCapture(int, STATIC)` 相当の挙動を分けて確認する。
+- `requestPointerCapture()` と `requestPointerCapture(View.POINTER_CAPTURE_MODE_ABSOLUTE)` の挙動を分けて確認する。
 - touchpad、mouse、touchscreen、stylus を別々に確認する。
 - remote pointer mapping、camera control、drag、pan、selection、viewport navigation など、座標解釈に依存する user flow を確認する。
+- `onCapturedPointerEvent()` で `action`、`source`、`deviceId`、`getX()`、`getY()`、`AXIS_HSCROLL`、`AXIS_VSCROLL` を記録する。
+- 1 本指での移動が `ACTION_MOVE` と X / Y 方向の相対移動量、2 本指でのスクロールが `ACTION_SCROLL` と scroll axis、イベントソースが `SOURCE_MOUSE_RELATIVE` になることを確認する。
+- タッチパッドの端まで指を移動し、指を持ち上げて中央へ置き直した後、同じ方向へ操作を続ける。置き直した瞬間にカーソル、カメラ、viewport が飛ばないことを確認する。
+
+イベントログとユーザー操作は分けて判定する。相対移動量が正しく届いていても、アプリが `getX()` / `getY()` を絶対座標として扱うと、カーソルがほとんど動かない、カメラの回転量が過大になる、ドラッグや選択位置が飛ぶ、といった不具合が起こりうる。イベント単位のテストではシステムからの通知内容を確認し、ユーザー操作単位のテストではアプリによる座標の解釈まで確認する。
 
 ## 顧客説明候補（Customer Explanation）
 
@@ -337,6 +357,10 @@ Android 17 では、touchpad を pointer capture 中に使った場合、default
 | Android 17 | 36 / 37 | touchpad + `POINTER_CAPTURE_MODE_ABSOLUTE` | absolute coordinate behavior を request できることを確認する。 |
 | Android 17 | 36 / 37 | mouse / stylus / touchscreen + pointer capture | touchpad 以外への影響範囲を確認する。 |
 
+追加の操作確認:
+- 1 本指での移動、2 本指でのスクロール、指の持ち上げ / 置き直しについて、イベントの順序を記録する。
+- リモートカーソル、カメラ回転、ドラッグ、パン、選択、viewport navigation の操作を期待どおり継続できることを確認する。
+
 ---
 
 # 未解決事項（Open Questions）
@@ -344,7 +368,7 @@ Android 17 では、touchpad を pointer capture 中に使った場合、default
 - `relative_capture_mode_by_default` の製品 default state はどの build / release config で有効になるか。
 - native inputflinger 側で relative / absolute mode がどのように touchpad event conversion に反映されるか。
 - touchpad 判定は `InputDevice` source、device class、kernel event、InputReader classification のどれに基づくか。
-- `MotionEvent` のどの座標 / axis / history が relative event として変化するか。
+- API reference に記載された `getX()` / `getY()`、`AXIS_VSCROLL` / `AXIS_HSCROLL`、`SOURCE_MOUSE_RELATIVE` と、実機で観測するイベントが一致するか。
 - mouse、stylus、touchscreen、trackball、external pointing device への影響範囲。
 
 ---

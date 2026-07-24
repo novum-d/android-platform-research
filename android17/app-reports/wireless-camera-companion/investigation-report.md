@@ -105,7 +105,7 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 
 | Behavior Change | 影響条件 | 想定されるアプリ影響 | 推奨確認 |
 | --- | --- | --- | --- |
-| Autonomous re-pairing for Bluetooth bond losses | Android 17、Bluetooth peripheral bond loss、system autonomous re-pairing attempt、Bluetooth module flag | ペアリング復旧時の broadcast timing や UI flow が変わる可能性。手動再ペアリング案内だけを前提にしている場合、状態表示がずれる可能性。 | bond loss、repairing 成功、repairing 失敗、`ACTION_KEY_MISSING`、ペアリング要求 UI を実機確認する。 |
+| Autonomous re-pairing for Bluetooth bond losses | Android 17、Android の Bluetooth bond を使うカメラ、周辺機器側の bond loss、システムによる自動再ペアリング、Bluetooth module flag | ペアリング復旧時の broadcast のタイミングや UI の流れが変わる可能性がある。`BOND_NONE` で独自のペアリングを開始する実装は、システムによる自動修復と競合する可能性がある。Wi-Fi のみで接続するカメラは直接影響を受けにくい。 | bond の利用有無、`BOND_NONE / BOND_BONDING / BOND_BONDED`、自動修復の成功 / 失敗、`ACTION_KEY_MISSING`、Bluetooth 復旧後の Wi-Fi 接続への引き継ぎを実機で確認する。 |
 | App memory limits | Android 17 の対象 device、vendor config / RAM / process state / memory usage 条件 | 画像 / 動画転送、サムネイル生成、大量キャッシュで memory outlier がある場合、process exit として観測される可能性。 | 画像一覧、連続転送、動画転送、長時間接続で memory baseline を測る。`ApplicationExitInfo` の `REASON_OTHER` / `MemoryLimiter:AnonSwap` を確認する。 |
 
 ## targetSdkVersion 37 更新で影響しうる項目（Target SDK Impact）
@@ -156,7 +156,7 @@ OS アップデートだけで影響しうる項目は、Bluetooth bond loss 後
 追加テスト:
 - Android 17 / targetSdkVersion 37 / local network permission denied: カメラ探索、手動 IP 接続、画像転送、リモート操作が適切に失敗・案内されること。
 - Android 17 / targetSdkVersion 37 / local network permission granted: 初回接続、再接続、OS 設定からの権限取り消し後の復旧。
-- Android 17 / targetSdkVersion 37 / Bluetooth off、range out、peripheral 側 bond loss: UI 状態、re-pairing、manual recovery の整合性。
+- Android 17 / 現行 targetSdkVersion / targetSdkVersion 37 / Bluetooth 無効、通信範囲外、周辺機器側の bond loss: Android の bond 利用有無、`BOND_NONE / BOND_BONDING / BOND_BONDED`、UI の状態、再ペアリング、Wi-Fi 接続への引き継ぎ、手動復旧手順の整合性。
 - Android 17 / targetSdkVersion 37 / tablet or foldable: ライブビュー、設定画面、画像一覧、転送進捗が崩れないこと。
 
 ---
@@ -234,7 +234,7 @@ HTTPS 通信については、certificate transparency の default enabled と E
 ## テストで確認すべき要点
 
 - Android 17 / targetSdkVersion 37 / local network permission denied / granted / revoked。
-- Bluetooth bond loss、repairing 成功、repairing 失敗、`ACTION_KEY_MISSING`。
+- Bluetooth bond の利用有無、`BOND_NONE / BOND_BONDING / BOND_BONDED`、自動修復の成功 / 失敗、ユーザーによる拒否、`ACTION_KEY_MISSING`、Bluetooth 復旧後の Wi-Fi 接続への引き継ぎ。
 - RFCOMM read loop の `-1` handling。
 - HTTPS production / staging / local endpoint。
 - tablet / foldable / multi-window。

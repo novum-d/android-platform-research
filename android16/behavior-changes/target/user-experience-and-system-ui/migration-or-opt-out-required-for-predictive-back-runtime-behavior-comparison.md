@@ -1,39 +1,39 @@
-# Predictive back - Dispatcher 経由あり・なしの実行挙動比較
+# Predictive Back - Dispatcher を経由する場合としない場合の実行挙動比較
 
 ## 位置づけ（Scope）
 
-このファイルは、system back gesture、toolbar / custom back、直接 navigation を実行した場合について、AndroidX `OnBackPressedDispatcher` の callback chain を通る経路と通らない経路を比較する companion document である。
-Behavior Change の根拠、適用条件、classification、confidence、Human Decision は primary report / one-page summary を正とする。
+このファイルは、システムの Back gesture、toolbar / 独自の Back 操作、navigation の直接実行について、AndroidX `OnBackPressedDispatcher` の callback chain を通る経路と通らない経路を比較する補足資料である。
+Behavior Change の根拠、適用条件、分類、confidence、人間の判断は、主レポートと1ページ要約を正とする。
 
-Primary report:
+主レポート:
 - [migration-or-opt-out-required-for-predictive-back.md](migration-or-opt-out-required-for-predictive-back.md)
 
-One-page summary:
+1ページ要約:
 - [migration-or-opt-out-required-for-predictive-back-summary.md](../../../summaries/target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-summary.md)
 
-Implementation examples:
+実装例:
 - [migration-or-opt-out-required-for-predictive-back-implementation-examples.md](migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
 
 ## 対象（Target）
 
 Android 16 Behavior Change:
-- Document: https://developer.android.com/about/versions/16/behavior-changes-16#predictive-back
-- Section: Migration or opt-out required for predictive back
+- 文書: https://developer.android.com/about/versions/16/behavior-changes-16#predictive-back
+- セクション: Migration or opt-out required for predictive back
 
 適用条件の要点:
-- OS アップデート / 全アプリ: No。
-- targetSdkVersion 36 以上: Yes。Android 16 以上端末で predictive back system animations が default enabled。
-- その他の必須条件: legacy `onBackPressed()` / `KEYCODE_BACK`、独自 back intercept、または back callback chain を持つこと。
+- OS アップデート / 全アプリ: いいえ。
+- targetSdkVersion 36 以上: はい。Android 16 以上の端末で Predictive Back のシステムアニメーションが既定で有効になる。
+- その他の必須条件: 従来の `onBackPressed()` / `KEYCODE_BACK`、独自の Back 処理、または Back callback chain を持つこと。
 
 ## 「Dispatcher 経由なし」の定義
 
-Android 16 の system back gesture は platform の back dispatch mechanism を通るため、「dispatcher が一切存在しない system gesture」という経路ではない。
+Android 16 のシステム Back gesture は platform の Back 通知機構を通るため、「dispatcher が一切存在しないシステム gesture」という経路ではない。
 この資料でいう Dispatcher は AndroidX `OnBackPressedDispatcher` を指す。
 
-Dispatcher 経由なしとして比較するのは次の経路である。
-- toolbar / custom button から `NavController.navigateUp()` / `popBackStack()` / `finish()` / business method を直接呼ぶ。
-- platform `OnBackInvokedDispatcher` へ直接 callback を登録し、AndroidX callback chain を使わない。
-- legacy `Activity#onBackPressed()` override を待つ。ただし Android 16 / targetSdkVersion 36 の system gesture では呼ばれない。
+Dispatcher を経由しない場合として比較するのは、次の経路である。
+- toolbar / 独自ボタンから `NavController.navigateUp()` / `popBackStack()` / `finish()` / 業務処理を直接呼ぶ。
+- platform の `OnBackInvokedDispatcher` へ直接 callback を登録し、AndroidX の callback chain を使わない。
+- 従来の `Activity#onBackPressed()` override が呼ばれるのを待つ。ただし、Android 16 / targetSdkVersion 36 のシステム gesture では呼ばれない。
 
 ## 比較契約（Comparison Contract）
 
@@ -41,18 +41,18 @@ Dispatcher 経由なしとして比較するのは次の経路である。
 
 | 条件 | 値 |
 | --- | --- |
-| Activity callback | Activity fallback / analytics callback を登録済み |
-| Fragment callback | selection mode を閉じる callback を後から登録済み |
+| Activity callback | Activity の fallback / analytics 用 callback を登録済み |
+| Fragment callback | 選択モードを閉じる callback を後から登録済み |
 | Navigation | Fragment back stack に前画面がある |
-| Drawer / dialog | Scenario ごとに open / closed を指定 |
+| Drawer / dialog | シナリオごとに開閉状態を指定 |
 | Android version | Android 16 |
 | targetSdkVersion | 36 |
 | Manifest | `enableOnBackInvokedCallback` は default / opt-out なし |
 
 期待する基本順序:
-1. 画面固有 UI state を閉じる。
+1. 画面固有の UI 状態を閉じる。
 2. Fragment / Navigation back stack を戻す。
-3. 処理できる callback がなければ Activity fallback / finish へ進む。
+3. 処理できる callback がなければ、Activity の fallback / finish へ進む。
 
 ## 比較対象（Comparison Targets）
 

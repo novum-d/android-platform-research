@@ -11,7 +11,7 @@
 - 非記載。
 
 現在の targetSdkVersion:
-- 要確認。比較上は previous targetSdkVersion 35 を前提にする。
+- 要確認。比較では以前の targetSdkVersion を 35 と仮定する。
 
 想定する更新後 targetSdkVersion:
 - 36
@@ -21,7 +21,7 @@
 - [x] Wi-Fi / local network
 - [x] 画像 / 動画転送
 - [x] リモート操作
-- [x] Companion device / pairing flow
+- [x] Companion device / ペアリング処理
 - [x] WebView / Network / TLS
 - [x] Large Screen / Window
 - [x] Native library / JNI / third-party SDK
@@ -36,14 +36,14 @@
 
 ### 調査対象 Android バージョン（Android Versions）
 
-From:
+比較元:
 - android-15.0.0_r36
 
-To:
+比較先:
 - android-16.0.0_r4
 
-Note:
-- `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本アプリ別調査では既存 Android16 調査と同じく `android-16.0.0_r4` を参照する。
+注記:
+- `android16/AGENTS.md` では比較先を `android-16.0.0_r1` としているが、本アプリ別調査では、既存の Android 16 調査と同じく `android-16.0.0_r4` を参照する。
 
 ### 調査日（Investigation Date）
 
@@ -57,31 +57,31 @@ Note:
 
 対象外にした領域:
 - 対象アプリのソースコード、APK、manifest、通信先一覧、実機ログの直接確認。
-- アプリ固有の最終 priority / severity / release readiness 判断。
+- アプリ固有の最終優先度、影響度、リリース判断。
 - 対象アプリを特定できる名称、パッケージ名、ストア URL の記載。
 
 アプリコード確認の有無:
 - なし。
 
 確認したアプリ実装範囲:
-- API usage: 未確認。カメラ連携アプリとして Bluetooth、Wi-Fi / LAN、HTTP(S)、画像 / 動画転送、リモート操作、companion pairing を利用する前提で仮評価。`ScheduledThreadPoolExecutor` / `ScheduledExecutorService` / `Timer` の `scheduleAtFixedRate` による定期 polling、接続監視、同期、retry、cleanup の有無は要確認。
+- API の利用状況: 未確認。カメラ連携アプリとして Bluetooth、Wi-Fi / LAN、HTTP(S)、画像 / 動画転送、リモート操作、companion pairing を利用する前提で仮評価した。`ScheduledThreadPoolExecutor` / `ScheduledExecutorService` / `Timer` の `scheduleAtFixedRate` による定期ポーリング、接続監視、同期、再試行、後処理の有無は確認が必要である。
 - Manifest: 未確認。`NEARBY_WIFI_DEVICES`、Bluetooth / Nearby devices、local network testing、orientation / resize / aspect ratio、edge-to-edge opt-out、predictive back opt-out は要確認。
-- Permissions: 未確認。Bluetooth runtime permissions、Nearby devices、location、future local network permission、storage / MediaStore 利用は要確認。
-- Background / service behavior: 未確認。接続復旧、定期 polling / retry / sync / cleanup、通知経由起動、Intent forwarding、PendingIntent / IntentSender 利用は要確認。
-- Device / form factor assumptions: スマートフォン中心と推定。ただし tablet / foldable / desktop windowing / virtual display projection は要確認。
+- 権限: 未確認。Bluetooth の runtime permission、Nearby devices、位置情報、将来の local network permission、ストレージ / MediaStore の利用は確認が必要である。
+- バックグラウンド / service の挙動: 未確認。接続復旧、定期ポーリング、再試行、同期、後処理、通知経由の起動、Intent の転送、PendingIntent / IntentSender の利用は確認が必要である。
+- 端末 / form factor の前提: スマートフォン中心と推定する。ただし、タブレット、折りたたみ端末、desktop windowing、virtual display への投影は確認が必要である。
 - 実機・自動テスト: 未実施。
 
 ---
 
 # エグゼクティブサマリー（Executive Summary）
 
-対象アプリ種別では、Android 16 の影響は Bluetooth reconnect / pairing、local network opt-in testing、native library 16 KB page size、large screen / edge-to-edge / predictive back、Intent security、fixed-rate 定期処理に集中する。
+この種類のアプリでは、Android 16 の影響は、Bluetooth の再接続 / ペアリング、local network の opt-in テスト、native library の 16 KB page size 対応、大画面、edge-to-edge、Predictive Back、Intent のセキュリティ、fixed-rate の定期処理に集中する。
 
-OS アップデートだけで影響しうる項目は、Bluetooth bond loss handling、Companion Device Manager discovery timeout、Intent redirection hardening、16 KB page-size compatibility mode、ART internal changes、virtual device owner projection override、GPU syscall filtering である。targetSdkVersion 36 へ上げる場合は、adaptive layouts、edge-to-edge opt-out 無効化、predictive back default enabled、Safer Intents opt-in、MediaStore version lockdown、fixed-rate work scheduling optimization などを別途確認する。
+OS アップデートだけで影響する可能性がある項目は、Bluetooth bond loss の処理、Companion Device Manager の探索タイムアウト、Intent redirection hardening、16 KB page-size compatibility mode、ART internal changes、virtual device owner による投影時の上書き、GPU syscall filtering である。targetSdkVersion を 36 へ上げる場合は、adaptive layouts、edge-to-edge の opt-out 無効化、Predictive Back の既定有効化、Safer Intents の opt-in、MediaStore version lockdown、fixed-rate work scheduling optimization などを別途確認する。
 
-Android 16 の Local Network Permission は Android 17 と異なり、現時点では default-on の targetSdkVersion 36 behavior ではない。Android 16 r4 では `RESTRICT_LOCAL_NETWORK` compat flag による opt-in testing behavior として扱い、カメラ探索、カメラ側 Wi-Fi AP、mDNS / NSD / `.local`、ローカル IP への HTTP / socket、ライブビュー、画像 / 動画転送をテスト対象にする。
+Android 16 の Local Network Permission は Android 17 と異なり、現時点では targetSdkVersion 36 で既定有効になる挙動ではない。Android 16 r4 では、`RESTRICT_LOCAL_NETWORK` compat flag を使った opt-in テストとして扱う。カメラ探索、カメラ側の Wi-Fi AP、mDNS / NSD / `.local`、ローカル IP への HTTP / socket、ライブビュー、画像 / 動画転送をテスト対象とする。
 
-対象アプリの manifest / API usage は未確認であるため、最終判断には実装棚卸しと実機テストが必要である。特に Bluetooth Classic / BLE / CDM、native `.so`、Intent router、fixed orientation / non-resizable UI、`scheduleAtFixedRate` による定期処理の有無を優先して確認する。
+対象アプリの manifest と API の利用状況は未確認であるため、最終判断には実装の棚卸しと実機テストが必要である。特に、Bluetooth Classic / BLE / CDM、native `.so`、Intent router、画面方向固定 / サイズ変更不可の UI、`scheduleAtFixedRate` による定期処理の有無を優先して確認する。
 
 ---
 
@@ -198,20 +198,20 @@ Android 16 の Local Network Permission は Android 17 と異なり、現時点�
 
 ---
 
-# 顧客向け説明（Customer-facing Explanation）
+# 顧客向け説明
 
-Android 16 では、カメラ連携アプリに対して「すぐに targetSdkVersion 36 化で壊れる項目」と「Android 16 OS 上で条件が揃うと影響する項目」と「Android 16 では opt-in testing に留まるが将来対応の準備になる項目」を分けて説明する必要がある。
+Android 16 では、カメラ連携アプリへの影響を、「targetSdkVersion 36 への更新で有効になる項目」「Android 16 上で追加条件を満たすと影響する項目」「Android 16 では opt-in テストにとどまるが、将来対応の準備になる項目」に分けて説明する必要がある。
 
-ローカルネットワークについては、Android 16 current stage では Android 17 のような default runtime permission enforcement ではない。Android 16 r4 では `RESTRICT_LOCAL_NETWORK` を明示的に enable した opt-in testing として、カメラ探索、カメラ側 Wi-Fi AP、ローカル IP / `.local` / mDNS / NSD、画像 / 動画転送、ライブビュー、リモート操作の failure handling を先行検証する位置づけである。
+ローカルネットワークについては、現在の Android 16 では、Android 17 のように runtime permission が既定で強制されるわけではない。Android 16 r4 では、`RESTRICT_LOCAL_NETWORK` を明示的に有効化する opt-in テストとして、カメラ探索、カメラ側の Wi-Fi AP、ローカル IP / `.local` / mDNS / NSD、画像 / 動画転送、ライブビュー、リモート操作が失敗した場合の処理を先行検証する。
 
-Bluetooth については、Android 16 OS update だけで remote bond loss handling と CDM timeout result が変わり得る。カメラの factory reset、bond reset、範囲外からの復帰、初回 discovery timeout など、onboarding と reconnect のユーザー体験を重点的に確認する。
+Bluetooth については、Android 16 への OS アップデートだけで、接続先側の bond loss 処理と CDM のタイムアウト結果が変わる可能性がある。カメラの factory reset、bond reset、通信範囲外からの復帰、初回探索のタイムアウトなど、初期設定と再接続のユーザー体験を重点的に確認する。
 
-targetSdkVersion 36 へ移行する場合は、large screen / edge-to-edge / predictive back が UI に直接影響する。カメラ live view、remote control、image viewer、setup wizard は fixed orientation、system bar avoidance、legacy back handling への依存が表に出やすいため、Android 16 / targetSdkVersion 36 の実機確認が必要である。
+targetSdkVersion 36 へ移行する場合は、大画面、edge-to-edge、Predictive Back が UI に直接影響する。カメラのライブビュー、リモート操作、画像表示、初期設定画面は、画面方向固定、system bar を避ける処理、従来方式の Back 処理への依存が表面化しやすいため、Android 16 / targetSdkVersion 36 の実機確認が必要である。
 
-定期処理については、executor または `Timer#scheduleAtFixedRate` で camera status polling、接続監視、同期、retry、cleanup 等を実装している場合、targetSdkVersion 36 では freeze / suspend 復帰時に missed execution が最大 1 回しか即時実行されない。missed period 数だけ処理する設計は callback の catch-up 回数に依存させず、最終処理時刻と現在時刻から必要量を明示的に計算する必要がある。
-Android Studio の `DiscouragedApi` 警告はこの Behavior Change と無関係ではない。短周期 polling は、前回の実際の開始時刻基準でよければ `Timer#schedule(..., period)`、前回処理完了から一定間隔を空けたければ `ScheduledExecutorService#scheduleWithFixedDelay` を移行候補とする。WorkManager / JobScheduler は本件の移行先ではなく、process death 後も再実行する別の background work 要件がある場合に限って検討する。
+定期処理については、executor または `Timer#scheduleAtFixedRate` でカメラ状態のポーリング、接続監視、同期、再試行、後処理などを実装している場合、targetSdkVersion 36 では、凍結や一時停止から復帰したときに未実行分が即時実行される回数は最大1回となる。実行できなかった周期数だけ処理する設計では、callback がまとめて呼ばれる回数に依存せず、最終処理時刻と現在時刻から必要量を明示的に計算する必要がある。
+Android Studio の `DiscouragedApi` 警告は、この Behavior Change と無関係ではない。短周期のポーリングは、前回の実際の開始時刻を基準にしてよければ `Timer#schedule(..., period)`、前回の処理完了から一定間隔を空ける必要があれば `ScheduledExecutorService#scheduleWithFixedDelay` を移行候補とする。WorkManager / JobScheduler は本件の移行先ではなく、プロセス終了後も再実行するという別のバックグラウンド処理要件がある場合に限って検討する。
 
-Native / SDK については、16 KB page-size device、ART internal changes、GPU syscall filtering を分けて確認する。画像・動画処理、codec、ML、暗号化、DB、monitoring / profiling / anti-tamper SDK が bundled native library や runtime internals に依存している場合、OS update だけでも互換性リスクになり得る。
+Native / SDK については、16 KB page-size 端末、ART internal changes、GPU syscall filtering を分けて確認する。画像・動画処理、codec、ML、暗号化、DB、monitoring、profiling、不正改変対策の SDK が、同梱された native library や runtime internals に依存している場合、OS アップデートだけでも互換性リスクになる可能性がある。
 
 ---
 
@@ -243,7 +243,7 @@ Native / SDK については、16 KB page-size device、ART internal changes、G
 - Explain / Monitor / Ignore / Further investigation required
 
 顧客説明優先度（Customer communication priority）:
-- TBD by human
+- 人間が判断する
 
 リリース判定（Release readiness decision）:
-- TBD by human
+- 人間が判断する

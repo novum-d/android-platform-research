@@ -1,36 +1,36 @@
-# Migration or opt-out required for predictive back - 実装例（Implementation Examples）
+# Predictive Back への移行または opt-out が必要 - 実装例
 
 ## 位置づけ（Scope）
 
-このファイルは、Predictive back default enabled の調査レポートに対する実装例である。
-根拠、適用条件、classification、confidence、Human Decision は primary report / one-page summary を正とする。
+このファイルは、Predictive Back が既定で有効になる変更に関する調査レポートの実装例である。
+根拠、適用条件、分類、confidence、人間の判断は、主レポートと1ページ要約を正とする。
 
-Primary report:
+主レポート:
 - [migration-or-opt-out-required-for-predictive-back.md](migration-or-opt-out-required-for-predictive-back.md)
 
-One-page summary:
+1ページ要約:
 - [migration-or-opt-out-required-for-predictive-back-summary.md](../../../summaries/target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-summary.md)
 
-Runtime behavior comparison:
+実行挙動の比較:
 - [migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md](migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md)
 
 ## 対象（Target）
 
 Android 16 Behavior Change:
-- Document: https://developer.android.com/about/versions/16/behavior-changes-16#predictive-back
-- Section: Migration or opt-out required for predictive back
+- 文書: https://developer.android.com/about/versions/16/behavior-changes-16#predictive-back
+- セクション: Migration or opt-out required for predictive back
 
 適用条件の要点:
-- OS アップデート / 全アプリ: No。targetSdkVersion 35 以下のアプリに OS アップデートだけで適用される根拠は確認していない。
-- targetSdkVersion 36 以上: Yes。Android 16 以上端末上で predictive back が default enabled になる。
-- その他の必須条件: legacy `onBackPressed()` / `KEYCODE_BACK` / custom back intercept に依存している場合に実質影響が出る。
+- OS アップデート / 全アプリ: いいえ。targetSdkVersion 35 以下のアプリに、OS アップデートだけで適用される根拠は確認していない。
+- targetSdkVersion 36 以上: はい。Android 16 以上の端末上で Predictive Back が既定で有効になる。
+- その他の必須条件: 従来の `onBackPressed()` / `KEYCODE_BACK` / 独自の Back 処理に依存している場合に、実質的な影響が出る。
 
 ## 使い方（How to Use）
 
-- primary report の「対応候補」には、短い代表例とこのファイルへのリンクだけを置く。
-- このファイルのコードは移行方針を具体化するための例であり、アプリの navigation stack、状態管理、dialog 実装に合わせて調整する。
+- 主レポートの「対応候補」には、短い代表例とこのファイルへのリンクだけを置く。
+- このファイルのコードは移行方針を具体化するための例であり、アプリの navigation stack、状態管理、dialog の実装に合わせて調整する。
 - 各例は、既存コードで何を探し、どの API / pattern へ置き換えるかを `Before` / `After` で示す。
-- 一時 opt-out は移行までの互換性維持に限定し、対象 Activity、理由、削除条件を記録する。
+- 一時的な opt-out は、移行まで互換性を維持する目的に限定し、対象 Activity、理由、削除条件を記録する。
 
 ## 対応方針（Implementation Strategy）
 

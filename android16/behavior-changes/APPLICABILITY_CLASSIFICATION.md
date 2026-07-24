@@ -1,160 +1,160 @@
-# Android 16 Applicability Classification
+# Android 16 適用条件分類
 
 このファイルは、Android 16 Behavior Changes を「OSアップデート時に自動的に適用される差分」と「targetSdkVersion 36 を上げた時に適用される差分」に分類するための基準を定義する。
 
-## Version Scope
+## バージョンスコープ
 
-From:
+比較元:
 - android-15.0.0_r36
 
-To:
+比較先:
 - android-16.0.0_r1
 
-## Official Documentation Sources
+## 公式ドキュメント参照元
 
-Primary documentation:
-- OS update / all apps: https://developer.android.com/about/versions/16/behavior-changes-all
+主要ドキュメント:
+- OS アップデート / 全アプリ: https://developer.android.com/about/versions/16/behavior-changes-all
 - targetSdkVersion 36+: https://developer.android.com/about/versions/16/behavior-changes-16
 - Compat framework: https://developer.android.com/about/versions/16/reference/compat-framework-changes
 
-## Classification Labels
+## 分類ラベル
 
-Use exactly one primary label per finding.
+各調査項目には、主分類を必ず1つだけ付ける。
 
 ### OS_UPDATE_ALL_APPS
 
-Use when the official document states that the behavior applies to all apps running on Android 16 regardless of targetSdkVersion.
+公式文書が「targetSdkVersion にかかわらず、Android 16 上で動作するすべてのアプリに適用される」と説明している場合に使う。
 
-Required evidence:
-- Behavior Change source is `behavior-changes-all`, or equivalent official statement exists.
-- AOSP evidence does not show a targetSdkVersion 36 gate.
-- If implementation is gated, the gate is OS version, device capability, module version, permission state, app state, API usage, or another non-targetSdk condition.
+必要な根拠:
+- Behavior Change の参照元が `behavior-changes-all` である、または同等の公式記述が存在する。
+- AOSP 根拠に targetSdkVersion 36 の適用 gate が見つからない。
+- 実装に gate がある場合、その条件が OS バージョン、端末の機能、モジュールのバージョン、権限状態、アプリの状態、API の利用、または targetSdkVersion 以外の条件である。
 
-Customer wording:
+顧客向け表現:
 - Android 16 へ OS アップデートすると、targetSdkVersion を変更していないアプリにも影響する可能性がある。
 
 ### TARGET_SDK_36
 
-Use when the behavior applies to apps targeting Android 16 / API level 36 or higher.
+Android 16 / API level 36 以上を対象とするアプリに適用される場合に使う。
 
-Required evidence:
-- Behavior Change source is `behavior-changes-16`, or equivalent official statement exists.
-- AOSP evidence shows a targetSdkVersion gate, compat ChangeId default-enabled for API 36+, or an API 36 condition.
-- Android 16 / targetSdkVersion 35 and Android 16 / targetSdkVersion 36 have different expected behavior.
+必要な根拠:
+- Behavior Change の参照元が `behavior-changes-16` である、または同等の公式記述が存在する。
+- AOSP 根拠で、targetSdkVersion の gate、API 36 以上で既定で有効になる compat ChangeId、または API 36 の条件を確認できる。
+- Android 16 / targetSdkVersion 35 と Android 16 / targetSdkVersion 36 で、期待される挙動が異なる。
 
-Customer wording:
+顧客向け表現:
 - targetSdkVersion を 36 以上に上げると有効になるため、OS アップデートだけでは原則として発生しない。
 
 ### TARGET_SDK_36_CONDITIONAL
 
-Use when targetSdkVersion 36 is necessary but not sufficient.
+targetSdkVersion 36 以上が必要だが、それだけでは適用されない場合に使う。
 
-Examples of additional conditions:
-- large screen or `sw600dp`
-- specific permission group
-- specific API usage
-- cross-app component boundary
-- manifest property or opt-out state
-- process lifecycle state
+追加条件の例:
+- large screen または `sw600dp`
+- 特定の権限グループ
+- 特定の API 利用
+- アプリ間の component boundary
+- manifest property または opt-out の状態
+- process lifecycle の状態
 
-Required evidence:
-- Same evidence as `TARGET_SDK_36`.
-- Additional runtime condition is documented and verified in AOSP or official docs.
+必要な根拠:
+- `TARGET_SDK_36` と同じ根拠。
+- 追加の実行時条件が文書化され、AOSP または公式ドキュメントで確認できる。
 
-Customer wording:
+顧客向け表現:
 - targetSdkVersion 36 以上に加えて、特定の端末条件、API 利用、権限、manifest 設定などを満たす場合に影響する。
 
 ### OPT_IN_ONLY
 
-Use when the official Android 16 documentation describes the current behavior as explicitly opt-in, and AOSP evidence shows that the behavior is not enabled by OS update alone or targetSdkVersion 36 alone.
+Android 16 の公式ドキュメントが現時点の挙動を明示的な opt-in と説明し、AOSP 根拠から、OS アップデートや targetSdkVersion 36 への更新だけでは有効にならないことを確認できる場合に使う。
 
-Examples of opt-in gates:
-- manifest attribute or manifest property
-- app compat flag force-enable
-- developer testing flag
-- feature flag plus explicit app / component configuration
+opt-in gate の例:
+- manifest attribute または manifest property
+- app compat flag による強制有効化
+- 開発者向けテスト flag
+- feature flag と、アプリまたは component の明示的な設定の組み合わせ
 
-Required evidence:
-- Official documentation states the opt-in nature or current opt-in stage.
-- AOSP evidence identifies the exact opt-in gate.
-- AOSP evidence shows that the default path does not apply the behavior without opt-in.
-- Android 16 / targetSdkVersion 35 and Android 16 / targetSdkVersion 36 expected behavior are both stated.
-- The report separates current Android 16 opt-in behavior from future default enforcement plans.
+必要な根拠:
+- 公式ドキュメントに、opt-in であること、または現在が opt-in 段階であることが記載されている。
+- AOSP 根拠から、正確な opt-in gate を特定できる。
+- AOSP 根拠から、opt-in しない既定の経路ではこの挙動が適用されないことを確認できる。
+- Android 16 / targetSdkVersion 35 と Android 16 / targetSdkVersion 36 の期待挙動をどちらも記載している。
+- 現在の Android 16 における opt-in の挙動と、将来既定で強制する計画をレポート内で分けている。
 
-Customer wording:
+顧客向け表現:
 - Android 16 の現時点では、OS アップデートや targetSdkVersion 36 化だけでは有効にならず、manifest 設定、compat flag、developer testing 手順などで明示的に opt-in した場合に影響する。
 
 ### MAINLINE_OR_PLAY_SYSTEM_UPDATE
 
-Use when the change is delivered through a Mainline module or Google Play system update and is not strictly tied to the Android 16 platform image.
+変更が Mainline module または Google Play system update で配信され、Android 16 の platform image だけでは適用可否が決まらない場合に使う。
 
-Required evidence:
-- Official documentation states module or Google Play system update delivery.
-- AOSP evidence identifies the module or package boundary where possible.
-- Impact description separates platform version from module version.
+必要な根拠:
+- 公式ドキュメントに、module または Google Play system update で配信されることが記載されている。
+- 可能な範囲で、AOSP 根拠から module または package boundary を特定している。
+- 影響説明で platform version と module version を分けている。
 
-Customer wording:
+顧客向け表現:
 - Android 16 端末だけでなく、対象モジュールが更新された過去 OS の端末にも影響する可能性がある。
 
 ### API_ADDITION_ONLY
 
-Use when the item adds or exposes an API but does not itself change existing app behavior.
+API を追加または公開するだけで、既存アプリの挙動自体は変わらない場合に使う。
 
-Required evidence:
-- API surface change is present.
-- No Behavior Change statement or no changed behavior for existing apps is identified.
-- Developer action is adoption opportunity, not compatibility mitigation.
+必要な根拠:
+- API surface に変更がある。
+- Behavior Change としての記述がない、または既存アプリの挙動変更を確認できない。
+- 開発者の対応が互換性問題の回避ではなく、新 API を採用する機会として説明できる。
 
-Customer wording:
+顧客向け表現:
 - 既存アプリの互換性リスクではなく、新 API の利用機会として扱う。
 
 ### UNKNOWN_NEEDS_MORE_EVIDENCE
 
-Use when the classification cannot be defended yet.
+適用条件分類を根拠付きで説明できない場合に使う。
 
-Required action:
-- Do not assign High confidence.
-- Record missing evidence.
-- Continue investigation before customer-facing conclusion.
+必要な対応:
+- High confidence を付けない。
+- 不足している根拠を記録する。
+- 顧客向けの結論を出す前に調査を継続する。
 
-## High Confidence Requirements
+## High confidence の条件
 
-A classification can be High confidence only when all of the following are true:
+以下をすべて満たす場合に限り、適用条件分類を High confidence とできる。
 
-- Original official statement is quoted or paraphrased with source URL.
-- The page category and the original statement agree.
-- AOSP evidence confirms the applicable gate, or confirms that no targetSdkVersion gate exists.
-- Compat framework entry is checked when a Change ID exists.
-- Android 16 / targetSdkVersion 35 and Android 16 / targetSdkVersion 36 expected behavior are both stated.
-- Additional conditions and exceptions are stated.
-- Customer-facing wording does not mix OS update impact with targetSdkVersion impact.
+- 公式ドキュメントの原文または要約を、出典 URL とともに記録している。
+- ページ種別と検証対象の原文が一致している。
+- AOSP 根拠から適用 gate を確認している、または targetSdkVersion の gate が存在しないことを確認している。
+- Change ID が存在する場合は、compat framework の項目を確認している。
+- Android 16 / targetSdkVersion 35 と Android 16 / targetSdkVersion 36 の期待挙動をどちらも記載している。
+- 追加条件と例外を記載している。
+- 顧客向け表現で、OS アップデートによる影響と targetSdkVersion 変更による影響を混同していない。
 
-## Evidence Pattern
+## 根拠の記録順
 
-Record facts in this order:
+事実は次の順序で記録する。
 
-1. Official documentation page and section.
-2. Original applicability statement.
-3. AOSP source context reviewed:
+1. 公式ドキュメントのページとセクション。
+2. 検証対象の適用条件文。
+3. 確認した AOSP ソース文脈:
    - file / symbol / entry point / caller
-   - why this code path is relevant to the Behavior Change
-   - Android 15 baseline and Android 16 behavior
-   - unrelated code paths excluded, when relevant
-4. Diff interpretation:
-   - observed source diff
-   - whether it adds, removes, gates, or changes default behavior
-   - how the diff supports the applicability classification
-5. Exact gate evidence.
-6. Compat framework Change ID and default state, if any.
-7. Expected behavior matrix.
-8. Developer impact and action candidates.
-9. Confidence and missing evidence.
+   - その code path が Behavior Change に関係する理由
+   - Android 15 の基準挙動と Android 16 の挙動
+   - 関係しない code path を除外した場合は、その内容
+4. 差分解釈:
+   - 確認したソース差分
+   - 挙動の追加、削除、gate の追加、既定動作の変更のどれに該当するか
+   - その差分が適用条件分類をどのように支えるか
+5. 正確な gate の根拠。
+6. Compat framework Change ID と既定状態。存在する場合のみ。
+7. 期待挙動の一覧表。
+8. 開発者への影響と対応候補。
+9. confidence と不足している根拠。
 
-## Common Misclassifications
+## よくある誤分類
 
-- Do not classify an item as `TARGET_SDK_36` only because it appears on Android 16 pages. Confirm the specific page and wording.
-- Do not classify an item as `OS_UPDATE_ALL_APPS` only because the implementation changed in AOSP. Check whether the implementation is behind a targetSdkVersion or compat gate.
-- Do not force opt-in-only behavior into `TARGET_SDK_36_CONDITIONAL` when AOSP does not show a targetSdkVersion 36 runtime gate.
-- Do not treat a new API as a Behavior Change unless existing behavior changes.
-- Do not ignore opt-out, exception, device form factor, or permission conditions.
-- Do not use High confidence when the AOSP checkout is unavailable.
+- Android 16 のページに掲載されているという理由だけで `TARGET_SDK_36` に分類しない。掲載ページと文言を確認する。
+- AOSP の実装が変わっているという理由だけで `OS_UPDATE_ALL_APPS` に分類しない。実装が targetSdkVersion または compat gate の内側にないか確認する。
+- AOSP に targetSdkVersion 36 の実行時 gate がない場合、opt-in 限定の挙動を `TARGET_SDK_36_CONDITIONAL` に無理に分類しない。
+- 既存の挙動が変わらない限り、新 API を Behavior Change として扱わない。
+- opt-out、例外、端末形態、権限の条件を無視しない。
+- AOSP checkout を利用できない場合は High confidence を使わない。

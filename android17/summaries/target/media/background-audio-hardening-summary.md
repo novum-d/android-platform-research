@@ -42,6 +42,8 @@ Android 17 Behavior Change
 
 Android 17 では、targetSdkVersion 37 以上のアプリに対して background audio hardening がより厳しくなる。AOSP では `HardeningEnforcer` の CINNAMON_BUN target check、AppOps、alarm exception、foreground audio control capability が確認できる。
 
+これは、全アプリ向けの変更とは独立した別の変更ではない。Android 17 の全アプリに共通する「ユーザーに表示されている Activity、または実行中の FGS」という条件に加えて、targetSdkVersion 37 以上では、WIU capability または exact alarm permission + `USAGE_ALARM` の例外が必要になる。
+
 ## 顧客影響
 
 - targetSdkVersion 37 化後、background の audio focus request が失敗しやすくなる。
@@ -67,6 +69,8 @@ Android 17 では、targetSdkVersion 37 以上のアプリに対して backgroun
 | Android 16 | 36 | baseline。 |
 | Android 17 | 36 | partial level の共通制限を確認。 |
 | Android 17 | 37 | strict level の追加制限、focus failure、volume no-op、playback mute を確認。 |
+
+targetSdkVersion 37 では、ユーザー操作から開始した WIU capability ありの FGS と、バックグラウンドから開始した WIU capability なしの FGS を分けて確認する。アラーム用途では、FGS + exact alarm permission + `USAGE_ALARM` を成功ケースとし、permission または usage を外した失敗ケースも確認する。`set-enable-hardening enable|throw` は targetSdkVersion の適用条件とアラーム用途の例外を上書きするため、正式な比較は hardening override を強制していない既定状態で実施する。
 
 ## 顧客向け説明
 

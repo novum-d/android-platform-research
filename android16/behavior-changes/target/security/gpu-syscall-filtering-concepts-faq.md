@@ -2,40 +2,40 @@
 
 ## 位置づけ
 
-このファイルは、GPU syscall filtering の primary report を読む際に生じた用語・処理経路の疑問を補足する FAQ companion である。公式ドキュメントの `FAQ` subsection を調査する [GPU syscall filtering FAQ](gpu-syscall-filtering-faq.md) とは目的が異なる。
+このファイルは、GPU syscall filtering の主レポートを読む際に生じる、用語や処理経路に関する疑問を補足する FAQ である。公式ドキュメントの `FAQ` subsection を調査する [GPU syscall filtering FAQ](gpu-syscall-filtering-faq.md) とは目的が異なる。
 
-根拠、適用条件、classification、confidence、Human Decision は primary report / one-page summary を正とする。この FAQ 自体で新しい Behavior Change や独立した適用分類を定義しない。
+根拠、適用条件、分類、confidence、人間の判断は、主レポートと1ページ要約を正とする。この FAQ 自体で、新しい Behavior Change や独立した適用条件分類は定義しない。
 
-Primary report:
+主レポート:
 - [GPU syscall filtering](gpu-syscall-filtering.md)
 
-One-page summary:
+1ページ要約:
 - [GPU syscall filtering summary](../../../summaries/target/security/gpu-syscall-filtering-summary.md)
 
-Camera app PM overview:
+カメラアプリの PM 向け概要:
 - [BC-014 GPU syscall filtering - PM向け概要](../../../app-reports/wireless-camera-companion/details/bc-014-gpu-syscall-filtering-pm-overview.md)
 
 ## 調査メタデータ
 
-- Android version: Android 16
-- From tag: `android-15.0.0_r36`
-- To tag: `android-16.0.0_r4`
-- Parent section: GPU syscall filtering
-- FAQ scope: shell command / syscall / IOCTL / caller / denial result
-- Inherited applicability classification: `OS_UPDATE_ALL_APPS`
-- Inherited confidence: Medium
+- Android バージョン: Android 16
+- 比較元タグ: `android-15.0.0_r36`
+- 比較先タグ: `android-16.0.0_r4`
+- 親セクション: GPU syscall filtering
+- FAQ の範囲: shell command / syscall / IOCTL / 呼び出し元 / 拒否された場合の結果
+- 継承する適用条件分類: `OS_UPDATE_ALL_APPS`
+- 継承する confidence: Medium
 
 ## FAQ
 
-### Q1. syscall は `cd` や `cat` などの command か
+### Q1. syscall は `cd` や `cat` などのコマンドか
 
 短い回答:
 
-異なる。`cd` や `cat` は人が shell に入力する command であり、syscall は program が Linux kernel の機能を利用するための interface である。
+異なる。`cd` や `cat` は人が shell に入力するコマンドであり、syscall はプログラムが Linux kernel の機能を利用するためのインターフェースである。
 
 説明:
 
-一つの shell command が一つの syscall に置き換わるわけではない。例えば、`cd` は shell 自身が `chdir` syscall を呼ぶ。`cat file.txt` では、shell が `execve` などで `cat` program を起動し、起動された `cat` が `openat`, `read`, `write`, `close` など複数の syscall を使う。
+一つの shell command が一つの syscall に置き換わるわけではない。例えば、`cd` では shell 自身が `chdir` syscall を呼ぶ。`cat file.txt` では、shell が `execve` などで `cat` プログラムを起動し、起動された `cat` が `openat`、`read`、`write`、`close` など複数の syscall を使う。
 
 ```text
 人が shell command を入力
@@ -47,17 +47,17 @@ Camera app PM overview:
 
 本件との関係:
 
-GPU syscall filtering は terminal command を禁止する変更ではない。app / library から GPU kernel driver へ送られる低レベル要求を制限する。
+GPU syscall filtering はターミナルコマンドを禁止する変更ではない。アプリや library から GPU kernel driver へ送られる低レベル要求を制限する。
 
-### Q2. syscall は shell command が kernel 向け command に変換されたものか
+### Q2. syscall は、shell command が kernel 向けのコマンドへ変換されたものか
 
 短い回答:
 
-厳密には異なる。shell は command を解釈して処理や program 起動を行い、その shell または起動された program / library が必要な syscall を呼ぶ。
+厳密には異なる。shell はコマンドを解釈して処理やプログラムの起動を行い、その shell または起動されたプログラム / library が必要な syscall を呼ぶ。
 
 説明:
 
-shell は syscall の呼び出し元になり得るが、shell command を syscall に機械的に翻訳するだけの層ではない。Android app、framework、native library、driver は shell を経由せず syscall を使う。
+shell は syscall の呼び出し元になることもあるが、shell command を syscall へ機械的に変換するだけの層ではない。Android アプリ、framework、native library、driver は、shell を経由せず syscall を使う。
 
 ```text
 shell command
@@ -68,37 +68,37 @@ shell command
 
 本件との関係:
 
-Android app の GPU access は通常、shell ではなく Vulkan / OpenGL ES / EGL と userspace driver を経由する。
+Android アプリの GPU アクセスは通常、shell ではなく、Vulkan / OpenGL ES / EGL と userspace driver を経由する。
 
-### Q3. どのような app が `ioctl` を呼ぶか
+### Q3. どのようなアプリが `ioctl` を呼ぶか
 
 短い回答:
 
-多くの Android app は framework / library / driver を通じて間接的に `ioctl` を使う。app developer が NDK の C / C++ code から `ioctl()` を直接書くのは、device integration や vendor-specific tooling などの限定された実装である。
+多くの Android アプリは、framework / library / driver を通じて間接的に `ioctl` を使う。アプリ開発者が NDK の C / C++ コードから `ioctl()` を直接呼び出すのは、端末との統合やベンダー固有のツールなど、限られた実装である。
 
 代表例:
 
-| app / feature | `ioctl` の使われ方 |
+| アプリ / 機能 | `ioctl` の使われ方 |
 | --- | --- |
-| Android app の process communication | Binder library / driver が `/dev/binder` を制御する |
-| game / graphics app | Vulkan / OpenGL userspace driver が GPU driver を制御する |
-| camera / audio / USB feature | framework、system service、native library が device driver を制御する |
+| Android アプリのプロセス間通信 | Binder library / driver が `/dev/binder` を制御する |
+| ゲーム / グラフィックスアプリ | Vulkan / OpenGL userspace driver が GPU driver を制御する |
+| カメラ / 音声 / USB 機能 | framework、system service、native library が device driver を制御する |
 | profiler / benchmark / diagnostics | native code が profiling / instrumentation command を発行し得る |
-| vendor-specific middleware / anti-cheat | non-public device command を直接使う可能性がある |
+| ベンダー固有の middleware / 不正対策 | 非公開の device command を直接使う可能性がある |
 
 本件で確認する条件:
 
-1. app process または bundled native SDK が `/dev/mali0` にアクセスしているか。
-2. その IOCTL が deprecated / development-only / profiling category か。
-3. shell / debuggable app ではなく、production の non-debuggable app から発行しているか。
+1. アプリプロセスまたは同梱された native SDK が `/dev/mali0` にアクセスしているか。
+2. その IOCTL が非推奨、開発専用、profiling 用のいずれかに分類されるか。
+3. shell / debuggable app ではなく、non-debuggable の製品版アプリから発行しているか。
 
-「どこかで `ioctl` が使われている」だけでは影響判定にならない。通常の CameraX / Camera2 / MediaCodec / Vulkan / OpenGL ES 利用で supported driver が内部的に発行する allowed IOCTL と、app / SDK が non-public Mali IOCTL を直接発行する実装を分けて扱う。
+「どこかで `ioctl` が使われている」というだけでは、影響の有無を判断できない。通常の CameraX / Camera2 / MediaCodec / Vulkan / OpenGL ES 利用で対応済みの driver が内部的に発行する許可対象の IOCTL と、アプリや SDK が非公開の Mali IOCTL を直接発行する実装を分けて扱う。
 
 ### Q4. `/dev/mali0` にアクセスして `ioctl` を呼ぶと何が起きるか
 
 短い回答:
 
-`ioctl` command が許可されれば Mali kernel driver が処理し、拒否されれば caller へ error が返る。その後に app が継続するか、機能停止するか、crash するかは app / SDK の error handling に依存する。
+`ioctl` command が許可されれば Mali kernel driver が処理し、拒否されれば呼び出し元へエラーが返る。その後、アプリが動作を継続するのか、機能を停止するのか、クラッシュするのかは、アプリや SDK のエラー処理に依存する。
 
 概念上の code:
 
@@ -120,16 +120,16 @@ ioctl(fd, command, data)
 
 Android 16 の filtering では、device node の `open` が成功しても、個別の `ioctlcmd` が SELinux policy により拒否される可能性がある。
 
-| 結果 | driver / app の挙動 |
+| 結果 | driver / アプリの挙動 |
 | --- | --- |
 | IOCTL が許可される | driver が memory allocation、GPU job submission、state query など command に対応する処理を行う |
-| IOCTL が拒否される | `ioctl()` が失敗し、一般には `-1` と permission-related errno が caller に返る |
-| caller が失敗を処理する | optional feature を無効化する、supported API へ fallback する、error を表示するなどして継続できる |
-| caller が成功を前提にする | native crash、feature failure、不正な状態などにつながり得る |
+| IOCTL が拒否される | `ioctl()` が失敗し、一般には `-1` と権限に関する errno が呼び出し元へ返る |
+| 呼び出し元が失敗を処理する | 任意機能を無効化する、対応済み API を使う代替処理へ切り替える、エラーを表示するなどして動作を継続できる |
+| 呼び出し元が成功を前提にする | native crash、機能停止、不正な状態などにつながる可能性がある |
 
 判定上の注意:
 
-SELinux denial は policy が command を拒否した evidence だが、それだけで customer impact は確定しない。app / SDK が return value と errno をどう処理するかを確認し、crash、feature failure、graceful fallback、diagnostic-only failure のどれに該当するか判定する。
+SELinux の拒否ログは、policy が command を拒否した根拠である。ただし、それだけで顧客影響は確定しない。アプリや SDK が戻り値と errno をどのように処理するかを確認し、クラッシュ、機能停止、安全な代替処理への切り替え、診断ログだけの失敗のどれに該当するかを判定する。
 
 ## 用語早見表
 
@@ -143,11 +143,11 @@ SELinux denial は policy が command を拒否した evidence だが、それ�
 | `ioctlcmd` | driver へ要求する操作を識別する command value |
 | SELinux denial | security policy が操作を拒否したことを示す audit log |
 
-## Verification
+## 確認方法
 
-実装・依存 SDK・実機 denial の確認手順は primary report の [確認方法](gpu-syscall-filtering.md#確認方法) を参照する。
+実装、依存 SDK、実機の拒否ログを確認する手順は、主レポートの [確認方法](gpu-syscall-filtering.md#確認方法) を参照する。
 
-## References
+## 参照資料
 
 - [Android 16 - GPU syscall filtering](https://developer.android.com/about/versions/16/behavior-changes-16#gpu-syscall-filtering)
 - [Linux system calls manual](https://man7.org/linux/man-pages/man2/syscalls.2.html)

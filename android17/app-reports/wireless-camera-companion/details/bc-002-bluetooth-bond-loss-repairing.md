@@ -33,6 +33,11 @@ Original statement:
 判断理由:
 - カメラ連携アプリでは Bluetooth を初期接続、Wi-Fi 起動、時刻同期、位置情報連携、再接続の補助に使う可能性がある。bond loss recovery flow の変化は UX に影響しうる。
 
+公開されているカメラ連携アプリとの比較:
+- Panasonic LUMIX Sync は、カメラと Bluetooth Low Energy でペアリングし、登録済みカメラとの Bluetooth 接続を起点に Wi-Fi 接続を確立する。カメラがスリープから復帰した後は、Bluetooth 接続を自動的に再確立すると説明されている。
+- Panasonic Image App の接続方式は機種によって異なり、QR コード / NFC / SSID を使う Wi-Fi のみの接続と、Bluetooth ペアリングから Wi-Fi 接続へ引き継ぐ方式がある。Bluetooth 対応機種では、リモートシャッター、リモート起動、自動転送、位置情報の記録、時刻同期などが Bluetooth 接続に依存する。
+- 対象アプリも同様の構成で Android の Bluetooth bond を作成する場合は、この変更を直接確認する必要がある。アプリ内だけで機器を登録する場合や、bond を作らずに GATT 接続だけを使う場合は、直接的な影響が小さい。
+
 ## 適用条件分類（Applicability Classification）
 
 主分類（Primary classification）:
@@ -122,13 +127,41 @@ Compat framework:
 - pairing context を見て repairing と通常 pairing を区別する実装が望ましい。
 
 既存実装で確認すべき点:
-- pairing / bond state receiver。
-- key missing handling。
-- 手動 unpair / re-pair guidance。
+- ペアリング / bond state の receiver。
+- key missing の処理。
+- 手動でのペアリング解除 / 再ペアリング手順。
+- `ACTION_BOND_STATE_CHANGED` / `getBondState()` の `BOND_NONE`、`BOND_BONDING`、`BOND_BONDED` 分岐。
+- `BOND_NONE` で即座に `createBond()`、手動のペアリング解除、独自のペアリング UI を開始していないか。
+- Android 17 の `EXTRA_PAIRING_CONTEXT=PAIRING_CONTEXT_REPAIRING` を通常の初回ペアリングと区別できるか。
+
+検索候補:
+
+```bash
+rg -n "ACTION_BOND_STATE_CHANGED|EXTRA_BOND_STATE|EXTRA_PREVIOUS_BOND_STATE|getBondState|BOND_NONE|BOND_BONDING|BOND_BONDED|createBond|ACTION_PAIRING_REQUEST|ACTION_KEY_MISSING|EXTRA_PAIRING_CONTEXT|PAIRING_CONTEXT_REPAIRING"
+```
 
 推奨対応候補:
 - `EXTRA_PAIRING_CONTEXT` を利用できる場合は context を区別する。
 - bond loss、repairing 成功、repairing 失敗を実機で確認する。
+
+推奨テスト:
+- カメラを登録した後、Android 側の状態が `BOND_BONDED` になるのか、それとも bond を作らない GATT 接続またはアプリ内だけの登録なのかを確認する。
+- スマートフォン側の登録を残したまま、カメラ側のペアリング情報だけを削除し、接続先で発生する bond loss を再現する。
+- 自動修復に成功した場合は、`BOND_BONDING -> BOND_BONDED` への遷移、`ACTION_KEY_MISSING` が送信されないこと、Bluetooth の再接続、Wi-Fi 接続への引き継ぎ、リモート撮影、画像転送を確認する。
+- テスト用カメラまたは周辺機器でセキュリティレベルを変更できる場合は、以前より低いセキュリティレベルで再ペアリングしても、既存の鍵が置き換えられないことを確認する。
+- 自動修復の失敗時またはユーザーが拒否した場合は、`ACTION_KEY_MISSING` が届くタイミング、アプリによる手動登録への切り替え、システム UI とアプリ UI が重複しないことを確認する。
+- Wi-Fi のみで接続するカメラと、Bluetooth 対応カメラを分けて検証する。
+
+公開仕様の参照:
+- LUMIX Sync の Bluetooth ペアリング: https://av.jpn.support.panasonic.com/support/global/cs/soft/lumix_sync/en/DC-BS1H/connect_bt.html
+- LUMIX Sync のサポート情報 / 対応 OS: https://av.jpn.support.panasonic.com/support/global/cs/soft/lumix_sync/en/index.html
+- Image App の Wi-Fi 接続: https://av.jpn.support.panasonic.com/support/global/cs/soft/image_app/dsc/android/android01.html
+- Image App の Bluetooth ペアリング: https://av.jpn.support.panasonic.com/support/spn/global/dsc/help/image_app/en/camera/shared_1/connect_1.html?css=style1&no=1
+
+事実と仮説の境界:
+- 上記 Panasonic アプリの接続方式は、公開仕様で確認した事実である。
+- 対象アプリが Android の bond、receiver、state machine をどのように利用しているかは、実装を確認できていない。
+- Panasonic アプリ自体で不具合が発生することを確認したものではなく、カメラ連携アプリの構成を比較する例として扱う。
 
 ## Confidence
 
@@ -141,5 +174,7 @@ Confidence の根拠:
 不足している根拠:
 - release build での flag default / device config override。
 - 対象アプリ実装。
+- Android 17 実機におけるカメラ周辺機器ごとの broadcast 順序と、Wi-Fi 接続への引き継ぎ結果。
+- 再ペアリング後のセキュリティレベルの比較結果と、既存の鍵が置き換えられる条件の実機検証結果。
 
 ---
