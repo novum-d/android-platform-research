@@ -25,3 +25,15 @@ Android Gradle Plugin (AGP) の version update、DSL 変更、variant API、lint
 | --- | --- |
 | [versions/](versions/) | AGP 更新の詳細調査 |
 | [summaries/](summaries/) | AGP 更新の 1ページサマリ |
+| [checklists/](checklists/) | 実プロジェクトへの移行チェックリスト |
+
+## Current Research
+
+| 種別 | 対象 | 資料 |
+| --- | --- | --- |
+| 詳細調査 | AGP 8.7 系 → 9.3.0 stable | [差分調査](versions/agp-8.7-to-9.3.md) |
+| 1ページサマリ | AGP 8.7 系 → 9.3.0 stable | [サマリ](summaries/agp-8.7-to-9.3-summary.md) |
+| 移行手順 | AGP 8.7 系 → 9.3.0 stable | [チェックリスト](checklists/agp-8.7-to-9.3-migration-checklist.md) |
+| Preview watch | AGP 9.4.0-alpha04 | [監視資料](versions/agp-9.4-preview-watch.md) |
+
+最新版の扱いは調査日を基準とする。stable と preview を分離し、preview を production の推奨移行先として扱わない。

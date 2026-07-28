@@ -106,6 +106,10 @@ Android 16 AOSP では、native stack に `btm_sec_report_bond_loss()` が追加
 
 この変更は targetSdkVersion 36 化だけの影響ではない。Android 16 OS 上で bonded Bluetooth device の remote bond loss が起きる場合に、targetSdkVersion 35 / 36 の両方で影響し得る。
 
+Android 15 と Android 16 で、同じ remote bond loss と自動接続契機がどの状態遷移になるかは、
+[Android 15 → 16 挙動比較](improved-bond-loss-handling-android15-to-16-behavior-comparison.md)
+にまとめた。
+
 ---
 
 # 公式ドキュメント確認（Original Documentation）

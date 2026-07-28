@@ -4,6 +4,12 @@ Behavior Changes の各セクションごとに、顧客説明向け調査レポ
 
 ## Quick View
 
+Android 16 の各変更をアプリ条件別の対応手順へ落とす場合:
+- [Android 16 Behavior Changes - ケース別対応手順ガイド](CASE_BASED_ACTION_GUIDE.md)
+
+Android 15 と Android 16 の挙動差を項目別に確認する場合:
+- [Android 15 → 16 挙動比較一覧](version-comparisons/README.md)
+
 最初にここを見る。各 Behavior Change は必ず 1 つの primary classification に入れる。
 
 | Classification | When it applies | Customer-facing meaning | List |
@@ -70,7 +76,7 @@ Android 16 へ OS アップデートすると、targetSdkVersion を変更して
 
 | Report | Summary | Notes | Status |
 | --- | --- | --- | --- |
-| [Improved bond loss handling](all/connectivity/improved-bond-loss-handling.md) | [Summary](../summaries/all/connectivity/improved-bond-loss-handling-summary.md) | Bluetooth remote bond loss handling | AOSP 根拠更新済み / High confidence |
+| [Improved bond loss handling](all/connectivity/improved-bond-loss-handling.md) | [Summary](../summaries/all/connectivity/improved-bond-loss-handling-summary.md) | Bluetooth remote bond loss handling / [Android 15→16 挙動比較](all/connectivity/improved-bond-loss-handling-android15-to-16-behavior-comparison.md) | AOSP 根拠更新済み / High confidence |
 | [16 KB page size compatibility mode](all/core-functionality/16-kb-page-size-compatibility-mode.md) | [Summary](../summaries/all/core-functionality/16-kb-page-size-compatibility-mode-summary.md) | 16 KB page-size device / native library alignment | AOSP 根拠更新済み / High confidence |
 | [Abandoned empty jobs stop reason](all/core-functionality/abandoned-empty-jobs-stop-reason.md) | [Summary](../summaries/all/core-functionality/abandoned-empty-jobs-stop-reason-summary.md) | JobScheduler stop reason | AOSP 根拠更新済み / High confidence |
 | [Fully deprecating JobInfo#setImportantWhileForeground](all/core-functionality/fully-deprecating-jobinfo-setimportantwhileforeground.md) | [Summary](../summaries/all/core-functionality/fully-deprecating-jobinfo-setimportantwhileforeground-summary.md) | JobScheduler API deprecation behavior | AOSP 根拠更新済み / High confidence |

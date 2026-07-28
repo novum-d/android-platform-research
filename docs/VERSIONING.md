@@ -13,6 +13,7 @@
 - confidence の考え方
 - 情報源の優先順位
 - 用語集
+- 複数の Android バージョンで再利用する比較テンプレート
 - バージョン横断の未解決質問や仮説
 
 Android バージョン固有のものは `android<version>/` に置く。
@@ -75,15 +76,13 @@ android17/
 
 ```text
 比較元: android-16.0.0_r4
-比較先: 未定: Android 17 AOSP タグ
+比較先: android-17.0.0_r1
 ```
 
-Android 17 の公式 Behavior Change ドキュメントは公開済み。ただし、ローカルの
-`frameworks-base` checkout には、現時点で `android-17*` タグが存在しない。
+Android 17 の公式 Behavior Change 文書と `android-17.0.0_r1` は公開済み。
+AOSP 根拠は両 tag の明示的な比較を使う。
 
-対象となる Android 17 AOSP タグを利用できるようになるまでは、AOSP 根拠に基づく結論に High confidence を付けない。
-
-Android 17 AOSP タグが利用可能になったら、リリース固有の以下の項目を更新する。
+Android 17 の追加 release tag または QPR tag を比較対象に採用する場合は、リリース固有の以下の項目を更新する。
 
 - Android version name
 - API level / targetSdkVersion
@@ -101,3 +100,4 @@ Android 17 AOSP タグが利用可能になったら、リリース固有の以�
 例:
 - `targetSdkVersion 37` の検証マトリクスは `android17/templates/` または `android17/behavior-changes/` に置く。
 - すべての Android バージョンで使う「AOSP checkout の扱い」は `docs/workflow/` に置く。
+- Android 15→16、Android 16→17 の両方で使う OS 挙動比較テンプレートは `docs/templates/` に置き、比較結果は対象の `android<version>/behavior-changes/` に置く。

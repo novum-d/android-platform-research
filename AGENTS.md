@@ -67,6 +67,34 @@ When working on a Build System investigation, read:
 - `build-system/README.md`
 - Relevant `build-system/<area>/README.md`
 
+## Android OS Version Behavior Comparison
+
+When a Behavior Change needs to explain how the same trigger, initial state, or
+application operation behaves differently between two Android OS versions,
+create a companion comparison file from:
+
+```text
+docs/templates/android-os-version-behavior-comparison-template.md
+```
+
+The comparison file must:
+
+- identify the baseline and target Android versions and AOSP tags;
+- use the same app build, targetSdkVersion, device role, transport, initial
+  state, and trigger on both OS versions unless a difference is explicitly
+  called out;
+- show the baseline and target timelines or state transitions side by side;
+- separate OS-version behavior from targetSdkVersion conditions;
+- separate system behavior from app-visible broadcasts, callbacks, API
+  availability, and system UI;
+- include Expected / Observed results and leave unexecuted observations marked
+  as not tested;
+- link to the primary investigation report and one-page summary.
+
+This companion does not replace the customer-facing investigation report or
+one-page summary. Applicability classification, confidence, evidence, and Human
+Decision remain authoritative in the primary report.
+
 ## Target Audience
 
 The audience is:

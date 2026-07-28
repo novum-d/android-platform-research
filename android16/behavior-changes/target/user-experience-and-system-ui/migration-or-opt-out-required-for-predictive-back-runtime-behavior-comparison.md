@@ -14,6 +14,9 @@ Behavior Change の根拠、適用条件、分類、confidence、人間の判断
 実装例:
 - [migration-or-opt-out-required-for-predictive-back-implementation-examples.md](migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
 
+Dispatcher 移行後に animation が消える場合の切り分け:
+- [migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md](migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md)
+
 ## 対象（Target）
 
 Android 16 Behavior Change:

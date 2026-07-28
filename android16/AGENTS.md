@@ -65,6 +65,7 @@ android16/templates/one-page-summary-template.md
 android16/templates/behavior-change-faq-template.md
 android16/templates/implementation-examples-template.md
 android16/templates/runtime-behavior-comparison-template.md
+docs/templates/android-os-version-behavior-comparison-template.md
 ```
 
 Write outputs under:
@@ -98,6 +99,19 @@ android16/templates/runtime-behavior-comparison-template.md
 ```
 
 Use identical inputs and runtime conditions for every compared implementation. Separate expected behavior derived from official documentation / source from observed device or test results.
+
+When a Behavior Change needs a comparison of the same operation or trigger on
+Android 15 and Android 16, create a companion OS version comparison file from:
+
+```text
+docs/templates/android-os-version-behavior-comparison-template.md
+```
+
+Keep the app build and runtime conditions identical across OS versions, and
+separate OS behavior, targetSdkVersion conditions, app-visible signals, and
+system UI. Link the companion from the primary report; do not duplicate or
+override the primary report's classification, confidence, evidence, or Human
+Decision.
 
 Human decisions belong in:
 

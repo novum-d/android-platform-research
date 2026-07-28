@@ -65,6 +65,8 @@ Use:
 ```text
 android17/templates/customer-report-template.md
 android17/templates/one-page-summary-template.md
+android17/templates/implementation-examples-template.md
+docs/templates/android-os-version-behavior-comparison-template.md
 ```
 
 Write outputs under:
@@ -73,6 +75,28 @@ Write outputs under:
 android17/behavior-changes/
 android17/summaries/
 ```
+
+When the same trigger or application operation must be compared between
+Android 16 and Android 17, use:
+
+```text
+docs/templates/android-os-version-behavior-comparison-template.md
+```
+
+Keep the app build and runtime conditions identical, separate OS behavior from
+targetSdkVersion 37 behavior, and link the result from
+`android17/behavior-changes/version-comparisons/`.
+
+When a Behavior Change needs concrete Kotlin, Java, manifest, XML, native, or
+test examples, use:
+
+```text
+android17/templates/implementation-examples-template.md
+```
+
+Link category-level examples from
+`android17/behavior-changes/implementation-examples/`. Examples do not replace
+the primary report's evidence or classification.
 
 Human decisions belong in:
 

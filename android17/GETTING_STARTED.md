@@ -9,8 +9,12 @@
 3. [behavior-changes/APPLICABILITY_CLASSIFICATION.md](behavior-changes/APPLICABILITY_CLASSIFICATION.md) で適用条件分類を確認する
 4. [templates/customer-report-template.md](templates/customer-report-template.md) で調査レポートの書式を確認する
 5. [templates/one-page-summary-template.md](templates/one-page-summary-template.md) で 1ページ要約の書式を確認する
-6. [summaries/README.md](summaries/README.md) で要約一覧を確認する
-7. [decisions/DECISION_LOG.md](decisions/DECISION_LOG.md) で人間の判断ログを確認する
+6. Kotlin、Manifest、XML、native、testの対応例が必要な場合は [Android 17対応例テンプレート](templates/implementation-examples-template.md) を使う
+7. Android 16 / 17 間の挙動差を比較する場合は [Android OS バージョン間挙動比較テンプレート](../docs/templates/android-os-version-behavior-comparison-template.md) を使う
+8. 調査済み項目の差は [Android 16 → 17 挙動比較一覧](behavior-changes/version-comparisons/README.md) で確認する
+9. 調査済み項目の実装・設定例は [Android 17対応例一覧](behavior-changes/implementation-examples/README.md) で確認する
+10. [summaries/README.md](summaries/README.md) で要約一覧を確認する
+11. [decisions/DECISION_LOG.md](decisions/DECISION_LOG.md) で人間の判断ログを確認する
 
 ## 公式ドキュメント
 
@@ -21,8 +25,8 @@
 - Android 17 overview: https://developer.android.com/about/versions/17
 
 注意:
-- Android 17 is currently documented as Beta.
-- Local `frameworks-base` has `android-17.0.0_r1`.
+- Android 17 の公式 Behavior Change 文書と `android-17.0.0_r1` release tag は公開済み。
+- 公式一覧は更新されるため、比較一覧の確認日と未収録項目を併記する。
 - AOSP evidence should use explicit tag comparisons from `android-16.0.0_r4` to `android-17.0.0_r1`.
 
 ## 計画とバックログ

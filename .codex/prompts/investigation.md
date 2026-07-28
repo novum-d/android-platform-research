@@ -149,6 +149,7 @@ Evidence は以下の単位で整理してください。
 | Android FAQ companion | Use the version-specific FAQ template when present, for example `android16/templates/behavior-change-faq-template.md` |
 | Android implementation examples | Use the version-specific implementation examples template when present, for example `android16/templates/implementation-examples-template.md` |
 | Android runtime behavior comparison | Use the version-specific runtime behavior comparison template when present, for example `android16/templates/runtime-behavior-comparison-template.md` |
+| Android OS version behavior comparison | `docs/templates/android-os-version-behavior-comparison-template.md` |
 | Build System version diff | `build-system/templates/version-diff-template.md` |
 | Build System one-page summary | `build-system/templates/one-page-summary-template.md` |
 | Build System migration checklist | `build-system/templates/migration-checklist-template.md` |
@@ -161,6 +162,9 @@ version directory に FAQ template がある場合は、そのテンプレート
 
 複数 API / 実装方式について、実行時刻、callback 選択順、fallback、遅延・lifecycle 復帰後の差を説明する必要がある場合は、version directory の runtime behavior comparison template を使って companion comparison file を作成する。
 比較には共通条件、expected timeline / flow、Expected / Observed、実装選択マップ、テスト仕様を含め、primary report の適用条件や根拠を重複して再判定しない。
+
+同じ初期状態と操作が Android OS バージョン間でどう変わるかを説明する場合は、`docs/templates/android-os-version-behavior-comparison-template.md` を使って companion comparison file を作成する。
+比較では baseline / target の OS と AOSP tag、共通条件、状態遷移、OS 差と targetSdkVersion 差、system behavior と app-visible signal、Expected / Observed を分離する。classification、confidence、evidence、Human Decision は primary report を正とする。
 
 ## Investigation Exit Criteria
 

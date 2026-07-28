@@ -10,6 +10,14 @@ Android 17 の公式 Behavior Change ドキュメントは公開済み。
 - `frameworks-base` には `android-17.0.0_r1` タグが存在する。
 - AOSP 根拠に基づく結論は、`android-16.0.0_r4` から `android-17.0.0_r1` への明示的なタグ比較を使う。
 
+Android 16 と Android 17 の挙動差を項目別に確認する場合:
+
+- [Android 16 → 17 挙動比較一覧](version-comparisons/README.md)
+
+Android 17向けの実装・設定・テスト例を確認する場合:
+
+- [Android 17対応例一覧](implementation-examples/README.md)
+
 ## 早見表
 
 最初にここを見る。各 Behavior Change は必ず 1 つの主分類に入れる。
@@ -43,6 +51,8 @@ https://developer.android.com/about/versions/17/behavior-changes-17
 
 ```text
 android17/templates/customer-report-template.md
+android17/templates/implementation-examples-template.md
+docs/templates/android-os-version-behavior-comparison-template.md
 ```
 
 <a id="official-category-index"></a>

@@ -14,6 +14,9 @@
 実行挙動の比較:
 - [migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md](migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md)
 
+Dispatcher 移行後に animation が消える場合の切り分け:
+- [migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md](migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md)
+
 ## 対象（Target）
 
 Android 16 Behavior Change:
@@ -37,6 +40,7 @@ Android 16 Behavior Change:
 推奨方針:
 - `KEYCODE_BACK` や `Activity.onBackPressed()` override ではなく、AndroidX Activity / Navigation / Compose の supported back navigation APIs へ寄せる。
 - 単純に戻る操作を intercept するだけなら `OnBackPressedCallback` / Compose `BackHandler` を使う。
+- callback は独自処理が必要な UI state の間だけ enabled にし、通常の navigation、cross-activity、back-to-home は library または system に委ねる。
 - predictive back gesture の進捗に合わせて UI を動かす場合は、Compose `PredictiveBackHandler`、Views の `OnBackPressedCallback` progress callbacks、または Navigation Event APIs を検討する。
 
 一時対応:
@@ -44,6 +48,8 @@ Android 16 Behavior Change:
 
 避けるべき方針:
 - `dispatchKeyEvent()` / `onKeyDown()` / `onKeyUp()` で `KEYCODE_BACK` を恒久的に処理し続ける。
+- analytics / logging だけのために Activity-wide callback を常時 enabled にする。
+- toolbar から `onBackPressedDispatcher.onBackPressed()` を呼べば system gesture progress も再現できると考える。
 - application 全体へ broad opt-out を設定し、移行対象を見えなくする。
 
 API 選択:
@@ -61,6 +67,7 @@ API 選択:
 
 挙動を統一する:
 - 端末の戻る操作、toolbar back、custom close button を同じ処理経路にしたい場合は `onBackPressedDispatcher.onBackPressed()` を使う。
+- ただし toolbar / custom button からの programmatic invocation には gesture start / progress / cancel がないため、Predictive Back animation は発生しない。
 - toolbar / app bar の Up 操作として Navigation graph 上の親へ戻したい場合は `NavController.navigateUp()` を優先する。
 - Fragment back stack を明示的に 1 つ戻したい場合は `NavController.popBackStack()` を使う。
 - `finish()` へ直接置き換えると、Fragment / Navigation Component / registered callback を飛ばす可能性があるため、既存挙動と一致するか確認する。
@@ -95,6 +102,7 @@ dispatcher 移行後の処理順:
 - `OnBackPressedDispatcher` へ移行すると、dispatcher が enabled な `OnBackPressedCallback` を登録順の逆順で探して呼ぶ。つまり、後から登録された enabled callback が先に処理される。
 - 親 Activity が先に callback を登録し、子 Activity が後で callback を登録する構造では、通常は子 callback が先に呼ばれる。子 callback が処理しない場合に自分を disabled にして dispatcher に委譲すると、次の候補として親 callback に進める。
 - Activity に broad callback を常時 enabled で登録すると、Fragment / Navigation Component / dialog / bottom sheet などの callback より先に back を消費し、従来呼ばれていた処理をブロックする可能性がある。
+- root Activity / root destination で broad callback が enabled の場合は、system の back-to-home / cross-activity animation も実行されない。callback が処理すべき UI state を事前に `isEnabled` へ反映する。
 - 画面固有の back handling は Fragment の `onViewCreated()` で `viewLifecycleOwner` に紐付け、Activity callback は Activity 全体の責務に限定する。
 - callback が処理すべき状態でない場合は、事前に `setEnabled(false)` にしておくか、callback 内で一時的に disabled にして dispatcher に委譲する。
 
@@ -180,15 +188,9 @@ override fun onBackPressed() {
 ```kotlin
 class EditFragment : Fragment(R.layout.edit_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val callback = object : OnBackPressedCallback(true) {
+        val callback = object : OnBackPressedCallback(false) {
             override fun handleOnBackPressed() {
-                if (viewModel.hasUnsavedChanges) {
-                    showDiscardConfirmDialog()
-                    return
-                }
-
-                isEnabled = false
-                requireActivity().onBackPressedDispatcher.onBackPressed()
+                showDiscardConfirmDialog()
             }
         }
 
@@ -196,6 +198,14 @@ class EditFragment : Fragment(R.layout.edit_fragment) {
             viewLifecycleOwner,
             callback,
         )
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.hasUnsavedChanges.collect { hasUnsavedChanges ->
+                    callback.isEnabled = hasUnsavedChanges
+                }
+            }
+        }
     }
 }
 ```
@@ -203,7 +213,7 @@ class EditFragment : Fragment(R.layout.edit_fragment) {
 移行手順:
 1. `onBackPressed()` override 内の条件分岐を画面単位の callback に移す。
 2. callback を `viewLifecycleOwner` に紐付ける。
-3. 処理しない状態では callback を無効化して通常の戻る処理へ渡す。
+3. 未保存状態を callback の `isEnabled` へ事前反映し、処理しない状態では通常の戻る処理へ渡す。
 
 確認観点:
 - 未保存変更がある状態では確認 dialog が出る。
@@ -213,6 +223,7 @@ class EditFragment : Fragment(R.layout.edit_fragment) {
 注意点:
 - callback は `viewLifecycleOwner` に紐付け、Fragment view 破棄後に残らないようにする。
 - 常に back を消費する callback にしない。画面側で処理しない状態では、通常の navigation に戻す。
+- callback 内で未保存状態を初めて判定して fallback するのではなく、gesture 開始前から `isEnabled` を同期する。
 
 ## 例 2: Compose で確認 dialog を出す
 
@@ -310,45 +321,51 @@ override fun onBackPressed() {
 }
 ```
 
-移行後:
+移行後: drawer の開閉状態を callback の enabled 状態へ事前に反映する
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+        val callback = object : OnBackPressedCallback(
+            drawerLayout.isDrawerOpen(GravityCompat.START),
+        ) {
             override fun handleOnBackPressed() {
-                if (drawerLayout.isOpen) {
-                    drawerLayout.close()
-                    return
+                drawerLayout.closeDrawer(GravityCompat.START)
+            }
+        }
+
+        onBackPressedDispatcher.addCallback(this, callback)
+
+        drawerLayout.addDrawerListener(
+            object : DrawerLayout.SimpleDrawerListener() {
+                override fun onDrawerOpened(drawerView: View) {
+                    callback.isEnabled = true
                 }
 
-                isEnabled = false
-                try {
-                    onBackPressedDispatcher.onBackPressed()
-                } finally {
-                    isEnabled = true
+                override fun onDrawerClosed(drawerView: View) {
+                    callback.isEnabled = false
                 }
-            }
-        })
+            },
+        )
     }
 }
 ```
 
 移行手順:
 1. `onBackPressed()` override の条件分岐を `OnBackPressedCallback` に移す。
-2. 画面側で処理する場合は callback 内で消費する。
-3. 画面側で処理しない場合は `isEnabled = false` にして dispatcher に戻す。
+2. drawer の開閉状態を callback の `isEnabled` に事前反映する。
+3. drawer が閉じている通常状態では callback を disabled にし、Navigation / system の Back 処理を妨げない。
 
 確認観点:
 - drawer が開いている状態では drawer だけが閉じる。
 - drawer が閉じている状態では通常の navigation / finish に進む。
-- `isEnabled` を戻す場合、同じ callback による無限再帰が起きない。
+- root destination では callback が disabled になり、back-to-home animation を妨げない。
 
 注意点:
-- Activity 終了や navigation stack pop で callback owner が破棄される場合、`isEnabled = true` に戻す処理が不要または到達しないケースがある。画面構造に合わせて扱う。
-- fallback 先を直接 `finish()` に置き換えると、Navigation Component や fragment back stack を飛ばす可能性がある。
+- Back gesture が始まってから callback 内の `if` で fallback するより、gesture 開始前から observable UI state に合わせて `isEnabled` を管理する。
+- callback 内から dispatcher の次候補へ委譲する必要がある別ケースでは、現在の callback を一時的に disabled にして無限再帰を避ける。
 
 ## 例 4: override ではない関数の `super.onBackPressed()` を置き換える
 
@@ -500,6 +517,7 @@ public final class DetailActivity extends BaseActivity {
 - `onBackPressedDispatcher.onBackPressed()` は親クラスだけを呼ぶ API ではない。enabled callback chain に back を流す API として扱う。
 - 親クラスに共通 callback を登録する設計も可能だが、子クラス callback との登録順と enabled 状態を必ずテストする。
 - 親クラス共通処理が Activity finish を直接呼ぶ場合は、Fragment / Navigation Component の back stack を飛ばしてよいか確認する。
+- この例の callback を常時 enabled にすると system animation を抑止する。実装時は `hasUnsavedChanges()` または global overlay が存在する間だけ enabled にし、どちらも false の場合は Navigation / system に Back を委ねる。
 
 ## 例 6: Navigation Component で内部 stack を pop する
 
@@ -524,35 +542,94 @@ override fun dispatchKeyEvent(event: KeyEvent): Boolean {
 }
 ```
 
-移行後:
+移行後: 標準の Navigation back stack は Navigation Component に委ねる
 
 ```kotlin
-val navController = findNavController(R.id.nav_host_fragment)
+class MainActivity : AppCompatActivity(R.layout.main_activity) {
+    private val navController: NavController
+        get() = findNavController(R.id.nav_host_fragment)
 
-onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-    override fun handleOnBackPressed() {
-        val handled = navController.popBackStack()
-        if (!handled) {
-            isEnabled = false
-            onBackPressedDispatcher.onBackPressed()
-        }
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
-})
+}
 ```
 
 移行手順:
 1. `KEYCODE_BACK` で stack を直接 pop する処理を削除する。
-2. Navigation Component の `NavController` に stack pop の責務を寄せる。
-3. `popBackStack()` が false の場合だけ通常の Activity back に渡す。
+2. system Back は Navigation Component / Fragment integration に任せ、Activity-wide callback を追加しない。
+3. toolbar Up は `NavController.navigateUp()` で明示し、処理できない場合だけ Activity の Up fallback に渡す。
 
 確認観点:
-- nested destination では `popBackStack()` が期待通り現在の graph 内を戻る。
-- stack が空の場合は Activity の通常 back / finish に進む。
+- nested destination では system gesture が期待通り現在の graph 内を戻る。
+- stack が空の場合は Activity の通常 Back / finish に進み、system animation を妨げる callback が残らない。
 - dialog destination / bottom sheet がある場合も閉じる順序が崩れない。
 
 注意点:
 - nested navigation、dialog destination、bottom sheet などを使う場合は、画面ごとの stack 状態をテストする。
-- Fragment 側で個別 callback を追加する場合は、Activity 側の broad callback と競合しないように責務を分ける。
+- 独自 UI stack を Navigation stack より先に閉じる必要がある場合だけ、UI state に応じて enabled になる callback を追加する。
+- Activity-wide callback から `popBackStack()` を常時呼ぶと、Navigation library の built-in Predictive Back support を bypass または競合させる可能性がある。
+
+## 例 6A: Navigation Compose の built-in Predictive Back を使う
+
+目的:
+- 標準の Compose destination 間遷移では独自 callback を追加せず、Navigation Compose の gesture integration と pop transition を使う。
+
+既存実装で探す箇所:
+- root の `BackHandler(enabled = true)` から常に `navController.popBackStack()` を呼んでいる箇所。
+- `NavHost` の外側で Activity-wide callback を登録し、Compose navigation を手動で戻している箇所。
+
+移行前:
+
+```kotlin
+BackHandler(enabled = true) {
+    navController.popBackStack()
+}
+```
+
+移行後:
+
+```kotlin
+NavHost(
+    navController = navController,
+    startDestination = Home,
+    popEnterTransition = {
+        EnterTransition.None
+    },
+    popExitTransition = {
+        scaleOut(
+            targetScale = 0.9f,
+            transformOrigin = TransformOrigin(
+                pivotFractionX = 0.5f,
+                pivotFractionY = 0.5f,
+            ),
+        )
+    },
+) {
+    composable<Home> {
+        HomeScreen()
+    }
+    composable<Detail> {
+        DetailScreen()
+    }
+}
+```
+
+移行手順:
+1. `navigation-compose` 2.8.0 以上を利用する。
+2. 標準の destination pop を行うだけの root `BackHandler` / Activity callback を削除する。
+3. `NavHost` の `popEnterTransition` / `popExitTransition` で戻る遷移を定義する。
+4. dialog、drawer、未保存確認など Navigation stack 以外の UI state だけを、状態連動 callback で処理する。
+
+確認観点:
+- edge swipe 中に現在 destination と戻り先の transition が gesture progress に追従する。
+- gesture cancel では destination が変わらず、描画が初期状態へ戻る。
+- toolbar Up は通常の pop transition、system gesture は predictive transition として、それぞれ意図した結果になる。
+- root destination では broad callback が Back を消費せず、back-to-home animation が表示される。
+
+注意点:
+- `onBackPressedDispatcher.onBackPressed()` を toolbar から呼んでも system gesture progress は生成されない。
+- Navigation library の built-in support で要件を満たす場合は、同じ destination pop のための `PredictiveBackHandler` を重ねて登録しない。
 
 ## 例 7: Compose で gesture progress に合わせた animation を行う
 
@@ -610,6 +687,7 @@ fun DetailScreen(onNavigateBack: () -> Unit) {
 注意点:
 - 単純な確認 dialog や stack pop だけなら `BackHandler` で足りる。
 - `CancellationException` は gesture cancel として扱い、UI state を戻す。
+- Navigation Compose の標準 destination 遷移なら、まず例 6A の built-in support を使い、画面固有の property animation が必要な場合だけ `PredictiveBackHandler` を追加する。
 
 ## 例 8: Views で gesture progress に合わせた animation を行う
 
@@ -676,6 +754,7 @@ onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
 注意点:
 - AndroidX Activity の progress callbacks が使える version を確認する。
 - default system animation や Material Component animation で十分な画面には custom progress animation を追加しない。
+- callback は custom animation が必要な destination / UI state の間だけ enabled にし、root の back-to-home / cross-activity animation を常時 intercept しない。
 
 ## 例 9: Navigation Event API で back gesture lifecycle を扱う
 
@@ -797,6 +876,9 @@ rg -n "KEYCODE_BACK|onBackPressed|dispatchKeyEvent|onKeyDown|onKeyUp|OnBackPress
 - Android 16 / targetSdkVersion 36 + migration: `onBackPressed` / `KEYCODE_BACK` 依存なしで確認 dialog、internal stack pop、task exit が期待通り動くことを確認する。
 - Android 16 / targetSdkVersion 36 + temporary opt-out: opt-out 対象 Activity だけ legacy behavior になることを確認する。
 - gesture navigation と 3-button navigation の両方で戻る操作を確認する。
+- toolbar / custom button の programmatic Back と実際の system gesture を別ケースとして確認する。
+- root destination で consuming callback が disabled になり、back-to-home animation が表示されることを確認する。
+- gesture cancel では destination / business state が確定せず、completed 時だけ navigation が1回実行されることを確認する。
 
 ## テストコード例（Test Code Examples）
 
