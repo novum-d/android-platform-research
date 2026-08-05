@@ -14,6 +14,14 @@ AOSP / tools/base source diff analysis is optional and should be used only when 
 Human-facing reports, summaries, and explanations must be written in Japanese.
 Codex-facing instructions, headings, and checklist item names may be written in English.
 
+## Git Workflow
+
+- Make all repository updates directly on `main`.
+- Before editing, verify that the current branch is `main`; switch to `main` if necessary.
+- Do not create or use topic, feature, or agent branches.
+- Commit and push repository changes to `origin/main`.
+- If uncommitted changes prevent a safe switch to `main`, stop and ask the repository owner how to proceed.
+
 ## Research Scope
 
 For Android Platform investigations, the primary unit of investigation is a Behavior Change section.
