@@ -47,7 +47,7 @@ Report: [Edge to edge opt-out going away](../target/user-experience-and-system-u
 Reports:
 - [Primary report](../target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md)
 - [Dispatcher animation guide](../target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md)
-- [Implementation examples](../target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
+- [Implementation examples](migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
 
 | ケース | 判定条件 | 対応手順 | 最低限の検証 |
 | --- | --- | --- | --- |

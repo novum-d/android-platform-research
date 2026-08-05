@@ -40,6 +40,7 @@ FAQ companions:
 
 Implementation examples:
 - 複数のコード例、framework 別移行例、temporary opt-out の具体例が必要な場合は、`android16/templates/implementation-examples-template.md` を使って companion implementation examples file を作成する。
+- implementation examples file は `android16/behavior-changes/case-guides/` に置く。
 - primary report の「対応候補」には、代表的な短い snippet と companion file へのリンクだけを置く。
 
 Runtime behavior comparisons:

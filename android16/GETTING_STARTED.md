@@ -11,7 +11,7 @@
 5. [templates/customer-report-template.md](templates/customer-report-template.md) で調査レポートの書式を確認する
 6. [templates/one-page-summary-template.md](templates/one-page-summary-template.md) で 1ページ要約の書式を確認する
 7. 読者向け FAQ が必要な場合は [templates/behavior-change-faq-template.md](templates/behavior-change-faq-template.md) を使い、主レポートとは別のファイルにする
-8. コード例や framework 別の移行例が必要な場合は [templates/implementation-examples-template.md](templates/implementation-examples-template.md) を使う
+8. コード例や framework 別の移行例が必要な場合は [templates/implementation-examples-template.md](templates/implementation-examples-template.md) を使い、`behavior-changes/case-guides/` に置く
 9. 複数の API / 実装方式について、実行時刻、callback の順序、fallback を比較する場合は [templates/runtime-behavior-comparison-template.md](templates/runtime-behavior-comparison-template.md) を使う
 10. 同じ操作の Android 15 / 16 間の挙動差を比較する場合は [Android OS バージョン間挙動比較テンプレート](../docs/templates/android-os-version-behavior-comparison-template.md) を使う
 11. 調査済み項目の Android 15 / 16 差は [Android 15 → 16 挙動比較一覧](behavior-changes/version-comparisons/README.md) で確認する

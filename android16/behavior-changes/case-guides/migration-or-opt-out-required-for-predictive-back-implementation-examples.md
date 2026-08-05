@@ -6,16 +6,16 @@
 根拠、適用条件、分類、confidence、人間の判断は、主レポートと1ページ要約を正とする。
 
 主レポート:
-- [migration-or-opt-out-required-for-predictive-back.md](migration-or-opt-out-required-for-predictive-back.md)
+- [migration-or-opt-out-required-for-predictive-back.md](../target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md)
 
 1ページ要約:
-- [migration-or-opt-out-required-for-predictive-back-summary.md](../../../summaries/target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-summary.md)
+- [migration-or-opt-out-required-for-predictive-back-summary.md](../../summaries/target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-summary.md)
 
 実行挙動の比較:
-- [migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md](migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md)
+- [migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md](../target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md)
 
 Dispatcher 移行後に animation が消える場合の切り分け:
-- [migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md](migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md)
+- [migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md](../target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md)
 
 ## 対象（Target）
 

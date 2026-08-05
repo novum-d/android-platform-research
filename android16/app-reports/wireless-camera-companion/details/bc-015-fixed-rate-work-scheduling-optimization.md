@@ -9,7 +9,7 @@ Behavior Change 文書:
 既存調査:
 - [android16/behavior-changes/target/core-functionality/fixed-rate-work-scheduling-optimization.md](../../../behavior-changes/target/core-functionality/fixed-rate-work-scheduling-optimization.md)
 - [android16/summaries/target/core-functionality/fixed-rate-work-scheduling-optimization-summary.md](../../../summaries/target/core-functionality/fixed-rate-work-scheduling-optimization-summary.md)
-- [android16/behavior-changes/target/core-functionality/fixed-rate-work-scheduling-optimization-implementation-examples.md](../../../behavior-changes/target/core-functionality/fixed-rate-work-scheduling-optimization-implementation-examples.md)
+- [android16/behavior-changes/case-guides/fixed-rate-work-scheduling-optimization-implementation-examples.md](../../../behavior-changes/case-guides/fixed-rate-work-scheduling-optimization-implementation-examples.md)
 
 ## 対象アプリとの関係
 
@@ -71,7 +71,7 @@ targetSdkVersion 影響:
 - 実行できなかった周期数だけ処理する必要がある場合は、callback がまとめて呼ばれる回数に依存せず、最終成功時刻と現在時刻から必要な処理量を計算する。
 - ポーリング、再試行、同期、後処理が、復帰直後に最大1回だけ実行される場合でも正しく収束するか確認する。
 - WorkManager / JobScheduler / AlarmManager は、本件の等価な移行先として扱わない。プロセス終了後の再実行など、カメラのポーリングとは別のバックグラウンド処理要件がある場合に限って、別途設計する。
-- Before / After、Timer、Java、テストコードは [Fixed rate work scheduling optimization - 実装例](../../../behavior-changes/target/core-functionality/fixed-rate-work-scheduling-optimization-implementation-examples.md) を参照する。
+- Before / After、Timer、Java、テストコードは [Fixed rate work scheduling optimization - 実装例](../../../behavior-changes/case-guides/fixed-rate-work-scheduling-optimization-implementation-examples.md) を参照する。
 
 ## テスト観点
 

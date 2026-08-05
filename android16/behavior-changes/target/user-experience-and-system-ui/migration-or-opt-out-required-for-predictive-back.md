@@ -275,7 +275,7 @@ For apps targeting Android 16 (API level 36) or higher and running on an Android
 # 対応候補（Required Actions）
 
 実装例:
-- [Predictive back implementation examples](migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
+- [Predictive back implementation examples](../../case-guides/migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
 - [Predictive back - Dispatcher 経由あり・なしの実行挙動比較](migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md)
 - [Predictive back - Dispatcher 移行後にアニメーションが消える原因と対処](migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md)
 

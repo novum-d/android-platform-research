@@ -6,13 +6,13 @@
 根拠、適用条件、分類、confidence、人間の判断は、主レポートと1ページ要約を正とする。
 
 主レポート:
-- [fixed-rate-work-scheduling-optimization.md](fixed-rate-work-scheduling-optimization.md)
+- [fixed-rate-work-scheduling-optimization.md](../target/core-functionality/fixed-rate-work-scheduling-optimization.md)
 
 1ページ要約:
-- [fixed-rate-work-scheduling-optimization-summary.md](../../../summaries/target/core-functionality/fixed-rate-work-scheduling-optimization-summary.md)
+- [fixed-rate-work-scheduling-optimization-summary.md](../../summaries/target/core-functionality/fixed-rate-work-scheduling-optimization-summary.md)
 
 実行挙動の比較:
-- [fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md](fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md)
+- [fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md](../target/core-functionality/fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md)
 
 ## 対象（Target）
 

@@ -81,6 +81,12 @@ When a Behavior Change needs concrete code examples, framework-specific migratio
 android16/templates/implementation-examples-template.md
 ```
 
+Store implementation examples under:
+
+```text
+android16/behavior-changes/case-guides/
+```
+
 Keep primary reports focused on evidence, applicability, impact, and action candidates.
 Place only short representative snippets and a link to the implementation examples file in the primary report.
 

@@ -12,7 +12,7 @@ Behavior Change の根拠、適用条件、分類、confidence、人間の判断
 - [migration-or-opt-out-required-for-predictive-back-summary.md](../../../summaries/target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-summary.md)
 
 実装例:
-- [migration-or-opt-out-required-for-predictive-back-implementation-examples.md](migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
+- [migration-or-opt-out-required-for-predictive-back-implementation-examples.md](../../case-guides/migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
 
 実行挙動の比較:
 - [migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md](migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md)
