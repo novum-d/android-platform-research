@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "android_version": 16,
+  "version_dir": "android16",
+  "baseline": {
+    "android_version": 15,
+    "aosp_tag": "android-15.0.0_r36",
+    "target_sdk": 35
+  },
+  "target": {
+    "aosp_tag": "android-16.0.0_r4",
+    "target_sdk": 36,
+    "codename": "BAKLAVA"
+  },
+  "default_reference_repository": "platform/frameworks/base",
+  "official_refs_url": "https://android.googlesource.com/platform/frameworks/base/+refs",
+  "official_documentation": {
+    "all_apps": "https://developer.android.com/about/versions/16/behavior-changes-all",
+    "target_sdk": "https://developer.android.com/about/versions/16/behavior-changes-16",
+    "compat_framework": "https://developer.android.com/about/versions/16/reference/compat-framework-changes"
+  },
+  "output_roots": {
+    "reports": "android16/behavior-changes",
+    "summaries": "android16/summaries",
+    "intermediate_prompts": "tmp/research-prompts/android16"
+  },
+  "scope_files": [
+    "android16/AGENTS.md",
+    "android16/README.md",
+    "android16/behavior-changes/APPLICABILITY_CLASSIFICATION.md",
+    "android16/templates/customer-report-template.md",
+    "android16/templates/one-page-summary-template.md"
+  ]
+}

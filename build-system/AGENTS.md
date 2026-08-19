@@ -129,15 +129,9 @@ When an update must be combined with another update, record:
 
 ## Evidence Hierarchy
 
-Priority order:
-
-1. Entry point release notes
-2. Official Documentation
-3. Compatibility Matrix
-4. API Reference / Migration Guide
-5. Issue Tracker
-6. 実機・実プロジェクト検証
-7. Blog
+The root `AGENTS.md` Evidence Hierarchy is the single source of truth. Release
+Notes remain the entry point; follow the root ordering for the subsequent deep
+dive. Do not define a second ordered hierarchy in this file.
 
 ## Fact vs Interpretation
 
@@ -201,7 +195,11 @@ The agent provides evidence and analysis only.
 
 ## Completion Criteria
 
-A Build System research item is complete only if:
+These criteria define **Research Complete**. The item becomes **Decision
+Complete** only after the repository owner records the human decision in the
+relevant decision log or project execution record.
+
+A Build System research item is Research Complete only if:
 
 - The investigation exit criteria in `.codex/prompts/investigation.md` are satisfied
 - Official documentation or release notes were checked

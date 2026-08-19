@@ -386,7 +386,7 @@ git -C frameworks-base tag --list 'android-17*'
 
 | 端末 OS | targetSdkVersion | Compat flag | 期待される挙動 |
 | --- | --- | --- | --- |
-| Android 16 | 36 | default | Android 16 baseline。last-typed password character reveal の挙動は Android 17 tag 比較待ち。 |
+| Android 16 | 36 | default | 単一の`TEXT_SHOW_PASSWORD` / `TextKeyListener.SHOW_PASSWORD`設定を使い、有効時は最後に入力した1文字を一時表示する従来path。 |
 | Android 17 | 36 | default | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` は デフォルト無効。旧 `TEXT_SHOW_PASSWORD` 相当の挙動が維持される。 |
 | Android 17 | 37 | default | 公式文書上は physical input device 使用時に `show_passwords_physical` が適用され、default では全 password characters が hidden。 |
 | Android 17 | 36 | force-enabled | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` を有効化すると split setting path を検証できる。 |

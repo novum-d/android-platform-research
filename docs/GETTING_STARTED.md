@@ -59,14 +59,19 @@ Android の変更を全部調べる
 
 | 情報 | 置き場所 |
 | --- | --- |
-| バージョンスコープ（version scope） | `android<version>/README.md` |
-| AOSP tag の組み合わせ（AOSP tag pair） | `android<version>/README.md` |
-| targetSdkVersion の焦点（targetSdkVersion focus） | `android<version>/README.md` |
+| version / AOSP tag / targetSdkVersion / output rootの正本 | `android<version>/research-scope.json` |
+| バージョンスコープの人間向け説明 | `android<version>/README.md` |
 | 適用条件分類（applicability classification） | `android<version>/behavior-changes/` |
 | レポート / 要約テンプレート（report / summary template） | `android<version>/templates/` |
 | バージョン固有 backlog / roadmap | `android<version>/planning/` |
 
 Build System の version diff、summary、migration checklist の置き場所は `build-system/README.md` と各 area の README を正とする。
+
+scope、索引、リンク、templateを変更した後は、次で構成を検証する。
+
+```bash
+python3 scripts/validate_repository_structure.py
+```
 
 ## 迷った時
 

@@ -202,7 +202,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `packages/NetworkSecurityConfig/platform/src/android/security/net/config/SystemCertificateSource.java`
 
 注記:
-- 実際の CT verification 実装は Conscrypt や別 project にある可能性がある。ただし、この調査は `frameworks-base` 根拠を対象としているため、Android 17 タグ入手後は `frameworks-base` 内の Network Security Config、API surface、compat framework 定義を優先して確認する。
+- `android-17.0.0_r1`の`frameworks-base`ではNetwork Security Config、API surface、compat framework定義まで確認済みである。実際のCT verification implementationを担うConscryptなど別projectの内部は本調査の検索範囲外であり、追加evidence対象として残る。
 
 ## 確認したソース文脈（Source Context Reviewed）
 
@@ -342,7 +342,7 @@ git -C frameworks-base tag --list 'android-17*'
 - ユーザーに見える症状: 社内検証や beta build でだけ通信失敗する可能性。
 - 技術的に起きていること: production IdP への接続は成功しても、アプリ固有の staging / private endpoint で CT policy または Network Security Config の扱いが異なり接続に失敗する。
 - 開発・運用への影響: Network Security Config、debug overrides、private PKI 例外条件の確認が必要になる可能性。
-- 推奨対応候補: staging 証明書運用を見直し、CT policy 対象外条件があるか Android 17 AOSP tag 後に確認する。
+- 推奨対応候補: staging証明書運用を見直し、公式CT policyと必要に応じたConscrypt側evidenceから対象外条件を確認する。
 - 根拠: 公式 statement、AOSP の CT デフォルト ゲート、Network Security Config の CT policy path。
 - 信頼度: Medium
 - 注意: Okta / Microsoft Entra ID で発生確認した事実ではない。private CA / user-added CA / debug override の扱いは Network Security Config と証明書設定ごとの確認が必要。

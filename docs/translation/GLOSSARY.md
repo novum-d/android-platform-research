@@ -159,7 +159,7 @@
 | 英語表現 | 標準訳 |
 | --- | --- |
 | Human decision required | 人間による判断が必要 |
-| Further investigation required after Android 17 AOSP tag is available | Android 17 AOSP タグ公開後に追加調査が必要 |
+| Further investigation of the related AOSP project is required | 関連AOSP projectの追加調査が必要 |
 | Final Priority | 最終優先度 |
 | Final Severity | 最終影響度 |
 | Release Readiness | リリース判断 |

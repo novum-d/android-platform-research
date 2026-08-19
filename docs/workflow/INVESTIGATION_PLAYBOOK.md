@@ -14,8 +14,13 @@
 8. 事実・観察・仮説・結論を分ける
 9. 顧客説明向けレポートを書く
 10. 1ページ要約を書く
-11. 人間が重要度・最終結論を判断する
-12. DECISION_LOG に残す
+11. `Pending Human Decision`を残し、Research Completeとする
+12. 人間が重要度・最終結論を判断する
+13. DECISION_LOGへ記録し、Decision Completeとする
+
+Research Completeは、証拠・顧客向けレポート・1ページ要約が完成した状態を指す。
+Decision Completeは、その後にリポジトリ所有者が判断ログを記録した状態を指す。
+人間の判断待ちを理由にResearch Completeを妨げず、agentがDecision Completeを代行しない。
 
 ## 適用条件分類（Applicability Classification）
 
@@ -32,7 +37,7 @@
 - `behavior-changes-all` に掲載され、AOSP に targetSdkVersion gate がない: OS update / all apps。
 - `behavior-changes-17` に掲載され、AOSP で `targetSdkVersion >= 37` を確認: targetSdkVersion 37。
 - `targetSdkVersion >= 37` に加えて `sw >= 600dp` が必要: targetSdkVersion 37 + additional runtime conditions。
-- 公式文書はあるが Android 17 tag がなく gate 未確認: Unknown / needs more evidence。
+- 公式文書はあるが、関連AOSP projectのtarget tagまたは実装pathを確認できずgate未確認: Unknown / needs more evidence。
 
 分類は以下のいずれかを必ず選ぶ。
 

@@ -1,31 +1,33 @@
 # 情報源（Sources）
 
-このファイルは、調査で参照する情報源の優先順位と、根拠として扱う際の信頼度を整理するためのものです。
+Android Platform調査とBuild System調査では、entry pointと証拠の役割が異なる。
+具体的な優先順位の正本はルート[`AGENTS.md`](../../AGENTS.md#evidence-hierarchy)とし、
+このページでは読み分けだけを示す。
 
-## Tier 1: 最優先根拠（Source of Truth）
+## Android Platform Behavior Changes
 
-- AOSP source code
-- API surface files such as `current.txt`
-- Android official documentation
-- Android release notes
+公式Behavior Change文書から調査項目を特定し、AOSP source codeとAPI surfaceで
+statementを検証する。Android公式文書・release notes・外部記事は、実装根拠の
+文脈説明と補助に使う。
 
-## Tier 2: 補助根拠
+```text
+Behavior Change Documentation（調査入口）
+-> AOSP source / API surface（実装検証）
+-> 顧客向け結論
+```
 
-- Android Developers Blog
-- Google I/O sessions
-- Android source comments
+公式文書とAOSP gateがずれる場合は差分を明記し、High confidenceにしない。
 
-## Tier 3: 参考情報
+## Build System
 
-- External blogs
-- Reddit
-- Medium
-- Personal notes
+Release Notesをentry pointとしてchange inventoryを作成し、影響候補だけを公式文書、
+Compatibility Matrix、API Reference / Migration Guide、Issue Tracker、実機・
+実プロジェクト検証へ深掘りする。Release Notesの要約だけを最終根拠にしない。
 
-## ルール（Rule）
+詳細は[`build-system/AGENTS.md`](../../build-system/AGENTS.md#evidence-hierarchy)を参照する。
 
-Tier 1 と矛盾する場合は Tier 1 を優先する。
+## External Context
 
-利用例:
-- AOSP source と外部 blog が矛盾する場合は、AOSP source を採用する。
-- 公式ドキュメントと AOSP gate がずれる場合は、差分を明記し、High confidence にしない。
+Android Developers Blog、公式conference session、AOSP commentは補助根拠として使える。
+Vendor blog、community article、forum post、social mediaは参考情報に留め、これらだけで
+Behavior ChangeまたはBuild System互換性の結論を出さない。

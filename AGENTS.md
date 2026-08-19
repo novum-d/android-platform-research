@@ -58,6 +58,18 @@ Extract changes from release notes, then deep dive only the changes that may aff
 
 Version-specific scope, AOSP tags, targetSdkVersion, templates, classification rules, and priority focus belong under the relevant `android<version>/` directory.
 
+The machine-readable source of truth for version, tag pair, targetSdkVersion,
+official documentation, and output roots is:
+
+```text
+<version-dir>/research-scope.json
+```
+
+`AGENTS.md`, `README.md`, `GETTING_STARTED.md`, classification rules, and
+templates remain human-facing instructions and must agree with that metadata.
+Run `python3 scripts/validate_repository_structure.py` after changing version
+scope or repository structure.
+
 ## AOSP Tag Freshness
 
 For a new Android Platform finding or an update to an existing finding, use the
@@ -274,6 +286,9 @@ Priority order:
 
 For Build System investigations:
 
+This list is the canonical Build System evidence hierarchy. Other files should
+link here instead of defining a different order.
+
 1. Entry point release notes
 2. Official Documentation
 3. Compatibility Matrix
@@ -316,22 +331,32 @@ This file is reserved for the repository owner's private notes.
 
 ## AOSP Checkout Hygiene
 
-Before using `frameworks-base` as evidence, check:
+Every AOSP repository used as evidence is a temporary evidence workspace.
+Use `frameworks-base/` for `platform/frameworks/base` and
+`tmp/aosp-checkouts/<project>` for other AOSP projects. Before using a checkout
+as evidence, record its AOSP project path and official remote URL, then check:
 
 ```bash
-git -C frameworks-base status --short
-git -C frameworks-base tag --list '<from-tag>'
-git -C frameworks-base tag --list '<to-tag>'
+git -C <checkout-dir> status --short
+git -C <checkout-dir> remote get-url origin
+git -C <checkout-dir> tag --list '<from-tag>'
+git -C <checkout-dir> tag --list '<to-tag>'
+git -C <checkout-dir> rev-list -n 1 '<from-tag>'
+git -C <checkout-dir> rev-list -n 1 '<to-tag>'
 ```
 
-If `frameworks-base` is dirty, do not treat local working tree changes as platform evidence.
-Use explicit tag comparisons such as:
+If a checkout is dirty, do not treat local working tree changes as platform
+evidence. Use explicit tag comparisons such as:
 
 ```bash
-git -C frameworks-base diff <from-tag> <to-tag> -- <path>
+git -C <checkout-dir> diff <from-tag> <to-tag> -- <path>
 ```
 
-Record any dirty checkout risk in the investigation report if it may affect confidence.
+Every report must identify the AOSP project, checkout path, resolved tag commit
+hashes, comparison command, and any dirty checkout risk that may affect
+confidence. A tag present in `platform/frameworks/base` does not prove that the
+same tag or implementation exists in another AOSP project; verify each project
+used as evidence.
 
 ## Ignore
 
@@ -346,6 +371,18 @@ For Android Platform Behavior Changes, the following are generally out of scope 
 - changes without explainable Android application developer impact
 
 ## Research Completion Criteria
+
+Completion has two distinct states:
+
+- **Research Complete**: evidence, report, one-page summary, and a
+  `Pending Human Decision` placeholder are complete. The owner has not
+  necessarily made a final decision.
+- **Decision Complete**: the repository owner has recorded the human decision
+  in the relevant `DECISION_LOG.md`.
+
+Agent completion criteria below refer to **Research Complete**. Agents must not
+block research completion while waiting for a human decision and must not mark
+an item **Decision Complete** on the owner's behalf.
 
 For Android Platform Behavior Changes:
 

@@ -16,6 +16,6 @@
 - Open / Investigating / Resolved
 
 記入例:
-- 疑問: Android 17 の該当変更に compat Change ID が存在するか。
-- 背景: 公式文書は targetSdkVersion 37 以上と述べるが、AOSP tag 未取得。
+- 疑問: 対象変更にcompat Change IDが存在するか。
+- 背景: 公式文書はtargetSdkVersion条件を述べるが、関連AOSP projectまたは実装pathでgate evidenceを確認できていない。
 - 状態: Open

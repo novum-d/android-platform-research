@@ -18,6 +18,12 @@ and Android 16. Before creating or updating a finding, apply the tag freshness
 rule in the root `AGENTS.md`. Existing reports must continue to state the tags
 actually used for their evidence until they are revalidated.
 
+Machine-readable scope source:
+
+```text
+android16/research-scope.json
+```
+
 ## Target SDK Focus
 
 The target SDK focus is:
@@ -130,7 +136,7 @@ Human decisions belong in:
 android16/decisions/DECISION_LOG.md
 ```
 
-## Android 16 Completion Criteria
+## Android 16 Research Complete Criteria
 
 An Android 16 research item is complete only if:
 
@@ -144,3 +150,6 @@ An Android 16 research item is complete only if:
 - Confidence level is assigned
 - One page summary is created
 - Human decision placeholder is recorded
+
+The item becomes Decision Complete only after the repository owner records the
+decision in `android16/decisions/DECISION_LOG.md`.

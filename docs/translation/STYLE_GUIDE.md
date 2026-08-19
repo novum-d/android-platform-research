@@ -24,7 +24,7 @@
 Android 17 で必ず失敗する。
 
 良い例:
-公式文書上は影響する可能性がある。ただし、AOSP tag 未取得のため実装上の gate は未確認である。
+公式文書上は影響する可能性がある。ただし、関連AOSP projectの実装pathを未確認のためgateは未検証である。
 ```
 
 ## 技術用語の扱い
@@ -42,7 +42,7 @@ Android 17 で必ず失敗する。
 - `Unknown` は「未確認」とする。
 - `Unverified` は「未検証」とする。
 - `Likely` は単独で断定せず、「可能性が高いが未検証」のように根拠不足を明示する。
-- AOSP tag がない場合は「AOSP tag 未取得のため未確認」と明記する。手元の checkout を指す場合は「ローカルの `frameworks-base` checkout に Android 17 AOSP タグが存在しない」のように書く。
+- target tagまたは関連project checkoutがない場合は、対象versionとprojectを明記して「`<project>`の`<target-tag>`を未取得のため未確認」と書く。tagが公開済みか、ローカルcheckoutにないだけかを混同しない。
 - 最終 priority / severity / release readiness は agent が確定しない。
 
 ## 翻訳しない箇所
@@ -62,7 +62,7 @@ Android 17 で必ず失敗する。
 ## Report と Summary の整合
 
 - Report で「未確認」とした内容は Summary でも「未確認」とする。
-- Report で「Android 17 AOSP tag 公開後に追加調査が必要」とした場合、Summary の判断欄も同じ意味にする。
+- Reportで「関連AOSP project / implementation pathの追加調査が必要」とした場合、Summaryの判断欄も同じ不足証拠を示す。
 - `AOSP ファイル`、`AOSP ソース文脈`、`差分解釈`、`適用 gate の結論` の順序をできるだけ揃える。
 - `Final Priority` などの判断欄は、人間判断であることを明記する。
 

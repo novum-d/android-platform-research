@@ -15,6 +15,6 @@
 関連ファイル（Related Files）:
 
 記入例:
-- 判断: Android 17 AOSP tag 公開までは Low confidence とする。
-- 理由: AOSP gate と compat framework default state が未確認のため。
+- 判断: 関連AOSP projectのgate evidenceを確認するまではLow confidenceとする。
+- 理由: AOSP gateとcompat framework default stateが未確認のため。
 - 影響: 顧客向けには暫定情報として説明し、確定分類には使わない。

@@ -185,14 +185,14 @@ Customer Communication Required:
 
 ```text
 Human decision required
-Further investigation required after Android 17 AOSP tag is available
+Further investigation of the related AOSP project is required
 ```
 
 採用訳:
 
 ```text
 人間による判断が必要
-Android 17 AOSP タグ公開後に追加調査が必要
+関連AOSP projectの追加調査が必要
 ```
 
 ## README / 手順書
@@ -216,13 +216,13 @@ How To Use:
 ```
 
 ```text
-Android 17 AOSP tag is not currently available in the local frameworks-base checkout.
+The target tag is not currently available in the local checkout for <AOSP project>.
 ```
 
 採用訳:
 
 ```text
-現時点では、ローカルの `frameworks-base` checkout に Android 17 AOSP タグは存在しません。
+現時点では、`<AOSP project>`のローカルcheckoutに対象tagは存在しません。
 ```
 
 補足:
@@ -230,25 +230,25 @@ Android 17 AOSP tag is not currently available in the local frameworks-base chec
 - `local network permission` の `local` は機能名の一部なので、この訳し方を流用しない。
 
 ```text
-Do not create High confidence AOSP-backed conclusions until the target Android 17 tag is available.
+Do not create High confidence AOSP-backed conclusions until the target tag and relevant implementation path are verified.
 ```
 
 採用訳:
 
 ```text
-対象となる Android 17 タグを利用できるようになるまでは、AOSP 根拠に基づく High confidence の結論は作成しないでください。
+対象tagと関連実装pathを確認するまでは、AOSP根拠に基づくHigh confidenceの結論を作成しないでください。
 ```
 
 ## 調査上の定型表現
 
 ```text
-Android 17 AOSP tag is not available locally.
+The target AOSP tag is not available in the local checkout for <AOSP project>.
 ```
 
 採用訳:
 
 ```text
-ローカルの `frameworks-base` には Android 17 AOSP タグが存在しない。
+`<AOSP project>`のローカルcheckoutには対象AOSP tagが存在しない。
 ```
 
 ```text

@@ -12,6 +12,9 @@
 
 既存レポートのメタデータは、そのレポートで実際に検証したタグを示す。最新タグで再検証するまでは機械的に書き換えない。
 
+機械可読な正本:
+- [research-scope.json](research-scope.json)
+
 主な targetSdkVersion:
 - targetSdkVersion 36
 
@@ -38,6 +41,7 @@ android16/AGENTS.md
 | [summaries/README.md](summaries/README.md) | 1ページ要約一覧 |
 | [app-reports/wireless-camera-companion/investigation-report.md](app-reports/wireless-camera-companion/investigation-report.md) | カメラ連携アプリ向け Android 16 影響調査 |
 | [behavior-changes/APPLICABILITY_CLASSIFICATION.md](behavior-changes/APPLICABILITY_CLASSIFICATION.md) | Android 16 用の適用条件分類 |
+| [app-reports/README.md](app-reports/README.md) | 特定アプリ向け横断調査の一覧 |
 
 ## ディレクトリ構成
 

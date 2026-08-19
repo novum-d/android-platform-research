@@ -85,15 +85,8 @@ AOSP source は公式 statement の検証・説明に必須であり、source di
 
 ### Build System
 
-Release Notes を entry point とし、次の順で必要な項目だけ深掘りする。
-
-1. Entry point release notes
-2. Official Documentation
-3. Compatibility Matrix
-4. API Reference / Migration Guide
-5. Issue Tracker
-6. 実機・実プロジェクト検証
-7. Blog
+Release Notesをentry pointとし、ルート`AGENTS.md`の`Evidence Hierarchy`を唯一の
+順序定義として、影響候補だけを深掘りする。このprompt内に別の順序を複製しない。
 
 AOSP / tools/base などの source code は、文書だけでは DSL や build 挙動を判断できない場合、または未記載変更を確認する場合に限る。
 

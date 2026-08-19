@@ -209,7 +209,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `packages/NetworkSecurityConfig/api/current.txt`
 
 注記:
-- 実際の ECH handshake implementation は networking library や TLS stack 側にある可能性がある。今回の mission は `frameworks-base` evidence に限定されているため、library / TLS stack 側は Android 17 tag 公開後の追加調査対象として扱う。
+- `android-17.0.0_r1`の`frameworks-base`ではNetwork Security Configとpolicy APIまで確認済みである。実際のECH handshake implementationを担うnetworking library / TLS stack側projectは本調査の検索範囲外であり、追加evidence対象として残る。
 
 ## 確認したソース文脈（Source Context Reviewed）
 

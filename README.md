@@ -32,6 +32,10 @@ Behavior Change Documentation
 
 AOSP source は、公式文書の記述を裏取りするために使います。AOSP diff だけを起点に結論を作らないでください。
 
+レポート、1ページ要約、`Pending Human Decision`が揃った状態をResearch Complete、
+その後にリポジトリ所有者が判断を記録した状態をDecision Completeと呼びます。
+調査完了と人間の判断完了を混同しません。
+
 Build System 調査は、対象 area の Release Notes などの entry point から始め、必要な一次情報をたどります。
 Release Notes は入口であり、最終根拠ではありません。
 
@@ -60,8 +64,8 @@ Release Notes / Entry Point
 | `build-system/` | AGP、Gradle、Kotlin、NDK、CI などの Build System 更新調査 |
 | `demos/` | Behavior Change の説明・再現補助用デモ。調査根拠そのものとしては扱わない |
 | `docs/` | バージョン非依存の調査手順、記録、知識、メモ |
-| `frameworks-base/` | Git 管理しない一時的な AOSP source checkout |
-| `scripts/` | ローカル補助スクリプト |
+| `frameworks-base/` / `tmp/aosp-checkouts/` | Git管理しない一時的なAOSP source checkout |
+| `scripts/` | analysis生成・構成検証などのローカル補助スクリプト |
 
 ## 置き場所の原則
 
@@ -74,6 +78,7 @@ Release Notes / Entry Point
 | バージョン固有の backlog / roadmap | `android<version>/planning/` |
 | バージョン固有の関連概念・調査テーマ | `android<version>/knowledge/` |
 | バージョン固有の report / summary template | `android<version>/templates/` |
+| バージョン固有の機械可読scope | `android<version>/research-scope.json` |
 | Build System 更新調査 | `build-system/<area>/versions/` |
 | Build System 1ページ要約 | `build-system/<area>/summaries/` |
 | Build System の再利用可能な移行チェックリスト | `build-system/<area>/checklists/` |
@@ -109,9 +114,15 @@ Build System の詳細調査は、対象領域ごとに `build-system/<area>/ver
 
 ## AOSP checkout の扱い（AOSP Checkout）
 
-`frameworks-base/` は一時的な evidence workspace として扱い、Git 管理対象にしません。
+`frameworks-base/`と`tmp/aosp-checkouts/<project>`は一時的なevidence workspaceとして扱い、Git管理対象にしません。
 
-調査では local working tree の差分ではなく、必ず AOSP tag 間の明示的な比較を使います。詳しくは [docs/workflow/AOSP_CHECKOUT.md](docs/workflow/AOSP_CHECKOUT.md) を参照してください。
+調査ではlocal working treeの差分ではなく、根拠に使うAOSP projectごとにtagとcommit hashを確認し、明示的なtag間比較を使います。詳しくは[docs/workflow/AOSP_CHECKOUT.md](docs/workflow/AOSP_CHECKOUT.md)を参照してください。
+
+構成やversion scopeを変更した後は、次を実行します。
+
+```bash
+python3 scripts/validate_repository_structure.py
+```
 
 ## docs 索引（Docs Index）
 

@@ -49,15 +49,15 @@ fragment を含まないページ URL など、1つの Behavior Change セクシ
 | --- | --- |
 | Android version | 公式 URL と page title |
 | Version directory | `android<version>/` |
-| From / To tag | ルート `AGENTS.md` の tag freshness rule で公式 refs を確認した後、`<version-dir>/AGENTS.md` と `<version-dir>/README.md` の一致した値 |
-| Previous / Target targetSdkVersion | `<version-dir>/AGENTS.md` と適用条件分類 |
+| From / To tag | ルート`AGENTS.md`のtag freshness ruleで公式refsを確認した後、`<version-dir>/research-scope.json`の値 |
+| Previous / Target targetSdkVersion | `<version-dir>/research-scope.json` |
 | Page type | 公式 URL、ページ見出し、公式 statement |
 | Official category | 公式ページ上の対象セクションの親カテゴリ |
 | Output paths | このガイドの path rule と既存の category / slug convention |
 | Applicability labels | `<version-dir>/behavior-changes/APPLICABILITY_CLASSIFICATION.md` |
 | Report / summary templates | `<version-dir>/templates/` |
 
-prompt template の placeholder と version-specific instructions が矛盾する場合は、version-specific instructions を優先します。公式 refs に version scope より新しい通常リリースタグがある場合は、中間プロンプトだけを上書きせず、version scope と version-specific templates を先にまとめて更新します。既存ファイルとの衝突を確認し、同じ項目の既存調査なら更新候補として扱います。別項目と衝突する場合は勝手に上書きしません。
+共通prompt templateのplaceholderとversion-specific instructionsが矛盾する場合は、`<version-dir>/research-scope.json`を優先し、構成検証で人間向け文書との不一致を検出します。公式refsにversion scopeより新しい通常リリースタグがある場合は、中間プロンプトだけを上書きせず、scope metadataとversion-specific instructionsを先にまとめて更新します。既存ファイルとの衝突を確認し、同じ項目の既存調査なら更新候補として扱います。別項目と衝突する場合は勝手に上書きしません。
 
 出力 path は次の形式で決定します。
 
@@ -103,20 +103,24 @@ tmp/research-prompts/android<version>/<all-or-target>/<topic-slug>.md
 ```text
 <version-dir>/README.md
 <version-dir>/AGENTS.md
+<version-dir>/research-scope.json
 <version-dir>/behavior-changes/APPLICABILITY_CLASSIFICATION.md
 <version-dir>/templates/customer-report-template.md
 <version-dir>/templates/one-page-summary-template.md
 ```
 
-`frameworks-base` に比較対象 tag が存在することも確認します。
+根拠に使うAOSP checkoutごとに、比較対象tagとresolved commit hashを確認します。
 
 ```bash
-git -C frameworks-base status --short
-git -C frameworks-base tag --list '<from-tag>'
-git -C frameworks-base tag --list '<to-tag>'
+git -C <checkout-dir> status --short
+git -C <checkout-dir> remote get-url origin
+git -C <checkout-dir> tag --list '<from-tag>'
+git -C <checkout-dir> tag --list '<to-tag>'
+git -C <checkout-dir> rev-list -n 1 '<from-tag>'
+git -C <checkout-dir> rev-list -n 1 '<to-tag>'
 ```
 
-`frameworks-base` が dirty な場合は、ローカル working tree の変更を platform evidence として扱わないでください。必ず `<from-tag>` と `<to-tag>` の明示的な tag 比較を使います。
+checkoutがdirtyな場合は、ローカルworking treeの変更をplatform evidenceとして扱わないでください。必ず`<from-tag>`と`<to-tag>`の明示的なtag比較を使います。
 
 AOSP checkout の扱いは以下も確認します。
 
@@ -314,13 +318,13 @@ Report と Summary は日本語で作成する。
 One page summary には Human decision placeholder を必ず残す。
 ```
 
-## Android 17 用の調査依頼テンプレート
+## 共通の調査依頼テンプレート
 
-Android 17 調査では、version-specific template の `android17/templates/research-prompt-template.md` を使います。単純な項目では最小入力として使い、複雑な項目では詳細入力フォーマットとして使います。
+すべての対応Android versionで、version非依存の共通templateを使います。
+version、tag、targetSdkVersion、出力先は`<version-dir>/research-scope.json`から補完し、
+template側へ固定値を複製しません。
 
-```text
-android17/templates/research-prompt-template.md
-```
+[共通調査依頼テンプレート](../templates/android-behavior-change-research-prompt-template.md)
 
 ## 固定調査指示
 
@@ -339,17 +343,17 @@ Codex は最小入力フォーマットを受け取ったら、このセクシ�
 - report は `<version-dir>/templates/customer-report-template.md` を使う。
 - summary は `<version-dir>/templates/one-page-summary-template.md` を使う。
 - version-specific output は `<version-dir>/` 配下に置く。
-- Android 17 の report / summary は、公式文書のページ種別とカテゴリに合わせて `<version-dir>/behavior-changes/<all-or-target>/<official-category-slug>/<topic-slug>.md` と `<version-dir>/summaries/<all-or-target>/<official-category-slug>/<topic-slug>-summary.md` に置く。ファイル名の先頭に連番は付けない。
+- report / summaryは、公式文書のページ種別とカテゴリに合わせて`<version-dir>/behavior-changes/<all-or-target>/<official-category-slug>/<topic-slug>.md`と`<version-dir>/summaries/<all-or-target>/<official-category-slug>/<topic-slug>-summary.md`に置く。ファイル名の先頭に連番は付けない。
 - unrelated file を上書きしない。
 - `docs/notes/PERSONAL_NOTES.md` は編集しない。
 - final priority、final severity、release readiness、customer communication priority は決めない。人間の判断欄として残す。
-- AOSP evidence を使う前に `git -C frameworks-base status --short` を確認する。dirty な working tree は platform evidence として扱わず、明示的な tag 比較を使う。
+- AOSP evidenceを使う前に、根拠に使う各checkoutのproject path、remote URL、status、tag、resolved commit hashを確認する。dirtyなworking treeはplatform evidenceとして扱わず、明示的なtag比較を使う。
 
 ### Required investigation steps
 
 1. 検証対象の公式 statement を抜き出す。
 2. documentation page type と initial applicability assumption を特定する。
-3. `<from-tag>` と `<to-tag>` の AOSP tag 比較で evidence を確認する。`<to-tag>` が未入手なら、その制約を記録し High confidence にしない。
+3. 関連AOSP projectごとに`<from-tag>`と`<to-tag>`を確認し、明示的なtag比較でevidenceを確認する。target tagまたは実装pathが未入手なら、そのprojectと制約を記録しHigh confidenceにしない。
 4. AOSP evidence がある場合は file / symbol / entry point / caller を特定する。
 5. その code path が Behavior Change の根拠になる理由を書く。
 6. baseline behavior と target Android behavior を分ける。
@@ -367,8 +371,9 @@ Codex は最小入力フォーマットを受け取ったら、このセクシ�
 
 ### Final checks
 
-- `shared/templates` や `docs/templates` など旧 template path を導入していないか repository search で確認する。
-- root `git status --short` と `git -C frameworks-base status --short` を確認する。
+- 廃止したversion-specific research prompt pathを再導入せず、共通templateを参照しているか確認する。
+- root `git status --short`と、根拠に使った各AOSP checkoutの`status --short`を確認する。
+- `python3 scripts/validate_repository_structure.py`を実行する。
 - 完了内容と、人間が判断すべき残事項を final response にまとめる。
 
 ## 実行後に人間が確認すること

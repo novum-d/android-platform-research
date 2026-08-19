@@ -408,21 +408,12 @@ Risk は最終判断ではない。人間が判断するための材料として
 
 ## Source Policy
 
-一次情報を優先する。
-
-優先順位:
-
-1. Official Documentation
-2. Release Notes
-3. Compatibility Matrix
-4. Issue Tracker
-5. 実機・実プロジェクト検証
-6. Blog
-
-Blog や個人記事は、一次情報の補助としてのみ使う。
-
-Release Notes は調査の entry point として優先する。
-ただし、Release Notes の要約だけを根拠にせず、必要に応じて Compatibility Matrix、API Reference、Migration Guide、Issue Tracker などの一次情報をたどる。
+Build System調査の証拠優先順位は、ルート
+[`AGENTS.md`](../AGENTS.md#evidence-hierarchy)を唯一の正本とする。
+Release Notesは調査のentry pointであり、そこからchange inventoryを抽出した後、
+Official Documentation、Compatibility Matrix、API Reference / Migration
+Guide、Issue Tracker、実プロジェクト検証へ必要な項目だけを深掘りする。
+Blogや個人記事は補助としてのみ使い、このREADMEでは別の順序を定義しない。
 
 ## Source Diff Policy
 

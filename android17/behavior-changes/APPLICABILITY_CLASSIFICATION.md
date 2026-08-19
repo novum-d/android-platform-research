@@ -119,7 +119,7 @@ Mainline module または Google Play system update で配信され、Android 17
 - 顧客向けの結論を出す前に調査を継続する。
 
 記入例:
-- 公式文書は targetSdkVersion 37 以上と読めるが、Android 17 AOSP tag がなく gate を確認できない。
+- 公式文書はtargetSdkVersion 37以上と読めるが、関連AOSP projectまたは実装pathを特定できずgateを確認できない。
 - AOSP 差分候補はあるが、公式 Behavior Change の該当文言と結びついていない。
 
 ## High confidence の条件
@@ -163,4 +163,4 @@ Android 17 AOSP タグは `android-17.0.0_r1` を利用する。High confidence 
 - AOSP 実装が変わっているという理由だけで `OS_UPDATE_ALL_APPS` に分類しない。実装が targetSdkVersion ゲートまたは compat gate の内側にないか確認する。
 - 既存挙動が変わらない限り、新 API 追加だけを Behavior Change として扱わない。
 - opt-out、例外、device form factor、permission 条件を無視しない。
-- Android 17 AOSP タグを利用できない状態で High confidence を使わない。
+- 関連AOSP projectの`android-17.0.0_r1`タグ、実装path、または必要なgate evidenceを確認できない状態でHigh confidenceを使わない。

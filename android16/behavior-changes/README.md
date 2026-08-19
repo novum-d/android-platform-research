@@ -48,6 +48,25 @@ Runtime behavior comparisons:
 - すべての比較対象へ同じ入力条件を与え、仕様から導く expected behavior と実機・テストの observed behavior を分ける。
 - runtime behavior comparison は primary report の classification / confidence / Human Decision を置き換えない。
 
+## Companion Artifacts
+
+補助成果物もこの中央索引から直接到達できるようにする。primary reportの
+classification、confidence、evidence、Human Decisionを置き換えない。
+
+| Type | Companion | Primary topic |
+| --- | --- | --- |
+| OS version behavior comparison | [Improved bond loss handling: Android 15 → 16](all/connectivity/improved-bond-loss-handling-android15-to-16-behavior-comparison.md) | [Improved bond loss handling](all/connectivity/improved-bond-loss-handling.md) |
+| Runtime behavior comparison | [Fixed-rate work scheduling](target/core-functionality/fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md) | [Fixed-rate work scheduling optimization](target/core-functionality/fixed-rate-work-scheduling-optimization.md) |
+| Runtime behavior comparison | [Predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md) | [Migration or opt-out required for predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md) |
+| Dispatcher / animation guide | [Predictive back dispatcher and animation guide](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md) | [Migration or opt-out required for predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md) |
+| FAQ | [GPU syscall filtering concepts](target/security/gpu-syscall-filtering-concepts-faq.md) | [GPU syscall filtering](target/security/gpu-syscall-filtering.md) |
+| Implementation examples | [Fixed-rate work scheduling examples](case-guides/fixed-rate-work-scheduling-optimization-implementation-examples.md) | [Fixed-rate work scheduling optimization](target/core-functionality/fixed-rate-work-scheduling-optimization.md) |
+| Implementation examples | [Predictive back examples](case-guides/migration-or-opt-out-required-for-predictive-back-implementation-examples.md) | [Migration or opt-out required for predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md) |
+| Category action guide | [Connectivity and security](case-guides/connectivity-and-security.md) | Multiple Behavior Changes |
+| Category action guide | [Core functionality](case-guides/core-functionality.md) | Multiple Behavior Changes |
+| Category action guide | [Privacy and health](case-guides/privacy-and-health.md) | Multiple Behavior Changes |
+| Category action guide | [UI and device form factors](case-guides/ui-and-device-form-factors.md) | Multiple Behavior Changes |
+
 ## Status Wording
 
 Status の confidence は README index 上の到達状態を示す。

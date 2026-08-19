@@ -15,6 +15,12 @@ To:
 
 Android 17 AOSP evidence must use explicit tag comparisons against `android-17.0.0_r1`.
 
+Machine-readable scope source:
+
+```text
+android17/research-scope.json
+```
+
 ## Target SDK Focus
 
 The target SDK focus is:
@@ -104,12 +110,12 @@ Human decisions belong in:
 android17/decisions/DECISION_LOG.md
 ```
 
-## Android 17 Completion Criteria
+## Android 17 Research Complete Criteria
 
 An Android 17 research item is complete only if:
 
 - Original statement is identified
-- Source code evidence is collected, or missing AOSP tag evidence is explicitly recorded
+- Source code evidence is collected, or the specific unreviewed AOSP project / code path is explicitly recorded
 - Applicability classification is assigned
 - OS update impact and targetSdkVersion 37 impact are separated
 - Compat framework evidence is checked when available
@@ -118,3 +124,6 @@ An Android 17 research item is complete only if:
 - Confidence level is assigned
 - One page summary is created
 - Human decision placeholder is recorded
+
+The item becomes Decision Complete only after the repository owner records the
+decision in `android17/decisions/DECISION_LOG.md`.

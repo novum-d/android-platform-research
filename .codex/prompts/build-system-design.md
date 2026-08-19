@@ -513,21 +513,11 @@ Agent は判断材料を残し、人間の判断欄を空欄または pending �
 
 ## Source Policy
 
-一次情報を優先します。
-
-優先順位:
-
-1. Official Documentation
-2. Release Notes
-3. Compatibility Matrix
-4. Issue Tracker
-5. 実機・実プロジェクト検証
-6. Blog
-
-Blog や個人記事は、一次情報の補助としてのみ使います。
-
-Release Notes は調査の entry point として優先します。
-ただし、Release Notes の要約だけを根拠にせず、必要に応じて Compatibility Matrix、API Reference、Migration Guide、Issue Tracker などの一次情報をたどります。
+証拠優先順位はルート`AGENTS.md`の`Evidence Hierarchy`を唯一の正本とする。
+Release Notesをentry pointとしてchange inventoryを作り、影響候補だけを
+Official Documentation、Compatibility Matrix、API Reference / Migration
+Guide、Issue Tracker、実プロジェクト検証へ深掘りする。Blogや個人記事は
+補助としてのみ使い、このプロンプト内では別の順序を定義しない。
 
 ## Source Diff Policy
 

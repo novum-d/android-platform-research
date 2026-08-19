@@ -57,7 +57,7 @@ Android 17 では、targetSdkVersion 37 以上のアプリで physical input dev
 
 | 端末 OS | targetSdkVersion | 期待挙動 |
 | --- | --- | --- |
-| Android 16 | 36 | Android 16 baseline。具体挙動は Android 17 tag 比較待ち。 |
+| Android 16 | 36 | 単一の`TEXT_SHOW_PASSWORD` / `TextKeyListener.SHOW_PASSWORD`設定を使い、有効時は最後に入力した1文字を一時表示する従来path。 |
 | Android 17 | 36 | `SPLIT_SHOW_PASSWORDS_TO_TOUCH_AND_PHYSICAL` は デフォルト無効。旧 path が維持される。 |
 | Android 17 | 37 | physical input device 使用時、default では全 password characters が hidden。 |
 

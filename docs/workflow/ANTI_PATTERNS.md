@@ -48,7 +48,7 @@ AOSP の targetSdkVersion gate、compat framework default state、または gate
 公式ドキュメントの分類と実装上の適用条件がずれる可能性がある。
 
 例:
-- Android 17 AOSP tag がなく targetSdkVersion gate を確認できないのに、High confidence とする。
+- 関連AOSP projectのtarget tagまたは実装pathを確認できず、targetSdkVersion gateを検証できないのにHigh confidenceとする。
 
 ## AP-007: Ignoring conditional applicability（追加条件を無視する）
 

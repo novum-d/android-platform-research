@@ -19,6 +19,9 @@
 主な targetSdkVersion:
 - targetSdkVersion 37
 
+機械可読な正本:
+- [research-scope.json](research-scope.json)
+
 ## 読み進め方
 
 Android 17 固有の読み進め方は以下を参照する。
@@ -45,6 +48,14 @@ android17/AGENTS.md
 | `planning/` | Android 17 固有のバックログ / ロードマップ |
 | `summaries/` | 顧客説明・社内共有用の 1ページ要約 |
 | `templates/` | Android 17 用のレポート / 要約テンプレート |
+
+## 主な索引
+
+| 索引 | 目的 |
+| --- | --- |
+| [behavior-changes/README.md](behavior-changes/README.md) | Behavior Change調査レポート一覧 |
+| [summaries/README.md](summaries/README.md) | 1ページ要約一覧 |
+| [app-reports/README.md](app-reports/README.md) | 特定アプリ向け横断調査の一覧 |
 
 ## 現在のアプリ別レポート
 

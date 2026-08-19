@@ -5,19 +5,37 @@ AOSP_DIR="${AOSP_DIR:-frameworks-base}"
 VERSION_DIR="${VERSION_DIR:-}"
 OLD_TAG="${OLD_TAG:-}"
 NEW_TAG="${NEW_TAG:-}"
-TARGET_CODENAME="${TARGET_CODENAME:-<target-codename>}"
+TARGET_CODENAME="${TARGET_CODENAME:-}"
 
 usage() {
   cat <<'USAGE'
 Usage:
-  VERSION_DIR=<android-version-dir> OLD_TAG=<from-tag> NEW_TAG=<to-tag> TARGET_CODENAME=<codename> scripts/generate_target.sh
+  VERSION_DIR=<android-version-dir> scripts/generate_target.sh
 
 Optional:
   AOSP_DIR=frameworks-base
+  OLD_TAG=<from-tag> NEW_TAG=<to-tag> TARGET_CODENAME=<codename>
+
+By default, tags and codename are read from:
+  <android-version-dir>/research-scope.json
 USAGE
 }
 
-if [[ -z "$VERSION_DIR" || -z "$OLD_TAG" || -z "$NEW_TAG" ]]; then
+if [[ -z "$VERSION_DIR" ]]; then
+  usage >&2
+  exit 2
+fi
+
+SCOPE_FILE="$VERSION_DIR/research-scope.json"
+
+if [[ -f "$SCOPE_FILE" ]]; then
+  OLD_TAG="${OLD_TAG:-$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["baseline"]["aosp_tag"])' "$SCOPE_FILE")}"
+  NEW_TAG="${NEW_TAG:-$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["target"]["aosp_tag"])' "$SCOPE_FILE")}"
+  TARGET_CODENAME="${TARGET_CODENAME:-$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["target"]["codename"])' "$SCOPE_FILE")}"
+fi
+
+if [[ -z "$OLD_TAG" || -z "$NEW_TAG" || -z "$TARGET_CODENAME" ]]; then
+  echo "Missing scope metadata: $SCOPE_FILE" >&2
   usage >&2
   exit 2
 fi

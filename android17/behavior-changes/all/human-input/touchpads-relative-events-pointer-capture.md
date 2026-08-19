@@ -226,7 +226,7 @@ git -C frameworks-base tag --list 'android-17*'
 - `core/api/current.txt`
 
 注記:
-- 実際の input dispatch は `frameworks-base` 以外の inputflinger / native service 側にある可能性がある。Android 17 tag 入手後は該当 project も evidence 対象として確認する必要がある。
+- `android-17.0.0_r1`のframework境界までは確認済みだが、実際のinput dispatchを担うinputflinger / native service側のprojectとexact conversionは未確認であり、追加evidence対象として残る。
 
 ## 確認したソース文脈（Source Context Reviewed）
 

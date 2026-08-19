@@ -28,7 +28,15 @@
 - [ ] 信頼度（Confidence）がある
 - [ ] 信頼度の理由と不足証拠が書かれている
 - [ ] 1ページ要約がある
-- [ ] 人間の最終判断が DECISION_LOG にある
+- [ ] `Pending Human Decision` placeholderがあり、Research Completeとして必要な成果物が揃っている
+
+## 判断完了レビュー（Decision Complete Review）
+
+Research Complete後に、リポジトリ所有者が判断を記録する段階で確認する。
+
+- [ ] 人間の最終判断がDECISION_LOGにある
+- [ ] 最終判断から根拠レポートと1ページ要約を追跡できる
+- [ ] agentの分析と人間のpriority / severity / release readiness判断が区別されている
 
 ## 分類レビュー（Classification Review）
 
@@ -51,4 +59,4 @@ High confidence にしてはいけない条件:
 
 記入例:
 - High confidence 可: 公式文書、AOSP gate、compat default state、targetSdkVersion 別の期待挙動がすべて一致している。
-- High confidence 不可: 公式文書はあるが AOSP gate が未確認、または Android 17 tag がなく diff を確認できない。
+- High confidence 不可: 公式文書はあるがAOSP gateが未確認、または関連AOSP projectのtarget tag / implementation pathを確認できずdiffを確認できない。

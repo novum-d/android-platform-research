@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "android_version": 17,
+  "version_dir": "android17",
+  "baseline": {
+    "android_version": 16,
+    "aosp_tag": "android-16.0.0_r4",
+    "target_sdk": 36
+  },
+  "target": {
+    "aosp_tag": "android-17.0.0_r1",
+    "target_sdk": 37,
+    "codename": "CINNAMON_BUN"
+  },
+  "default_reference_repository": "platform/frameworks/base",
+  "official_refs_url": "https://android.googlesource.com/platform/frameworks/base/+refs",
+  "official_documentation": {
+    "all_apps": "https://developer.android.com/about/versions/17/behavior-changes-all",
+    "target_sdk": "https://developer.android.com/about/versions/17/behavior-changes-17",
+    "compat_framework": null,
+    "compat_framework_status": "The standard Android 17 compatibility framework URL returned 404 on 2026-08-19; use AOSP ChangeId annotations until the page is published."
+  },
+  "output_roots": {
+    "reports": "android17/behavior-changes",
+    "summaries": "android17/summaries",
+    "intermediate_prompts": "tmp/research-prompts/android17"
+  },
+  "scope_files": [
+    "android17/AGENTS.md",
+    "android17/README.md",
+    "android17/behavior-changes/APPLICABILITY_CLASSIFICATION.md",
+    "android17/templates/customer-report-template.md",
+    "android17/templates/one-page-summary-template.md"
+  ]
+}

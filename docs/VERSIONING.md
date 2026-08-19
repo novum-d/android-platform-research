@@ -18,6 +18,11 @@
 
 Android バージョン固有のものは `android<version>/` に置く。
 
+version、tag pair、targetSdkVersion、公式URL、出力rootの機械可読な正本は
+`android<version>/research-scope.json`とする。README、AGENTS、GETTING_STARTED、
+classification、templateはこの値と一致させ、変更後に
+`python3 scripts/validate_repository_structure.py`を実行する。
+
 例:
 - Behavior Change 一覧
 - 適用条件分類

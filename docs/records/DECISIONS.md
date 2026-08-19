@@ -17,6 +17,6 @@
 関連ファイル（Related Files）:
 
 記入例:
-- 判断: Android 17 tag 公開までは `UNKNOWN_NEEDS_MORE_EVIDENCE` のまま維持する。
-- 理由: AOSP gate と compat default state が未確認のため。
+- 判断: 関連AOSP projectのgate evidenceを確認するまでは`UNKNOWN_NEEDS_MORE_EVIDENCE`のまま維持する。
+- 理由: targetSdkVersion gateとcompat default stateが未確認のため。
 - 影響: 顧客向け確定結論には使わず、暫定調査として扱う。
