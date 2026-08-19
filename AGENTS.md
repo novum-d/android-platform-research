@@ -58,6 +58,30 @@ Extract changes from release notes, then deep dive only the changes that may aff
 
 Version-specific scope, AOSP tags, targetSdkVersion, templates, classification rules, and priority focus belong under the relevant `android<version>/` directory.
 
+## AOSP Tag Freshness
+
+For a new Android Platform finding or an update to an existing finding, use the
+latest standard AOSP release tag available for each Android version in the
+comparison pair. A standard release tag has the form
+`android-<version>.0.0_r<number>`; do not substitute `android-security-*`,
+`android-platform-*`, CTS/VTS, preview, branch, or QPR names for this default.
+
+Before generating the intermediate prompt:
+
+1. Verify the official refs for the relevant AOSP repository, using
+   `platform/frameworks/base` as the default reference repository.
+2. Compare the highest numeric standard release tags with the pair pinned in
+   `<version-dir>/AGENTS.md` and `<version-dir>/README.md`.
+3. If a newer tag exists, update the version scope, version-specific templates,
+   classification metadata, and generation examples together before starting
+   the investigation. Do not silently override only the generated prompt.
+4. Record the actual tag pair in every report.
+
+Existing reports are evidence records. Do not mechanically rewrite their tag
+metadata or conclusions when a newer tag is published. Update those files only
+after re-running the relevant evidence checks with the new pair, and state what
+was revalidated.
+
 When working on a version-specific investigation, read:
 
 - Root `AGENTS.md`
@@ -87,28 +111,16 @@ Behavior Change section URL
 Use `docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md` as the source of truth for the
 detailed generation and execution rules.
 
-Required behavior:
+Root-level invariants only:
 
-- Read the URL and identify exactly one Behavior Change section.
-- Extract the page type, official category, section hierarchy, original
-  statements, applicability conditions, exceptions, opt-in / opt-out details,
-  and official related links from that section.
-- Derive the Android version, version directory, AOSP tags,
-  targetSdkVersion values, output paths, and allowed applicability labels from
-  the repository's version-specific instructions. Repository values override
-  stale placeholders in prompt templates.
-- Generate a complete intermediate prompt under
-  `tmp/research-prompts/android<version>/<all-or-target>/<topic-slug>.md`.
-- Read the generated file back and use it as the authoritative task
-  specification for the investigation. Continue in the same turn; do not ask
-  the user to copy and paste the generated prompt and do not launch a nested
-  Codex process.
-- Keep the intermediate prompt out of the customer-facing report and do not
-  treat it as evidence.
-- Ask for clarification only when the URL does not identify one section, the
-  official page cannot be read, the derived Android version has no repository
-  scope, or an output collision cannot be resolved without changing existing
-  research.
+- One URL identifies one Behavior Change section.
+- Apply the AOSP tag freshness rule before metadata completion.
+- Generate and read back the intermediate prompt, then execute it in the same
+  Codex session without launching a nested Codex process.
+- Intermediate prompts are ignored generated files, not research evidence.
+- Ask only for an unreadable or ambiguous official section, missing repository
+  scope, or an unrelated output collision. Detailed extraction, path, and
+  execution rules belong only to the workflow guide.
 
 ## AGP Release Notes URL-Only Research Requests
 
@@ -132,30 +144,16 @@ Use `build-system/CODEX_CLI_RESEARCH_GUIDE.md` as the source of truth for AGP
 URL analysis, baseline derivation, output paths, prompt generation, and prompt
 execution.
 
-Required behavior:
+Root-level invariants only:
 
-- Derive the target AGP version, release channel, release-note change
-  inventory, compatibility requirements, linked migration guidance, and
-  relevant official references from the URL.
-- Derive the comparison baseline from the user's explicit instruction first,
-  then an existing investigation for the same target, then the latest stable
-  completed AGP investigation target that is lower than the requested target.
-- Ask for the From version only if those sources do not produce exactly one
-  defensible baseline. Do not guess from the local machine or an unrelated
-  sample project.
-- Derive detail, summary, and migration checklist paths using existing AGP
-  naming conventions.
-- Generate the completed prompt under
-  `tmp/research-prompts/build-system/agp/` and read it back before execution.
-- Use the generated file as the authoritative task specification and continue
-  the investigation in the same turn. Do not ask the user to paste it again
-  and do not launch a nested Codex process.
-- If no target application project is specified, continue with repository-wide
-  AGP research and mark project-specific affected modules and command results
-  as not provided or not executed. Do not invent observations.
-- Release Notes remain the entry point, not the final source of truth. Deep
-  dive relevant compatibility, migration, API, issue, and project-verification
-  evidence according to `build-system/AGENTS.md`.
+- Release Notes are the entry point, and one target version or release line
+  must be identifiable.
+- Generate and read back the intermediate prompt, then execute it in the same
+  Codex session without launching a nested Codex process.
+- Do not invent a baseline, target-project state, or command result.
+- Intermediate prompts are ignored generated files, not research evidence.
+- Baseline precedence, extraction fields, output paths, and ambiguity rules
+  belong only to the Build System workflow guide.
 
 When working on a Build System investigation, read:
 

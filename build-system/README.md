@@ -42,6 +42,7 @@ build-system/<area>/
   README.md
   versions/
   summaries/
+  checklists/  # migration checklist が必要な area のみ
 ```
 
 ## Policy
@@ -183,7 +184,9 @@ Build System 調査の成果物は、詳細調査、1ページサマリ、移行
 | --- | --- | --- |
 | 詳細調査 | `templates/version-diff-template.md` | `build-system/<area>/versions/` |
 | 1ページサマリ | `templates/one-page-summary-template.md` | `build-system/<area>/summaries/` |
-| 移行チェックリスト | `templates/migration-checklist-template.md` | 実作業 PR / issue に紐付く場所 |
+| 再利用可能な移行チェックリスト | `templates/migration-checklist-template.md` | `build-system/<area>/checklists/` |
+
+このリポジトリの checklist は、version pair ごとの検出、変更候補、検証、rollback の再利用可能な基準を管理する。対象プロジェクトで実行した command result、対象 module、実際の変更、Human Decision は、対象プロジェクト側の PR / issue / 実行用 checklist に記録し、このリポジトリの汎用 checklist と混ぜない。汎用 checklist から実行記録の場所へ、実行記録から根拠となる version diff へ相互参照を残す。
 
 詳細調査ファイルは最低限以下を持つ。
 

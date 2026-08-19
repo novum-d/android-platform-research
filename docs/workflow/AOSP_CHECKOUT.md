@@ -10,6 +10,8 @@
 - `frameworks-base/` の working tree 変更を platform evidence として扱わない
 - 調査では必ず `<from-tag>` と `<to-tag>` の明示的な tag 比較を使う
 - `frameworks-base/` が dirty でも、tag 比較に基づく evidence だけを採用する
+- 新規・更新調査では、ルート `AGENTS.md` の tag freshness rule に従い、公式 refs 上の各バージョンの最新通常リリースタグを確認する
+- 既存レポートのタグは、そのタグで evidence を再検証するまでは書き換えない
 
 ## 事前確認
 
@@ -56,7 +58,7 @@ scripts/generate_target.sh
 生成物は `<android-version-dir>/analysis/` に出力します。
 
 記入例:
-- Android 17 調査では `VERSION_DIR=android17`、`OLD_TAG=android-16.0.0_r4`、`NEW_TAG=<android-17-aosp-tag>` を使う。
+- Android 17 調査では `VERSION_DIR=android17`、`OLD_TAG=android-16.0.0_r4`、`NEW_TAG=android-17.0.0_r1` を使う。
 - 生成された `analysis/*.txt` は候補一覧であり、最終的な根拠は tag diff と source context に記録する。
 
 ## 避けること

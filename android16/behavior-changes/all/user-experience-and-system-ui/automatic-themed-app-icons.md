@@ -15,7 +15,7 @@
 | Page type | Behavior changes: all apps |
 | 出力 | `android16/behavior-changes/all/user-experience-and-system-ui/automatic-themed-app-icons.md` |
 
-注意: `android16/AGENTS.md` の To tag は `android-16.0.0_r1` だが、この調査では依頼スコープに従い `android-16.0.0_r4` を確認した。公式本文は “Beginning with Android 16 QPR 2” としており、`android-16.0.0_r4` で見える実装部品と、QPR2 リリースで実際に有効化される挙動は分けて扱う。
+注意: 公式本文は “Beginning with Android 16 QPR 2” としており、`android-16.0.0_r4` で見える実装部品と、QPR2 リリースで実際に有効化される挙動は分けて扱う。
 
 ## Original statements
 

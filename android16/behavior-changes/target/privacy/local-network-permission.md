@@ -16,7 +16,6 @@
 - Applicability classification: `OPT_IN_ONLY`
 - Confidence: High
 
-Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり `android-16.0.0_r4` を使用した。
 
 Classification note: 現在の Android 16 evidence では、Local Network Protections は `RESTRICT_LOCAL_NETWORK` compat change による opt-in testing behavior として実装されており、targetSdkVersion 36 では default-enabled ではない。一方、将来 release で runtime permission enforcement される計画が公式文書と TODO に存在する。公式文書と AOSP gate が current opt-in-only behavior と一致するため、primary label は `OPT_IN_ONLY` とし、実質条件を追加条件として記録する。
 

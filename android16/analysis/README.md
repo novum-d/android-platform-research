@@ -8,7 +8,7 @@ Generated from:
 
 ```text
 From: android-15.0.0_r36
-To:   android-16.0.0_r1
+To:   android-16.0.0_r4
 ```
 
 Using:
@@ -16,7 +16,7 @@ Using:
 ```bash
 VERSION_DIR=android16 \
 OLD_TAG=android-15.0.0_r36 \
-NEW_TAG=android-16.0.0_r1 \
+NEW_TAG=android-16.0.0_r4 \
 TARGET_CODENAME=BAKLAVA \
 scripts/generate_target.sh
 ```

@@ -9,3 +9,4 @@ frameworks-base/
 # Generated temporary files
 *.tmp
 tmp/research-prompts/
+tmp/aosp-checkouts/

@@ -11,7 +11,6 @@ To:
 - android-16.0.0_r4
 
 Scope note:
-- `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、この調査ではユーザー指定に従い、公開済み Android 16 tag として `android-16.0.0_r4` を使用した。
 
 ### Behavior Change 文書
 

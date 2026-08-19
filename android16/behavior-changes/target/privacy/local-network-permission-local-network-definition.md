@@ -16,7 +16,6 @@
 - Applicability classification: `OPT_IN_ONLY`
 - Confidence: High
 
-Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり公開済み Android 16 tag として `android-16.0.0_r4` を使用した。
 
 Classification note: Local Network Definition は Android 16 targeting apps ページにあるが、Local Network Permission 全体は current stage で opt-in feature と説明されている。AOSP `android-16.0.0_r4` の `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 では default-enabled ではない。現在の実効影響は `RESTRICT_LOCAL_NETWORK` force-enable と permission state に依存するため、`OPT_IN_ONLY` を primary label とし、current opt-in / future enforcement / local network definition / address-prefix classification を追加条件として記録する。
 

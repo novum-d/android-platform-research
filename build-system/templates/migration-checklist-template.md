@@ -1,5 +1,7 @@
 # [Migration Title] チェックリスト
 
+> Ownership: このテンプレートから作る repository-wide checklist は再利用可能な手順を定義する。`Current`、実行済みチェック、command result、対象 branch / commit、Decision Log は、対象プロジェクト側へコピーした実行用 checklist または PR / issue でのみ記入する。
+
 ## Summary
 
 この migration で実施する変更と、実施しない変更を明記する。

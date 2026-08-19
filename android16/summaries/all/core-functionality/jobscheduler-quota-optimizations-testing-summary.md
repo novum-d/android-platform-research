@@ -18,7 +18,6 @@ To:
 - android-16.0.0_r4
 
 Note:
-- `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼スコープに従い `android-16.0.0_r4` を使用。
 
 ## 適用条件（Applicability）
 

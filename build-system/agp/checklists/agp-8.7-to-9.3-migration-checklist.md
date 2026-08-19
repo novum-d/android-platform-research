@@ -1,5 +1,7 @@
 # AGP 8.7 系から 9.3.0 への移行チェックリスト
 
+> このファイルは version pair 共通の再利用可能な手順である。チェック状態、実行結果、対象 branch / commit、Human Decision は、対象プロジェクト側の実行用 checklist または PR / issue に記録する。このファイルへ project 固有の実績を直接記入しない。
+
 ## Summary
 
 AGP 8.7 系から 9.3.0 への更新を、AGP 9.0 の新 DSL、Built-in Kotlin、削除 API、R8 変更を含めて検出・実装・検証する。
@@ -242,4 +244,4 @@ rg -n "externalNativeBuild|ndkVersion|CMakeLists|prefab" \
 
 ### Validation
 
-実行した command、CI run、artifact の参照を Completion Record に追記する。
+実行した command、CI run、artifact の参照は、対象プロジェクト側へコピーした Completion Record に追記する。

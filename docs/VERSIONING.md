@@ -36,6 +36,7 @@ Android バージョン固有のものは `android<version>/` に置く。
 ```text
 android16/
   analysis/
+  app-reports/
   behavior-changes/
   decisions/
   knowledge/
@@ -48,7 +49,7 @@ android16/
 
 ```text
 比較元: android-15.0.0_r36
-比較先: android-16.0.0_r1
+比較先: android-16.0.0_r4
 ```
 
 主な targetSdkVersion:
@@ -64,6 +65,7 @@ Android 17 調査ディレクトリ:
 ```text
 android17/
   analysis/
+  app-reports/
   behavior-changes/
   decisions/
   knowledge/
@@ -82,7 +84,7 @@ android17/
 Android 17 の公式 Behavior Change 文書と `android-17.0.0_r1` は公開済み。
 AOSP 根拠は両 tag の明示的な比較を使う。
 
-Android 17 の追加 release tag または QPR tag を比較対象に採用する場合は、リリース固有の以下の項目を更新する。
+新しい通常 release tag を比較対象に採用する場合は、リリース固有の以下の項目をまとめて更新する。最新タグの確認方法と既存レポートの移行規則はルート `AGENTS.md` の tag freshness rule を正とする。
 
 - Android version name
 - API level / targetSdkVersion
@@ -95,7 +97,7 @@ Android 17 の追加 release tag または QPR tag を比較対象に採用す�
 
 ## 実用ルール
 
-ファイルに `Android 16`、`targetSdkVersion 36`、`android-16.0.0_r1`、または Android 16 固有の調査優先度が含まれる場合、そのファイルは通常 `docs/` ではなく `android16/` 配下に置く。
+ファイルに `Android 16`、`targetSdkVersion 36`、`android-16.0.0_r4`、または Android 16 固有の調査優先度が含まれる場合、そのファイルは通常 `docs/` ではなく `android16/` 配下に置く。
 
 例:
 - `targetSdkVersion 37` の検証マトリクスは `android17/templates/` または `android17/behavior-changes/` に置く。

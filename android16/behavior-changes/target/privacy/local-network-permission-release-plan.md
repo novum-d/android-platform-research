@@ -16,7 +16,6 @@
 - Applicability classification: `OPT_IN_ONLY`
 - Confidence: High
 
-Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり公開済み Android 16 tag として `android-16.0.0_r4` を使用した。
 
 Classification note: Release plan セクションは、Android 16 時点の default-on behavior ではなく、25Q2 opt-in phase と later Android release enforcement への移行計画を説明している。AOSP `android-16.0.0_r4` では `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 では default-enabled ではない。現在の developer testing は compat flag force-enable に依存するため、`OPT_IN_ONLY` を primary label とし、opt-in / future enforcement 条件を追加条件として記録する。
 

@@ -14,7 +14,6 @@
 - Applicability classification: `TARGET_SDK_36_CONDITIONAL`
 - Confidence: High
 
-Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり `android-16.0.0_r4` を使用した。
 
 ## Official Documentation Review
 

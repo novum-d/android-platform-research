@@ -18,7 +18,7 @@
 
 ## Scope note
 
-`android16/AGENTS.md` の version scope は `android-16.0.0_r1` を To tag としているが、この調査では依頼どおり公開済み Android 16 tag `android-16.0.0_r4` を確認対象にした。`frameworks-base` は `git status --short` が空で、`android-15.0.0_r36` と `android-16.0.0_r4` tag は存在する。AOSP evidence は tag 参照または local checkout 内の r4 相当ファイルに基づく。
+`frameworks-base` は `git status --short` が空で、`android-15.0.0_r36` と `android-16.0.0_r4` tag は存在する。AOSP evidence は tag 参照または local checkout 内の r4 相当ファイルに基づく。
 
 ## Official Documentation Review
 

@@ -11,7 +11,6 @@ To:
 - android-16.0.0_r4
 
 Note:
-- `android16/AGENTS.md` の既定 scope は `android-16.0.0_r1` だが、この調査では依頼に従い、公開済み Android 16 tag として `android-16.0.0_r4` を使った。
 - `frameworks-base` checkout は clean。指定 tag `android-15.0.0_r36` / `android-16.0.0_r4` はどちらも存在する。
 - AOSP evidence は `frameworks-base` local checkout と、`tmp/aosp-checkouts/HealthFitness` に shallow clone した `platform/packages/modules/HealthFitness` の `android-16.0.0_r4` tag を参照した。
 

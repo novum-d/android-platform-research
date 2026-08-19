@@ -11,7 +11,6 @@ Android 16 Behavior Change
 - android-16.0.0_r4
 
 注記:
-- `android16/AGENTS.md` の既定の比較先は `android-16.0.0_r1` である。この要約では、依頼に従い `android-16.0.0_r4` を確認対象とした。
 
 ## 適用条件（Applicability）
 

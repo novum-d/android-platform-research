@@ -6,11 +6,11 @@
 
 既定の比較範囲:
 - 比較元: `android-15.0.0_r36`
-- 比較先: `android-16.0.0_r1`
+- 比較先: `android-16.0.0_r4`
 
-個別調査での上書き:
-- 多くの個別調査では、依頼された範囲に従い、公開済みの `android-16.0.0_r4` タグを比較先として使用している。
-- 各レポートのメタデータとスコープ注記を正とする。README の既定範囲と異なる場合は、レポート側にその差を記録する。
+この組み合わせは、2026-08-19 に [AOSP `platform/frameworks/base` の公式 refs](https://android.googlesource.com/platform/frameworks/base/+refs) で確認した Android 15 / 16 の最新通常リリースタグである。新規調査と既存調査の更新開始時には、ルート `AGENTS.md` の tag freshness rule に従って再確認する。
+
+既存レポートのメタデータは、そのレポートで実際に検証したタグを示す。最新タグで再検証するまでは機械的に書き換えない。
 
 主な targetSdkVersion:
 - targetSdkVersion 36

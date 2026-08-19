@@ -27,26 +27,11 @@ Use `CODEX_CLI_RESEARCH_GUIDE.md` as the source of truth when an official Build
 System entry-point URL is provided. AGP Release Notes URLs are supported by the
 complete URL-only workflow.
 
-For an AGP Release Notes URL, the agent must:
-
-1. Read the official page and identify one target AGP version or release line.
-2. Extract a complete change inventory before deciding which items need a deep
-   dive.
-3. Resolve the From version using the deterministic precedence defined in
-   `CODEX_CLI_RESEARCH_GUIDE.md`.
-4. Derive the output filenames from existing AGP conventions.
-5. Generate a placeholder-free intermediate prompt under
-   `tmp/research-prompts/build-system/agp/`.
-6. Read the file back, validate the URL, versions, channel, and output paths,
-   and then execute it in the current Codex session.
-7. Continue through the detailed investigation, one-page summary, migration
-   checklist, and human-decision placeholder. Prompt generation alone is not
-   completion.
-
-Do not ask the user to manually copy release-note content or the generated
-prompt. Ask only when the URL or comparison baseline is genuinely ambiguous,
-the official page cannot be read, or an unrelated output collision would be
-overwritten.
+The guide owns the extraction fields, baseline precedence, output naming,
+ambiguity handling, and completion checks. This file keeps only these safety
+invariants: do not ask the user to copy official content or a generated prompt;
+do not invent project observations; execute the generated prompt in the current
+session; and do not treat prompt generation alone as completion.
 
 Always follow:
 
@@ -186,7 +171,6 @@ Detailed investigation:
 - Decision Log
 - Completion Criteria
 - Follow-up Tasks
-- References
 
 One-page summary:
 

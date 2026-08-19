@@ -10,13 +10,11 @@
 
 1. この `README.md` でリポジトリ全体の目的と構成を確認する
 2. [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) で共通の読み進め方を確認する
-3. Android Platform 調査では、調査対象バージョンの `android<version>/GETTING_STARTED.md` を読む
-4. Build System 調査では、[build-system/README.md](build-system/README.md) を読む
-5. [docs/workflow/INVESTIGATION_PLAYBOOK.md](docs/workflow/INVESTIGATION_PLAYBOOK.md) で調査手順を確認する
-6. [docs/workflow/REVIEW_CHECKLIST.md](docs/workflow/REVIEW_CHECKLIST.md) でレポート完成条件を確認する
-7. Codex CLI で Android Behavior Change を調査する場合は、公式セクション URL だけを入力し、[Android URL-only workflow](docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md) に従う
-8. Codex CLI で AGP 差分を調査する場合は、公式 AGP Release Notes URL だけを入力し、[Build System URL-only workflow](build-system/CODEX_CLI_RESEARCH_GUIDE.md) に従う
-9. 目的別の依頼例は [Codex プロンプト・ユースケース一覧](docs/workflow/PROMPT_USE_CASES.md) から選ぶ
+3. Android Platform 調査では、調査対象バージョンの `android<version>/GETTING_STARTED.md`、[Android調査プレイブック](docs/workflow/INVESTIGATION_PLAYBOOK.md)、[Androidレビュー項目](docs/workflow/REVIEW_CHECKLIST.md) を読む
+4. Build System 調査では、[build-system/README.md](build-system/README.md) と対象 area の README を読む
+5. Codex CLI で Android Behavior Change を調査する場合は、公式セクション URL だけを入力し、[Android URL-only workflow](docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md) に従う
+6. Codex CLI で AGP 差分を調査する場合は、公式 AGP Release Notes URL だけを入力し、[Build System URL-only workflow](build-system/CODEX_CLI_RESEARCH_GUIDE.md) に従う
+7. 目的別の依頼例は [Codex プロンプト・ユースケース一覧](docs/workflow/PROMPT_USE_CASES.md) から選ぶ
 
 バージョンごとの読み進め方、対象 tag、targetSdkVersion、テンプレート、分類ルールは、各 `android<version>/` 配下に置きます。ルート README には、特定 Android バージョン専用の作業手順を書きません。
 
@@ -70,6 +68,7 @@ Release Notes / Entry Point
 | 追加するもの | 置き場所 |
 | --- | --- |
 | バージョン固有の Behavior Change 調査レポート | `android<version>/behavior-changes/` |
+| 特定アプリ向けのバージョン横断影響レポート | `android<version>/app-reports/` |
 | バージョン固有の 1ページ要約 | `android<version>/summaries/` |
 | バージョン固有の人間の判断ログ | `android<version>/decisions/` |
 | バージョン固有の backlog / roadmap | `android<version>/planning/` |
@@ -77,6 +76,7 @@ Release Notes / Entry Point
 | バージョン固有の report / summary template | `android<version>/templates/` |
 | Build System 更新調査 | `build-system/<area>/versions/` |
 | Build System 1ページ要約 | `build-system/<area>/summaries/` |
+| Build System の再利用可能な移行チェックリスト | `build-system/<area>/checklists/` |
 | Build System 共通テンプレート | `build-system/templates/` |
 | OS / targetSdkVersion 別の移行デモ | `demos/android-migration-lab/` |
 | 共通調査プロンプト | `.codex/prompts/investigation.md` |
@@ -94,6 +94,7 @@ Android バージョン固有の調査成果物は `android<version>/` に置き
 ```text
 android<version>/
   analysis/
+  app-reports/
   behavior-changes/
   decisions/
   knowledge/

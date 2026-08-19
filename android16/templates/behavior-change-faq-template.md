@@ -19,7 +19,7 @@ Related app report / PM overview, if applicable:
 
 - Android version: Android 16
 - From tag: `android-15.0.0_r36`
-- To tag: `android-16.0.0_r1`
+- To tag: `android-16.0.0_r4`
 - Parent section: `<Behavior Change section>`
 - FAQ scope: `<terms / architecture / runtime flow / testing / common misunderstanding>`
 - Inherited applicability classification: `<label from primary report>`

@@ -76,6 +76,8 @@ Checklist: build-system/agp/checklists/agp-<from>-to-<to>-migration-checklist.md
 Intermediate prompt: tmp/research-prompts/build-system/agp/agp-<from>-to-<to>.md
 ```
 
+この Checklist path は、version pair 共通の再利用可能な手順を置く場所である。対象 project 固有の affected modules、実行結果、実変更、Human Decision は対象 project 側の PR / issue / 実行用 checklist に記録し、repository-wide checklist へ実績として混在させない。
+
 preview releaseはstable migration targetと分離し、次のconventionを使う。
 
 ```text

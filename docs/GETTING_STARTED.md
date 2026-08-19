@@ -4,19 +4,29 @@
 
 特定 Android バージョンの読み進め方は、各 `android<version>/GETTING_STARTED.md` を確認してください。
 
-## 読む順番
+## 共通の読む順番
 
 1. ルートの `README.md` でリポジトリ全体の目的を確認する
-2. 調査対象バージョンの `GETTING_STARTED.md` を読む
-3. 対象バージョンの `behavior-changes/README.md` で調査対象一覧と分類を確認する
-4. `docs/workflow/INVESTIGATION_PLAYBOOK.md` で調査手順を確認する
-5. `docs/workflow/REVIEW_CHECKLIST.md` で完成条件を確認する
-6. AOSP checkout の扱いを `docs/workflow/AOSP_CHECKOUT.md` で確認する
-7. Codex CLI で Android Behavior Change を調査する場合は `docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md` を確認する
-8. Codex CLI で AGP 差分を調査する場合は `build-system/CODEX_CLI_RESEARCH_GUIDE.md` を確認する
-9. 目的別の依頼例は `docs/workflow/PROMPT_USE_CASES.md` から選ぶ
+2. Android Platform と Build System のどちらを調査するか選ぶ
+3. 目的別の依頼例は `docs/workflow/PROMPT_USE_CASES.md` から選ぶ
 
-## 調査対象の選び方
+## Android Platform 調査
+
+1. 調査対象バージョンの `GETTING_STARTED.md` を読む
+2. 対象バージョンの `behavior-changes/README.md` で調査対象一覧と分類を確認する
+3. `docs/workflow/INVESTIGATION_PLAYBOOK.md` で Android Behavior Change の調査手順を確認する
+4. `docs/workflow/REVIEW_CHECKLIST.md` で完成条件を確認する
+5. `docs/workflow/AOSP_CHECKOUT.md` で一時 checkout と tag 比較の扱いを確認する
+6. 公式セクション URL から依頼する場合は `docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md` を確認する
+
+## Build System 調査
+
+1. `build-system/README.md` と `build-system/AGENTS.md` を読む
+2. `build-system/<area>/README.md` で対象 area の成果物と索引を確認する
+3. `.codex/prompts/investigation.md` と `build-system/templates/` で調査手順と出力形式を確認する
+4. AGP Release Notes URL から依頼する場合は `build-system/CODEX_CLI_RESEARCH_GUIDE.md` を確認する
+
+## Android Platform の調査対象の選び方
 
 1 回の調査では、Behavior Change セクションを 1 つだけ選びます。
 
@@ -32,7 +42,7 @@ Android の変更を全部調べる
 対象 Android バージョンの Behavior Change セクションを 1 件選び、公式文書を起点に調査する
 ```
 
-## 作業の流れ
+## Android Platform の作業の流れ
 
 ```text
 公式 Behavior Change 文書を読む
@@ -55,6 +65,8 @@ Android の変更を全部調べる
 | 適用条件分類（applicability classification） | `android<version>/behavior-changes/` |
 | レポート / 要約テンプレート（report / summary template） | `android<version>/templates/` |
 | バージョン固有 backlog / roadmap | `android<version>/planning/` |
+
+Build System の version diff、summary、migration checklist の置き場所は `build-system/README.md` と各 area の README を正とする。
 
 ## 迷った時
 

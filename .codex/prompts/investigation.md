@@ -67,19 +67,35 @@ Entry Point と References は分けて記録してください。
 
 追加調査しない変更についても、対象外にした理由を短く記録してください。
 
-## Primary Sources
+## Entry Point と Evidence Priority
 
-優先順位:
+Android Platform と Build System では、調査の入口と結論を支える根拠の優先順位が異なる。
 
-1. Official Documentation
-2. Release Notes
-3. Migration Guide
-4. Compatibility Matrix
+### Android Behavior Changes
+
+調査は必ず公式 Behavior Change 文書から開始する。statement の実装条件を検証する根拠は次の順で扱う。
+
+1. AOSP source code
+2. API surface changes (`current.txt`)
+3. Android official documentation
+4. Android release notes
+5. External articles
+
+AOSP source は公式 statement の検証・説明に必須であり、source diff だけを起点に新しい Behavior Change を作らない。
+
+### Build System
+
+Release Notes を entry point とし、次の順で必要な項目だけ深掘りする。
+
+1. Entry point release notes
+2. Official Documentation
+3. Compatibility Matrix
+4. API Reference / Migration Guide
 5. Issue Tracker
-6. Source Code
-7. 実機検証
+6. 実機・実プロジェクト検証
+7. Blog
 
-Source Code の調査は必要な場合のみ実施してください。
+AOSP / tools/base などの source code は、文書だけでは DSL や build 挙動を判断できない場合、または未記載変更を確認する場合に限る。
 
 ## References
 

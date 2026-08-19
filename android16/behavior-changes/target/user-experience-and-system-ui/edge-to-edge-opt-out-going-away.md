@@ -11,7 +11,6 @@ To:
 - android-16.0.0_r4
 
 Note:
-- `android16/AGENTS.md` の既定 scope は `android-16.0.0_r1` だが、この調査では依頼に従い、確認時点で利用可能な Android 16 最新 tag として `android-16.0.0_r4` を使った。
 
 ### Behavior Change 文書（Behavior Change Source）
 

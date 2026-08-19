@@ -14,7 +14,8 @@
 8. 調査済み項目の差は [Android 16 → 17 挙動比較一覧](behavior-changes/version-comparisons/README.md) で確認する
 9. 調査済み項目の実装・設定例は [Android 17対応例一覧](behavior-changes/implementation-examples/README.md) で確認する
 10. [summaries/README.md](summaries/README.md) で要約一覧を確認する
-11. [decisions/DECISION_LOG.md](decisions/DECISION_LOG.md) で人間の判断ログを確認する
+11. 特定アプリ向けの横断評価は [Wireless camera companion向け調査](app-reports/wireless-camera-companion/investigation-report.md) を確認する
+12. [decisions/DECISION_LOG.md](decisions/DECISION_LOG.md) で人間の判断ログを確認する
 
 ## 公式ドキュメント
 
@@ -48,7 +49,7 @@ Codex CLI で Android 17 調査を実行する場合は、共通手順書を読�
 
 ## analysis 生成（Analysis Generation）
 
-Android 17 の AOSP tag が利用可能になったら、analysis files を生成する。
+最新の version scope で analysis files を再生成する場合:
 
 ```bash
 VERSION_DIR=android17 \

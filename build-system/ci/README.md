@@ -51,4 +51,5 @@ CI でのみ確認する場合:
 
 | Directory | Purpose |
 | --- | --- |
+| [versions/](versions/) | CI / build environment のversion update・migration詳細調査 |
 | [summaries/](summaries/) | CI / build environment 更新の 1ページサマリ |

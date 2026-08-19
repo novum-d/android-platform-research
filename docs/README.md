@@ -29,9 +29,9 @@ docs/VERSIONING.md
 | 作業（Task） | 最初に見る場所（Start here） |
 | --- | --- |
 | 初めて読む | `GETTING_STARTED.md` |
-| 調査手順を確認する | `workflow/INVESTIGATION_PLAYBOOK.md` |
-| レポート完成条件を確認する | `workflow/REVIEW_CHECKLIST.md` |
-| Codex CLI で調査を実行する | `workflow/CODEX_CLI_RESEARCH_GUIDE.md` |
+| Android Behavior Change の調査手順を確認する | `workflow/INVESTIGATION_PLAYBOOK.md` |
+| Android Behavior Change の完成条件を確認する | `workflow/REVIEW_CHECKLIST.md` |
+| Codex CLI で Android 調査を実行する | `workflow/CODEX_CLI_RESEARCH_GUIDE.md` |
 | Codex CLI で AGP 差分調査を実行する | `../build-system/CODEX_CLI_RESEARCH_GUIDE.md` |
 | 目的別のプロンプト例を選ぶ | `workflow/PROMPT_USE_CASES.md` |
 | AOSP checkout の扱いを確認する | `workflow/AOSP_CHECKOUT.md` |

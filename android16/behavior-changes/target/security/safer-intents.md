@@ -14,7 +14,6 @@
 - Applicability classification: `OPT_IN_ONLY`
 - Confidence: High
 
-Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり `android-16.0.0_r4` を使用した。
 
 Confidence note: 公式文書は Android 16 初期 impact を manifest opt-in に限定している。AOSP でも `android:intentMatchingFlags` / feature flag / cross-app resolution が実効 gate であり、targetSdkVersion 36 だけでは有効にならないことを確認できるため、`OPT_IN_ONLY` として High confidence とする。
 

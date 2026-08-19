@@ -1,6 +1,8 @@
+core/api/Android.bp
 core/api/current.txt
 core/api/lint-baseline.txt
 core/api/module-lib-current.txt
 core/api/system-current.txt
+core/api/system-lint-baseline.txt
 core/api/test-current.txt
 core/api/test-lint-baseline.txt

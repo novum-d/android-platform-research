@@ -1,9 +1,13 @@
 # Re-evaluation: Applicability Classification Readiness
 
+> Historical record: this re-evaluation used the tag pair available for this
+> run. It is not the current Android 16 version scope. Use `android16/README.md`
+> and regenerated `analysis/*.txt` files for current investigations.
+
 Date:
 - 2026-06-07
 
-Version scope:
+Historical version scope used by this record:
 - From: android-15.0.0_r36
 - To: android-16.0.0_r1
 

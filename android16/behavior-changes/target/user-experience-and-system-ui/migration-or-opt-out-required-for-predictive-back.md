@@ -11,7 +11,6 @@
 - android-16.0.0_r4
 
 注記:
-- `android16/AGENTS.md` の既定の比較先は `android-16.0.0_r1` だが、この調査では依頼に従い、確認時点で利用できる最新の Android 16 タグ `android-16.0.0_r4` を使った。
 
 ### Behavior Change 文書（Behavior Change Source）
 

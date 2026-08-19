@@ -11,7 +11,6 @@ To:
 - android-16.0.0_r4
 
 Note:
-- `android16/AGENTS.md` の既定 scope は `android-16.0.0_r1` だが、この調査では依頼に従い `android-16.0.0_r4` を使用した。
 
 ## 適用条件（Applicability）
 

@@ -21,7 +21,7 @@
 | UC-07 | 特定アプリへの影響を横断整理 | アプリpathまたは機能・API情報 | app investigation report |
 | UC-08 | AOSP gate / compat evidenceを再調査 | 主レポートpath、未解決論点 | evidenceとconfidenceを更新したレポート・要約 |
 | UC-09 | 実機・CI・project検証結果を反映 | 成果物path、実行条件、結果 | Expected / Observed、Validation、confidenceの更新 |
-| UC-10 | AGP移行チェックリストを実project向けに具体化 | AGP詳細調査path、対象project path | project固有の検出・変更・検証・rollback手順 |
+| UC-10 | AGP移行チェックリストを実project向けに具体化 | AGP詳細調査path、対象project path | 対象project側の実行用checklistまたはPR / issue記録 |
 | UC-11 | AGP preview watchを更新 | 公式preview Release Notes URL | preview watch、stableとの差、次回確認条件 |
 | UC-12 | Behavior Changeの概念FAQを作成・更新 | 主レポートpath、読者の質問 | version固有FAQ companion |
 | UC-13 | 複数API・実装方式のruntime挙動を比較 | 主レポートpath、比較対象 | runtime behavior comparison |
@@ -287,8 +287,8 @@ Facts、Observed、Conclusionsを分け、summaryも必要な範囲だけ更新�
 AGP / CIの場合:
 
 ```text
-build-system/agp/versions/<report>.md とchecklistに、<project-path>で実行した
-<commands>の結果を反映してください。未実行commandは未実行のまま残してください。
+build-system/agp/versions/<report>.md と汎用checklistを根拠として、<project-path>側の実行用checklistまたはPR / issue記録に
+<commands>の結果を反映してください。汎用checklistへproject固有の実績を混ぜず、未実行commandは未実行のまま残してください。
 ```
 
 ## UC-10: AGP移行チェックリストを実project向けに具体化
@@ -300,16 +300,19 @@ repository-wideなAGP差分調査を、実際のproject module、Gradle設定、
 ### プロンプト例
 
 ```text
-build-system/agp/versions/agp-<from>-to-<to>.md を正として、
-<project-path>向けmigration checklistを更新してください。
+build-system/agp/versions/agp-<from>-to-<to>.md と
+build-system/agp/checklists/agp-<from>-to-<to>-migration-checklist.md を正として、
+<project-path>側に実行用migration checklistを作成または更新してください。
 現在version、affected modules、検出command、変更候補、verification、rollbackをprojectから確認してください。
-実装変更はせず、checklistの具体化だけを行ってください。
+このrepositoryの汎用checklistにはproject固有の実行結果を混ぜず、実装変更は行わないでください。
 ```
 
 ### 制約
 
 - AGP、Gradle、Kotlin、compileSdk、targetSdkVersion、NDK、依存更新を必要なく同じPRへ混ぜない。
 - commandを実行していない場合は候補と実績を分ける。
+- project固有のcommand result、対象module、実変更、Human Decisionは対象project側へ記録する。
+- このrepositoryの汎用checklistは、複数projectに再利用できる手順が変わる場合だけ更新する。
 - upgrade実装まで依頼された場合だけproject filesを変更する。
 
 ## UC-11: AGP preview watchを更新

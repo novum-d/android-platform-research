@@ -11,7 +11,6 @@ To:
 - android-16.0.0_r4
 
 Note:
-- `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼スコープに従い公開済み Android 16 tag として `android-16.0.0_r4` を使用した。
 - AOSP checkout `frameworks-base`、`tmp/aosp-checkouts/Bluetooth`、`tmp/aosp-checkouts/Settings` は clean で、`android-15.0.0_r36` / `android-16.0.0_r4` tag の存在を確認した。
 
 Previous targetSdkVersion:

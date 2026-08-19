@@ -11,7 +11,6 @@
 - android-16.0.0_r4
 
 注記:
-- `android16/AGENTS.md` の既定の比較先は `android-16.0.0_r1` だが、この調査では依頼に従い、公開済みの Android 16 タグ `android-16.0.0_r4` を使った。
 - `frameworks-base` checkout に未コミットの変更はない。指定した `android-15.0.0_r36` / `android-16.0.0_r4` タグはどちらも存在する。
 - ローカルに `libcore` checkout がなかったため、AOSP 公式 Gitiles のタグ指定 URL で `platform/libcore` を確認した。
 

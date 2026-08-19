@@ -16,7 +16,6 @@
 - Applicability classification: `TARGET_SDK_36_CONDITIONAL`
 - Confidence: High
 
-Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり公開済み Android 16 tag として `android-16.0.0_r4` を使用した。
 
 Classification note: この変更は Android 16 / API level 36 以上を target する app に対して、selected media permission flow で limited access を選んだ場合に発生する。targetSdkVersion 36 は必要条件だが、Android 16 OS、photo/video permission prompt、limited selected media access、app-owned image/video の存在、ユーザーの保持または deselection が追加条件になるため `TARGET_SDK_36_CONDITIONAL` と分類する。
 

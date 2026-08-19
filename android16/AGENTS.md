@@ -11,7 +11,12 @@ From:
 - android-15.0.0_r36
 
 To:
-- android-16.0.0_r1
+- android-16.0.0_r4
+
+This pair is the current latest standard AOSP release-tag pair for Android 15
+and Android 16. Before creating or updating a finding, apply the tag freshness
+rule in the root `AGENTS.md`. Existing reports must continue to state the tags
+actually used for their evidence until they are revalidated.
 
 ## Target SDK Focus
 

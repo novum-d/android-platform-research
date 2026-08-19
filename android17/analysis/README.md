@@ -4,9 +4,7 @@
 
 ## 現在の状態
 
-現時点では、ローカルの `frameworks-base` checkout に Android 17 AOSP タグは存在しません。
-
-対象となる Android 17 タグが利用可能になり、分析補助ファイルを生成するまでは、AOSP 根拠に基づく High confidence の結論は作成しないでください。
+Android 16 / 17 の最新通常リリースタグを使って分析補助ファイルを生成済みです。新規・更新調査ではルート `AGENTS.md` の tag freshness rule に従い、より新しいタグが公開されていないか先に確認してください。
 
 ## 生成元
 
@@ -14,7 +12,7 @@
 
 ```text
 比較元: android-16.0.0_r4
-比較先: 未定: Android 17 AOSP タグ
+比較先: android-17.0.0_r1
 ```
 
 使用するコマンド:
@@ -22,8 +20,8 @@
 ```bash
 VERSION_DIR=android17 \
 OLD_TAG=android-16.0.0_r4 \
-NEW_TAG=<android-17-aosp-tag> \
-TARGET_CODENAME=<android-17-codename> \
+NEW_TAG=android-17.0.0_r1 \
+TARGET_CODENAME=CINNAMON_BUN \
 scripts/generate_target.sh
 ```
 

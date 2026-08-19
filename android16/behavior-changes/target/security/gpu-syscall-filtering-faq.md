@@ -17,7 +17,6 @@
 - Applicability classification: `OS_UPDATE_ALL_APPS`
 - Confidence: Medium
 
-Scope note: `android16/AGENTS.md` は To tag を `android-16.0.0_r1` としているが、本調査では依頼どおり `android-16.0.0_r4` を使用した。
 
 Confidence note: 公式文書は Pixel Mali / production build / platform-level policy / OEM opt-in を述べており、targetSdkVersion 36 gate は述べていない。AOSP public `system/sepolicy` では IOCTL xperm filter mechanism を確認できたが、Pixel Mali 用の具体的 IOCTL category list / allowlist / denylist は公開 checkout 内では確認できなかった。そのため confidence は Medium とする。
 

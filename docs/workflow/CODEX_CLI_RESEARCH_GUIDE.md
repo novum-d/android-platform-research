@@ -49,7 +49,7 @@ fragment を含まないページ URL など、1つの Behavior Change セクシ
 | --- | --- |
 | Android version | 公式 URL と page title |
 | Version directory | `android<version>/` |
-| From / To tag | `<version-dir>/AGENTS.md`、次に `<version-dir>/README.md` |
+| From / To tag | ルート `AGENTS.md` の tag freshness rule で公式 refs を確認した後、`<version-dir>/AGENTS.md` と `<version-dir>/README.md` の一致した値 |
 | Previous / Target targetSdkVersion | `<version-dir>/AGENTS.md` と適用条件分類 |
 | Page type | 公式 URL、ページ見出し、公式 statement |
 | Official category | 公式ページ上の対象セクションの親カテゴリ |
@@ -57,7 +57,7 @@ fragment を含まないページ URL など、1つの Behavior Change セクシ
 | Applicability labels | `<version-dir>/behavior-changes/APPLICABILITY_CLASSIFICATION.md` |
 | Report / summary templates | `<version-dir>/templates/` |
 
-prompt template の placeholder と version-specific instructions が矛盾する場合は、version-specific instructions を優先します。既存ファイルとの衝突を確認し、同じ項目の既存調査なら更新候補として扱います。別項目と衝突する場合は勝手に上書きしません。
+prompt template の placeholder と version-specific instructions が矛盾する場合は、version-specific instructions を優先します。公式 refs に version scope より新しい通常リリースタグがある場合は、中間プロンプトだけを上書きせず、version scope と version-specific templates を先にまとめて更新します。既存ファイルとの衝突を確認し、同じ項目の既存調査なら更新候補として扱います。別項目と衝突する場合は勝手に上書きしません。
 
 出力 path は次の形式で決定します。
 
@@ -316,10 +316,10 @@ One page summary には Human decision placeholder を必ず残す。
 
 ## Android 17 用の調査依頼テンプレート
 
-Android 17 調査では、ルートの `android17-prompt-template.md` を使います。単純な項目では最小入力として使い、複雑な項目では詳細入力フォーマットとして使います。
+Android 17 調査では、version-specific template の `android17/templates/research-prompt-template.md` を使います。単純な項目では最小入力として使い、複雑な項目では詳細入力フォーマットとして使います。
 
 ```text
-android17-prompt-template.md
+android17/templates/research-prompt-template.md
 ```
 
 ## 固定調査指示

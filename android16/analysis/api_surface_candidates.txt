@@ -8,3 +8,6 @@ nfc/api/current.txt
 nfc/api/module-lib-current.txt
 nfc/api/system-current.txt
 packages/CrashRecovery/framework/api/system-current.txt
+packages/Vcn/framework-b/api/current.txt
+packages/Vcn/framework-b/api/module-lib-current.txt
+packages/Vcn/framework-b/api/system-current.txt

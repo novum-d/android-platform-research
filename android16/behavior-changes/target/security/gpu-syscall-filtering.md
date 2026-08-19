@@ -15,7 +15,6 @@
 - 適用条件分類: `OS_UPDATE_ALL_APPS`
 - Confidence: Medium
 
-スコープ注記: `android16/AGENTS.md` では比較先タグを `android-16.0.0_r1` としているが、本調査では依頼どおり `android-16.0.0_r4` を使用した。
 
 Confidence の注記: 公式文書は、Pixel の Mali GPU、製品版ビルド、プラットフォーム単位の policy を対象としており、targetSdkVersion の gate は示していない。公開されている AOSP の `system/sepolicy` では IOCTL xperm filter mechanism を確認できたが、Pixel Mali 用の具体的な IOCTL 分類、allowlist、denylist は公開 checkout 内で確認できなかった。そのため Confidence は Medium とする。
 

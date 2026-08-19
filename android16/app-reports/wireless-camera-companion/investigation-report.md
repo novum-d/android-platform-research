@@ -43,7 +43,6 @@
 - android-16.0.0_r4
 
 注記:
-- `android16/AGENTS.md` では比較先を `android-16.0.0_r1` としているが、本アプリ別調査では、既存の Android 16 調査と同じく `android-16.0.0_r4` を参照する。
 
 ### 調査日（Investigation Date）
 
