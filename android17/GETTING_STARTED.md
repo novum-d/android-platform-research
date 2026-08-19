@@ -40,6 +40,8 @@
 
 Codex CLI で Android 17 調査を実行する場合は、共通手順書を読んだ上で、このディレクトリの version scope と template path を使う。
 
+通常の入力は公式 Behavior Change セクション URL 1件だけとする。Codex が公式セクションを解析し、version scope、category、output path を補完した中間プロンプトを `tmp/research-prompts/` に生成して、同じセッション内で調査を実行する。
+
 ```text
 ../docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md
 ```

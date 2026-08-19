@@ -2,7 +2,9 @@
 
 `docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md` の固定調査指示に従って、この Behavior Change 1件を end-to-end で調査してください。
 
-複雑な項目、サブセクション、例外、opt-in / opt-out、将来 release plan を扱う場合は、下の詳細入力項目を埋めてください。単純な項目では、空欄を削って最小入力として使って構いません。
+通常は人間がこのテンプレートを埋める必要はありません。Codex が公式セクション URL を解析し、このテンプレートと version-specific instructions から `tmp/research-prompts/` 配下の中間プロンプトを生成します。
+
+URL を利用できない場合の手動 fallback、または生成内容のレビューに使う場合は、複雑な項目、サブセクション、例外、opt-in / opt-out、将来 release plan に応じて下の詳細入力項目を埋めてください。単純な項目では、空欄を削って最小入力として使って構いません。
 
 ## 調査対象
 
@@ -12,7 +14,7 @@ Version directory: android17
 
 From tag: android-16.0.0_r4
 
-To tag: TBD: Android 17 AOSP tag
+To tag: android-17.0.0_r1
 
 Previous targetSdkVersion: 36
 

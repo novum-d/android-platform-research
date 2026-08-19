@@ -1,8 +1,98 @@
 # Codex CLI 調査依頼ガイド（Codex CLI Research Guide）
 
-この手順書は、Codex CLI に Android Behavior Change 調査を依頼する時の入力形式を定義します。
+この手順書は、Codex CLI に Android Behavior Change 調査を依頼する時の URL-only workflow、プロンプト生成規則、実行規則を定義します。
 
-長い固定指示を毎回プロンプトに貼る必要はありません。依頼時は「最小入力フォーマット」だけを貼り、固定の調査手順・完成条件・禁止事項はこのファイルと各 version directory の文書を Codex が読む前提にします。
+通常の依頼では、調査対象の公式 Behavior Change セクション URL だけを入力します。Codex は公式セクションと repository の version-specific instructions から必要項目を補完し、中間プロンプトファイルを生成して、その内容を同じセッション内で実行します。長い固定指示や公式文書抜粋を人間が毎回貼る必要はありません。
+
+```text
+項目 URL
+-> 公式セクションの解析
+-> バージョン・カテゴリ・出力先等を補完
+-> 中間プロンプトファイル生成
+-> Codex で実行
+```
+
+## URL-only workflow
+
+### 人間が入力するもの
+
+原則として、Android Developers の Behavior Change セクション URL 1件だけを入力します。URL fragment がある場合は、その fragment が指すセクションを調査単位とします。
+
+```text
+https://developer.android.com/about/versions/<version>/behavior-changes-<page>#<section>
+```
+
+URL とともに追加の調査観点が指定された場合は、それも中間プロンプトへ保存します。URLから取得できる値を人間へ再入力させてはいけません。
+
+### Step 1: 公式セクションの解析
+
+必ず公式ページを読み、対象セクションから以下を抽出します。
+
+- page title と canonical page URL
+- page type: all apps / apps targeting Android `<version>` / compat framework changes
+- official category
+- parent section、section title、subsections
+- original statements to verify
+- OS version、targetSdkVersion、permission、API、device、app state などの適用条件
+- 追加条件、例外、opt-in、opt-out、移行方法
+- セクション内の公式関連リンク
+
+fragment を含まないページ URL など、1つの Behavior Change セクションを一意に特定できない場合は、推測で複数項目をまとめず、対象セクションの確認を求めます。ページ取得に失敗した場合も、公式本文を推測で補完しません。
+
+### Step 2: repository metadata の補完
+
+公式ページと repository から以下を補完します。
+
+| 項目 | Source of truth |
+| --- | --- |
+| Android version | 公式 URL と page title |
+| Version directory | `android<version>/` |
+| From / To tag | `<version-dir>/AGENTS.md`、次に `<version-dir>/README.md` |
+| Previous / Target targetSdkVersion | `<version-dir>/AGENTS.md` と適用条件分類 |
+| Page type | 公式 URL、ページ見出し、公式 statement |
+| Official category | 公式ページ上の対象セクションの親カテゴリ |
+| Output paths | このガイドの path rule と既存の category / slug convention |
+| Applicability labels | `<version-dir>/behavior-changes/APPLICABILITY_CLASSIFICATION.md` |
+| Report / summary templates | `<version-dir>/templates/` |
+
+prompt template の placeholder と version-specific instructions が矛盾する場合は、version-specific instructions を優先します。既存ファイルとの衝突を確認し、同じ項目の既存調査なら更新候補として扱います。別項目と衝突する場合は勝手に上書きしません。
+
+出力 path は次の形式で決定します。
+
+```text
+<version-dir>/behavior-changes/<all-or-target>/<official-category-slug>/<topic-slug>.md
+<version-dir>/summaries/<all-or-target>/<official-category-slug>/<topic-slug>-summary.md
+```
+
+### Step 3: 中間プロンプトファイル生成
+
+補完した内容を、このガイドの詳細入力フォーマットに従って次へ保存します。
+
+```text
+tmp/research-prompts/android<version>/<all-or-target>/<topic-slug>.md
+```
+
+中間ファイルには placeholder を残さず、最低限以下を含めます。
+
+- source URL
+- 補完済みの research target と output paths
+- 公式セクションから抽出した original statements
+- applicability details、exceptions、related links
+- 公式本文と repository metadata を分けた extraction notes
+- 調査時に確認すべき AOSP gate / compat framework の検索観点
+- report、summary、必要な companion file の作成指示
+
+不明な値をもっともらしく埋めてはいけません。調査を継続できる不明点は `Unknown - verify during investigation` として明示し、分類や出力先を変える不明点だけを人間へ確認します。
+
+中間プロンプトは生成物であり、調査レポートの evidence や正式な成果物ではありません。Git の追跡対象にも含めません。
+
+### Step 4: 生成プロンプトの実行
+
+中間ファイルを書いた後に必ず読み返し、placeholder、URL、version、tag、targetSdkVersion、page type、category、output path の整合性を確認します。問題があれば中間ファイルを修正します。
+
+整合性確認後、そのファイルを現在の Codex セッションにおける authoritative task specification として扱い、同じターンで `Required investigation steps` へ進みます。人間へ再貼付を求めず、別の `codex exec` を再帰的に起動しません。
+
+中間ファイルを生成しただけでは調査完了ではありません。report と summary の作成、review checklist による確認まで終えた時点で完了です。
 
 ## 事前準備
 
@@ -32,9 +122,9 @@ AOSP checkout の扱いは以下も確認します。
 docs/workflow/AOSP_CHECKOUT.md
 ```
 
-## 入力する項目
+## 展開済みプロンプトの項目
 
-調査依頼時は、以下だけを入力します。
+以下は Codex が URL と repository から補完して中間プロンプトへ記録する項目です。URL-only workflow では人間が手入力する必要はありません。
 
 | 入力項目 | 内容 |
 | --- | --- |
@@ -72,9 +162,9 @@ docs/workflow/AOSP_CHECKOUT.md
 
 詳細入力では、`Parent section title` と `Subsections` は該当する場合だけ入れます。サブセクション単体を調査する場合は、親セクションの base behavior と当該サブセクションの論点を分けて書きます。
 
-## 最小入力フォーマット
+## 手動入力用の最小フォーマット（fallback）
 
-以下だけをコピーし、値を埋めて Codex CLI に貼り付けます。
+公式 URL だけでは対象セクションを特定できない場合、または URL を利用できない環境でのみ、以下をコピーし、値を埋めて Codex CLI に貼り付けます。
 
 ```text
 docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md の固定調査指示に従って、以下の Behavior Change 1件を調査してください。

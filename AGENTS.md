@@ -67,6 +67,49 @@ When working on a version-specific investigation, read:
 - `<version-dir>/GETTING_STARTED.md`
 - `<version-dir>/behavior-changes/APPLICABILITY_CLASSIFICATION.md`
 
+## URL-Only Research Requests
+
+When the user provides an official Android Behavior Change section URL as the
+research target, treat that URL as sufficient input. Do not require the user to
+manually fill the research prompt template with information that can be derived
+from the official page or this repository.
+
+Follow this sequence before investigating AOSP source:
+
+```text
+Behavior Change section URL
+-> Official section analysis
+-> Repository-derived metadata completion
+-> Intermediate research prompt file
+-> Execute the generated prompt in the current Codex session
+```
+
+Use `docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md` as the source of truth for the
+detailed generation and execution rules.
+
+Required behavior:
+
+- Read the URL and identify exactly one Behavior Change section.
+- Extract the page type, official category, section hierarchy, original
+  statements, applicability conditions, exceptions, opt-in / opt-out details,
+  and official related links from that section.
+- Derive the Android version, version directory, AOSP tags,
+  targetSdkVersion values, output paths, and allowed applicability labels from
+  the repository's version-specific instructions. Repository values override
+  stale placeholders in prompt templates.
+- Generate a complete intermediate prompt under
+  `tmp/research-prompts/android<version>/<all-or-target>/<topic-slug>.md`.
+- Read the generated file back and use it as the authoritative task
+  specification for the investigation. Continue in the same turn; do not ask
+  the user to copy and paste the generated prompt and do not launch a nested
+  Codex process.
+- Keep the intermediate prompt out of the customer-facing report and do not
+  treat it as evidence.
+- Ask for clarification only when the URL does not identify one section, the
+  official page cannot be read, the derived Android version has no repository
+  scope, or an output collision cannot be resolved without changing existing
+  research.
+
 When working on a Build System investigation, read:
 
 - Root `AGENTS.md`

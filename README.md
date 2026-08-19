@@ -14,7 +14,7 @@
 4. Build System 調査では、[build-system/README.md](build-system/README.md) を読む
 5. [docs/workflow/INVESTIGATION_PLAYBOOK.md](docs/workflow/INVESTIGATION_PLAYBOOK.md) で調査手順を確認する
 6. [docs/workflow/REVIEW_CHECKLIST.md](docs/workflow/REVIEW_CHECKLIST.md) でレポート完成条件を確認する
-7. Codex CLI で調査する場合は [docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md](docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md) を確認する
+7. Codex CLI で調査する場合は、公式 Behavior Change セクション URL だけを入力し、[docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md](docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md) の URL-only workflow に従う
 
 バージョンごとの読み進め方、対象 tag、targetSdkVersion、テンプレート、分類ルールは、各 `android<version>/` 配下に置きます。ルート README には、特定 Android バージョン専用の作業手順を書きません。
 
