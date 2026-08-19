@@ -17,7 +17,7 @@ docs/VERSIONING.md
 | --- | --- | --- |
 | `GETTING_STARTED.md` | 初見向けの共通導線 | `GETTING_STARTED.md` |
 | `overview/` | リポジトリの目的、位置づけ、情報源、時系列、用語 | `WHY.md`, `META.md`, `SOURCES.md`, `TIMELINE.md`, `glossary.md` |
-| `workflow/` | 調査手順、判断基準、レビュー観点、避けるべき進め方 | `RESEARCH_PRINCIPLES.md`, `INVESTIGATION_PLAYBOOK.md`, `REVIEW_CHECKLIST.md`, `CONFIDENCE.md`, `ANTI_PATTERNS.md` |
+| `workflow/` | 調査手順、プロンプト例、判断基準、レビュー観点、避けるべき進め方 | `PROMPT_USE_CASES.md`, `RESEARCH_PRINCIPLES.md`, `INVESTIGATION_PLAYBOOK.md`, `REVIEW_CHECKLIST.md`, `CONFIDENCE.md`, `ANTI_PATTERNS.md` |
 | `planning/` | 複数 Android バージョンにまたがる将来テーマ | `FUTURE_INVESTIGATIONS.md` |
 | `records/` | 完了 findings、人間の判断、学び | `FINDINGS.md`, `DECISIONS.md`, `LESSONS_LEARNED.md` |
 | `knowledge/` | 複数 Android バージョンにまたがる仮説、未解決質問 | `hypotheses.md`, `questions.md` |
@@ -33,6 +33,7 @@ docs/VERSIONING.md
 | レポート完成条件を確認する | `workflow/REVIEW_CHECKLIST.md` |
 | Codex CLI で調査を実行する | `workflow/CODEX_CLI_RESEARCH_GUIDE.md` |
 | Codex CLI で AGP 差分調査を実行する | `../build-system/CODEX_CLI_RESEARCH_GUIDE.md` |
+| 目的別のプロンプト例を選ぶ | `workflow/PROMPT_USE_CASES.md` |
 | AOSP checkout の扱いを確認する | `workflow/AOSP_CHECKOUT.md` |
 | confidence の基準を確認する | `workflow/CONFIDENCE.md` |
 | やってはいけない進め方を確認する | `workflow/ANTI_PATTERNS.md` |

@@ -2,6 +2,8 @@
 
 この手順書は、Codex CLI に Android Behavior Change 調査を依頼する時の URL-only workflow、プロンプト生成規則、実行規則を定義します。
 
+調査作成・更新、実装例、判断ログ、再レビューなど目的別の入力例は [PROMPT_USE_CASES.md](PROMPT_USE_CASES.md) を参照してください。
+
 通常の依頼では、調査対象の公式 Behavior Change セクション URL だけを入力します。Codex は公式セクションと repository の version-specific instructions から必要項目を補完し、中間プロンプトファイルを生成して、その内容を同じセッション内で実行します。長い固定指示や公式文書抜粋を人間が毎回貼る必要はありません。
 
 ```text

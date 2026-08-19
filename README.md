@@ -16,6 +16,7 @@
 6. [docs/workflow/REVIEW_CHECKLIST.md](docs/workflow/REVIEW_CHECKLIST.md) でレポート完成条件を確認する
 7. Codex CLI で Android Behavior Change を調査する場合は、公式セクション URL だけを入力し、[Android URL-only workflow](docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md) に従う
 8. Codex CLI で AGP 差分を調査する場合は、公式 AGP Release Notes URL だけを入力し、[Build System URL-only workflow](build-system/CODEX_CLI_RESEARCH_GUIDE.md) に従う
+9. 目的別の依頼例は [Codex プロンプト・ユースケース一覧](docs/workflow/PROMPT_USE_CASES.md) から選ぶ
 
 バージョンごとの読み進め方、対象 tag、targetSdkVersion、テンプレート、分類ルールは、各 `android<version>/` 配下に置きます。ルート README には、特定 Android バージョン専用の作業手順を書きません。
 

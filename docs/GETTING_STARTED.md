@@ -14,6 +14,7 @@
 6. AOSP checkout の扱いを `docs/workflow/AOSP_CHECKOUT.md` で確認する
 7. Codex CLI で Android Behavior Change を調査する場合は `docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md` を確認する
 8. Codex CLI で AGP 差分を調査する場合は `build-system/CODEX_CLI_RESEARCH_GUIDE.md` を確認する
+9. 目的別の依頼例は `docs/workflow/PROMPT_USE_CASES.md` から選ぶ
 
 ## 調査対象の選び方
 

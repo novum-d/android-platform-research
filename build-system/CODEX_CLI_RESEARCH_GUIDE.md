@@ -2,6 +2,8 @@
 
 この手順書は、公式 Build System entry-point URL を起点に、必要な情報を補完し、中間プロンプトを生成して同じ Codex セッションで調査を実行する規則を定義する。
 
+AGP差分の作成・更新、project向けchecklist、検証結果反映、preview watchなど目的別の入力例は [../docs/workflow/PROMPT_USE_CASES.md](../docs/workflow/PROMPT_USE_CASES.md) を参照する。
+
 現在、完全な URL-only workflow の対象は AGP Release Notes である。
 
 ```text
