@@ -21,6 +21,33 @@ The primary unit of investigation is a Build System version update or migration 
 
 Use `.codex/prompts/investigation.md` as the shared investigation workflow prompt.
 
+## URL-Only Research Requests
+
+Use `CODEX_CLI_RESEARCH_GUIDE.md` as the source of truth when an official Build
+System entry-point URL is provided. AGP Release Notes URLs are supported by the
+complete URL-only workflow.
+
+For an AGP Release Notes URL, the agent must:
+
+1. Read the official page and identify one target AGP version or release line.
+2. Extract a complete change inventory before deciding which items need a deep
+   dive.
+3. Resolve the From version using the deterministic precedence defined in
+   `CODEX_CLI_RESEARCH_GUIDE.md`.
+4. Derive the output filenames from existing AGP conventions.
+5. Generate a placeholder-free intermediate prompt under
+   `tmp/research-prompts/build-system/agp/`.
+6. Read the file back, validate the URL, versions, channel, and output paths,
+   and then execute it in the current Codex session.
+7. Continue through the detailed investigation, one-page summary, migration
+   checklist, and human-decision placeholder. Prompt generation alone is not
+   completion.
+
+Do not ask the user to manually copy release-note content or the generated
+prompt. Ask only when the URL or comparison baseline is genuinely ambiguous,
+the official page cannot be read, or an unrelated output collision would be
+overwritten.
+
 Always follow:
 
 ```text

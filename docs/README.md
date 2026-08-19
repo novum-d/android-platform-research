@@ -32,6 +32,7 @@ docs/VERSIONING.md
 | 調査手順を確認する | `workflow/INVESTIGATION_PLAYBOOK.md` |
 | レポート完成条件を確認する | `workflow/REVIEW_CHECKLIST.md` |
 | Codex CLI で調査を実行する | `workflow/CODEX_CLI_RESEARCH_GUIDE.md` |
+| Codex CLI で AGP 差分調査を実行する | `../build-system/CODEX_CLI_RESEARCH_GUIDE.md` |
 | AOSP checkout の扱いを確認する | `workflow/AOSP_CHECKOUT.md` |
 | confidence の基準を確認する | `workflow/CONFIDENCE.md` |
 | やってはいけない進め方を確認する | `workflow/ANTI_PATTERNS.md` |

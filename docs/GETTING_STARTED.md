@@ -12,7 +12,8 @@
 4. `docs/workflow/INVESTIGATION_PLAYBOOK.md` で調査手順を確認する
 5. `docs/workflow/REVIEW_CHECKLIST.md` で完成条件を確認する
 6. AOSP checkout の扱いを `docs/workflow/AOSP_CHECKOUT.md` で確認する
-7. Codex CLI を使う場合は `docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md` を確認する
+7. Codex CLI で Android Behavior Change を調査する場合は `docs/workflow/CODEX_CLI_RESEARCH_GUIDE.md` を確認する
+8. Codex CLI で AGP 差分を調査する場合は `build-system/CODEX_CLI_RESEARCH_GUIDE.md` を確認する
 
 ## 調査対象の選び方
 

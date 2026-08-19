@@ -110,6 +110,53 @@ Required behavior:
   scope, or an output collision cannot be resolved without changing existing
   research.
 
+## AGP Release Notes URL-Only Research Requests
+
+When the user provides an official AGP Release Notes URL as the research
+target, treat that URL as sufficient input for AGP version research whenever
+the comparison baseline can be derived unambiguously from existing repository
+research. Do not require the user to transcribe release notes, compatibility
+versions, or output paths.
+
+Follow this sequence:
+
+```text
+AGP Release Notes URL
+-> Official release notes analysis
+-> From / To version and output metadata completion
+-> Intermediate AGP research prompt file
+-> Execute the generated prompt in the current Codex session
+```
+
+Use `build-system/CODEX_CLI_RESEARCH_GUIDE.md` as the source of truth for AGP
+URL analysis, baseline derivation, output paths, prompt generation, and prompt
+execution.
+
+Required behavior:
+
+- Derive the target AGP version, release channel, release-note change
+  inventory, compatibility requirements, linked migration guidance, and
+  relevant official references from the URL.
+- Derive the comparison baseline from the user's explicit instruction first,
+  then an existing investigation for the same target, then the latest stable
+  completed AGP investigation target that is lower than the requested target.
+- Ask for the From version only if those sources do not produce exactly one
+  defensible baseline. Do not guess from the local machine or an unrelated
+  sample project.
+- Derive detail, summary, and migration checklist paths using existing AGP
+  naming conventions.
+- Generate the completed prompt under
+  `tmp/research-prompts/build-system/agp/` and read it back before execution.
+- Use the generated file as the authoritative task specification and continue
+  the investigation in the same turn. Do not ask the user to paste it again
+  and do not launch a nested Codex process.
+- If no target application project is specified, continue with repository-wide
+  AGP research and mark project-specific affected modules and command results
+  as not provided or not executed. Do not invent observations.
+- Release Notes remain the entry point, not the final source of truth. Deep
+  dive relevant compatibility, migration, API, issue, and project-verification
+  evidence according to `build-system/AGENTS.md`.
+
 When working on a Build System investigation, read:
 
 - Root `AGENTS.md`

@@ -18,6 +18,8 @@ Build System 更新時に、このリポジトリだけを見れば以下を判�
 
 設計方針の詳細は [../.codex/prompts/build-system-design.md](../.codex/prompts/build-system-design.md) に残す。
 
+Codex CLI へ公式 entry-point URL だけを渡して調査する場合は、[CODEX_CLI_RESEARCH_GUIDE.md](CODEX_CLI_RESEARCH_GUIDE.md) を使う。AGP Release Notes URL については、URL解析、比較元・出力先補完、中間プロンプト生成、同一セッションでの実行までを定義している。
+
 ## Scope
 
 初期対象:
@@ -58,6 +60,16 @@ Release Notes / Entry Point
   -> Version Diff Investigation
   -> Migration Checklist
   -> Human Decision
+```
+
+AGP の URL-only research では、次の導線をこの flow の前段として使う。
+
+```text
+AGP Release Notes URL
+  -> 公式 Release Notes の解析
+  -> From / To version・出力先の補完
+  -> tmp/research-prompts/build-system/agp/ に中間プロンプト生成
+  -> 同じ Codex セッションで調査実行
 ```
 
 通常調査では AOSP / tools/base の差分調査を必須にしない。
@@ -195,6 +207,7 @@ Build System 調査の成果物は、詳細調査、1ページサマリ、移行
 
 推奨テンプレート:
 
+- [CODEX_CLI_RESEARCH_GUIDE.md](CODEX_CLI_RESEARCH_GUIDE.md) - 公式 entry-point URL から中間プロンプトを生成・実行する手順
 - [../.codex/prompts/investigation.md](../.codex/prompts/investigation.md) - 共通の調査手順プロンプト
 - [templates/version-diff-template.md](templates/version-diff-template.md)
 - [templates/one-page-summary-template.md](templates/one-page-summary-template.md)
