@@ -25,6 +25,7 @@
 | UC-11 | AGP preview watchを更新 | 公式preview Release Notes URL | preview watch、stableとの差、次回確認条件 |
 | UC-12 | Behavior Changeの概念FAQを作成・更新 | 主レポートpath、読者の質問 | version固有FAQ companion |
 | UC-13 | 複数API・実装方式のruntime挙動を比較 | 主レポートpath、比較対象 | runtime behavior comparison |
+| UC-14 | このrepositoryの構成をレビュー | review scope、必要なら改善実装の可否 | evidence付き構成レビュー、明示依頼時のみ修正 |
 
 ## 共通ルール
 
@@ -374,6 +375,95 @@ android16/behavior-changes/<report>.md を正として、<API-or-pattern-A>と<A
 - primary reportのapplicabilityやevidenceを比較資料側で再判定しない。
 - 未実施結果をObservedとして記録しない。
 
+## UC-14: このrepositoryの構成をレビュー
+
+### 使う場面
+
+調査を追加する前後やversion追加時に、repositoryの入口、instruction hierarchy、directory配置、source of truth、templateと成果物の対応、索引、内部リンク、生成物の扱いが一貫しているか確認する。
+
+通常はread-onlyのレビューとして実行する。レビュー依頼だけではファイル修正、成果物移動、削除、commit、pushを行わない。「レビューして改善まで実施」と明示された場合だけ、指摘内容に沿った変更を行う。
+
+### 最小プロンプト
+
+```text
+このrepositoryの構成をレビューしてください。
+ファイルは変更せず、構成上の問題、根拠、影響、改善候補を日本語で報告してください。
+```
+
+Android PlatformとBuild Systemの境界を重点確認する場合:
+
+```text
+このrepositoryの構成をレビューしてください。
+特にAndroid version固有情報とBuild System調査の分離、AGENTS.mdのinstruction hierarchy、
+source of truthの重複、Codex URL-only workflow、templateと成果物pathの整合性を確認してください。
+変更は行わないでください。
+```
+
+レビュー後の改善まで依頼する場合:
+
+```text
+このrepositoryの構成をレビューし、根拠が明確な構成・導線・リンク・instruction不整合を改善してください。
+既存の調査内容とdocs/notes/PERSONAL_NOTES.mdは変更せず、mainへcommit・pushしてください。
+判断が必要な再編、成果物移動、削除は実行せず、候補として報告してください。
+```
+
+### 必須確認項目
+
+| 観点 | 確認内容 |
+| --- | --- |
+| Entry points | root README、docs、version directory、Build Systemから目的の手順・成果物へ到達できるか |
+| Instruction hierarchy | root / version / Build SystemのAGENTS.mdに重複、矛盾、scope漏れがないか |
+| Source of truth | version、AOSP tag、targetSdkVersion、classification、workflow、template pathが複数箇所で食い違っていないか |
+| Directory ownership | version固有成果物、共通workflow、Build System、demo、temporary evidenceの配置が方針どおりか |
+| Templates and outputs | 必須成果物にtemplateがあり、既存成果物と保存先conventionが対応しているか |
+| Index coverage | 作成済みreport、summary、comparison、example、checklistがREADMEやindexから参照されているか |
+| Prompt workflows | Android / AGP URL-only workflow、中間プロンプト、ユースケース一覧が入口から発見できるか |
+| Links | repository内Markdown link、相互link、古いpath参照に問題がないか |
+| Generated files | `frameworks-base/`、`tmp/`、中間プロンプトなどが正式成果物やGit追跡対象と混ざっていないか |
+| Naming and placeholders | filename、category slug、version表記、古いTBDやplaceholderが現行scopeと矛盾していないか |
+| Duplication and maintenance | 同じ規則やmetadataの重複が将来の更新漏れを起こしやすくしていないか |
+| Protected content | `docs/notes/PERSONAL_NOTES.md`を編集対象または正式なsource of truthとして扱っていないか |
+
+### レビュー手順
+
+1. branchとworking treeを確認し、既存の未commit変更をユーザーの変更として保護する。
+2. root、対象scope、下位directoryのAGENTS.mdを確認する。
+3. `README.md`、`GETTING_STARTED.md`、workflow guide、template、indexの導線をたどる。
+4. `rg --files`と`rg`を使い、未索引成果物、古いpath、重複metadata、placeholder候補を確認する。
+5. findingごとにFact、Evidence、Impact、Recommendationを分ける。
+6. 問題が見つからない観点も、確認範囲とともに記録する。
+7. read-only依頼なら報告して終了する。改善依頼なら、安全でscope内の変更だけを実施・検証する。
+
+### 出力フォーマット
+
+```text
+## Review scope
+- 確認したdirectory / entry point
+- 確認対象外
+
+## Findings
+| Finding | Evidence | Impact | Recommendation |
+
+## Confirmed consistent areas
+- 問題が見つからなかった観点と確認範囲
+
+## Proposed changes requiring human decision
+- 成果物移動、削除、大規模再編、source of truth変更など
+
+## Validation
+- 実行したread-only check
+- 変更を行った場合だけ、変更後checkとGit状態
+```
+
+### 制約
+
+- 構成レビューをBehavior ChangeやAGPの内容再調査へ広げない。内容の正確性は、構成矛盾の確認に必要な範囲だけ扱う。
+- final priority、final severity、release readinessを決めず、影響と改善候補を提示する。
+- review findingに実ファイルpath、見出し、検索結果などの根拠を付ける。
+- protected noteの内容をレビュー材料として読み込んだり、編集したりしない。
+- unrelatedな既存変更を修正、整形、commitしない。
+- ファイル移動、削除、大規模なdirectory再編は、改善依頼に含まれていても人間の明示判断なしに実行しない。
+
 ## ユースケース選択の目安
 
 ```text
@@ -394,6 +484,9 @@ android16/behavior-changes/<report>.md を正として、<API-or-pattern-A>と<A
 
 人間の最終判断を保存する
   -> UC-04
+
+repository全体の運用・配置・導線を確認する
+  -> UC-14
 ```
 
 ## 一覧へ追加する基準
