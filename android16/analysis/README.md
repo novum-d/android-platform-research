@@ -14,12 +14,10 @@ To:   android-16.0.0_r4
 Using:
 
 ```bash
-VERSION_DIR=android16 \
-OLD_TAG=android-15.0.0_r36 \
-NEW_TAG=android-16.0.0_r4 \
-TARGET_CODENAME=BAKLAVA \
-scripts/generate_target.sh
+VERSION_DIR=android16 scripts/generate_target.sh
 ```
+
+Tag、codename、出力先は [`research-scope.json`](../research-scope.json) から読み込む。生成時の remote、working tree、resolved commit、比較 command は [`metadata.json`](metadata.json) に保存する。
 
 ## Rule
 

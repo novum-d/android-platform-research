@@ -15,9 +15,21 @@
   "default_reference_repository": "platform/frameworks/base",
   "official_refs_url": "https://android.googlesource.com/platform/frameworks/base/+refs",
   "official_documentation": {
-    "all_apps": "https://developer.android.com/about/versions/16/behavior-changes-all",
-    "target_sdk": "https://developer.android.com/about/versions/16/behavior-changes-16",
-    "compat_framework": "https://developer.android.com/about/versions/16/reference/compat-framework-changes"
+    "all_apps": {
+      "url": "https://developer.android.com/about/versions/16/behavior-changes-all",
+      "availability": "published",
+      "checked_at": "2026-08-19"
+    },
+    "target_sdk": {
+      "url": "https://developer.android.com/about/versions/16/behavior-changes-16",
+      "availability": "published",
+      "checked_at": "2026-08-19"
+    },
+    "compat_framework": {
+      "url": "https://developer.android.com/about/versions/16/reference/compat-framework-changes",
+      "availability": "published",
+      "checked_at": "2026-08-19"
+    }
   },
   "output_roots": {
     "reports": "android16/behavior-changes",
@@ -30,5 +42,23 @@
     "android16/behavior-changes/APPLICABILITY_CLASSIFICATION.md",
     "android16/templates/customer-report-template.md",
     "android16/templates/one-page-summary-template.md"
-  ]
+  ],
+  "artifact_policy": {
+    "separately_indexed_directories": [
+      "version-comparisons"
+    ],
+    "summary_exempt_directories": [
+      "case-guides",
+      "version-comparisons"
+    ],
+    "summary_exempt_files": [
+      "CASE_BASED_ACTION_GUIDE.md",
+      "all/connectivity/improved-bond-loss-handling-android15-to-16-behavior-comparison.md",
+      "target/core-functionality/fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md",
+      "target/security/gpu-syscall-filtering-concepts-faq.md",
+      "target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md",
+      "target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md"
+    ]
+  },
+  "analysis_metadata": "android16/analysis/metadata.json"
 }

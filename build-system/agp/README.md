@@ -29,12 +29,14 @@ Android Gradle Plugin (AGP) の version update、DSL 変更、variant API、lint
 
 ## Current Research
 
+version、release channel、purpose、成果物 path、Research / Decision status の機械可読な正本は [research-scope.json](research-scope.json) とする。この表は人間向け索引であり、JSON と一致させる。
+
 | 種別 | 対象 | 資料 |
 | --- | --- | --- |
-| 詳細調査 | AGP 8.7 系 → 9.3.0 stable | [差分調査](versions/agp-8.7-to-9.3.md) |
-| 1ページサマリ | AGP 8.7 系 → 9.3.0 stable | [サマリ](summaries/agp-8.7-to-9.3-summary.md) |
-| 移行手順 | AGP 8.7 系 → 9.3.0 stable | [チェックリスト](checklists/agp-8.7-to-9.3-migration-checklist.md) |
-| Preview watch | AGP 9.4.0-alpha04 | [監視資料](versions/agp-9.4-preview-watch.md) |
+| 詳細調査 | AGP 8.7 系 → 9.3.1 stable | [差分調査](versions/agp-8.7-to-9.3.md) |
+| 1ページサマリ | AGP 8.7 系 → 9.3.1 stable | [サマリ](summaries/agp-8.7-to-9.3-summary.md) |
+| 移行手順 | AGP 8.7 系 → 9.3.1 stable | [チェックリスト](checklists/agp-8.7-to-9.3-migration-checklist.md) |
+| Preview watch | AGP 9.4.0-rc01 | [監視資料](versions/agp-9.4-preview-watch.md) |
 
 最新版の扱いは調査日を基準とする。stable と preview を分離し、preview を production の推奨移行先として扱わない。
 
@@ -42,7 +44,7 @@ Android Gradle Plugin (AGP) の version update、DSL 変更、variant API、lint
 
 通常は公式 AGP Release Notes URL 1件だけを Codex CLI へ入力する。詳細な解析・補完・中間プロンプト生成・実行規則は [../CODEX_CLI_RESEARCH_GUIDE.md](../CODEX_CLI_RESEARCH_GUIDE.md) に従う。
 
-比較元の補完順序:
+比較元の補完順序は `research-scope.json` の `research_complete` な stable item を基準にする:
 
 1. ユーザーが同じ依頼で明示した From version
 2. 同じ target version を扱う既存の詳細調査に記録された From version
@@ -64,4 +66,4 @@ build-system/agp/checklists/agp-<from>-to-<to>-migration-checklist.md
 tmp/research-prompts/build-system/agp/agp-<from>-to-<to>.md
 ```
 
-既存の同一 target 調査がある場合は、その調査で採用済みの path を再利用する。別調査の path と衝突する場合は上書きしない。preview URL は stable migration target と混ぜず、既存の `preview-watch` convention を使う。
+既存成果物は `(target version / release line, release channel, purpose)` が同じ場合だけ path を再利用する。別調査の path と衝突する場合は上書きしない。Release Notes の title だけで stable と判定せず、公式 API Reference の Current / Preview 表示などを照合する。preview と stable は同じ URL でも別 identity とし、preview は既存の `preview-watch` convention を使う。

@@ -1,4 +1,4 @@
-# AGP 8.7 系から 9.3.0 までの差分調査
+# AGP 8.7 系から 9.3.1 までの差分調査
 
 ## 1. 調査メタデータ
 
@@ -6,14 +6,14 @@
 | --- | --- |
 | 調査対象 | Android Gradle Plugin |
 | From | AGP 8.7.x |
-| To | AGP 9.3.0 |
-| 最新 stable の確認日 | 2026-07-28 |
+| To | AGP 9.3.1 |
+| 最新 stable の確認日 | 2026-08-19 |
 | 調査方式 | 各 minor の公式 release notes を inventory 化し、互換性・破壊的変更・移行経路を深掘り |
 | 対象プロジェクト | 未指定。実プロジェクトへの適用判定は未実施 |
 | 総合リスク | High。AGP 9.0 で DSL、Kotlin 統合、既定値、削除 API がまとまって変更される |
 | Confidence | High（公式 release notes、公式移行ガイド、公式互換性表に基づく） |
 
-この文書は既存の [AGP 8.7.0 調査](agp-8.7.0.md) を baseline とし、AGP 8.8 から 9.3.0 までの累積差分を扱う。最新 preview である AGP 9.4.0-alpha04 は stable の移行先に含めず、[preview 監視資料](agp-9.4-preview-watch.md)へ分離した。
+この文書は既存の [AGP 8.7.0 調査](agp-8.7.0.md) を baseline とし、AGP 8.8 から 9.3.1 までの累積差分を扱う。2026-08-19 に公式 9.3 Release Notes を再確認し、9.3.1 に public fixed issue が掲載されていないこと、公式 API Reference で current stable が 9.3.1 であることを確認した。最新 preview である AGP 9.4.0-rc01 は stable の移行先に含めず、[preview 監視資料](agp-9.4-preview-watch.md)へ分離した。
 
 ## Investigation Workflow
 
@@ -25,7 +25,7 @@
 
 ## 2. 結論
 
-AGP 8.7 系からの最新 stable 移行先は AGP 9.3.0 である。必要な build toolchain は Gradle 8.9 から 9.5.0、Build Tools 34.0.0 から 36.0.0、既定 NDK は 27.0.12077973 から 28.2.13676358 へ進む。JDK の最低要件は 17 のまま変わらない。
+AGP 8.7 系からの最新 stable 移行先は AGP 9.3.1 である。必要な build toolchain は Gradle 8.9 から 9.5.0、Build Tools 34.0.0 から 36.0.0、既定 NDK は 27.0.12077973 から 28.2.13676358 へ進む。JDK の最低要件は 17 のまま変わらない。
 
 移行の中心はバージョン番号の更新ではなく、AGP 9.0 の次の変更である。
 
@@ -59,7 +59,7 @@ AGP 8.7 系からの最新 stable 移行先は AGP 9.3.0 である。必要な b
 | 9.0 | [AGP 9.0.0](https://developer.android.com/build/releases/agp-9-0-0-release-notes) | major migration の中心 |
 | 9.1 | [AGP 9.1.0](https://developer.android.com/build/releases/agp-9-1-0-release-notes) | R8 package 再配置を深掘り |
 | 9.2 | [AGP 9.2.0](https://developer.android.com/build/releases/agp-9-2-0-release-notes) | R8 attribute と report aggregation を深掘り |
-| 9.3 | [AGP 9.3.0](https://developer.android.com/build/releases/agp-9-3-0-release-notes) | stable target |
+| 9.3 | [AGP 9.3.1](https://developer.android.com/build/releases/agp-9-3-0-release-notes) | stable target |
 
 ### 補助資料
 
@@ -85,7 +85,7 @@ AGP 8.7 系からの最新 stable 移行先は AGP 9.3.0 である。必要な b
 | 9.0 | 9.0.1 | 9.1.0 | 17 | 36.0.0 | 28.2.13676358 | 36.1 |
 | 9.1 | 9.1.1 | 9.3.1 | 17 | 36.0.0 | 28.2.13676358 | 37 |
 | 9.2 | 9.2.1 | 9.4.1 | 17 | 36.0.0 | 28.2.13676358 | 37 |
-| 9.3 | 9.3.0 | 9.5.0 | 17 | 36.0.0 | 28.2.13676358 | 37 |
+| 9.3 | 9.3.1 | 9.5.0 | 17 | 36.0.0 | 28.2.13676358 | 37 |
 
 ### Kotlin / IDE compatibility
 
@@ -122,6 +122,7 @@ AGP 8.7 系からの最新 stable 移行先は AGP 9.3.0 である。必要な b
 | AGP-12 | test / coverage report aggregation | 9.2 | experimental | No | CI report |
 | AGP-13 | R8 config analyzer task | 9.3 | tooling | Yes | app module |
 | AGP-14 | 新 `optimization` DSL と keep rule source set | 9.3 | API / tooling | Conditional | optimized app/library |
+| AGP-15 | 9.3.1 patch。public fixed issue の掲載なし | 9.3.1 | patch | No | 追加の公開変更がないため、stable baseline の patch 固定だけ更新 |
 
 ### Deep Dive しない変更
 
@@ -269,11 +270,11 @@ AGP 9.3 は app module に standalone R8 configuration analyzer task を提供�
 
 ### Minimum Required
 
-AGP 9.3.0 を採用する場合:
+AGP 9.3.1 を採用する場合:
 
 | 項目 | 最低 / 必須値 |
 | --- | --- |
-| AGP | 9.3.0 |
+| AGP | 9.3.1 |
 | Gradle | 9.5.0 |
 | JDK | 17 |
 | Build Tools | 36.0.0 |
@@ -282,7 +283,7 @@ AGP 9.3.0 を採用する場合:
 
 ### 推奨 baseline
 
-この調査時点の stable baseline 候補は AGP 9.3.0 + Gradle 9.5.0 + JDK 17 である。ただし次はプロジェクト事情で決める。
+この調査時点の stable baseline 候補は AGP 9.3.1 + Gradle 9.5.0 + JDK 17 である。ただし次はプロジェクト事情で決める。
 
 - `compileSdk`: AGP だけを理由に API 37 へ上げない
 - `targetSdk`: OS behavior change 調査と別に判断する
@@ -335,7 +336,7 @@ AGP 9.3.0 を採用する場合:
 
 | Fact | Evidence | Confidence |
 | --- | --- | --- |
-| 調査時点の最新 stable は AGP 9.3.0 | 公式 AGP 9.3 release notes | High |
+| 調査時点の最新 stable は AGP 9.3.1 | 公式 AGP 9.3 release notes | High |
 | AGP 9.3 は Gradle 9.5.0、JDK 17 を要求する | 公式 9.3 compatibility | High |
 | AGP 9.0 で新 DSL と Built-in Kotlin が既定になる | 公式 9.0 release notes / migration guide | High |
 | 旧 opt-out は AGP 10 で削除予定 | 公式 roadmap / 9.0 documentation | High。ただし将来計画は変更可能 |
@@ -455,7 +456,7 @@ native module がある場合:
 2. **8.x 準備 PR**: public DSL / Variant API へ先行移行し、可能なら AGP 8.13.2 + Gradle 8.13 で安定させる。
 3. **9.0 境界 PR**: AGP 9.0.1 + Gradle 9.1.0 へ更新し、一時 opt-out が必要なら期限付きで記録する。
 4. **Kotlin PR**: Built-in Kotlin へ移行し、KAPT / KSP と compiler options を整理する。
-5. **最新 stable PR**: AGP 9.3.0 + Gradle 9.5.0 へ更新する。
+5. **最新 stable PR**: AGP 9.3.1 + Gradle 9.5.0 へ更新する。
 6. **最適化 PR**: R8 analyzer の結果に基づき keep rule と optimization DSL を整理する。
 7. **別テーマ**: compileSdk / targetSdk、NDK pin、experimental report は独立して判断する。
 
@@ -473,9 +474,11 @@ native module がある場合:
 
 | 日付 | 判断 | 根拠 | Owner |
 | --- | --- | --- | --- |
-| 未決定 | AGP 9.3.0 を候補とする | 2026-07-28 時点の最新 stable | Repository owner |
+| 未決定 | AGP 9.3.1 を候補とする | 2026-08-19 時点の最新 stable | Repository owner |
 
-## 17. Completion Criteria
+## 17. Research Complete Criteria
+
+対象 project が未指定でも満たせる調査成果物の完成条件である。project 固有の command 実行は Follow-up Tasks とし、Research Complete を妨げない。
 
 - [x] 公式 release notes を 8.7 から 9.3 まで確認した
 - [x] change inventory を作成した
@@ -487,15 +490,15 @@ native module がある場合:
 - [x] detection method を記録した
 - [x] verification commands と test scope を記録した
 - [x] rollback plan と PR 分割案を記録した
-- [ ] 対象プロジェクトで検出コマンドを実行した
-- [ ] 対象プロジェクトで build / test / lint を実行した
+
+Status: **Research Complete / Pending Human Decision**
 
 ## 18. Facts / Observations / Hypotheses / Conclusions
 
 ### Facts
 
-- AGP 9.3.0 が調査時点の最新 stable である。
-- AGP 9.3.0 は Gradle 9.5.0 と JDK 17 を要求する。
+- AGP 9.3.1 が調査時点の最新 stable である。
+- AGP 9.3.1 は Gradle 9.5.0 と JDK 17 を要求する。
 - AGP 9.0 で新 DSL と Built-in Kotlin が既定になる。
 - AGP 9.1、9.2 で R8 の挙動変更がある。
 
@@ -511,7 +514,7 @@ native module がある場合:
 
 ### Conclusions
 
-AGP 8.7 系から 9.3.0 への更新は major migration として扱う。まず静的検出で AGP 9.0 の境界条件を可視化し、build logic、Kotlin、R8、native を分離して検証する。
+AGP 8.7 系から 9.3.1 への更新は major migration として扱う。まず静的検出で AGP 9.0 の境界条件を可視化し、build logic、Kotlin、R8、native を分離して検証する。
 
 ## References
 
@@ -535,7 +538,7 @@ Build System 調査では公式 release notes と compatibility を一次 eviden
 
 Repository owner が決める項目:
 
-- [ ] AGP 9.3.0 を移行先にするか
+- [ ] AGP 9.3.1 を移行先にするか
 - [ ] AGP 8.13.2 / 9.0.1 を経由するか
 - [ ] 一時 opt-out を許可するか、許可する場合の削除期限
 - [ ] Built-in Kotlin と KAPT / KSP 移行の PR 構成

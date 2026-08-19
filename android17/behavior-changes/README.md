@@ -6,9 +6,9 @@ Behavior Changes の各セクションごとに、顧客説明向け調査レポ
 
 Android 17 の公式 Behavior Change ドキュメントは公開済み。
 
-ローカル AOSP の状態:
-- `frameworks-base` には `android-17.0.0_r1` タグが存在する。
-- AOSP 根拠に基づく結論は、`android-16.0.0_r4` から `android-17.0.0_r1` への明示的なタグ比較を使う。
+AOSP scope:
+- 2026-08-19 に公式 refs で確認した `android-16.0.0_r4` から `android-17.0.0_r1` を標準の比較 pair とする。
+- 新規・更新調査では [`research-scope.json`](../research-scope.json) と公式 refs を再確認し、AOSP 根拠は明示的な tag 比較から取得する。
 
 Android 16 と Android 17 の挙動差を項目別に確認する場合:
 

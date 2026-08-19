@@ -472,6 +472,8 @@ Agent は判断材料を残し、人間の判断欄を空欄または pending �
 
 ## Completion Criteria
 
+この節の基準は Research Complete を表す。Human Decision は `Pending Human Decision` のままでもよく、repository owner が判断を記録した後にだけ Decision Complete とする。
+
 調査完了条件:
 
 - Official Documentation 確認済み

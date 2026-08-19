@@ -111,8 +111,10 @@ Risk:
 
 ## Human Decision
 
+Research Complete 時点では `Pending Human Decision` とする。repository owner が判断を記録した後に Decision Complete となる。
+
 最終判断:
-- Proceed / Defer / Split / Further investigation required
+- Pending Human Decision / Proceed / Defer / Split / Further investigation required
 
 判断者:
 - （記入）

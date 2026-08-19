@@ -223,7 +223,9 @@ Risk:
 | --- | --- | --- | --- |
 | YYYY-MM-DD | Pending Human Decision |  |  |
 
-## Completion Criteria
+## Research Complete Criteria
+
+以下は調査成果物の完成条件である。Human Decision が `Pending Human Decision` のままでも満たせる。owner が判断を記録した後にのみ Decision Complete とする。
 
 - [ ] Entry Point Release Notes 確認済み
 - [ ] Change Inventory 作成済み

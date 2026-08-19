@@ -18,12 +18,10 @@ Android 16 / 17 の最新通常リリースタグを使って分析補助ファ�
 使用するコマンド:
 
 ```bash
-VERSION_DIR=android17 \
-OLD_TAG=android-16.0.0_r4 \
-NEW_TAG=android-17.0.0_r1 \
-TARGET_CODENAME=CINNAMON_BUN \
-scripts/generate_target.sh
+VERSION_DIR=android17 scripts/generate_target.sh
 ```
+
+Tag、codename、出力先は [`research-scope.json`](../research-scope.json) から読み込みます。生成時の remote、working tree、resolved commit、比較 command は [`metadata.json`](metadata.json) に保存します。
 
 ## 取り扱いルール
 

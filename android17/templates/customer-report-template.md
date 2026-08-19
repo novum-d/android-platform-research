@@ -161,6 +161,14 @@ Android 16 と Android 17 の差分。
 
 # AOSP 調査（AOSP Investigation）
 
+## AOSP 証拠ワークスペース（AOSP Evidence Workspaces）
+
+新規・更新・再検証時に、根拠として使った repository ごとに記入する。既存レポートへ再検証せず追記しない。
+
+| AOSP project | Official remote URL | Checkout path | Working tree | From tag / resolved commit | To tag / resolved commit | Comparison command | Dirty risk / limitations |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `platform/frameworks/base` | `https://android.googlesource.com/platform/frameworks/base` | `frameworks-base/` | Clean / Dirty | `android-16.0.0_r4` / `<40-char hash>` | `android-17.0.0_r1` / `<40-char hash>` | `git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- <path>` | |
+
 ## 関連ファイル（Related Files）
 
 - file1

@@ -373,6 +373,8 @@ Risk は最終判断ではない。人間が判断するための材料として
 
 ## Completion Criteria
 
+この節は **Research Complete** の条件を定義する。証拠、詳細調査、1ページサマリ、再利用可能な checklist と `Pending Human Decision` が揃えば Research Complete とし、owner の判断待ちを理由に未完了としない。owner が判断ログまたは対象 project の実行記録へ判断を記録した後にのみ **Decision Complete** とする。
+
 調査完了条件:
 
 - Release Notes 確認済み

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T07:39:48+00:00",
+  "aosp_project": "platform/frameworks/base",
+  "official_remote_url": "https://android.googlesource.com/platform/frameworks/base",
+  "checkout_path": "frameworks-base",
+  "working_tree": "clean",
+  "baseline": {
+    "tag": "android-15.0.0_r36",
+    "resolved_commit": "396d32905ded85c082232bc510b525c9e372e585"
+  },
+  "target": {
+    "tag": "android-16.0.0_r4",
+    "resolved_commit": "45034f0663f960d9ee5fb0a101a4732b71f6e2f4"
+  },
+  "comparison_command": "git -C frameworks-base diff --no-renames --name-only android-15.0.0_r36 android-16.0.0_r4",
+  "dirty_risk": "none"
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-08-19",
+  "official_channel_source": "https://developer.android.com/reference/tools/gradle-api",
+  "current": {
+    "stable": "agp-8.7-to-9.3-stable",
+    "preview": "agp-9.4-preview-watch"
+  },
+  "items": [
+    {
+      "id": "agp-8.7.0-inventory",
+      "purpose": "single-version-inventory",
+      "release_channel": "stable",
+      "from_version": null,
+      "to_version": "8.7.0",
+      "entry_point_url": "https://developer.android.com/build/releases/agp-8-7-0-release-notes",
+      "detail": "build-system/agp/versions/agp-8.7.0.md",
+      "summary": "build-system/agp/summaries/agp-8.7.0-summary.md",
+      "checklist": null,
+      "research_status": "research_complete",
+      "decision_status": "pending_human_decision"
+    },
+    {
+      "id": "agp-8.7-to-9.3-stable",
+      "purpose": "version-diff",
+      "release_channel": "stable",
+      "from_version": "8.7.x",
+      "to_version": "9.3.1",
+      "entry_point_url": "https://developer.android.com/build/releases/agp-9-3-0-release-notes",
+      "detail": "build-system/agp/versions/agp-8.7-to-9.3.md",
+      "summary": "build-system/agp/summaries/agp-8.7-to-9.3-summary.md",
+      "checklist": "build-system/agp/checklists/agp-8.7-to-9.3-migration-checklist.md",
+      "research_status": "research_complete",
+      "decision_status": "pending_human_decision"
+    },
+    {
+      "id": "agp-9.4-preview-watch",
+      "purpose": "preview-watch",
+      "release_channel": "rc",
+      "from_version": "9.3.1",
+      "to_version": "9.4.0-rc01",
+      "entry_point_url": "https://developer.android.com/build/releases/agp-9-4-0-release-notes",
+      "detail": "build-system/agp/versions/agp-9.4-preview-watch.md",
+      "summary": null,
+      "checklist": null,
+      "research_status": "research_complete",
+      "decision_status": "pending_human_decision"
+    }
+  ]
+}

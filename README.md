@@ -121,7 +121,14 @@ Build System の詳細調査は、対象領域ごとに `build-system/<area>/ver
 構成やversion scopeを変更した後は、次を実行します。
 
 ```bash
+python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/validate_repository_structure.py
+```
+
+新規・更新調査を開始する前は、ネットワークを使う freshness check も実行します。通常の CI は外部状態に依存しない上の検証だけを実行します。
+
+```bash
+python3 scripts/validate_repository_structure.py --online
 ```
 
 ## docs 索引（Docs Index）

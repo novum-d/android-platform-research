@@ -1,21 +1,21 @@
-# AGP 8.7 系から 9.3.0 への更新: 1ページサマリ
+# AGP 8.7 系から 9.3.1 への更新: 1ページサマリ
 
 ## Target
 
 | 項目 | 内容 |
 | --- | --- |
 | From | AGP 8.7.x |
-| To | AGP 9.3.0 |
-| 調査日 | 2026-07-28 |
+| To | AGP 9.3.1 |
+| 調査日 | 2026-08-19 |
 | 対象プロジェクト | 未指定 |
 
 ## Outcome
 
-2026-07-28 時点の最新 stable は AGP 9.3.0 である。AGP 8.7 系からの更新は、単純な plugin version 更新ではなく AGP 9.0 を境界とする major migration として扱う。
+2026-08-19 時点の最新 stable は AGP 9.3.1 である。公式 Release Notes では 9.3.1 に public fixed issue は掲載されていない。AGP 8.7 系からの更新は、単純な plugin version 更新ではなく AGP 9.0 を境界とする major migration として扱う。
 
 ## Compatibility
 
-| 項目 | AGP 8.7 系 | AGP 9.3.0 |
+| 項目 | AGP 8.7 系 | AGP 9.3.1 |
 | --- | --- | --- |
 | Gradle | 8.9 | 9.5.0 |
 | JDK | 17 | 17 |
@@ -29,7 +29,7 @@
 
 ## Minimum Required Versions
 
-- AGP 9.3.0
+- AGP 9.3.1
 - Gradle 9.5.0
 - JDK 17
 - Build Tools 36.0.0
@@ -42,7 +42,7 @@
 - 旧 `applicationVariants` / `libraryVariants` / `variantFilter` や内部実装型を public `androidComponents` API へ移す
 - Built-in Kotlin に合わせて `org.jetbrains.kotlin.android`、KAPT、`android.kotlinOptions`、source set を見直す
 - 削除された Wear app 埋め込み、density split、旧 report task、DSL / Variant API、global build feature property を除去する
-- AGP 9.3.0 と Gradle 9.5.0 を同じ移行段階で更新し、Gradle 実行 JDK 17 を確認する
+- AGP 9.3.1 と Gradle 9.5.0 を同じ移行段階で更新し、Gradle 実行 JDK 17 を確認する
 
 ### Should Verify
 
@@ -64,7 +64,7 @@
 1. 旧 DSL / Variant API、Kotlin plugin、KAPT、削除 property、R8、native build を静的検出する。
 2. 必要なら AGP 8.13.2 で public API への準備変更を安定させる。
 3. AGP 9.0 境界で新 DSL と Built-in Kotlin を検証する。一時 opt-out は期限付きの退避策にする。
-4. AGP 9.3.0 + Gradle 9.5.0 へ更新する。
+4. AGP 9.3.1 + Gradle 9.5.0 へ更新する。
 5. release build、minification、instrumentation、native build、CI を検証する。
 6. `:app:analyzeReleaseR8Config` の結果に基づく rule 整理は別 PR にする。
 
@@ -105,7 +105,7 @@ app、Android library、dynamic feature、Wear、native、KMP、`buildSrc` / `bu
 
 ## Human Decision
 
-- [ ] AGP 9.3.0 を移行先とするか
+- [ ] AGP 9.3.1 を移行先とするか
 - [ ] 中間版を経由するか
 - [ ] 一時 opt-out と削除期限を認めるか
 - [ ] Kotlin / KAPT / KSP、R8、native 対応の PR 分割

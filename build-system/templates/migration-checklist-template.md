@@ -106,7 +106,9 @@ Release / device verification:
 | --- | --- | --- | --- |
 | YYYY-MM-DD | Pending Human Decision |  |  |
 
-## Completion Criteria
+## Execution Completion Criteria
+
+この checklist は対象 project での実行完了条件であり、repository の調査成果物に対する Research Complete 条件とは分ける。Human Decision は owner が記録する。
 
 - [ ] 対象変更が Change Isolation Policy に沿っている
 - [ ] 必須でない更新を混ぜていない

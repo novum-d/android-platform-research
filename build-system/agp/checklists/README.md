@@ -6,4 +6,4 @@ AGP の version update を実プロジェクトへ適用するときに再利用
 
 | Checklist | Scope |
 | --- | --- |
-| [AGP 8.7 系 → 9.3.0](agp-8.7-to-9.3-migration-checklist.md) | AGP 9.0 major migration を含む最新 stable への更新 |
+| [AGP 8.7 系 → 9.3.1](agp-8.7-to-9.3-migration-checklist.md) | AGP 9.0 major migration を含む最新 stable への更新 |

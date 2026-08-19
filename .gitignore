@@ -5,6 +5,8 @@ frameworks-base/
 .DS_Store
 .idea/
 .vscode/
+__pycache__/
+*.pyc
 
 # Generated temporary files
 *.tmp

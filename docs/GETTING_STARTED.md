@@ -66,11 +66,19 @@ Android の変更を全部調べる
 | バージョン固有 backlog / roadmap | `android<version>/planning/` |
 
 Build System の version diff、summary、migration checklist の置き場所は `build-system/README.md` と各 area の README を正とする。
+AGP の version、release channel、purpose、成果物 path、Research / Decision status は `build-system/agp/research-scope.json` を機械可読な正本とする。
 
 scope、索引、リンク、templateを変更した後は、次で構成を検証する。
 
 ```bash
+python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/validate_repository_structure.py
+```
+
+新規・更新調査の開始前には、公式 refs と公式文書の公開状態も確認する。
+
+```bash
+python3 scripts/validate_repository_structure.py --online
 ```
 
 ## 迷った時

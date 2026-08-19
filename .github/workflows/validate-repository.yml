@@ -1,0 +1,30 @@
+name: Validate repository structure
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run validator tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
+      - name: Check generator shell syntax
+        run: bash -n scripts/generate_target.sh
+      - name: Validate repository structure
+        run: python3 scripts/validate_repository_structure.py
+      - name: Check official tag, documentation, and AGP channel freshness
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: python3 scripts/validate_repository_structure.py --online

@@ -80,10 +80,13 @@ comparison pair. A standard release tag has the form
 
 Before generating the intermediate prompt:
 
-1. Verify the official refs for the relevant AOSP repository, using
+1. Run `python3 scripts/validate_repository_structure.py --online`, then verify
+   any additional relevant AOSP repository not represented by the version
+   scope. Use
    `platform/frameworks/base` as the default reference repository.
 2. Compare the highest numeric standard release tags with the pair pinned in
-   `<version-dir>/AGENTS.md` and `<version-dir>/README.md`.
+   `<version-dir>/research-scope.json`. Treat that file as authoritative and
+   verify that version-specific human-facing instructions agree with it.
 3. If a newer tag exists, update the version scope, version-specific templates,
    classification metadata, and generation examples together before starting
    the investigation. Do not silently override only the generated prompt.
@@ -352,11 +355,13 @@ evidence. Use explicit tag comparisons such as:
 git -C <checkout-dir> diff <from-tag> <to-tag> -- <path>
 ```
 
-Every report must identify the AOSP project, checkout path, resolved tag commit
-hashes, comparison command, and any dirty checkout risk that may affect
-confidence. A tag present in `platform/frameworks/base` does not prove that the
-same tag or implementation exists in another AOSP project; verify each project
-used as evidence.
+Every new, updated, or revalidated report must identify the AOSP project,
+official remote URL, checkout path, resolved tag commit hashes, comparison
+command, and any dirty checkout risk that may affect confidence. Existing
+reports are migrated only when their evidence is re-run; do not add provenance
+claims to historical reports without rechecking them. A tag present in
+`platform/frameworks/base` does not prove that the same tag or implementation
+exists in another AOSP project; verify each project used as evidence.
 
 ## Ignore
 

@@ -41,6 +41,8 @@ Release Notes に含まれる変更を最初に inventory 化し、その後で 
 
 対象 version を一意に特定できない generic URL、複数 release line をまとめた URL、取得できないページについては推測で進めず確認する。
 
+Release Notes の page title が `AGP X.Y.0` でも、それだけで stable と判定しない。固定 issue の release heading、公式 AGP API Reference の `Current Release` / `Preview Releases`、対応する Android Studio release 情報を照合し、channel を確定する。公式情報が食い違う場合は preview として扱い、不一致を中間プロンプトへ保存する。
+
 ## Step 2: From / To version の補完
 
 To version は公式 Release Notes の page title、version heading、release tableから決定する。
@@ -51,7 +53,7 @@ From version は次の優先順位で決定する。
 2. requested target を To version とする既存の詳細調査に記録された From version
 3. requested target より低い、完了済み stable AGP 詳細調査のうち、version ordering 上もっとも新しい To version
 
-補完時は `build-system/agp/README.md` の Current Research と `build-system/agp/versions/` の Metadata / Completion Criteria を確認する。
+補完時は `build-system/agp/research-scope.json` を機械可読な正本とし、`build-system/agp/README.md` の Current Research、`build-system/agp/versions/` の Metadata / Research Complete Criteria が一致することを確認する。
 
 次は比較元として使わない。
 
@@ -63,9 +65,11 @@ From version は次の優先順位で決定する。
 
 同じ優先順位で候補が複数残る、version ordering を判断できない、または完了済み baseline が存在しない場合だけ From version を確認する。
 
-既存の単一 version inventory と同じ target URLの場合は、その調査の目的とpathを再利用し、差分調査へ無理に変換しない。既存のversion diffと同じtargetの場合は、既存のFrom / Toとpathを再利用する。
+既存成果物の identity は target URL だけでなく、`(target version / release line, release channel, purpose)` で判定する。同じ identity の単一 version inventory は目的と path を再利用し、差分調査へ無理に変換しない。同じ stable version diff identity は既存の From / To と path を再利用する。preview watch と stable version diff は URL が同じでも別 identity とし、stable 調査で preview watch を上書きしない。
 
 ## Step 3: 調査 metadata と出力先の補完
+
+既存成果物の version、channel、purpose、path、Research / Decision status は `build-system/agp/research-scope.json` から補完する。成果物を作成・更新した場合は registry と人間向け index を同時に更新する。
 
 stable version diff の標準 path は次のとおりとする。versionはfilename-safeな形式へ正規化し、既存pathがある場合は既存表記を優先する。
 
@@ -87,7 +91,7 @@ Intermediate prompt: tmp/research-prompts/build-system/agp/agp-<major>.<minor>-p
 
 preview watchではstableへの移行チェックリストを作らない。previewをproductionのRecommended versionとして扱わない。
 
-出力先が同じ調査の既存成果物なら更新対象として扱う。別のversion pairや別目的の成果物と衝突する場合は上書きせず確認する。
+出力先が同じ channel / purpose の既存成果物なら更新対象として扱う。別の version pair、release channel、または purpose の成果物と衝突する場合は上書きせず確認する。
 
 対象application projectが指定されていないことはblockerにしない。その場合は次のように明記する。
 
@@ -197,6 +201,7 @@ tmp/research-prompts/build-system/agp/<derived-name>.md
 
 - Entry Point URLとpage titleが一致する
 - To versionとrelease channelが公式ページと一致する
+- release channel を page title だけで判定していない
 - From versionにderivation sourceがある
 - From versionがTo versionより低い
 - stableとpreviewが混在していない
@@ -210,7 +215,7 @@ tmp/research-prompts/build-system/agp/<derived-name>.md
 
 ## 完了条件
 
-stable AGP version diffは、次をすべて満たした場合に完了とする。
+stable AGP version diffは、次をすべて満たした場合に **Research Complete** とする。repository owner が Human Decision を記録した後にのみ **Decision Complete** となる。
 
 - 詳細調査を`build-system/templates/version-diff-template.md`に沿って作成または更新した
 - 1ページサマリを`build-system/templates/one-page-summary-template.md`に沿って作成または更新した

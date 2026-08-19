@@ -38,6 +38,8 @@
 - Decision Logへ記録する判断は、人間が明示した内容に限る。
 - 調査成果物、説明、要約、Decision Logは日本語で作成する。
 
+構成レビューで改善実装も依頼された場合は、`review -> improve -> tests / validator -> re-review`を繰り返す。新しい指摘がなく、未解決事項が外部状態またはHuman Decisionだけになるまで継続し、各周回で見つけた問題を次の検証基準へ反映する。
+
 ## UC-01: Android OS差分調査の項目を作成・更新
 
 ### 使う場面
@@ -97,11 +99,11 @@ https://developer.android.com/build/releases/agp-<version>-release-notes#<sectio
 ### Codexの処理
 
 1. Release Notes全体のchange inventoryを抽出する。
-2. To version、release channel、compatibility requirementsを抽出する。
+2. To version、release channel、compatibility requirementsを抽出する。page title だけで stable と判定せず、公式 API Reference の Current / Preview 表示などを照合する。
 3. 既存調査からFrom versionを一意に補完する。一意に決まらない場合だけ確認する。
 4. `tmp/research-prompts/build-system/agp/`へ中間プロンプトを生成する。
 5. Release NotesをEntry Pointとして、必要な項目だけCompatibility Matrix、Migration Guide、API Reference、Issue Trackerを深掘りする。
-6. 詳細調査、1ページサマリ、移行チェックリストを作成・更新する。
+6. stable なら詳細調査、1ページサマリ、移行チェックリストを作成・更新する。preview なら UC-11 の preview watch に routing し、stable 成果物を上書きしない。
 
 ### 主な成果物
 

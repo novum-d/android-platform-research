@@ -1,10 +1,10 @@
-# AGP 8.7 系から 9.3.0 への移行チェックリスト
+# AGP 8.7 系から 9.3.1 への移行チェックリスト
 
 > このファイルは version pair 共通の再利用可能な手順である。チェック状態、実行結果、対象 branch / commit、Human Decision は、対象プロジェクト側の実行用 checklist または PR / issue に記録する。このファイルへ project 固有の実績を直接記入しない。
 
 ## Summary
 
-AGP 8.7 系から 9.3.0 への更新を、AGP 9.0 の新 DSL、Built-in Kotlin、削除 API、R8 変更を含めて検出・実装・検証する。
+AGP 8.7 系から 9.3.1 への更新を、AGP 9.0 の新 DSL、Built-in Kotlin、削除 API、R8 変更を含めて検出・実装・検証する。
 
 ## Scope
 
@@ -20,7 +20,7 @@ AGP 8.7 系から 9.3.0 への更新を、AGP 9.0 の新 DSL、Built-in Kotlin�
 
 ## 0. Human Decision
 
-- [ ] 移行先を AGP 9.3.0 とする
+- [ ] 移行先を AGP 9.3.1 とする
 - [ ] 直接更新か、8.13.2 / 9.0.1 を経由するか決める
 - [ ] 一時 opt-out の可否と削除期限を決める
 - [ ] compileSdk / targetSdk / NDK 更新を分離するか決める
@@ -101,7 +101,7 @@ rg -n "externalNativeBuild|ndkVersion|CMakeLists|prefab" \
 
 ## 3. Compatibility Update
 
-- [ ] AGP を 9.3.0 へ更新する
+- [ ] AGP を 9.3.1 へ更新する
 - [ ] Gradle wrapper を 9.5.0 へ更新する
 - [ ] Gradle daemon / CI の JDK 17 を確認する
 - [ ] Build Tools 36.0.0 の取得方法を確認する
@@ -112,7 +112,7 @@ rg -n "externalNativeBuild|ndkVersion|CMakeLists|prefab" \
 
 | 項目 | 値 |
 | --- | --- |
-| AGP | 9.3.0 |
+| AGP | 9.3.1 |
 | Gradle | 9.5.0 |
 | JDK | 17 |
 | Build Tools | 36.0.0 |

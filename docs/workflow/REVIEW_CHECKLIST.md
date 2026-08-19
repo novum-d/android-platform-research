@@ -12,6 +12,10 @@
 - [ ] OS version 条件と targetSdkVersion 条件を分けて説明している
 - [ ] device/form factor、permission、API usage、manifest/property など追加条件を確認している
 - [ ] AOSP根拠ファイルがある
+- [ ] 根拠に使った各 AOSP project の official remote URL と checkout path がある
+- [ ] 比較元・比較先 tag の resolved commit hash がある
+- [ ] 明示的な tag 比較 command と working tree の clean / dirty 状態がある
+- [ ] dirty な場合、local working tree を evidence に使っていないことと confidence への影響がある
 - [ ] AOSP のどの部分を見たか、file / symbol / entry point / caller が明記されている
 - [ ] そのコードパスを Behavior Change の根拠として採用した理由が書かれている
 - [ ] baseline Android version と target Android version の差分解釈が書かれている
@@ -29,6 +33,15 @@
 - [ ] 信頼度の理由と不足証拠が書かれている
 - [ ] 1ページ要約がある
 - [ ] `Pending Human Decision` placeholderがあり、Research Completeとして必要な成果物が揃っている
+
+## Repository 構成レビュー
+
+- [ ] `python3 -m unittest discover -s tests -p 'test_*.py'` が成功する
+- [ ] `python3 scripts/validate_repository_structure.py` が成功する
+- [ ] 新規・更新調査の開始前に `python3 scripts/validate_repository_structure.py --online` が成功する
+- [ ] behavior report と 1ページ要約、Build System detail / summary / checklist の索引漏れがない
+- [ ] `research-scope.json`、人間向け instructions、analysis metadata が一致する
+- [ ] 既存 evidence record を再検証せず最新 tag metadata だけに書き換えていない
 
 ## 判断完了レビュー（Decision Complete Review）
 

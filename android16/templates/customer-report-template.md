@@ -161,6 +161,14 @@ Android 15 と Android 16 の差分。
 
 # AOSP 調査（AOSP Investigation）
 
+## AOSP 証拠ワークスペース（AOSP Evidence Workspaces）
+
+新規・更新・再検証時に、根拠として使った repository ごとに記入する。既存レポートへ再検証せず追記しない。
+
+| AOSP project | Official remote URL | Checkout path | Working tree | From tag / resolved commit | To tag / resolved commit | Comparison command | Dirty risk / limitations |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `platform/frameworks/base` | `https://android.googlesource.com/platform/frameworks/base` | `frameworks-base/` | Clean / Dirty | `android-15.0.0_r36` / `<40-char hash>` | `android-16.0.0_r4` / `<40-char hash>` | `git -C frameworks-base diff android-15.0.0_r36 android-16.0.0_r4 -- <path>` | |
+
 ## 関連ファイル（Related Files）
 
 - file1

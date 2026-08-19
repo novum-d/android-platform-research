@@ -139,7 +139,7 @@ Low confidence は、公式原文または AOSP gate のいずれかが未確認
 ## コマンド例（Commands）
 
 ```bash
-git -C frameworks-base diff --name-only <from-tag> <to-tag>
-git -C frameworks-base diff <from-tag> <to-tag> -- <file>
-git -C frameworks-base grep -n "targetSdkVersion\\|ApplicationInfo.targetSdkVersion\\|CompatChanges.isChangeEnabled\\|@ChangeId\\|@EnabledAfter\\|@EnabledSince" <to-tag> -- <file-or-dir>
+git -C <checkout-dir> diff --name-only <from-tag> <to-tag>
+git -C <checkout-dir> diff <from-tag> <to-tag> -- <file>
+git -C <checkout-dir> grep -n "targetSdkVersion\\|ApplicationInfo.targetSdkVersion\\|CompatChanges.isChangeEnabled\\|@ChangeId\\|@EnabledAfter\\|@EnabledSince" <to-tag> -- <file-or-dir>
 ```

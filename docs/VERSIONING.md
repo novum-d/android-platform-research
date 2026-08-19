@@ -23,6 +23,15 @@ version、tag pair、targetSdkVersion、公式URL、出力rootの機械可読な
 classification、templateはこの値と一致させ、変更後に
 `python3 scripts/validate_repository_structure.py`を実行する。
 
+`research-scope.json` は次も管理する。
+
+- `official_documentation`: URL、`published` / `unpublished`、確認日、未公開時の fallback
+- `output_roots`: report、summary、中間 prompt の出力 root
+- `artifact_policy`: 中央索引と専用索引の境界、1ページ要約を持たない companion の例外
+- `analysis_metadata`: 生成済み analysis の provenance metadata path
+
+新規・更新調査の開始前は `python3 scripts/validate_repository_structure.py --online` で、各 Android version の最新通常 release tag と公式文書の公開状態を再確認する。API level は Android version から計算で仮定せず、公式 scope と前後 version の整合性を検証する。
+
 例:
 - Behavior Change 一覧
 - 適用条件分類
