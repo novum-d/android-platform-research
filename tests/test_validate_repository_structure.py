@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import importlib.util
 import json
 import tempfile
@@ -16,6 +17,39 @@ SPEC.loader.exec_module(validator)
 
 
 class RepositoryValidatorTest(unittest.TestCase):
+    def test_checked_date_must_be_real_and_not_future(self) -> None:
+        errors: list[str] = []
+        validator.validate_checked_date("2026-02-30", errors, "checked_at")
+        self.assertEqual(errors, ["checked_at must be a valid YYYY-MM-DD date"])
+        errors.clear()
+        validator.validate_checked_date("20260820", errors, "checked_at")
+        self.assertEqual(errors, ["checked_at must be a valid YYYY-MM-DD date"])
+        errors.clear()
+        future = f"{datetime.date.today().year + 1}-01-01"
+        validator.validate_checked_date(future, errors, "checked_at")
+        self.assertEqual(errors, ["checked_at cannot be in the future"])
+
+    def test_agp_version_order_accepts_patch_and_release_line_updates(self) -> None:
+        patch_from = validator.parse_agp_version("9.3.0")
+        patch_to = validator.parse_agp_version("9.3.1")
+        line_from = validator.parse_agp_version("8.7.x")
+        line_to = validator.parse_agp_version("9.3.1")
+        alpha = validator.parse_agp_version("9.4.0-alpha02")
+        rc = validator.parse_agp_version("9.4.0-rc01")
+        stable = validator.parse_agp_version("9.4.0")
+        self.assertIsNotNone(patch_from)
+        self.assertIsNotNone(patch_to)
+        self.assertIsNotNone(line_from)
+        self.assertIsNotNone(line_to)
+        self.assertIsNotNone(alpha)
+        self.assertIsNotNone(rc)
+        self.assertIsNotNone(stable)
+        self.assertTrue(validator.agp_version_is_earlier(patch_from, patch_to))
+        self.assertTrue(validator.agp_version_is_earlier(line_from, line_to))
+        self.assertTrue(validator.agp_version_is_earlier(alpha, rc))
+        self.assertTrue(validator.agp_version_is_earlier(rc, stable))
+        self.assertFalse(validator.agp_version_is_earlier(line_to, line_to))
+
     def test_scope_discovery_is_not_version_hardcoded(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -88,6 +122,10 @@ class RepositoryValidatorTest(unittest.TestCase):
             source.write_text("[Target](target.md#missing)\n", encoding="utf-8")
             validator.validate_markdown_links(root, errors)
             self.assertTrue(any("broken Markdown anchor" in error for error in errors), errors)
+            errors.clear()
+            source.write_text("![Missing image](missing.png)\n", encoding="utf-8")
+            validator.validate_markdown_links(root, errors)
+            self.assertTrue(any("broken Markdown link" in error for error in errors), errors)
 
     def test_stable_build_report_requires_summary_and_checklist(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -116,14 +154,15 @@ class RepositoryValidatorTest(unittest.TestCase):
                 (agp / child).mkdir(parents=True, exist_ok=True)
             shared = agp / "versions" / "shared.md"
             shared.write_text("# Shared\n", encoding="utf-8")
-            (agp / "README.md").write_text("[Registry](research-scope.json) stable 1.0 preview 2.0-alpha01\n", encoding="utf-8")
+            (agp / "README.md").write_text(
+                "[Registry](research-scope.json) stable 1.0.0 preview 2.0.0-alpha01 2026-08-19\n",
+                encoding="utf-8",
+            )
             base = {
-                "from_version": "0.9",
-                "entry_point_url": "https://developer.android.com/agp",
                 "detail": "build-system/agp/versions/shared.md",
                 "summary": None,
                 "checklist": None,
-                "research_status": "research_complete",
+                "research_status": "in_progress",
                 "decision_status": "pending_human_decision",
             }
             registry = {
@@ -132,8 +171,24 @@ class RepositoryValidatorTest(unittest.TestCase):
                 "official_channel_source": "https://developer.android.com/reference/tools/gradle-api",
                 "current": {"stable": "stable", "preview": "preview"},
                 "items": [
-                    {**base, "id": "stable", "purpose": "single-version-inventory", "release_channel": "stable", "to_version": "1.0"},
-                    {**base, "id": "preview", "purpose": "preview-watch", "release_channel": "alpha", "to_version": "2.0-alpha01"},
+                    {
+                        **base,
+                        "id": "stable",
+                        "purpose": "single-version-inventory",
+                        "release_channel": "stable",
+                        "from_version": None,
+                        "to_version": "1.0.0",
+                        "entry_point_url": "https://developer.android.com/build/releases/agp-1-0-0-release-notes",
+                    },
+                    {
+                        **base,
+                        "id": "preview",
+                        "purpose": "preview-watch",
+                        "release_channel": "alpha",
+                        "from_version": "1.0.0",
+                        "to_version": "2.0.0-alpha01",
+                        "entry_point_url": "https://developer.android.com/build/releases/agp-2-0-0-release-notes",
+                    },
                 ],
             }
             (agp / "research-scope.json").write_text(json.dumps(registry), encoding="utf-8")

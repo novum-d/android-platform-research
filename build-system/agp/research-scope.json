@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "checked_at": "2026-08-19",
+  "checked_at": "2026-08-20",
   "official_channel_source": "https://developer.android.com/reference/tools/gradle-api",
   "current": {
     "stable": "agp-8.7-to-9.3-stable",

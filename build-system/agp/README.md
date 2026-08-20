@@ -31,6 +31,8 @@ Android Gradle Plugin (AGP) の version update、DSL 変更、variant API、lint
 
 version、release channel、purpose、成果物 path、Research / Decision status の機械可読な正本は [research-scope.json](research-scope.json) とする。この表は人間向け索引であり、JSON と一致させる。
 
+公式AGP channel確認日: 2026-08-20
+
 | 種別 | 対象 | 資料 |
 | --- | --- | --- |
 | 詳細調査 | AGP 8.7 系 → 9.3.1 stable | [差分調査](versions/agp-8.7-to-9.3.md) |

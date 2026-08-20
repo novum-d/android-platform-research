@@ -10,7 +10,7 @@
 - To: 8.7.0
 
 詳細調査:
-- `build-system/agp/versions/agp-8.7.0.md`
+- [AGP 8.7.0 調査](../versions/agp-8.7.0.md)
 
 ## Decision Summary
 

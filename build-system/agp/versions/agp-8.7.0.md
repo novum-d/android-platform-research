@@ -27,6 +27,9 @@ AGP 8.7.0 への更新 PR には、原則として Gradle wrapper 更新、compi
 - Issue:
 - PR:
 
+関連成果物:
+- [1ページサマリ](../summaries/agp-8.7.0-summary.md)
+
 ## Investigation Workflow
 
 調査は以下の順序で行った。
@@ -296,6 +299,8 @@ native module がある場合:
 - [x] PR 分割方針記載済み
 - [x] 1ページサマリ作成済み
 - [x] Human Decision placeholder 記載済み
+
+Status: **Research Complete / Pending Human Decision**
 
 ## Follow-up Tasks
 

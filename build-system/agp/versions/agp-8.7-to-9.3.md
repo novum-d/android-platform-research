@@ -15,6 +15,10 @@
 
 この文書は既存の [AGP 8.7.0 調査](agp-8.7.0.md) を baseline とし、AGP 8.8 から 9.3.1 までの累積差分を扱う。2026-08-19 に公式 9.3 Release Notes を再確認し、9.3.1 に public fixed issue が掲載されていないこと、公式 API Reference で current stable が 9.3.1 であることを確認した。最新 preview である AGP 9.4.0-rc01 は stable の移行先に含めず、[preview 監視資料](agp-9.4-preview-watch.md)へ分離した。
 
+関連成果物:
+- [1ページサマリ](../summaries/agp-8.7-to-9.3-summary.md)
+- [移行チェックリスト](../checklists/agp-8.7-to-9.3-migration-checklist.md)
+
 ## Investigation Workflow
 
 1. AGP 8.7 の既存調査を baseline とする。

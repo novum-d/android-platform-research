@@ -2,6 +2,12 @@
 
 このファイルは、Android 17 調査を進める時に読む場所をまとめる。
 
+## バージョンスコープ
+
+- Baseline: `android-16.0.0_r4` / targetSdkVersion 36
+- Target: `android-17.0.0_r1` / targetSdkVersion 37
+- 機械可読な正本: [research-scope.json](research-scope.json)
+
 ## 読む順番
 
 1. [README.md](README.md) で Android 17 の version scope を確認する

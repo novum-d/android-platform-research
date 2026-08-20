@@ -17,9 +17,10 @@ from urllib.request import Request, urlopen
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[1]
 STANDARD_TAG = re.compile(r"^android-(\d+)\.0\.0_r([1-9]\d*)$")
-INLINE_LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
+AGP_VERSION = re.compile(r"^(\d+)\.(\d+)(?:\.(\d+|x))?(?:-(alpha|beta|rc)(\d+))?$")
+INLINE_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 REFERENCE_DEFINITION = re.compile(r"^\s*\[([^\]]+)\]:\s*(<[^>]+>|\S+)", re.MULTILINE)
-REFERENCE_USE = re.compile(r"(?<!!)\[([^\]]+)\]\[([^\]]*)\]")
+REFERENCE_USE = re.compile(r"\[([^\]]+)\]\[([^\]]*)\]")
 HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$", re.MULTILINE)
 EXPLICIT_ANCHOR = re.compile(r"<a\s+(?:name|id)=[\"']([^\"']+)[\"']\s*></a>", re.I)
 REQUIRED_SCOPE_KEYS = {
@@ -36,6 +37,7 @@ REQUIRED_SCOPE_KEYS = {
     "artifact_policy",
     "analysis_metadata",
 }
+REPOSITORY_TIMEZONE = datetime.timezone(datetime.timedelta(hours=9))
 
 
 def fail(errors: list[str], message: str) -> None:
@@ -76,6 +78,19 @@ def load_json(path: Path, root: Path, errors: list[str], label: str) -> dict:
         fail(errors, f"{label} must be a JSON object: {relative(path, root)}")
         return {}
     return data
+
+
+def validate_checked_date(value: object, errors: list[str], label: str) -> None:
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(value)):
+        fail(errors, f"{label} must be a valid YYYY-MM-DD date")
+        return
+    try:
+        checked = datetime.date.fromisoformat(str(value))
+    except ValueError:
+        fail(errors, f"{label} must be a valid YYYY-MM-DD date")
+        return
+    if checked > datetime.datetime.now(REPOSITORY_TIMEZONE).date():
+        fail(errors, f"{label} cannot be in the future")
 
 
 def validate_tag(value: object, expected_version: int, errors: list[str], label: str) -> None:
@@ -146,14 +161,20 @@ def validate_scope(scope: dict, scope_path: Path, root: Path, errors: list[str])
     if scope.get("default_reference_repository") != "platform/frameworks/base":
         fail(errors, f"default_reference_repository must be platform/frameworks/base: {relative(scope_path, root)}")
     refs_url = scope.get("official_refs_url")
-    if not isinstance(refs_url, str) or not refs_url.startswith("https://android.googlesource.com/"):
-        fail(errors, f"official_refs_url must be an Android Gitiles HTTPS URL: {relative(scope_path, root)}")
+    expected_refs_url = "https://android.googlesource.com/platform/frameworks/base/+refs"
+    if refs_url != expected_refs_url:
+        fail(errors, f"official_refs_url must be {expected_refs_url}: {relative(scope_path, root)}")
 
     documentation = scope.get("official_documentation")
     required_documentation = {"all_apps", "target_sdk", "compat_framework"}
     if not isinstance(documentation, dict) or not required_documentation <= set(documentation):
         fail(errors, f"official_documentation must define all_apps, target_sdk, and compat_framework: {relative(scope_path, root)}")
     else:
+        expected_document_paths = {
+            "all_apps": f"/about/versions/{android_version}/behavior-changes-all",
+            "target_sdk": f"/about/versions/{android_version}/behavior-changes-{android_version}",
+            "compat_framework": f"/about/versions/{android_version}/reference/compat-framework-changes",
+        }
         for name, item in documentation.items():
             if not isinstance(item, dict):
                 fail(errors, f"official_documentation.{name} must be an object")
@@ -162,8 +183,13 @@ def validate_scope(scope: dict, scope_path: Path, root: Path, errors: list[str])
                 fail(errors, f"official_documentation.{name}.availability is invalid")
             if not isinstance(item.get("url"), str) or not item["url"].startswith("https://developer.android.com/"):
                 fail(errors, f"official_documentation.{name}.url must be an official Android URL")
-            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(item.get("checked_at", ""))):
-                fail(errors, f"official_documentation.{name}.checked_at must be YYYY-MM-DD")
+            elif name in expected_document_paths and urlsplit(item["url"]).path.rstrip("/") != expected_document_paths[name]:
+                fail(errors, f"official_documentation.{name}.url does not match Android {android_version}")
+            validate_checked_date(
+                item.get("checked_at"),
+                errors,
+                f"official_documentation.{name}.checked_at",
+            )
             if item.get("availability") == "unpublished" and not item.get("fallback"):
                 fail(errors, f"official_documentation.{name} needs a fallback while unpublished")
 
@@ -179,6 +205,18 @@ def validate_scope(scope: dict, scope_path: Path, root: Path, errors: list[str])
     if not isinstance(scope_files, list) or not scope_files or not all(isinstance(item, str) for item in scope_files):
         fail(errors, f"scope_files must be a non-empty string list: {relative(scope_path, root)}")
     else:
+        if len(scope_files) != len(set(scope_files)):
+            fail(errors, f"scope_files contains duplicate paths: {relative(scope_path, root)}")
+        required_scope_files = {
+            f"{version_dir}/AGENTS.md",
+            f"{version_dir}/README.md",
+            f"{version_dir}/GETTING_STARTED.md",
+            f"{version_dir}/behavior-changes/APPLICABILITY_CLASSIFICATION.md",
+            f"{version_dir}/templates/customer-report-template.md",
+            f"{version_dir}/templates/one-page-summary-template.md",
+        }
+        for missing_scope_file in sorted(required_scope_files - set(scope_files)):
+            fail(errors, f"required scope file is not registered: {missing_scope_file}")
         for item in scope_files:
             path = repository_path(root, item, errors, "scope_files entry")
             if path is not None:
@@ -197,6 +235,13 @@ def validate_scope(scope: dict, scope_path: Path, root: Path, errors: list[str])
             values = policy.get(name)
             if not isinstance(values, list) or not all(isinstance(value, str) and value for value in values):
                 fail(errors, f"artifact_policy.{name} must be a string list")
+                continue
+            if len(values) != len(set(values)):
+                fail(errors, f"artifact_policy.{name} contains duplicate paths")
+            for value in values:
+                candidate = Path(value)
+                if candidate.is_absolute() or ".." in candidate.parts:
+                    fail(errors, f"artifact_policy.{name} contains an unsafe relative path: {value}")
 
 
 def parse_destination(raw: str) -> tuple[str, str]:
@@ -340,21 +385,27 @@ def validate_android_artifacts(scope: dict, root: Path, errors: list[str]) -> No
             )
 
     summaries_root = version_root / "summaries"
+    summary_files = [path for path in summaries_root.rglob("*.md") if path.name != "README.md"]
     require_indexed(
         summaries_root / "README.md",
-        [path for path in summaries_root.rglob("*.md") if path.name != "README.md"],
+        summary_files,
         root,
         errors,
     )
     exempt_directories = set(policy["summary_exempt_directories"])
     exempt_files = set(policy["summary_exempt_files"])
+    expected_summaries: set[Path] = set()
     for report in behavior_root.rglob("*.md"):
         report_relative = report.relative_to(behavior_root)
         if report.name in excluded_names or any(part in exempt_directories for part in report_relative.parts) or report_relative.as_posix() in exempt_files:
             continue
         expected = summaries_root / report_relative.parent / f"{report.stem}-summary.md"
+        expected_summaries.add(expected.resolve())
         if not expected.is_file():
             fail(errors, f"primary report has no one-page summary: {relative(report, root)}")
+    for summary in summary_files:
+        if summary.resolve() not in expected_summaries:
+            fail(errors, f"one-page summary has no primary report: {relative(summary, root)}")
 
     app_reports_root = version_root / "app-reports"
     if app_reports_root.is_dir():
@@ -364,6 +415,14 @@ def validate_android_artifacts(scope: dict, root: Path, errors: list[str]) -> No
             root,
             errors,
         )
+        for report in app_reports_root.glob("*/investigation-report.md"):
+            details_root = report.parent / "details"
+            if not details_root.is_dir():
+                continue
+            report_links = linked_paths(report, root)
+            for detail in details_root.rglob("*.md"):
+                if detail.resolve() not in report_links:
+                    fail(errors, f"app investigation detail is not linked from its report: {relative(detail, root)}")
 
 
 def validate_analysis_metadata(scope: dict, root: Path, errors: list[str]) -> None:
@@ -445,6 +504,47 @@ def validate_build_artifacts(root: Path, errors: list[str]) -> None:
                     fail(errors, f"stable Build System report has no migration checklist: {relative(report, root)}")
 
 
+def validate_required_content(
+    path: Path,
+    requirements: tuple[tuple[str, tuple[str, ...]], ...],
+    root: Path,
+    errors: list[str],
+) -> None:
+    text = path.read_text(encoding="utf-8").casefold()
+    for label, alternatives in requirements:
+        if not any(alternative.casefold() in text for alternative in alternatives):
+            fail(errors, f"required content {label} is missing from {relative(path, root)}")
+
+
+def parse_agp_version(value: object) -> tuple[int, int, int | None, str | None, int | None] | None:
+    match = AGP_VERSION.fullmatch(str(value))
+    if not match:
+        return None
+    patch = match.group(3)
+    qualifier = match.group(5)
+    return (
+        int(match.group(1)),
+        int(match.group(2)),
+        int(patch) if patch and patch != "x" else None,
+        match.group(4),
+        int(qualifier) if qualifier else None,
+    )
+
+
+def agp_version_is_earlier(
+    baseline: tuple[int, int, int | None, str | None, int | None],
+    target: tuple[int, int, int | None, str | None, int | None],
+) -> bool:
+    if baseline[:2] != target[:2]:
+        return baseline[:2] < target[:2]
+    if baseline[2] is None or target[2] is None:
+        return False
+    if baseline[2] != target[2]:
+        return baseline[2] < target[2]
+    channel_order = {"alpha": 0, "beta": 1, "rc": 2, None: 3}
+    return (channel_order[baseline[3]], baseline[4] or 0) < (channel_order[target[3]], target[4] or 0)
+
+
 def validate_agp_research_registry(root: Path, errors: list[str]) -> None:
     path = root / "build-system/agp/research-scope.json"
     registry = load_json(path, root, errors, "AGP research registry")
@@ -452,8 +552,7 @@ def validate_agp_research_registry(root: Path, errors: list[str]) -> None:
         return
     if registry.get("schema_version") != 1:
         fail(errors, "unsupported AGP research registry schema_version")
-    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(registry.get("checked_at", ""))):
-        fail(errors, "AGP research registry checked_at must be YYYY-MM-DD")
+    validate_checked_date(registry.get("checked_at"), errors, "AGP research registry checked_at")
     source = registry.get("official_channel_source")
     if not isinstance(source, str) or not source.startswith("https://developer.android.com/"):
         fail(errors, "AGP research registry official_channel_source must be an official Android URL")
@@ -462,6 +561,8 @@ def validate_agp_research_registry(root: Path, errors: list[str]) -> None:
     if not isinstance(items, list) or not items or not isinstance(current, dict):
         fail(errors, "AGP research registry must define non-empty items and current")
         return
+    if set(current) != {"stable", "preview"}:
+        fail(errors, "AGP research registry current must contain exactly stable and preview")
 
     required = {
         "id", "purpose", "release_channel", "from_version", "to_version", "entry_point_url",
@@ -471,6 +572,11 @@ def validate_agp_research_registry(root: Path, errors: list[str]) -> None:
     identities: set[tuple[str, str, str]] = set()
     artifact_owners: dict[Path, str] = {}
     registered: set[Path] = set()
+    artifact_directories = {
+        "detail": (root / "build-system/agp/versions").resolve(),
+        "summary": (root / "build-system/agp/summaries").resolve(),
+        "checklist": (root / "build-system/agp/checklists").resolve(),
+    }
     for item in items:
         if not isinstance(item, dict) or required - item.keys():
             fail(errors, "AGP research registry item is malformed")
@@ -480,16 +586,20 @@ def validate_agp_research_registry(root: Path, errors: list[str]) -> None:
             fail(errors, f"AGP research registry item id is invalid or duplicated: {item_id}")
             continue
         by_id[item_id] = item
+        purpose = item.get("purpose")
+        if purpose not in {"single-version-inventory", "version-diff", "preview-watch"}:
+            fail(errors, f"AGP registry purpose is invalid: {item_id}")
         target = item.get("to_version")
-        match = re.match(r"^(\d+\.\d+)", str(target))
-        if not match:
+        parsed_target = parse_agp_version(target)
+        if parsed_target is None:
             fail(errors, f"AGP registry to_version is invalid: {item_id}")
             continue
         channel = item.get("release_channel")
-        if channel not in {"stable", "alpha", "beta", "rc", "preview"}:
+        if channel not in {"stable", "alpha", "beta", "rc"}:
             fail(errors, f"AGP registry release_channel is invalid: {item_id}")
         channel_group = "stable" if channel == "stable" else "preview"
-        identity = (match.group(1), channel_group, str(item.get("purpose")))
+        target_identity = str(target) if channel_group == "stable" else f"{parsed_target[0]}.{parsed_target[1]}"
+        identity = (target_identity, channel_group, str(purpose))
         if identity in identities:
             fail(errors, f"AGP research identity is duplicated: {identity}")
         identities.add(identity)
@@ -497,8 +607,31 @@ def validate_agp_research_registry(root: Path, errors: list[str]) -> None:
             fail(errors, f"AGP research_status is invalid: {item_id}")
         if item.get("decision_status") not in {"pending_human_decision", "decision_complete"}:
             fail(errors, f"AGP decision_status is invalid: {item_id}")
-        if not str(item.get("entry_point_url", "")).startswith("https://developer.android.com/"):
+        if item.get("decision_status") == "decision_complete" and item.get("research_status") != "research_complete":
+            fail(errors, f"AGP decision_complete item must also be research_complete: {item_id}")
+        entry_point_url = str(item.get("entry_point_url", ""))
+        if not entry_point_url.startswith("https://developer.android.com/"):
             fail(errors, f"AGP entry_point_url is not official: {item_id}")
+        elif f"agp-{parsed_target[0]}-{parsed_target[1]}-" not in urlsplit(entry_point_url).path:
+            fail(errors, f"AGP entry_point_url does not match to_version release line: {item_id}")
+        if purpose == "single-version-inventory" and item.get("from_version") is not None:
+            fail(errors, f"AGP single-version inventory must use a null from_version: {item_id}")
+        if purpose in {"version-diff", "preview-watch"}:
+            parsed_from = parse_agp_version(item.get("from_version"))
+            if parsed_from is None:
+                fail(errors, f"AGP {purpose} needs a valid from_version: {item_id}")
+            elif not agp_version_is_earlier(parsed_from, parsed_target):
+                fail(errors, f"AGP from_version must be an unambiguously earlier version than to_version: {item_id}")
+        suffix_channel = parsed_target[3]
+        if channel == "stable" and (suffix_channel is not None or parsed_target[2] is None):
+            fail(errors, f"stable AGP item must use an exact stable patch version: {item_id}")
+        if channel in {"alpha", "beta", "rc"} and suffix_channel != channel:
+            fail(errors, f"AGP release_channel does not match to_version suffix: {item_id}")
+        if purpose == "preview-watch" and channel == "stable":
+            fail(errors, f"AGP preview watch cannot use the stable channel: {item_id}")
+        if purpose != "preview-watch" and channel != "stable":
+            fail(errors, f"non-watch AGP research must use the stable channel: {item_id}")
+        item_artifacts: dict[str, Path] = {}
         for field in ("detail", "summary", "checklist"):
             value = item.get(field)
             if value is None:
@@ -506,6 +639,9 @@ def validate_agp_research_registry(root: Path, errors: list[str]) -> None:
             artifact = repository_path(root, value, errors, f"AGP registry {item_id}.{field}")
             if artifact is None:
                 continue
+            item_artifacts[field] = artifact
+            if artifact.parent != artifact_directories[field] or artifact.suffix != ".md":
+                fail(errors, f"AGP registry {item_id}.{field} is outside its canonical artifact directory: {value}")
             if not artifact.is_file():
                 fail(errors, f"AGP registered artifact is missing: {value}")
             owner = artifact_owners.get(artifact)
@@ -513,11 +649,117 @@ def validate_agp_research_registry(root: Path, errors: list[str]) -> None:
                 fail(errors, f"AGP artifact path is shared by {owner} and {item_id}: {value}")
             artifact_owners[artifact] = item_id
             registered.add(artifact)
-        if item.get("purpose") == "version-diff" and channel == "stable":
+        if not isinstance(item.get("detail"), str):
+            fail(errors, f"AGP registry item lacks a detail artifact: {item_id}")
+        if item.get("research_status") == "research_complete" and channel == "stable" and item.get("summary") is None:
+            fail(errors, f"research_complete stable AGP item lacks a summary: {item_id}")
+        if purpose == "version-diff" and channel == "stable":
             if item.get("summary") is None or item.get("checklist") is None:
                 fail(errors, f"stable AGP version diff lacks summary or checklist in registry: {item_id}")
-        if item.get("purpose") == "preview-watch" and (item.get("summary") is not None or item.get("checklist") is not None):
+        if purpose == "preview-watch" and (item.get("summary") is not None or item.get("checklist") is not None):
             fail(errors, f"AGP preview watch must not reuse stable summary/checklist paths: {item_id}")
+
+        if item.get("research_status") == "research_complete":
+            detail = item_artifacts.get("detail")
+            if detail is not None and detail.is_file():
+                validate_required_content(
+                    detail,
+                    (
+                        ("summary or conclusion", ("summary", "## 2. 結論")),
+                        ("entry point", ("entry point",)),
+                        ("change inventory", ("change inventory",)),
+                        ("compatibility matrix", ("compatibility matrix",)),
+                        ("minimum versions", ("minimum",)),
+                        ("recommended versions", ("recommended", "推奨")),
+                        ("breaking-change classification", ("breaking change",)),
+                        ("evidence", ("evidence",)),
+                        ("risk", ("risk",)),
+                        ("affected modules", ("affected modules",)),
+                        ("detection method", ("detection method",)),
+                        ("verification commands", ("verification commands",)),
+                        ("test scope", ("test scope",)),
+                        ("rollback plan", ("rollback plan",)),
+                        ("follow-up tasks", ("follow-up tasks",)),
+                        ("PR strategy", ("pr strategy", "pr 分割")),
+                        ("references", ("references",)),
+                        ("Facts", ("### facts",)),
+                        ("Observations", ("### observations",)),
+                        ("Hypotheses", ("### hypotheses",)),
+                        ("Conclusions", ("### conclusions",)),
+                        ("Research Complete criteria", ("research complete criteria", "completion criteria")),
+                        ("Research Complete status", ("research complete",)),
+                    ),
+                    root,
+                    errors,
+                )
+                detail_text = detail.read_text(encoding="utf-8")
+                if (
+                    item.get("decision_status") == "pending_human_decision"
+                    and "pending human decision" not in detail_text.casefold()
+                ):
+                    fail(errors, f"pending AGP item lacks Pending Human Decision in detail: {item_id}")
+                if item.get("decision_status") == "decision_complete" and not re.search(
+                    r"(?:status|判断状態)[^\n]*decision complete",
+                    detail_text,
+                    re.I,
+                ):
+                    fail(errors, f"decision_complete AGP item lacks a Decision Complete status in detail: {item_id}")
+
+            summary = item_artifacts.get("summary")
+            if summary is not None and summary.is_file():
+                validate_required_content(
+                    summary,
+                    (
+                        ("target", ("## target",)),
+                        ("decision summary", ("decision summary", "## outcome")),
+                        ("minimum versions", ("minimum required versions",)),
+                        ("compatibility", ("compatibility",)),
+                        ("risk", ("risk",)),
+                        ("affected modules", ("affected modules",)),
+                        ("verification", ("verification",)),
+                        ("evidence or references", ("evidence", "references")),
+                        ("follow-up tasks", ("follow-up tasks",)),
+                        ("Human Decision", ("human decision",)),
+                    ),
+                    root,
+                    errors,
+                )
+                if detail is not None and detail.resolve() not in linked_paths(summary, root):
+                    fail(errors, f"AGP summary does not link its detail report: {item_id}")
+                if (
+                    item.get("decision_status") == "pending_human_decision"
+                    and "pending human decision" not in summary.read_text(encoding="utf-8").casefold()
+                ):
+                    fail(errors, f"pending AGP item lacks Pending Human Decision in summary: {item_id}")
+                if detail is not None and summary.resolve() not in linked_paths(detail, root):
+                    fail(errors, f"AGP detail report does not link its summary: {item_id}")
+
+            checklist = item_artifacts.get("checklist")
+            if checklist is not None and checklist.is_file():
+                validate_required_content(
+                    checklist,
+                    (
+                        ("summary", ("## summary",)),
+                        ("scope", ("## scope",)),
+                        ("detection steps", ("detection", "pre-check")),
+                        ("minimum versions", ("minimum required versions",)),
+                        ("file changes", ("file changes",)),
+                        ("verification commands", ("verification",)),
+                        ("test scope", ("test scope",)),
+                        ("rollback plan", ("rollback",)),
+                        ("completion criteria", ("completion criteria",)),
+                        ("follow-up tasks", ("follow-up tasks",)),
+                        ("references", ("references",)),
+                        ("Human Decision", ("human decision",)),
+                    ),
+                    root,
+                    errors,
+                )
+                for label, companion in (("detail report", detail), ("summary", summary)):
+                    if companion is not None and companion.resolve() not in linked_paths(checklist, root):
+                        fail(errors, f"AGP checklist does not link its {label}: {item_id}")
+                if detail is not None and checklist.resolve() not in linked_paths(detail, root):
+                    fail(errors, f"AGP detail report does not link its checklist: {item_id}")
 
     for name, expected_group in (("stable", "stable"), ("preview", "preview")):
         item_id = current.get(name)
@@ -536,7 +778,7 @@ def validate_agp_research_registry(root: Path, errors: list[str]) -> None:
     actual = {
         artifact
         for directory in ("versions", "summaries", "checklists")
-        for artifact in (agp_root / directory).glob("*.md")
+        for artifact in (agp_root / directory).rglob("*.md")
         if artifact.name != "README.md"
     }
     for artifact in sorted(actual - registered):
@@ -546,6 +788,8 @@ def validate_agp_research_registry(root: Path, errors: list[str]) -> None:
         fail(errors, "AGP README does not link the machine-readable research registry")
     elif all(isinstance(item_id, str) and item_id in by_id for item_id in current.values()):
         text = readme.read_text(encoding="utf-8")
+        if str(registry.get("checked_at")) not in text:
+            fail(errors, "AGP README does not show the registry checked_at date")
         for item_id in current.values():
             version = by_id[item_id]["to_version"]
             if version not in text:
@@ -602,11 +846,47 @@ def validate_build_evidence_policy(root: Path, errors: list[str]) -> None:
 def validate_templates(root: Path, scopes: list[dict], errors: list[str]) -> None:
     required_terms = ("Official remote URL", "Checkout path", "resolved commit", "Comparison command", "Dirty risk")
     for scope in scopes:
-        path = root / scope["version_dir"] / "templates/customer-report-template.md"
+        template_root = root / scope["version_dir"] / "templates"
+        path = template_root / "customer-report-template.md"
         text = path.read_text(encoding="utf-8")
         for term in required_terms:
             if term not in text:
                 fail(errors, f"AOSP provenance field {term!r} is missing from {relative(path, root)}")
+        validate_required_content(
+            path,
+            (
+                ("Original Documentation", ("original documentation",)),
+                ("Applicability Classification", ("applicability classification",)),
+                ("Confidence", ("confidence",)),
+                ("OS Update Behavior", ("os update behavior",)),
+                ("targetSdkVersion behavior", ("targetsdkversion",)),
+                ("compat framework", ("compat framework",)),
+                ("AOSP Investigation", ("aosp investigation",)),
+                ("Source Context Reviewed", ("source context reviewed",)),
+                ("Diff Interpretation", ("diff interpretation",)),
+                ("Verification Method", ("verification method",)),
+                ("Conclusion", ("conclusion",)),
+                ("References", ("references",)),
+                ("Pending Human Decision", ("pending human decision",)),
+            ),
+            root,
+            errors,
+        )
+        summary = template_root / "one-page-summary-template.md"
+        validate_required_content(
+            summary,
+            (
+                ("Target", ("target",)),
+                ("Applicability", ("applicability",)),
+                ("scenario matrix", ("matrix",)),
+                ("Customer Impact", ("customer impact",)),
+                ("Required Action", ("required action",)),
+                ("Evidence", ("evidence",)),
+                ("Pending Human Decision", ("pending human decision",)),
+            ),
+            root,
+            errors,
+        )
 
 
 def validate_ignored_workspaces(root: Path, errors: list[str]) -> None:
@@ -615,7 +895,10 @@ def validate_ignored_workspaces(root: Path, errors: list[str]) -> None:
         fail(errors, ".gitignore is missing")
         return
     ignore = path.read_text(encoding="utf-8")
-    for entry in ("frameworks-base/", "tmp/aosp-checkouts/", "tmp/research-prompts/"):
+    for entry in (
+        "frameworks-base/", "tmp/aosp-checkouts/", "tmp/research-prompts/",
+        "__pycache__/", "*.pyc", "*.tmp", ".DS_Store",
+    ):
         if entry not in ignore:
             fail(errors, f"temporary workspace is not ignored: {entry}")
 

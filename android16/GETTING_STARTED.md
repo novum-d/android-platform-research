@@ -2,6 +2,12 @@
 
 このファイルは、Android 16 調査を進める時に読む場所をまとめる。
 
+## バージョンスコープ
+
+- Baseline: `android-15.0.0_r36` / targetSdkVersion 35
+- Target: `android-16.0.0_r4` / targetSdkVersion 36
+- 機械可読な正本: [research-scope.json](research-scope.json)
+
 ## 読む順番
 
 1. [README.md](README.md) で Android 16 のバージョンスコープを確認する

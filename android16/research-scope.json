@@ -18,17 +18,17 @@
     "all_apps": {
       "url": "https://developer.android.com/about/versions/16/behavior-changes-all",
       "availability": "published",
-      "checked_at": "2026-08-19"
+      "checked_at": "2026-08-20"
     },
     "target_sdk": {
       "url": "https://developer.android.com/about/versions/16/behavior-changes-16",
       "availability": "published",
-      "checked_at": "2026-08-19"
+      "checked_at": "2026-08-20"
     },
     "compat_framework": {
       "url": "https://developer.android.com/about/versions/16/reference/compat-framework-changes",
       "availability": "published",
-      "checked_at": "2026-08-19"
+      "checked_at": "2026-08-20"
     }
   },
   "output_roots": {
@@ -39,6 +39,7 @@
   "scope_files": [
     "android16/AGENTS.md",
     "android16/README.md",
+    "android16/GETTING_STARTED.md",
     "android16/behavior-changes/APPLICABILITY_CLASSIFICATION.md",
     "android16/templates/customer-report-template.md",
     "android16/templates/one-page-summary-template.md"

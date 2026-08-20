@@ -353,3 +353,12 @@ targetSdkVersion、compat framework、OS version、device condition のいずれ
 - File
 - File
 - File
+
+---
+
+# 人間の判断欄（Human Decision）
+
+判断状態（Decision Status）:
+- Pending Human Decision
+
+最終優先度、最終severity、release readiness、顧客連絡優先度はrepository ownerが記録する。

@@ -29,6 +29,16 @@ if [[ -z "$VERSION_DIR" ]]; then
   exit 2
 fi
 
+if [[ ! "$VERSION_DIR" =~ ^android[1-9][0-9]*$ ]]; then
+  echo "VERSION_DIR must be a repository-root Android version directory such as android17: $VERSION_DIR" >&2
+  exit 2
+fi
+
+if [[ -L "$VERSION_DIR" ]]; then
+  echo "VERSION_DIR must not be a symbolic link: $VERSION_DIR" >&2
+  exit 2
+fi
+
 SCOPE_FILE="$VERSION_DIR/research-scope.json"
 
 if [[ ! -f "$SCOPE_FILE" ]]; then
@@ -66,6 +76,11 @@ if [[ "$AOSP_DIR" = /* || "$AOSP_DIR" == *".."* ]]; then
 fi
 
 ANALYSIS_DIR="$VERSION_DIR/analysis"
+
+if [[ -L "$ANALYSIS_DIR" ]]; then
+  echo "Analysis output directory must not be a symbolic link: $ANALYSIS_DIR" >&2
+  exit 2
+fi
 
 if [[ ! -d "$AOSP_DIR/.git" ]]; then
   echo "AOSP checkout not found: $AOSP_DIR" >&2

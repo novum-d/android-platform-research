@@ -105,6 +105,8 @@ app、Android library、dynamic feature、Wear、native、KMP、`buildSrc` / `bu
 
 ## Human Decision
 
+Status: **Pending Human Decision**
+
 - [ ] AGP 9.3.1 を移行先とするか
 - [ ] 中間版を経由するか
 - [ ] 一時 opt-out と削除期限を認めるか

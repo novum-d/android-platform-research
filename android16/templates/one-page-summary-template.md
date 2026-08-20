@@ -87,6 +87,9 @@ To:
 
 ## 人間の判断欄（Human Decision）
 
+判断状態（Decision Status）:
+- Pending Human Decision
+
 最終優先度（Final Priority）:
 - Critical / High / Medium / Low
 
