@@ -1,10 +1,10 @@
-# Pixel Tablet 実機でカメラ画面の回転影響と証跡を収集する
+# Pixel Tablet 実機でAndroidアプリの画面回転・window resize影響と証跡を収集する
 
-対象カメラアプリについて、Android 16 の Adaptive layouts による画面回転・window resize 影響を Pixel Tablet 実機で確認し、再確認可能な証跡一式を作成してください。
+対象Androidアプリについて、Android 16のAdaptive layoutsによる画面回転・window resize影響をPixel Tablet実機で確認し、再確認可能な証跡一式を作成してください。
 
 ## Inputs
 
-- Camera project: `<camera-project-path>`
+- Android project: `<android-project-path>`
 - Package name: `<package-name>`
 - targetSdkVersion 35 build command or APK: `<target35-build-command-or-apk>`
 - targetSdkVersion 36 build command or APK: `<target36-build-command-or-apk>`
@@ -12,17 +12,16 @@
 - Evidence output root: `<evidence-output-root>`
 - Split-screen companion app: `<companion-package-or-system-app>`
 
-`<...>` が未入力でも project、Gradle設定、manifest、既存test、接続端末から安全に補完できる項目は補完してください。package、build variant、画面到達手順、出力先が一意に決まらない場合だけ確認してください。
+`<...>`が未入力でもproject、Gradle設定、manifest、既存test、接続端末から安全に補完できる項目は補完してください。package、build variant、画面到達手順、出力先が一意に決まらない場合だけ確認してください。
 
 ## Fixed test conditions
 
-- Device: 物理実機の Google Pixel Tablet。emulatorで代替しない。
+- Device: 物理実機のGoogle Pixel Tablet。emulatorで代替しない。
 - Device OS: Android 16 / API level 36。
-- App builds: targetSdkVersion 35 と targetSdkVersion 36。
+- App builds: targetSdkVersion 35とtargetSdkVersion 36。
 - target 35 / 36 buildは、可能な限り同じsource commit・同じfeature設定から作成し、targetSdkVersion以外の差を記録する。
 - Primary window modes: full-screen、split-screen multi-window。
 - Primary orientation states: Pixel Tabletで観測したportrait相当、landscape相当。rotation番号だけで方向を決めつけない。
-- Primary lenses: back / front。アプリが片方だけを提供する場合は理由を記録する。
 - Primary hardware state: undocked、screen unlocked。dock状態を記録し、docked / Hub Modeを別ケースに含める場合は明示する。
 
 ## Scope and authority
@@ -30,21 +29,21 @@
 - 対象projectのsource、manifest、build設定、既存test、既存logを読み取ってよい。
 - build、install、app起動、ADBによる端末状態の読取・一時設定、screenshot、UI hierarchy、logcat、dumpsysの取得を実施してよい。
 - 既存証跡だけでは画面到達または分岐実行を確認できない場合、debug / test build限定の最小ログを追加してよい。production / release behavior、analytics、永続設定は変更しない。
-- debug / testログ追加前後のdiffを記録し、機密情報、camera frame、ユーザー入力、位置情報、識別子をログへ出さない。
+- debug / testログ追加前後のdiffを記録し、機密情報、ユーザー入力、位置情報、認証情報、個人識別子をログへ出さない。
 - app dataの消去、端末初期化、production署名、release配布、commit、pushは行わない。
 - unrelatedな既存変更を修正しない。dirty worktreeの場合は変更を保護し、競合する場合だけ停止する。
-- logcat全体のclearは他の調査ログを失うため既定では行わない。run ID、取得開始時刻、tag、PIDを使って対象区間を分離する。
+- logcat全体のclearは既定では行わない。run ID、取得開始時刻、tag、PIDを使って対象区間を分離する。
 
 ## Required reading
 
-最初に以下を読んで、Expectedを確定してください。
+最初に以下を読んでExpectedを確定してください。
 
 - `android16/behavior-changes/case-guides/adaptive-layouts-manifest-api-behavior-guide.md`
 - `android16/behavior-changes/target/device-form-factors/adaptive-layouts.md`
 - `android16/behavior-changes/target/device-form-factors/implementation-details-adaptive-layouts.md`
 - https://developer.android.com/develop/adaptive-apps/guides/app-orientation-aspect-ratio-resizability
 - https://developer.android.com/guide/app-compatibility/test-debug
-- https://developer.android.com/develop/ui/views/layout/support-multi-window-mode
+- https://developer.android.com/develop/adaptive-apps/guides/support-multi-window-mode
 - https://developer.android.com/tools/adb
 
 ExpectedとObservedを分離し、実行していないケースをPassにしないでください。
@@ -59,9 +58,9 @@ ExpectedとObservedを分離し、実行していないケースをPassにしな
 4. `adb shell wm help`を保存し、このbuildで利用可能なrotation / window commandを確認する。command名を推測しない。
 5. physical size、override size、density、display情報、`smallestScreenWidthDp`、navigation mode、font scale、locale、dark mode、dock状態、現在のuser rotation設定を保存する。
 6. target 35 / 36 APKについて、source commit、variant、versionName、versionCode、targetSdkVersion、APK SHA-256を保存する。
-7. feature flags、login / test account、camera permission、端末側のapp aspect-ratio設定、app data、選択中のcamera modeなど、両buildで揃えるinitial stateを保存する。変更やdata消去が必要なら先に確認する。
-8. split-screen companion appがcamera / microphoneを要求せず、camera resourceや対象appのforeground動作と競合しないことを確認する。
-9. テスト用camera scene、screen lock、通知表示、個人情報を含まない撮影環境を確認する。
+7. feature flags、permission、login / test account、test data、端末側のapp aspect-ratio設定、app data、選択中のapp stateなど、両buildで揃えるinitial stateを保存する。変更やdata消去が必要なら先に確認する。
+8. split-screen companion appが対象appのpermission、foreground動作、network、audio、sensorなど検証対象のresourceと競合しないことを確認する。
+9. notification、IME、system dialog、個人情報などscreenshotへ混入し得る状態を確認し、必要なものはケース条件として記録する。
 10. evidence rootにrun IDを持つdirectoryを作成し、開始時刻と全command transcriptを記録する。
 
 Pixel Tabletのmodel / SDK、APKのtargetSdkVersion、対象packageを証明できない場合は、Observedを作らずblockerとして報告してください。
@@ -70,7 +69,7 @@ Pixel Tabletのmodel / SDK、APKのtargetSdkVersion、対象packageを証明で�
 
 既知画面だけに限定せず、次の利用箇所から回転・resize影響を受ける画面を棚卸ししてください。
 
-各画面について通常のユーザー導線、必要なpermission / login / feature flag、direct intent / deep linkの有無を記録してください。direct intentやdeep linkで到達できても、通常導線の到達確認を代替したとは扱わず、どちらを実行したか明示してください。
+各画面について通常のユーザー導線、必要なpermission / login / feature flag / test data、direct intent / deep linkの有無を記録してください。direct intentやdeep linkで到達できても、通常導線の到達確認を代替したとは扱わず、どちらを実行したか明示してください。
 
 Manifest / configuration:
 
@@ -80,6 +79,7 @@ Manifest / configuration:
 - `configChanges`
 - `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY`
 - `appCategory`
+- orientation、screen size、window sizeに応じたresource qualifier
 
 Runtime / window:
 
@@ -89,18 +89,11 @@ Runtime / window:
 - `screenWidthDp` / `screenHeightDp` / `smallestScreenWidthDp`
 - `Display.getRotation()` / `display.rotation`
 - `WindowMetrics` / window bounds / measured width and height
+- window size classまたはapp独自breakpoint
 - `isInMultiWindowMode()` / `onMultiWindowModeChanged()`
 - `onConfigurationChanged()`、Activity recreation、saved state
-
-Camera:
-
-- camera sensor orientation
-- display rotation / target rotation
-- CameraX `PreviewView`、`UseCase.targetRotation`、`SurfaceRequest.TransformationInfo`相当
-- Camera1 / Camera2のpreview transform、`setDisplayOrientation()`相当
-- front camera mirror
-- preview resolution、crop rect、scale type、aspect ratio
-- captured image / videoのrotation metadata、JPEG EXIF orientation
+- system bar / display cutout / IME insets
+- Compose / Viewsのlayout、navigation、dialog / overlay、scroll、focus状態
 
 ### Attribute-driven branch impact
 
@@ -108,7 +101,7 @@ Camera:
 
 | File / symbol | 取得・設定する属性 | 値のsource | Branch condition | 選択される処理 | 影響画面 | target 35 expected | target 36 expected | Runtime marker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `<path:symbol>` | `<attribute>` | `<manifest/API/camera/window>` | `<if/when>` | `<layout/transform/recreate/navigation>` | `<screen>` | `<expected>` | `<expected>` | `<tag/event>` |
+| `<path:symbol>` | `<attribute>` | `<manifest/API/resource/window>` | `<if/when>` | `<layout/recreate/navigation/state>` | `<screen>` | `<expected>` | `<expected>` | `<tag/event>` |
 
 次を必ず確認してください。
 
@@ -117,7 +110,7 @@ Camera:
 - requested orientationと実効orientation / window boundsを混同していないか確認する。
 - displayの600dp gateと現在のapp window幅によるUI breakpointを混同していないか確認する。
 - target 35 / 36、full-screen / multi-windowでbranchの入力値または選択結果が変わるか確認する。
-- branchがcamera preview transform、crop、mirror、capture metadata、Activity recreation、state restorationへ与える影響を記録する。
+- branchがlayout、resource選択、navigation、Activity recreation、state restoration、rendering、入力受付へ与える影響を記録する。
 
 ## Phase 3: Evidence markers
 
@@ -126,12 +119,12 @@ Camera:
 既存ログが不足する場合、debug / test限定で次のmarkerを追加してください。
 
 ```text
-CameraEvidence RUN_ID=<id> EVENT=SCREEN_RESUMED SCREEN=<stable-screen-id>
-CameraEvidence RUN_ID=<id> EVENT=PREVIEW_STREAMING SCREEN=<id> LENS=<front|back>
-CameraEvidence RUN_ID=<id> EVENT=ATTRIBUTE_READ NAME=<name> VALUE=<value>
-CameraEvidence RUN_ID=<id> EVENT=BRANCH_SELECTED BRANCH=<stable-branch-id> RESULT=<result>
-CameraEvidence RUN_ID=<id> EVENT=WINDOW_STATE ROTATION=<value> ORIENTATION=<value> SMALLEST_WIDTH_DP=<value> BOUNDS=<value> MULTI_WINDOW=<true|false>
-CameraEvidence RUN_ID=<id> EVENT=CAMERA_TRANSFORM SENSOR_ORIENTATION=<value> TARGET_ROTATION=<value> RESOLUTION=<value> CROP=<value> MIRROR=<value>
+AppWindowEvidence RUN_ID=<id> EVENT=SCREEN_RESUMED SCREEN=<stable-screen-id>
+AppWindowEvidence RUN_ID=<id> EVENT=UI_READY SCREEN=<stable-screen-id> STATE=<stable-state-id>
+AppWindowEvidence RUN_ID=<id> EVENT=ATTRIBUTE_READ NAME=<name> VALUE=<value>
+AppWindowEvidence RUN_ID=<id> EVENT=BRANCH_SELECTED BRANCH=<stable-branch-id> RESULT=<result>
+AppWindowEvidence RUN_ID=<id> EVENT=WINDOW_STATE ROTATION=<value> ORIENTATION=<value> SMALLEST_WIDTH_DP=<value> BOUNDS=<value> MULTI_WINDOW=<true|false>
+AppWindowEvidence RUN_ID=<id> EVENT=STATE_RESTORED SCREEN=<stable-screen-id> STATE=<stable-state-id>
 ```
 
 同じtagとrun IDを全証跡で使用してください。process restart後はPIDが変わるため、PIDだけでrunを識別しないでください。
@@ -154,15 +147,15 @@ Window / rotation条件:
 | --- | --- | --- |
 | W1 | Full-screen | portrait相当で安定後に取得 |
 | W2 | Full-screen | landscape相当で安定後に取得 |
-| W3 | Full-screen | W1 -> W2の回転後、Activity / camera / state復帰を取得 |
+| W3 | Full-screen | W1 -> W2の回転後、Activity / UI / state復帰を取得 |
 | W4 | Split-screen | dividerを幅広側にして取得 |
 | W5 | Split-screen | dividerを狭幅側にして取得 |
-| W6 | Split-screen | split状態のまま回転またはbounds変更し、復帰を取得 |
+| W6 | Split-screen | split状態のまま回転またはbounds変更し、UI / state復帰を取得 |
 | W7 | Full-screen | splitから戻した後の状態復帰を取得 |
 
-各影響画面についてB1とB3をW1〜W7で実行してください。B2とB4は最も重要なcamera preview画面でW1〜W6を実行し、Behavior Change単体の影響を分離してください。B5はmanifest opt-outが存在する場合だけ実行してください。
+各影響画面についてB1とB3をW1〜W7で実行してください。B2とB4は最も影響度の高い代表画面でW1〜W6を実行し、Behavior Change単体の影響を分離してください。B5はmanifest opt-outが存在する場合だけ実行してください。
 
-back / front camera、photo / videoなど複数モードがある場合は、screen inventoryのリスクに基づき組み合わせを選び、除外理由を記録してください。最低限、主要preview画面はback / frontの両方を確認してください。
+複数の表示状態、入力状態、content種別、navigation階層がある場合は、screen inventoryのリスクに基づき組み合わせを選び、除外理由を記録してください。
 
 ## Phase 5: Device operations
 
@@ -172,7 +165,7 @@ back / front camera、photo / videoなど複数モードがある場合は、scr
 - `adb shell wm help`が示すsyntaxだけを使う。
 - commandが成功しても、rotation番号からportrait / landscapeを決めず、実効display情報、window bounds、screenshotで確認する。
 - ADBによるlogical rotationと、Pixel Tabletを物理的に回す操作を区別して記録する。
-- camera sensor / HAL /端末姿勢の影響を確認するケースでは、必要な時点でユーザーへ物理回転を依頼し、そのケースを自動ADB回転で代替しない。
+- 加速度sensor、端末姿勢、外部displayなど物理状態の影響が検証対象なら、必要な時点でユーザーへ物理操作を依頼し、自動ADB操作で代替しない。
 
 ### Multi-window
 
@@ -181,7 +174,7 @@ back / front camera、photo / videoなど複数モードがある場合は、scr
 - 安定したUI test / system UI操作があれば使用する。なければユーザーへsplit-screen開始、divider移動、終了を依頼して継続する。
 - `isInMultiWindowMode()` marker、Activity / Window dumps、boundsの3つでmulti-window状態を確認する。
 - companion app、divider位置、左右または上下の配置を各ケースで固定・記録する。
-- camera / microphoneを使用するappをcompanionに選ばず、camera resource競合をレイアウト不具合と誤認しない。
+- companion appによるresource競合、IME、overlay、foreground制約をlayout不具合と誤認しない。
 
 ### Compat change
 
@@ -204,13 +197,12 @@ back / front camera、photo / videoなど複数モードがある場合は、scr
 ├── display.txt
 ├── layout.json
 ├── screenshot.png
-├── visual-review.md
-└── capture-metadata.txt       # 撮影結果を検証した場合
+└── visual-review.md
 ```
 
 必須証跡:
 
-1. `CameraEvidence`の`SCREEN_RESUMED`と、camera画面なら`PREVIEW_STREAMING`。
+1. `AppWindowEvidence`の`SCREEN_RESUMED`と`UI_READY`。
 2. 属性取得値と`BRANCH_SELECTED`。影響branchがない場合はsource inspection結果を記録する。
 3. `dumpsys activity activities`によるtop / resumed Activity。
 4. `dumpsys window windows`によるfocus、windowing mode、bounds。
@@ -223,14 +215,12 @@ back / front camera、photo / videoなど複数モードがある場合は、scr
 
 screen到達済みと判定するには、原則として次の4点を一致させてください。
 
-- destination側の`SCREEN_RESUMED`
-- top / resumed Activityまたはsingle-Activity appのdestination固有UI marker
+- destination側の`SCREEN_RESUMED` / `UI_READY`
+- top / resumed Activityまたはsingle-Activity appのdestination固有marker
 - destination固有のUI hierarchy element
 - 視認済みscreenshot
 
-single-Activity / Compose navigationではActivity名だけを到達証拠にしないでください。camera previewが`SurfaceView`、protected buffer、`FLAG_SECURE`等によりscreenshotで黒くなる場合は成功扱いにせず、制約を記録し、許可された非secure debug buildまたは端末外観撮影を代替候補として提示してください。secure表示を回避する操作は行わないでください。
-
-撮影画像まで対象とする場合は、preview screenshotとは別に、生成fileのpixel dimensions、rotation metadata / EXIF、front camera mirror方針、表示結果を記録してください。
+single-Activity / Compose navigationではActivity名だけを到達証拠にしないでください。`SurfaceView`、protected buffer、`FLAG_SECURE`等によりscreenshotで内容を確認できない場合は成功扱いにせず、制約を記録し、許可された非secure debug / test buildまたは端末外観撮影を代替候補として提示してください。secure表示を回避する操作は行わないでください。
 
 ## Phase 7: Analysis
 
@@ -242,10 +232,9 @@ caseごとに次を比較してください。
 - full-screen vs split-screen wide vs split-screen narrow
 - requested orientation vs effective orientation / bounds
 - app codeで取得した属性値 vs 選択されたbranch vs visual result
-- back camera vs front camera
-- rotation / resize前後のpreview transform、crop、mirror、controls位置、state preservation
+- rotation / resize前後のlayout、navigation、scroll / focus、input、state preservation
 
-画面のstretch、clip、off-screen control、previewの反転・回転・歪み、system bar / dividerとの重なり、dialog / overlay位置、camera再接続、入力状態消失を確認してください。回転途中だけの黒画面や一時崩れが疑われる場合は、screenshotだけで結論を出さず、許可範囲で短いscreen recordingまたは追加ログを候補として記録してください。
+stretch、clip、off-screen control、表示密度の不整合、system bar / divider / IMEとの重なり、navigation bar / rail、pane、dialog / overlay位置、scroll到達性、状態消失、二重遷移、再読み込みを確認してください。一時崩れや再生成中だけの問題が疑われる場合は、screenshotだけで結論を出さず、許可範囲で短いscreen recordingまたは追加ログを候補として記録してください。
 
 ## Output
 
@@ -266,7 +255,7 @@ evidence root直下へ次を作成してください。
 - split-screenを終了し、開始前のwindow状態へ戻す。
 - debug / test markerのsource変更は勝手に破棄せず、diffと残置理由を報告する。
 - background logcat processがあれば停止する。
-- app data、camera media、既存ログを削除していないことを確認する。
+- app data、test data、既存ログを削除していないことを確認する。
 
 ## Completion criteria
 
@@ -275,7 +264,7 @@ evidence root直下へ次を作成してください。
 - 影響画面と属性依存branchをsourceから棚卸しした。
 - 必須matrixを実行し、未実行はNot testedとして理由を記録した。
 - 各caseの画面到達をlog、system state、UI hierarchy、視認済みscreenshotで確認した。
-- camera固有のsensor / target rotation、transform、crop、mirrorを必要範囲で確認した。
+- orientation / window属性と選択branch、その下流のlayout / navigation / stateへの影響を確認した。
 - ExpectedとObservedを分け、推測をObservedにしていない。
 - 端末設定とcompat overrideを復元した。
 - evidence index、code impact、visual comparison、hash、cleanup記録を作成した。
