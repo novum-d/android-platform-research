@@ -26,6 +26,7 @@
 | UC-12 | Behavior Changeの概念FAQを作成・更新 | 主レポートpath、読者の質問 | version固有FAQ companion |
 | UC-13 | 複数API・実装方式のruntime挙動を比較 | 主レポートpath、比較対象 | runtime behavior comparison |
 | UC-14 | このrepositoryの構成をレビュー | review scope、必要なら改善実装の可否 | evidence付き構成レビュー、明示依頼時のみ修正 |
+| UC-15 | Pixel Tablet実機でカメラ画面の回転影響を検証 | camera project、package、target 35 / 36 build、画面到達手順 | screenshot、logcat、UI hierarchy、system state、code impact |
 
 ## 共通ルール
 
@@ -469,6 +470,77 @@ source of truthの重複、Codex URL-only workflow、templateと成果物pathの
 - unrelatedな既存変更を修正、整形、commitしない。
 - ファイル移動、削除、大規模なdirectory再編は、改善依頼に含まれていても人間の明示判断なしに実行しない。
 
+## UC-15: Pixel Tablet実機でカメラ画面の回転影響を検証
+
+### 使う場面
+
+Android 16 Adaptive layoutsの影響を受けるカメラアプリについて、Pixel Tablet実機でtargetSdkVersion 35 / 36、全画面、分割画面、回転を比較し、画面到達と属性依存branchの実行を再確認可能な証跡として保存する。
+
+これはUC-09の前段にあたる。UC-15は実機操作とevidence bundleの収集を担当し、UC-09は確認済みObservedを主レポートやapp reportへ反映する。
+
+### 実行用プロンプト
+
+[Pixel Tabletカメラ回転検証プロンプト](../../.codex/prompts/verify-camera-rotation-on-pixel-tablet.md)を使う。
+
+最小入力:
+
+```text
+- Camera project: <camera-project-path>
+- Package name: <package-name>
+- targetSdkVersion 35 build command or APK: <value>
+- targetSdkVersion 36 build command or APK: <value>
+- Known affected screens and entry steps: <value>
+- Evidence output root: <path>
+
+.codex/prompts/verify-camera-rotation-on-pixel-tablet.md に従って、
+Pixel Tablet実機 / Android 16で画面回転とmulti-window影響を検証してください。
+```
+
+### 必須確認項目
+
+- 接続端末が物理実機のPixel Tablet、Android 16 / API 36であること。
+- target 35 / 36 APKが同じsource baselineから作られ、targetSdkVersionを端末上でも確認できること。
+- manifest、runtime orientation API、Configuration、WindowMetrics、multi-window、camera rotation / transform関連の利用箇所。
+- 取得・設定した属性を使うbranchと、その下流のlayout、camera transform、crop、mirror、capture metadata、state restorationへの影響。
+- target 35 / 36 defaultと、compat change force-enable / force-disableによるBehavior Change単体の分離。
+- full-screen、split-screen wide / narrow、split中のrotation / resize、full-screen復帰。
+- back / front cameraと主要camera mode。
+- destination側marker、top / resumed state、UI hierarchy、視認済みscreenshotの一致。
+- secure surface、camera preview黒画面、UI hierarchy取得不能、ADB logical rotationと物理回転の差。
+- rotation、compat override、window stateのcleanup。
+
+### 主な成果物
+
+```text
+<evidence-output-root>/<run-id>/
+├── INDEX.md
+├── code-impact.md
+├── visual-comparison.md
+├── SHA256SUMS
+├── cleanup.md
+└── <case-id>/
+    ├── metadata.txt
+    ├── commands.txt
+    ├── logcat.txt
+    ├── activity.txt
+    ├── window.txt
+    ├── display.txt
+    ├── layout.json
+    ├── screenshot.png
+    └── visual-review.md
+```
+
+### 制約
+
+- emulatorをPixel Tablet実機のObservedとして代用しない。
+- `wm size`によるdisplay overrideをmulti-windowの代用にしない。
+- rotation command成功だけでportrait / landscapeを判定しない。
+- single-Activity appでActivity名だけを画面到達証拠にしない。
+- appログだけでPassにせず、system state、UI hierarchy、screenshotと照合する。
+- production / release behaviorへ検証ログを追加しない。
+- secure表示を回避しない。capture不能はBlockedとして代替候補を示す。
+- target projectまたは調査レポートへObservedを反映するのは、証跡確認後に明示依頼された場合だけとする。
+
 ## ユースケース選択の目安
 
 ```text
@@ -482,7 +554,7 @@ source of truthの重複、Codex URL-only workflow、templateと成果物pathの
   -> 概念整理はUC-12、複数API / callback比較はUC-13
 
 根拠または品質を補強する
-  -> 全体レビューはUC-05、AOSP / compat再調査はUC-08、実測反映はUC-09
+  -> 全体レビューはUC-05、AOSP / compat再調査はUC-08、実機証跡収集はUC-15、実測反映はUC-09
 
 複数条件や対象を横断して説明する
   -> OS間比較はUC-06、特定アプリ影響はUC-07

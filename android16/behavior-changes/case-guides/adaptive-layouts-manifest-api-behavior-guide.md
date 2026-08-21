@@ -207,6 +207,8 @@ adb shell am compat reset UNIVERSAL_RESIZABLE_BY_DEFAULT <package>
 
 ## 最小検証マトリクス
 
+Pixel Tablet実機でカメラ画面の証跡を収集する場合は、[専用実行プロンプト](../../../.codex/prompts/verify-camera-rotation-on-pixel-tablet.md)を使用する。
+
 | Case | OS | targetSdkVersion | Compat change | Opt-out | Expected |
 | --- | --- | --- | --- | --- | --- |
 | Baseline target | Android 16 | 35 | default | なし | 新挙動は既定適用されない |
