@@ -55,7 +55,7 @@ AOSP では game は `ApplicationInfo.CATEGORY_GAME`、small screen は `Display
 
 理由:
 - 例外条件に入る場合、Android 16 / targetSdkVersion 36 でも base behavior は抑止される。
-- 例外条件に入らない large screen では、fixed orientation、non-resizable、min/max aspect ratio、pillarboxing 前提が崩れる。
+- 例外条件に入らないlarge screenでは、固定方向、サイズ変更不可、min/max aspect ratio、pillarboxingの前提が崩れる。
 - OEM / DeviceConfig と user aspect ratio settings により、端末やユーザー設定ごとに見え方が変わる可能性がある。
 
 ## 影響対象（Who Is Affected）
@@ -115,7 +115,7 @@ targetSdkVersion 36 以上に上げると、Android 16 端末の large screen �
 - Compat framework: `UNIVERSAL_RESIZABLE_BY_DEFAULT` / 357141415、Android 16 / API 36 以上 target で enabled。
 - AOSP files: `ActivityInfo.java`、`ApplicationInfo.java`、`PackageParser.java`、`WindowManager.java`、`DisplayContent.java`、`ActivityRecord.java`、`AppCompatAspectRatioOverrides.java`、`AppCompatResizeOverrides.java`、`WindowManagerConstants.java`。
 - AOSP source context: manifest category / display size / user setting / DeviceConfig / opt-out property -> `ActivityRecord#isUniversalResizeable()`。
-- Diff interpretation: Android 16 tag で large screen default ignore 経路が追加。例外条件では universal resizable path から外れる。
+- Diff interpretation: Android 16 tagでlarge screen default ignore経路が追加。例外条件では、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる。
 - Gate conclusion: Android 16 以上 + targetSdkVersion 36 以上 + `sw >= 600dp` + non-game + user exception なし + opt-out なし + OEM package opt-out なし。
 
 ## 人間の判断欄（Human Decision）

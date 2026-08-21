@@ -79,7 +79,7 @@ Android 16 では、trusted / privileged virtual device owner が管理する se
 
 この変更は targetSdkVersion 36 化の影響ではなく、Android 16 OS 上で virtual device owner projection 経路に乗る場合の条件付き影響である。通常の phone local display 実行では、本件の override は適用されない。
 
-影響が出るのは、portrait-only、fixed orientation、`resizeableActivity=false`、min/max aspect ratio などに依存し、large screen / external display / landscape window に適応していないアプリである。顧客向けには「OS 更新だけ」「targetSdkVersion 36 化」「virtual device owner projection 時だけ」「large screen UI impact」を分けて説明する必要がある。
+影響が出るのは、portrait-only、固定方向、`resizeableActivity=false`、min/max aspect ratioなどに依存し、large screen / external display / landscape windowに適応していないアプリである。顧客向けには「OS更新だけ」「targetSdkVersion 36化」「virtual device owner projection時だけ」「large screen UI impact」を分けて説明する必要がある。
 
 ---
 
@@ -135,7 +135,7 @@ Android 16 では、trusted / privileged virtual device owner が管理する se
   - `OVERRIDE_ANY_ORIENTATION_TO_USER`、`OVERRIDE_MIN_ASPECT_RATIO` などは per-app app-compat testing / override 用で、本件の virtual display owner path と混同しない。
 - Aconfig:
   - `com.android.window.flags.vdm_force_app_universal_resizable_api`
-  - description: virtual display 上で app を universal resizable に force する API availability。
+  - description: virtual display上でappをあらゆるウィンドウサイズへ変更可能な状態に強制するAPI availability。
 
 ---
 
@@ -158,7 +158,7 @@ Files / symbols:
 - `VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions(boolean)`
 
 Relevant behavior:
-- `isIgnoreActivitySizeRestrictions()` は display が fixed orientation、aspect ratio、resizability を無視するかを返す。
+- `isIgnoreActivitySizeRestrictions()`はdisplayが固定方向、aspect ratio、サイズ変更可否の制約を無視するかを返す。
 - API は `@SystemApi` かつ `@FlaggedApi(com.android.window.flags.Flags.FLAG_VDM_FORCE_APP_UNIVERSAL_RESIZABLE_API)`。
 - Builder method の doc は、true にするには `DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED` が必要で、trusted でない display では property が無視されると説明している。
 
@@ -191,7 +191,7 @@ Files / symbols:
 
 Relevant behavior:
 - `DisplayWindowSettings#setIgnoreActivitySizeRestrictionsOnDisplayLocked(...)` は `SettingsEntry#mIgnoreActivitySizeRestrictions` を display override settings に保存する。
-- `DisplayContent` は作成時に `mIgnoreActivitySizeRestrictions` を読み込み、`isDisplayIgnoreActivitySizeRestrictions()` で fixed orientation、aspect ratio、resizability を無視する display かを返す。
+- `DisplayContent`は作成時に`mIgnoreActivitySizeRestrictions`を読み込み、`isDisplayIgnoreActivitySizeRestrictions()`で固定方向、aspect ratio、サイズ変更可否の制約を無視するdisplayかを返す。
 - `DisplayContent` の comment は、この値が `VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions` から設定され得ると説明している。
 
 Diff interpretation:
@@ -205,7 +205,7 @@ Files / symbols:
 - `frameworks-base/services/core/java/com/android/server/wm/AppCompatUtils.java`
 
 Relevant behavior:
-- `AppCompatOrientationPolicy#overrideOrientationIfNeeded(...)` は eligible virtual display では activity の orientation request を無視し、`SCREEN_ORIENTATION_USER` を返す。
+- `AppCompatOrientationPolicy#overrideOrientationIfNeeded(...)`はeligible virtual displayではactivityからの画面の向きの要求を無視し、`SCREEN_ORIENTATION_USER`を返す。
 - `AppCompatAspectRatioOverrides#hasFullscreenOverride()` は `shouldIgnoreActivitySizeRestrictionsForDisplay()` を fullscreen override 条件に含める。
 - `AppCompatUtils#isDisplayIgnoreActivitySizeRestrictions(...)` は aconfig flag と `DisplayContent#isDisplayIgnoreActivitySizeRestrictions()` の両方を gate にする。
 - `AppCompatUtils#isChangeEnabled(...)` は display が restrictions を無視する場合、package-level compat change を適用しないようにしている。
@@ -257,7 +257,7 @@ Files / symbols:
 - `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY`
 
 Relevant behavior:
-- Android 16 / API level 36 以降の ignore orientation request display setting 上で、package / activity が fixed orientation、min/max aspect ratio、unresizable を宣言・要求できるかに関係する property がある。
+- Android 16 / API level 36以降の「画面の向きの要求を無視するdisplay設定」上で、package / activityが固定方向、min/max aspect ratio、サイズ変更不可を宣言・要求できるかに関係するpropertyがある。
 
 Diff interpretation:
 - これは virtual device owner override そのものではなく、large screen / app compatibility override ecosystem の一部である。
@@ -272,7 +272,7 @@ Diff interpretation:
 - 公式文書は Android 16 all apps ページの Device form factors に本項目を掲載している。
 - 公式文書は virtual device owner を trusted / privileged app と説明している。
 - 公式文書は Android 16 / API level 36 で virtual device owner が select virtual devices 上の app settings を override できると述べている。
-- AOSP には `VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions(boolean)` があり、fixed orientation、aspect ratio、resizability を無視する display property として定義されている。
+- AOSPには`VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions(boolean)`があり、固定方向、aspect ratio、サイズ変更可否の制約を無視するdisplay propertyとして定義されている。
 - AOSP ではこの property は `@SystemApi` / `@FlaggedApi` であり、trusted display 条件を満たさない場合は DisplayManagerService が request を無視する。
 - AOSP では `CREATE_VIRTUAL_DEVICE` が `internal|role`、`ADD_TRUSTED_DISPLAY` が `signature|role`。
 - WindowManager は display setting として `mIgnoreActivitySizeRestrictions` を保持し、AppCompat policy が orientation / aspect ratio / resizability restriction を無視する判定に使う。
@@ -329,7 +329,7 @@ Diff interpretation:
 
 | シナリオ（Scenario） | 期待挙動（Expected behavior） |
 | --- | --- |
-| Android 16 / orientation restriction ignored | `AppCompatOrientationPolicy` が eligible virtual display で activity orientation request を `SCREEN_ORIENTATION_USER` 相当に扱う。 |
+| Android 16 / orientation restriction ignored | `AppCompatOrientationPolicy`がeligible virtual displayでactivityからの画面の向きの要求を`SCREEN_ORIENTATION_USER`相当に扱う。 |
 | Android 16 / orientation restriction respected | override disabled / non-eligible display / app opt-out 条件では通常 policy に従う。 |
 | Android 16 / aspect ratio restriction ignored | display-level ignore setting が fullscreen / aspect ratio override 条件に入る。 |
 | Android 16 / aspect ratio restriction respected | override がない display では manifest / app compat policy に従う。 |
@@ -357,7 +357,7 @@ Diff interpretation:
 
 - companion app streaming / virtual device projection で利用されるアプリ。
 - phone portrait 専用 UI のアプリ。
-- fixed orientation を前提にするアプリ。
+- 固定方向を前提にするアプリ。
 - aspect ratio 制限を前提にするアプリ。
 - `resizeableActivity=false` や resizability 制限を持つアプリ。
 - large screen / external display / desktop mode / Chromebook / car display / VR display で利用され得るアプリ。
@@ -425,7 +425,7 @@ targetSdkVersion 36 へ上げたこと自体が本件の直接条件ではあり
 - portrait-only / phone-only layout を large screen / landscape / desktop-class bounds で確認する。
 - WindowMetrics / size class / responsive layout / adaptive navigation へ移行する。
 - camera / media / map / game / document / form など display size に敏感な workflow を projection 環境で手動確認する。
-- SDK / library が fixed orientation や fixed aspect ratio を前提にしていないか確認する。
+- SDK / libraryが固定方向や固定aspect ratioを前提にしていないか確認する。
 - virtual device owner / privileged companion app と連携する場合、どの virtual display に override が有効か契約・仕様として確認する。
 
 ---

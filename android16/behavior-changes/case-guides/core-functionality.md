@@ -49,7 +49,7 @@ Report: [Fully deprecating JobInfo#setImportantWhileForeground](../all/core-func
 | 即時の短時間 work | `true` で速やかな実行を期待 | expedited job を用途・quota と合わせて評価 | timing / quota / fallback |
 | User-started transfer | `true` で転送継続を期待 | user-initiated data transfer job を評価 | permission / user-visible state |
 | User-visible continuous work | job より継続表示が主目的 | FGS policy と照合して foreground service を評価 | notification / stop / background |
-| SDK 内部利用 | app code にないが dependency が使用 | SDK を更新し、実効 no-op 前提を vendor と確認 | dependency scan / Android 16 execution |
+| SDK内部利用 | app codeにないがdependencyが使用 | SDKを更新し、呼び出しても実際の動作を変えないことをvendorと確認 | dependency scan / Android 16 execution |
 
 ## Fixed rate work scheduling optimization
 

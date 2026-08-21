@@ -99,11 +99,11 @@ Compat framework:
 
 # エグゼクティブサマリー（Executive Summary）
 
-Android 16 では、`JobInfo.Builder#setImportantWhileForeground(true)` は実効性を失う。呼び出しても `FLAG_IMPORTANT_WHILE_FOREGROUND` は設定されず、warning log を出して builder 自体を返すだけになる。`JobInfo#isImportantWhileForeground()` も常に `false` を返す。
+Android 16では、`JobInfo.Builder#setImportantWhileForeground(true)`は呼び出しても動作を変えなくなる。`FLAG_IMPORTANT_WHILE_FOREGROUND`は設定されず、warning logを出してbuilder自体を返すだけになる。`JobInfo#isImportantWhileForeground()`も常に`false`を返す。
 
 これは targetSdkVersion 36 化による変更ではなく、Android 16 all apps の OS behavior change として扱う。targetSdkVersion 35 のままでも、Android 16 上では同じ挙動が期待される。
 
-Android 12 以降、この API は既に deprecated だった。今回のポイントは deprecation warning ではなく、Android 15 では flag 状態によって残っていた important-while-foreground の実装経路が、Android 16 で API と JobScheduler controller の両方から実効的に除去されたこと。
+Android 12以降、このAPIは既にdeprecatedだった。今回のポイントはdeprecation warningではなく、Android 15ではflag状態によって残っていたimportant-while-foregroundの処理経路が、Android 16でAPIとJobScheduler controllerの両方から除去されたこと。
 
 ---
 
@@ -115,7 +115,7 @@ Android 12 以降、この API は既に deprecated だった。今回のポイ�
 
 - `JobInfo.Builder#setImportantWhileForeground(boolean)` は、scheduling app が foreground にいる間、または background restriction から一時的に exempt されている間の job の重要性を示す。
 - この method は Android 12 / API level 31 から deprecated。
-- Android 16 以降、この method は実効的に機能せず、呼び出しは ignored になる。
+- Android 16以降、このmethodは実際の動作を変えず、呼び出しはignoredになる。
 - この functionality removal は `JobInfo#isImportantWhileForeground()` にも適用される。
 - Android 16 以降、`JobInfo#isImportantWhileForeground()` を呼ぶと `false` を返す。
 
@@ -133,7 +133,7 @@ Android 12 以降、この API は既に deprecated だった。今回のポイ�
 
 `setImportantWhileForeground(boolean)` は Android 12 から deprecated だった。Android 15 tag の API surface でも `setImportantWhileForeground(boolean)` と `isImportantWhileForeground()` は `@Deprecated` として公開されている。
 
-Android 16 の変更は、deprecated API が残っていること自体ではなく、runtime behavior が実効的に削除されたこと。Android 16 tag では:
+Android 16の変更は、deprecated APIが残っていること自体ではなく、runtimeで挙動を変える処理が削除されたこと。Android 16 tagでは:
 
 - `setImportantWhileForeground(boolean)` は `importantWhileForeground` の値に関係なく warning log を出して `return this` する。
 - `isImportantWhileForeground()` は内部 flags を読まず、常に `false` を返す。
@@ -152,7 +152,7 @@ Android 15 tag では、`Flags.ignoreImportantWhileForeground()` が false の�
 
 ## Android 16 target
 
-Android 16 tag では、上記の実効経路が削除または無効化されている。
+Android 16 tagでは、上記の実際に挙動へ影響する処理経路が削除または無効化されている。
 
 - `JobInfo#isImportantWhileForeground()` は `return false` のみ。
 - `Builder#setImportantWhileForeground(boolean)` は warning log のみで、`mFlags` や `mPriority` を変更しない。
@@ -201,13 +201,13 @@ Android 16 tag では、上記の実効経路が削除または無効化され�
 | `job.aconfig` `ignore_important_while_foreground` | exported flag として存在し、API / controller 経路の条件。 | exported flag は残るが、public API 実装は flag 条件なしの no-op / false。 | Android 15 の flagged behavior と Android 16 の unconditional behavior を分ける根拠。 |
 | `DeviceIdleJobsController#updateTaskStateLocked()` | `allowInIdle` に important-while-foreground flag を含める。 | `allowInIdle` 経路が削除され、whitelist / idle mode のみを見る。 | doze relaxation と temporary allowlist 期待が無効になる根拠。 |
 | `QuotaController#getMaxJobExecutionTimeMsLocked()` | privileged state かつ high priority、または important-while-foreground flag の job に runtime-free quota max limit を返す。 | important 判定は effective priority >= high のみ。flag 参照は削除。 | important-while-foreground による quota / runtime 特別扱いが消える根拠。 |
-| `ThermalStatusRestriction#isJobRestricted()` | thermal restriction の foreground job 例外に `isImportantWhileForeground()` を使う。 | `isImportantWhileForeground()` を使う分岐が削除。 | thermal restriction 例外としての実効性が消える根拠。 |
+| `ThermalStatusRestriction#isJobRestricted()` | thermal restrictionのforeground job例外に`isImportantWhileForeground()`を使う。 | `isImportantWhileForeground()`を使う分岐が削除。 | thermal restrictionの例外として扱われなくなる根拠。 |
 | `core/api/current.txt` | `isImportantWhileForeground()` は `@Deprecated @FlaggedApi(...)`。 | `isImportantWhileForeground()` は `@Deprecated` のみ。 | API surface 上の Android 16 public behavior 固定化の根拠。 |
 
 必須記入項目（Required context）:
 - Entry point / caller: app または library が `new JobInfo.Builder(...).setImportantWhileForeground(true).build()` で `JobInfo` を作成し、`JobScheduler#schedule(JobInfo)` に渡す。
 - Runtime path: `JobInfo.Builder` -> `JobInfo` -> `JobSchedulerService` / `DeviceIdleJobsController` / `QuotaController` / `ThermalStatusRestriction`。
-- Why relevant: 公式文書が述べる API call ignored、getter false、job の foreground importance の実効性を直接実装・参照している経路。
+- Why relevant: 公式文書が述べるAPI call ignored、getter false、jobをforeground importanceに基づいて特別扱いする挙動を直接実装・参照している経路。
 - Excluded code paths: Android 16 JobScheduler quota optimizations の top-started job / foreground-service-concurrent job quota enforcement は別 Behavior Change。`setImportantWhileForeground()` の代替ではなく、foreground state と quota の一般的な扱いなので混同しない。
 
 ## 差分解釈（Diff Interpretation）
@@ -218,7 +218,7 @@ Android 16 tag では、上記の実効経路が削除または無効化され�
 | `setImportantWhileForeground()` が flag を set / clear する実装から warning log + `return this` に変更。 | Removed behavior | setter は引数に関係なく ignored。priority も変えない。 | 公式の「calling this method will be ignored」を支持。 | High |
 | `DeviceIdleJobsController` から `allowInIdle` と flag tracking が削除。 | Removed behavior | doze 中の important-while-foreground 例外がなくなる。 | foreground / temp allowlist 中の relaxation 期待に影響。 | High |
 | `QuotaController` の important 判定から `FLAG_IMPORTANT_WHILE_FOREGROUND` が削除。 | Removed behavior | quota-free max limit 判定に important-while-foreground flag が使われない。 | priority / quota 期待に影響。 | High |
-| `ThermalStatusRestriction` から `isImportantWhileForeground()` 分岐が削除。 | Removed behavior | thermal restriction 例外に使われない。 | scheduler restriction の実効影響を補強。 | Medium |
+| `ThermalStatusRestriction`から`isImportantWhileForeground()`分岐が削除。 | Removed behavior | thermal restrictionの例外に使われない。 | scheduler restrictionへ実際に与える影響を補強。 | Medium |
 | API surface で `isImportantWhileForeground()` の `@FlaggedApi` が外れ、deprecated public API として残る。 | API surface changed | API は削除ではなく残存し、戻り値 behavior が固定化。 | migration では compile break ではなく runtime behavior 変更として説明する根拠。 | High |
 | targetSdkVersion 36 gate が見つからない。 | No target gate | Android 16 上の all-apps behavior。 | `OS_UPDATE_ALL_APPS` を支持。 | High |
 
@@ -228,7 +228,7 @@ Android 16 tag では、上記の実効経路が削除または無効化され�
 
 | Original statement | 判定 | Evidence | Notes |
 | --- | --- | --- | --- |
-| `setImportantWhileForeground(boolean)` indicates job importance while scheduling app is foreground or temporarily exempted. | Verified for historical semantics | Android 15 `JobInfo` javadoc and implementation; `DeviceIdleJobsController` / `QuotaController` historical use. | Android 16 ではこの semantics は実効的に残らない。 |
+| `setImportantWhileForeground(boolean)` indicates job importance while scheduling app is foreground or temporarily exempted. | Verified for historical semantics | Android 15 `JobInfo` javadoc and implementation; `DeviceIdleJobsController` / `QuotaController` historical use. | Android 16ではこのsemanticsに基づく特別扱いは残らない。 |
 | Deprecated since Android 12. | Verified by API docs / source javadoc | `@Deprecated` is present in Android 15 and Android 16 API surface. | Android 12 tag までは今回の tag diff 対象外だが、AOSP current API でも deprecated 状態は確認。 |
 | Starting Android 16, no longer functions effectively and call is ignored. | Verified | Android 16 `setImportantWhileForeground()` logs warning and returns without touching `mFlags` / `mPriority`. | targetSdkVersion 条件なし。 |
 | Removal also applies to `JobInfo#isImportantWhileForeground()`. | Verified | Android 16 getter no longer checks flags. | API remains present. |
@@ -243,7 +243,7 @@ Android 16 tag では、上記の実効経路が削除または無効化され�
 - 公式文書は all apps ページにこの項目を掲載している。
 - Android 16 `JobInfo.Builder#setImportantWhileForeground(boolean)` は `importantWhileForeground` の引数を使わず、warning log を出して `return this` する。
 - Android 16 `JobInfo#isImportantWhileForeground()` は常に false を返す。
-- Android 16 の JobScheduler controller 側から important-while-foreground flag の実効参照が削除されている。
+- Android 16のJobScheduler controller側から、important-while-foreground flagを実際の判定に使う参照が削除されている。
 - Android 16 の該当経路に targetSdkVersion 36 gate は見つからない。
 - `JobInfo.Builder#setExpedited(boolean)` と `JobInfo.Builder#setUserInitiated(boolean)` は Android 16 API surface に存在し、`setUserInitiated(boolean)` は `RUN_USER_INITIATED_JOBS` permission を要求する。
 
@@ -252,7 +252,7 @@ Android 16 tag では、上記の実効経路が削除または無効化され�
 - Android 15 tag にも `ignore_important_while_foreground` aconfig flag は存在し、flag enabled の場合は API no-op / false の準備があった。
 - Android 16 では API 実装が aconfig flag 条件から外れ、常に ignored / false になる。
 - hidden `FLAG_IMPORTANT_WHILE_FOREGROUND` は Android 16 にも残るが、public builder が flag を立てないため、通常の app scheduling path では新規 job に反映されない。
-- `JobInfo` の `flags` field は parcel / copy で保持されるため、内部的・互換的に古い flag が存在する可能性はある。ただし controller 側で特別扱いされないため、実効性はない。
+- `JobInfo`の`flags` fieldはparcel / copyで保持されるため、内部的・互換的に古いflagが存在する可能性はある。ただしcontroller側で特別扱いされないため、実際のスケジューリング動作には影響しない。
 
 ## Hypotheses
 
@@ -263,7 +263,7 @@ Android 16 tag では、上記の実効経路が削除または無効化され�
 ## Conclusions
 
 - 本項目は `OS_UPDATE_ALL_APPS` と分類する。Android 16 上では targetSdkVersion 35 / 36 に関係なく、該当 API は ignored / false になる。
-- 顧客向けには「targetSdkVersion 36 に上げた時の影響」ではなく、「Android 16 OS 上で deprecated JobInfo API の実効性がなくなる影響」として説明する。
+- 顧客向けには「targetSdkVersion 36に上げた時の影響」ではなく、「Android 16 OS上でdeprecated JobInfo APIを呼び出してもスケジューリング動作が変わらなくなる影響」として説明する。
 - `setImportantWhileForeground(true)` による優先度上げ、doze 中の relaxation、quota / thermal restriction 例外を期待する設計は見直す必要がある。
 - 代替候補は用途に応じて `setExpedited(true)`、`setUserInitiated(true)`、foreground service、または通常 job + stop reason / pending reason logging で検討する。
 
@@ -286,7 +286,7 @@ Android 16 tag では、上記の実効経路が削除または無効化され�
 | --- | --- |
 | targetSdkVersion 35 / `setImportantWhileForeground(true)` | ignored。flag / priority は変更されない。 |
 | targetSdkVersion 36 / `setImportantWhileForeground(true)` | target 35 と同じ。 |
-| `setImportantWhileForeground(false)` | ignored。既に builder 上で flag が立っていない限り実効変化なし。 |
+| `setImportantWhileForeground(false)` | ignored。既にbuilder上でflagが立っていない限り、実際の動作に変化なし。 |
 | `JobInfo#isImportantWhileForeground()` | 常に false。 |
 | direct JobScheduler job | deprecated API を使っても important-while-foreground の特別扱いは得られない。 |
 | WorkManager task | AOSP では Jetpack 内部実装までは確認不可。WorkManager がこの deprecated API に依存していなければ低影響。 |

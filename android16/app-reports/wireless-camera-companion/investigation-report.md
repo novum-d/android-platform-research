@@ -117,14 +117,14 @@ Android 16 の Local Network Permission は Android 17 と異なり、現時点�
 | Intent redirection hardening | Android 16、untrusted nested Intent Activity launch | external Intent extras をそのまま起動する router が block / exception になる可能性 | nested Intent validation と legitimate flow を確認 |
 | 16 KB page size compatibility mode | Android 16、16 KB page-size device、4 KB-aligned native libs | startup dialog、compat mode、native crash / performance 差 | APK / AAB の `.so` alignment と 16 KB device startup を確認 |
 | ART internal changes | Android 16 または Android 12+ updated ART module、ART internals 依存 | hidden API / runtime internals 依存 SDK が crash する可能性 | SDK 棚卸し、hidden API warning / JNI failure を確認 |
-| Virtual device owner overrides | Android 16、trusted virtual device owner projection | fixed orientation / non-resizable / aspect ratio 制限が projection 上で無視される | PC / car / Chromebook / VR projection があるか確認 |
+| Virtual device owner overrides | Android 16、trusted virtual device owner projection | 固定方向 / サイズ変更不可 / aspect ratio制限がprojection上で無視される | PC / car / Chromebook / VR projectionがあるか確認 |
 | GPU syscall filtering | Android 16、Mali GPU production build、direct `/dev/mali0` ioctl | unsupported graphics profiling / middleware が SELinux deny | native graphics SDK と Pixel Mali device logs を確認 |
 
 ## targetSdkVersion 36 更新で影響しうる項目（Target SDK Impact）
 
 | Behavior Change | targetSdkVersion 条件 | 追加条件 | 想定されるアプリ影響 | 推奨確認 |
 | --- | --- | --- | --- | --- |
-| Adaptive layouts | targetSdkVersion 36 以上 | Android 16、`sw >= 600dp`、non-game、opt-out なし | live view / remote control / image list が large screen bounds に伸びる | fixed orientation、`resizeableActivity=false`、min/max aspect ratio を確認 |
+| Adaptive layouts | targetSdkVersion 36以上 | Android 16、`sw >= 600dp`、non-game、opt-outなし | live view / remote control / image listがlarge screen boundsに伸びる | 固定方向、`resizeableActivity=false`、min/max aspect ratioを確認 |
 | Edge-to-edge opt-out going away | targetSdkVersion 36 以上 | Android 16、`windowOptOutEdgeToEdgeEnforcement` 依存 | system bars / navigation bar / IME と UI が重なる | setup / live view / image viewer の insets を確認 |
 | Predictive back default enabled | targetSdkVersion 36 以上 | Android 16、legacy `onBackPressed` / `KEYCODE_BACK` 依存 | back handling、connection flow、image viewer の戻る挙動が変わる | AndroidX / OnBackInvoked へ移行し、temporary opt-out を限定 |
 | Safer Intents | targetSdkVersion 36 / compile SDK 36 採用時に opt-in しやすい | Android 16、`android:intentMatchingFlags` opt-in、cross-app explicit Intent | external app / SDK からの explicit Intent が filter mismatch で block | manifest opt-in と intent filter を確認 |

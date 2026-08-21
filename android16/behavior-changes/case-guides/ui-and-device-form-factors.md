@@ -15,7 +15,7 @@ Manifest / API guide: [Adaptive layouts manifest / API behavior](adaptive-layout
 | --- | --- | --- | --- |
 | `< sw600dp` | small screen | 従来挙動を baseline とする | portrait / landscape |
 | `>= sw600dp` + responsive | orientation / aspect ratio 制約に非依存 | target 36 で通常 regression | tablet / foldable / desktop |
-| Fixed orientation / non-resizable | manifest / runtime restriction に依存 | WindowMetrics と adaptive layout へ移行し state preservation を実装 | rotate / resize / split screen |
+| 固定方向 / サイズ変更不可 | manifest / runtime restrictionに依存 | WindowMetricsとadaptive layoutへ移行しstate preservationを実装 | rotate / resize / split screen |
 | Off-screen / stretched UI | fixed dimensions / animation assumptions | constraint、scroll、pane、dialog位置を修正 | extreme aspect ratio |
 | Game exception | `appCategory=game` | exception 適用を確認し、将来適応の backlog を残す | category有無 |
 | Temporary opt-out | 未移行 Activity がある | Activity単位 property を優先し、理由と削除条件を記録 | opt-out有無。API 37では無効予定 |
@@ -28,7 +28,7 @@ Report: [Virtual device owner overrides](../all/device-form-factors/virtual-devi
 | --- | --- | --- | --- |
 | Projection なし | virtual / external display use case なし | 対応不要 | feature inventory |
 | Untrusted / ordinary display | owner override 条件外 | 通常 display behavior を確認 | display owner / trust |
-| Privileged virtual device owner | projection app が制約を override | fixed orientation 等を信用せず adaptive UI にする | remote bounds / rotation |
+| Privileged virtual device owner | projection appが制約をoverride | 固定方向などを前提にせずadaptive UIにする | remote bounds / rotation |
 | Small portrait-only layout | projected large / landscape で破綻 | pane、scroll、responsive breakpointsを追加 | car / PC / XR-like bounds |
 | Input modality changes | keyboard / mouse / controller | touch-only assumption を除去 | focus / hover / key / controller |
 

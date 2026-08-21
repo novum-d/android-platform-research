@@ -34,7 +34,7 @@ Android 16 では、`JobInfo.Builder#setImportantWhileForeground(true)` を呼�
 
 `JobInfo#isImportantWhileForeground()` も Android 16 では常に `false` を返す。
 
-これは targetSdkVersion 36 化の影響ではなく、Android 16 all apps の OS behavior change。Android 12 からの deprecation と、Android 16 で実効性がなくなる runtime behavior change を分けて説明する。
+これはtargetSdkVersion 36化の影響ではなく、Android 16 all appsのOS behavior change。Android 12からのdeprecationと、Android 16で呼び出しても動作が変わらなくなるruntime behavior changeを分けて説明する。
 
 ## 早見マトリクス（At-a-Glance Matrix）
 
@@ -73,7 +73,7 @@ Android 16 では、`JobInfo.Builder#setImportantWhileForeground(true)` を呼�
 | --- | --- |
 | OS / targetSdkVersion | Android 15 target 35、Android 16 target 35、Android 16 target 36、可能なら Android 15 target 36 を比較。 |
 | setter true | `setImportantWhileForeground(true)` 後に `isImportantWhileForeground()` が false になること。 |
-| setter false | `setImportantWhileForeground(false)` が実効変化を起こさないこと。 |
+| setter false | `setImportantWhileForeground(false)`が実際の動作を変えないこと。 |
 | dumpsys / persistence | scheduled job の flags / priority / dumpsys jobscheduler 表示。 |
 | foreground scheduling | app foreground state でもこの API の特別扱いがないこと。 |
 | background scheduling | app background state でも同様に no-op であること。 |
@@ -107,7 +107,7 @@ Android 16 では、`JobInfo.Builder#setImportantWhileForeground(true)` を呼�
 
 Android 16 では、`JobInfo.Builder#setImportantWhileForeground(true)` を呼んでも job は重要扱いされません。`JobInfo#isImportantWhileForeground()` も常に `false` を返します。
 
-これは targetSdkVersion 36 に上げた時の影響ではなく、Android 16 に OS アップデートした端末上で発生する all-apps behavior です。Android 12 から deprecated だった API が、Android 16 で実効的に no-op になったと説明してください。
+これはtargetSdkVersion 36に上げた時の影響ではなく、Android 16にOSアップデートした端末上で発生するall-apps behaviorです。Android 12からdeprecatedだったAPIが、Android 16では呼び出しても実際の動作を変えないno-opになったと説明してください。
 
 該当 API に priority / quota / doze relaxation を依存させている場合は、用途に応じて expedited job、user-initiated data transfer job、foreground service、または通常 job へ整理し直す必要があります。
 

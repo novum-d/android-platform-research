@@ -87,7 +87,7 @@ Base behavior が適用される条件（Base behavior applies when）:
 - Games: `android:appCategory` 由来の `ApplicationInfo.CATEGORY_GAME`。
 - User aspect ratio setting: device の aspect ratio settings で user が app default behavior を明示選択する場合。
 - Small screens: `sw < 600dp`。
-- OEM / device config: `WindowManagerConstants` / DeviceConfig の orientation request ignore 設定や package opt-out list。
+- OEM / device config: `WindowManagerConstants` / DeviceConfigの画面の向きの要求を無視する設定やpackage opt-out list。
 - Temporary opt-out: `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true`。公式文書では `Exceptions` ではなく隣接する `Opt out temporarily` 節で説明される。
 
 Compat framework:
@@ -103,7 +103,7 @@ Compat framework:
 
 Android 16 の `Exceptions` 節は、Adaptive layouts の base behavior、つまり large screen で orientation / resizability / aspect ratio restrictions を無視する挙動が適用されない条件を列挙している。
 
-公式文書で確認できる例外は、game、user が device の aspect ratio settings で app default behavior を明示選択する場合、`sw600dp` 未満の screen の 3 つである。AOSP evidence でも、game は `ApplicationInfo.CATEGORY_GAME`、small screen は `DisplayContent#isLargeScreen()`、user setting は `AppCompatAspectRatioOverrides` を通じて universal resizable 判定に接続される。
+公式文書で確認できる例外は、game、userがdeviceのaspect ratio settingsでapp default behaviorを明示選択する場合、`sw600dp`未満のscreenの3つである。AOSP evidenceでも、gameは`ApplicationInfo.CATEGORY_GAME`、small screenは`DisplayContent#isLargeScreen()`、user settingは`AppCompatAspectRatioOverrides`を通じて、あらゆるウィンドウサイズへ変更可能とする判定に接続される。
 
 OEM / device configuration override は再確認時点の公式 `#exceptions` section には掲載されていなかったが、AOSP には `WindowManagerConstants` の DeviceConfig key と package opt-out list が存在する。そのため顧客向け説明では、公式の 3 例外と、端末実装・DeviceConfig による追加的な分岐を混ぜずに説明する。
 
@@ -149,17 +149,17 @@ OEMs can provide overrides to the Android 16 behavior through device configurati
 
 ## 解釈（Interpretation）
 
-この節は base behavior の説明ではなく、base behavior が適用されない条件を説明する節である。base behavior が有効な場合、Android 16 / targetSdkVersion 36 / `sw >= 600dp` で `screenOrientation`、`resizeableActivity=false`、`minAspectRatio`、`maxAspectRatio`、`setRequestedOrientation()` などが実効制約として無視される。`Exceptions` は、この universal resizable path から外れる gate として読む。
+この節はbase behaviorの説明ではなく、base behaviorが適用されない条件を説明する節である。base behaviorが有効な場合、Android 16 / targetSdkVersion 36 / `sw >= 600dp`で`screenOrientation`、`resizeableActivity=false`、`minAspectRatio`、`maxAspectRatio`、`setRequestedOrientation()`などが最終的な制約として採用されない。`Exceptions`は、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる条件として読む。
 
 ---
 
 # 変更内容（What Changed）
 
-- Android 16 tag では、`DisplayContent#getIgnoreOrientationRequest()` に large screen（`sw >= 600dp`）で orientation request を既定で無視する分岐が追加されている。
+- Android 16 tagでは、`DisplayContent#getIgnoreOrientationRequest()`にlarge screen（`sw >= 600dp`）で画面の向きの要求を既定で無視する分岐が追加されている。
 - `ActivityInfo.UNIVERSAL_RESIZABLE_BY_DEFAULT` / 357141415 は `@EnabledAfter(VANILLA_ICE_CREAM)` の compat change として定義され、Android 16 / targetSdkVersion 36 以上で default enabled になる。
 - `ActivityRecord#canBeUniversalResizeable()` は、game、large screen、compat change、DeviceConfig、package opt-out、temporary opt-out を評価する。
 - `ActivityRecord#isUniversalResizeable()` は、activity-level opt-out と user aspect ratio preference も評価する。
-- 例外に該当する場合、fixed orientation / aspect ratio / resizability を無視する universal resizable path に入らない。その結果、従来の orientation request、resizability、aspect ratio、pillarboxing / compatibility mode の扱いが残る、または device / user policy に従う。
+- 例外に該当する場合、固定方向・アスペクト比・サイズ変更可否の制約を無視して、あらゆるウィンドウサイズへ変更可能とする処理経路に入らない。その結果、従来の画面の向きの要求、サイズ変更可否、アスペクト比、pillarboxing / compatibility modeの扱いが残る、またはdevice / user policyに従う。
 
 ---
 
@@ -169,7 +169,7 @@ OEMs can provide overrides to the Android 16 behavior through device configurati
 
 - Android 16 に OS アップデートしただけで targetSdkVersion 35 以下の全アプリに適用されるか: No。
 - Android 16 / targetSdkVersion 35: `UNIVERSAL_RESIZABLE_BY_DEFAULT` は default enabled ではないため、targetSdkVersion 36 起因の base behavior は既定適用されない。
-- ただし OEM / DeviceConfig の orientation request ignore、既存の user aspect ratio settings、端末固有の app compat policy は別経路で存在する。これは targetSdkVersion 36 の Behavior Change と分けて検証する必要がある。
+- ただしOEM / DeviceConfigによる画面の向きの要求の無視、既存のuser aspect ratio settings、端末固有のapp compat policyは別経路で存在する。これはtargetSdkVersion 36のBehavior Changeと分けて検証する必要がある。
 
 ## targetSdkVersion 36 以上での挙動（targetSdkVersion 36 Behavior）
 
@@ -180,7 +180,7 @@ OEMs can provide overrides to the Android 16 behavior through device configurati
 ## Android 15 / targetSdkVersion 36
 
 - `android-15.0.0_r36` にも `UNIVERSAL_RESIZABLE_BY_DEFAULT`、opt-out property、`ActivityRecord#isUniversalResizeable()` の準備コードは存在する。
-- ただし `android-16.0.0_r4` では `DisplayContent#getIgnoreOrientationRequest()` に「large screen は既定で orientation request を無視する」分岐が追加されている。Android 15 tag には同等の default large screen 分岐は確認できなかった。
+- ただし`android-16.0.0_r4`では`DisplayContent#getIgnoreOrientationRequest()`に「large screenでは既定で画面の向きの要求を無視する」分岐が追加されている。Android 15 tagには同等のdefault large screen分岐は確認できなかった。
 - よって Android 15 / targetSdkVersion 36 は Android 16 の公式 Behavior Change と同一とは結論しない。検証可能な環境があれば Android 16 / targetSdkVersion 36 と比較する。
 
 ## Temporary opt-out
@@ -215,24 +215,24 @@ OEMs can provide overrides to the Android 16 behavior through device configurati
 | ファイル / シンボル | Android 15 baseline | Android 16 target | このコードパスを根拠にする理由 |
 | --- | --- | --- | --- |
 | `ActivityInfo.UNIVERSAL_RESIZABLE_BY_DEFAULT` | Change ID 357141415、`@EnabledAfter(VANILLA_ICE_CREAM)` が存在 | 同じ | targetSdkVersion 36 gate と compat override の根拠 |
-| `DisplayContent#getIgnoreOrientationRequest()` | large screen default ignore 分岐なし | `isLargeScreen()` なら orientation request を既定で ignore | base behavior と `sw < 600dp` 例外の根拠 |
+| `DisplayContent#getIgnoreOrientationRequest()` | large screen default ignore分岐なし | `isLargeScreen()`なら画面の向きの要求を既定で無視 | base behaviorと`sw < 600dp`例外の根拠 |
 | `DisplayContent#isLargeScreen()` / `WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP` | threshold は 600 | threshold は 600 | `sw600dp` 判定 |
 | `ApplicationInfo.category` / `CATEGORY_GAME` | `android:appCategory` 由来の category 定義あり | 同じ | game exception の入力値 |
 | `PackageParser` / `AndroidManifestApplication_appCategory` | manifest の `appCategory` を `ApplicationInfo.category` に設定 | 同じ | `android:appCategory` から game exception へ接続する根拠 |
-| `ActivityRecord#canBeUniversalResizeable()` | game、compat、DeviceConfig、package opt-out を評価 | 同じ | universal resizable path の exception gate |
+| `ActivityRecord#canBeUniversalResizeable()` | game、compat、DeviceConfig、package opt-outを評価 | 同じ | あらゆるウィンドウサイズへ変更可能とする処理経路から外れる条件 |
 | `ActivityRecord#isUniversalResizeable()` | activity opt-out、user preference を評価 | 同じ | temporary opt-out と user setting exception |
 | `AppCompatAspectRatioOverrides#userPreferenceCompatibleWithNonResizability()` | user aspect ratio setting を評価 | 同じ | user が app default behavior を選んだ場合の例外解釈 |
 | `WindowManagerConstants` | DeviceConfig key と package opt-out list が存在 | 同じ | OEM / device configuration override evidence |
 | `AppCompatResizeOverrides#allowRestrictedResizability()` | application / activity property を読む | 同じ | temporary opt-out evidence |
-| `AppCompatAspectRatioPolicy#getMinAspectRatio()` / `getMaxAspectRatio()` | universal resizable なら 0 | 同じ | base behavior 時に min/max aspect ratio が無視される根拠 |
-| `ActivityRecord#getOverrideOrientation()` / `isResizeable()` | universal resizable path に接続 | 同じ | exception 時にこの path から外れることの意味 |
+| `AppCompatAspectRatioPolicy#getMinAspectRatio()` / `getMaxAspectRatio()` | あらゆるウィンドウサイズへ変更可能と判定された場合は0 | 同じ | base behavior時にmin/max aspect ratioが無視される根拠 |
+| `ActivityRecord#getOverrideOrientation()` / `isResizeable()` | あらゆるウィンドウサイズへ変更可能とする処理経路に接続 | 同じ | exception時にこの処理経路から外れることの意味 |
 | `core/api/current.txt` / `test-current.txt` | `UNIVERSAL_RESIZABLE_BY_DEFAULT` は public current ではなく test-current | 同じ | public API surface 上の新規一般 API ではなく compat/test API |
 
 必須記入項目（Required context）:
 - Entry point / caller: manifest parsing -> `PackageParser` -> `ApplicationInfo.category` / `ActivityInfo`、display policy -> `DisplayContent#getIgnoreOrientationRequest()`、resize policy -> `ActivityRecord#isUniversalResizeable()` / `canBeUniversalResizeable()`。
 - Relevant class or service responsibility: WindowManager / ActivityTaskManager は activity の orientation、window bounds、resizeability、size compat、aspect ratio policy、letterbox / compatibility mode を解決する。
-- Baseline Android behavior: Android 15 tag では Android 16 の large screen default ignore 分岐は確認できない。fixed orientation / non-resizable / aspect ratio restrictions は従来の policy に従う。
-- Target Android behavior: Android 16 tag では targetSdkVersion 36 compat change と large screen gate により universal resizable path が既定有効になる。ただし本 report の例外条件ではその path から外れる。
+- Baseline Android behavior: Android 15 tagではAndroid 16のlarge screen default ignore分岐は確認できない。固定方向・サイズ変更不可・アスペクト比の制約は従来のpolicyに従う。
+- Target Android behavior: Android 16 tagではtargetSdkVersion 36 compat changeとlarge screen gateにより、あらゆるウィンドウサイズへ変更可能とする処理経路が既定有効になる。ただし本reportの例外条件ではその処理経路から外れる。
 - Diff kind: changed condition / changed default。Android 16 tag の `DisplayContent#getIgnoreOrientationRequest()` が large screen default true を返す条件を追加している。
 - Classification support: targetSdkVersion 36 gate と runtime condition / exception があるため `TARGET_SDK_36_CONDITIONAL`。
 - Unrelated or excluded paths: UI state loss、stretched layout、off-screen animation は `Common breaking changes` の影響説明であり、本 report では例外 gate の証跡としては扱わない。
@@ -249,7 +249,7 @@ OEMs can provide overrides to the Android 16 behavior through device configurati
 public static final long UNIVERSAL_RESIZABLE_BY_DEFAULT = 357141415L;
 ```
 
-この change id は fixed orientation、aspect ratio、resizability の制限を無視し、app が available area を満たすようにするものとして定義されている。
+このchange idは固定方向、アスペクト比、サイズ変更可否の制限を無視し、appがavailable areaを満たすようにするものとして定義されている。
 
 Android 16 の `DisplayContent#getIgnoreOrientationRequest()`:
 
@@ -297,7 +297,7 @@ if (appInfo.category == ApplicationInfo.CATEGORY_GAME) {
 ```
 
 解釈:
-- `android:appCategory="game"` が `ApplicationInfo.CATEGORY_GAME` になる app は、universal resizable path に入らない。
+- `android:appCategory="game"`が`ApplicationInfo.CATEGORY_GAME`になるappは、あらゆるウィンドウサイズへ変更可能とする処理経路に入らない。
 - game だが `android:appCategory` を指定していない app は、この AOSP gate だけでは game exception として扱われない可能性がある。installer category hint など別入力もあり得るため、実機では `ApplicationInfo.category` を確認する。
 
 ## User aspect ratio setting exception
@@ -319,10 +319,10 @@ boolean userPreferenceCompatibleWithNonResizability() {
 }
 ```
 
-また、user min aspect ratio override は `USER_MIN_ASPECT_RATIO_APP_DEFAULT` や custom ratio と区別される。公式文書の「Users explicitly opting in to the app's default behavior」は、user が app default 側を選んだ場合に universal resizable path から外れる例外として解釈できる。
+また、user min aspect ratio overrideは`USER_MIN_ASPECT_RATIO_APP_DEFAULT`やcustom ratioと区別される。公式文書の「Users explicitly opting in to the app's default behavior」は、userがapp default側を選んだ場合に、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる例外として解釈できる。
 
 解釈:
-- user setting が未設定または fullscreen の場合は、AOSP の `userPreferenceCompatibleWithNonResizability()` は true を返し、universal resizable path を許容する。
+- user settingが未設定またはfullscreenの場合は、AOSPの`userPreferenceCompatibleWithNonResizability()`はtrueを返し、あらゆるウィンドウサイズへ変更可能とする処理経路を許容する。
 - user が app default behavior を明示選択した場合は、この path から外れる可能性がある。実機テストでは device の aspect ratio settings の選択肢と `dumpsys` / windowing behavior を併せて確認する。
 
 ## Small screen exception
@@ -392,16 +392,16 @@ if (mAppCompatController.getResizeOverrides().allowRestrictedResizability()) {
 
 解釈:
 - temporary opt-out は公式 `Exceptions` 節ではなく `Opt out temporarily` 節の条件である。
-- ただし実装上は universal resizable path を抑止するため、例外条件と同じく base behavior を避ける効果を持つ。
+- ただし実装上は、あらゆるウィンドウサイズへ変更可能とする処理経路を抑止するため、例外条件と同じくbase behaviorを避ける効果を持つ。
 - API 37 以降は公式文書上この opt-out は使えなくなる予定であり、恒久対策ではない。
 
 ## Base behavior で無視される制約と、例外時の扱い
 
 | 制約 / API | Base behavior 適用時 | 例外時の扱い |
 | --- | --- | --- |
-| `android:screenOrientation` | fixed orientation constraint として尊重されない | 従来 policy / device policy に従う |
-| `Activity#setRequestedOrientation()` | requested orientation が実効 orientation constraint として尊重されない | 従来 policy / device policy に従う |
-| `Activity#getRequestedOrientation()` | requested value と実効 orientation / bounds が乖離し得る | 従来 policy では requested value と実効制約が近くなる可能性 |
+| `android:screenOrientation` | 固定方向の制約として採用されない | 従来policy / device policyに従う |
+| `Activity#setRequestedOrientation()` | 要求した画面の向きが最終的な制約として採用されない | 従来policy / device policyに従う |
+| `Activity#getRequestedOrientation()` | 要求値と、システムが実際に採用した画面の向き・アプリに割り当てられたウィンドウ領域が乖離し得る | 従来policyでは要求値と最終的な制約が近くなる可能性 |
 | `android:resizeableActivity="false"` | `isUniversalResizeable()` により non-resizable 前提が崩れる | non-resizable / compatibility mode が残る可能性 |
 | `android:minAspectRatio` / `android:maxAspectRatio` | aspect ratio policy が 0 扱いになり制限として効かない | manifest / user / device policy により制限される可能性 |
 | Pillarboxing / compatibility mode | 公式文書上 pillarboxing は使われず full display window を満たす | compatibility mode / pillarboxing が戻る可能性 |
@@ -426,7 +426,7 @@ if (mAppCompatController.getResizeOverrides().allowRestrictedResizability()) {
 | Android 16 / targetSdkVersion 36 / `sw < 600dp` | 非適用 | large screen gate を満たさない |
 | Android 16 / targetSdkVersion 36 / game app | 非適用 | `ApplicationInfo.CATEGORY_GAME` で `canBeUniversalResizeable()` が false |
 | Android 16 / targetSdkVersion 36 / user aspect ratio setting exception | 非適用になり得る | user が app default behavior を明示選択した状態を確認 |
-| Android 16 / targetSdkVersion 36 / OEM override enabled | 端末 config 次第 | DeviceConfig が compat change とは別に orientation request ignore を有効化可能 |
+| Android 16 / targetSdkVersion 36 / OEM override enabled | 端末config次第 | DeviceConfigがcompat changeとは別に画面の向きの要求を無視する設定を有効化可能 |
 | Android 16 / targetSdkVersion 36 / OEM override disabled / package opt-out | 非適用または抑止 | package opt-out list に入る場合は config path から外れる |
 | Android 16 / targetSdkVersion 36 / Activity-level temporary opt-out | 非適用 | 該当 activity は restricted resizability を許可 |
 | Android 16 / targetSdkVersion 36 / Application-level temporary opt-out | 非適用 | package 全体で restricted resizability を許可 |
@@ -439,7 +439,7 @@ if (mAppCompatController.getResizeOverrides().allowRestrictedResizability()) {
 
 ## games / `android:appCategory="game"` を指定しているアプリ
 
-- `ApplicationInfo.CATEGORY_GAME` なら universal resizable path から外れる。
+- `ApplicationInfo.CATEGORY_GAME`なら、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる。
 - Android 16 / targetSdkVersion 36 でも、Adaptive layouts の base behavior は標準では適用されない想定。
 - ただし game UI の large screen 対応が不要という意味ではない。端末固有の windowing mode や user settings は別途検証する。
 
@@ -469,7 +469,7 @@ if (mAppCompatController.getResizeOverrides().allowRestrictedResizability()) {
 - Android 16 target では一時的に base behavior を避けられる。
 - API 37 以降は使えなくなる予定のため、adaptive layout 対応を並行して進める必要がある。
 
-## fixed orientation / aspect ratio / compatibility mode に依存するアプリ
+## 固定方向 / aspect ratio / compatibility modeに依存するアプリ
 
 - 例外条件に入らない場合は base behavior により制約が無視される。
 - 例外条件に入る場合も、端末設定や user setting の変更で base behavior に戻る可能性があるため、固定前提の UI は長期的にリスクが残る。
@@ -509,7 +509,7 @@ if (mAppCompatController.getResizeOverrides().allowRestrictedResizability()) {
 - `adb shell am compat enable UNIVERSAL_RESIZABLE_BY_DEFAULT <package>` / `disable` で compat change を切り替える。
 - game app は `android:appCategory="game"` の有無で比較する。
 - aspect ratio settings は device UI で app default / fullscreen / custom ratio を切り替える。
-- `dumpsys window` / `dumpsys package` で package category、requested orientation、bounds、letterbox / compat mode 関連 state を確認する。
+- `dumpsys window` / `dumpsys package`でpackage category、要求した画面の向き、bounds、letterbox / compat mode関連stateを確認する。
 - emulator / Pixel / OEM large screen device で DeviceConfig 差分を確認する。
 
 ---
@@ -530,12 +530,12 @@ if (mAppCompatController.getResizeOverrides().allowRestrictedResizability()) {
 
 - 公式 `#exceptions` section の OEM override statement は再確認時点では見つからなかった。
 - OEM / DeviceConfig override の AOSP evidence は存在するため、端末差の説明としては重要である。
-- user aspect ratio setting の実装は `AppCompatAspectRatioOverrides` にあり、user preference が universal resizable 判定の一部になる。
+- user aspect ratio settingの実装は`AppCompatAspectRatioOverrides`にあり、user preferenceが、あらゆるウィンドウサイズへ変更可能とする判定の一部になる。
 - Android 15 tag にも準備コードはあるが、Android 16 tag の `DisplayContent#getIgnoreOrientationRequest()` が large screen default behavior の重要な差分である。
 
 ## Hypotheses
 
-- user が aspect ratio settings で app default behavior を選ぶと、`USER_MIN_ASPECT_RATIO_APP_DEFAULT` 系の user preference により universal resizable path から外れ、従来の compatibility mode / aspect ratio policy に近い表示になる。
+- userがaspect ratio settingsでapp default behaviorを選ぶと、`USER_MIN_ASPECT_RATIO_APP_DEFAULT`系のuser preferenceにより、あらゆるウィンドウサイズへ変更可能とする処理経路から外れ、従来のcompatibility mode / aspect ratio policyに近い表示になる。
 - OEM / DeviceConfig の `ignore_activity_orientation_request_screens=all` は small screen にも影響し得るが、これは公式 targetSdkVersion 36 の標準 base behavior とは別の端末 policy として扱うべきである。
 - game だが category が未設定の app は、公式が意図する game exception に入らない可能性がある。
 
@@ -550,7 +550,7 @@ if (mAppCompatController.getResizeOverrides().allowRestrictedResizability()) {
 
 # 推奨対応候補（Recommended Action Candidates）
 
-- `targetSdkVersion 36` 化前に、large screen / foldable / tablet / desktop windowing で fixed orientation / fixed aspect ratio / non-resizable 前提の UI を洗い出す。
+- `targetSdkVersion 36`化前に、large screen / foldable / tablet / desktop windowingで固定方向 / 固定aspect ratio / サイズ変更不可を前提とするUIを洗い出す。
 - game は `android:appCategory="game"` または `ApplicationInfo.category` が期待通り game になっているか確認する。
 - user aspect ratio settings を変えたときの display mode、pillarboxing、bounds、activity recreation を確認する。
 - temporary opt-out は Android 16 向けの移行猶予としてのみ使い、API 37 以降に向けて adaptive layout 対応を進める。

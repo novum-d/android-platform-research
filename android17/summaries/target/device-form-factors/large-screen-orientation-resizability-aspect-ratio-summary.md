@@ -59,7 +59,7 @@ AOSP では `UNIVERSAL_RESIZABLE_BY_DEFAULT = 357141415L` が Android 16 target 
 - AOSP: `services/core/java/com/android/server/wm/AppCompatResizeOverrides.java` の `DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT = 447301631L`
 - AOSP: `DISABLE_OPT_OUT_UNIVERSAL_RESIZABLE_BY_DEFAULT` は `@EnabledAfter(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)` で、Android 17 / API 37 から opt-out property が効かないと comment している。
 - AOSP: `DisplayContent.isLargeScreen` は `smallestScreenWidthDp >= 600dp` を大画面条件にする。
-- AOSP: `ActivityRecord.canBeUniversalResizeable` は game を除外し、大画面かつ change enabled の場合に universal resizable 候補とする。
+- AOSP: `ActivityRecord.canBeUniversalResizeable`はgameを除外し、大画面かつchange enabledの場合に、あらゆるウィンドウサイズへ変更可能とする判定の候補にする。
 
 ## 人間の判断欄（Human Decision）
 

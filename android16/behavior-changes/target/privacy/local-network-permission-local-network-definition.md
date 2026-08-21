@@ -17,7 +17,7 @@
 - Confidence: High
 
 
-Classification note: Local Network Definition は Android 16 targeting apps ページにあるが、Local Network Permission 全体は current stage で opt-in feature と説明されている。AOSP `android-16.0.0_r4` の `RESTRICT_LOCAL_NETWORK` は `@EnabledAfter(targetSdkVersion = 36)` であり、targetSdkVersion 36 では default-enabled ではない。現在の実効影響は `RESTRICT_LOCAL_NETWORK` force-enable と permission state に依存するため、`OPT_IN_ONLY` を primary label とし、current opt-in / future enforcement / local network definition / address-prefix classification を追加条件として記録する。
+Classification note: Local Network DefinitionはAndroid 16 targeting appsページにあるが、Local Network Permission全体はcurrent stageでopt-in featureと説明されている。AOSP `android-16.0.0_r4`の`RESTRICT_LOCAL_NETWORK`は`@EnabledAfter(targetSdkVersion = 36)`であり、targetSdkVersion 36ではdefault-enabledではない。現時点で実際に影響が発生するかどうかは`RESTRICT_LOCAL_NETWORK` force-enableとpermission stateに依存するため、`OPT_IN_ONLY`をprimary labelとし、current opt-in / future enforcement / local network definition / address-prefix classificationを追加条件として記録する。
 
 ## Official Documentation Review
 
@@ -240,7 +240,7 @@ Interpretation:
 - AOSP は IPv6 について「link-local だけ」ではなく、prefix length が 0 でない IPv6 `LinkAddress` を local prefix として扱う。これは directly-connected routes / stub network という公式説明と整合するが、範囲は広い。
 - BPF map は interface index を key に含むため、address prefix だけでなく interface も local network 判定に関与する。
 - 公式文書の cellular WWAN / VPN exclusion は、今回確認した local prefix map population の範囲では明示的な除外条件としては確認できなかった。`NetworkCapabilities.NET_CAPABILITY_LOCAL_NETWORK` の doc には「Internet access 用 network は local network ではない」とあるが、これは Local Network Permission の address-prefix enforcement と同一概念ではないため、補助情報に留める。
-- Current opt-in phase では `RESTRICT_LOCAL_NETWORK` を enable して reboot し、`NEARBY_WIFI_DEVICES` が grant されていない app UID が local network traffic を行う場合に実効影響が出る。
+- Current opt-in phaseでは`RESTRICT_LOCAL_NETWORK`をenableしてrebootし、`NEARBY_WIFI_DEVICES`がgrantされていないapp UIDがlocal network trafficを行う場合に、実際の通信影響が出る。
 
 ## Hypotheses
 
@@ -255,7 +255,7 @@ Interpretation:
 - Local Network Definition のうち、IPv4 listed ranges、IPv4/IPv6 multicast、IPv4 broadcast は AOSP r4 の定数・BPF map population・unit test により確認できた。
 - IPv6 は `LinkAddress` の prefix length を使う実装であり、link-local / directly-connected route / stub network という公式説明と概ね整合する。ただし Thread 固有・multiple-subnets の final semantics は未確定。
 - Local network 判定は address-prefix だけでなく interface index と protocol / remote port を含む BPF longest-prefix match で扱われる。
-- Android 16 OS update だけ、または targetSdkVersion 36 化だけでは、current stage の Local Network Permission restriction が default で発生するとは言えない。現時点の実効影響は 25Q2 以降相当 build、`RESTRICT_LOCAL_NETWORK` enable、reboot、permission denied / missing に依存する。
+- Android 16 OS updateだけ、またはtargetSdkVersion 36化だけでは、current stageのLocal Network Permission restrictionがdefaultで発生するとは言えない。現時点で実際に通信へ影響するかどうかは、25Q2以降相当build、`RESTRICT_LOCAL_NETWORK` enable、reboot、permission denied / missingに依存する。
 - 顧客向けには「どの宛先が local network に分類されるか」と「その宛先への access が実際に失敗する条件」を分けて説明する必要がある。
 
 ## Applicability Gate Evidence

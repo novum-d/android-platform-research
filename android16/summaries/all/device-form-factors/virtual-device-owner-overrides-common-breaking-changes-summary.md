@@ -41,10 +41,10 @@ Android 16 では、virtual device owner projection 環境で app settings overr
 
 ## AOSP evidence
 
-- `VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions(boolean)` は、fixed orientation、aspect ratio、resizability を無視する virtual display property を設定する SystemApi。
+- `VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions(boolean)`は、固定方向、aspect ratio、サイズ変更可否の制約を無視するvirtual display propertyを設定するSystemApi。
 - `DisplayManagerService` は trusted virtual display でない場合、この request を無視する。trusted display の場合だけ WindowManager に display-level override を設定する。
 - `DisplayWindowSettings` / `DisplayContent` は display uniqueId / `Display.TYPE_VIRTUAL` に紐付く ignore state を保持する。
-- `AppCompatOrientationPolicy` は eligible virtual display で orientation request を `SCREEN_ORIENTATION_USER` 相当に扱う。
+- `AppCompatOrientationPolicy`はeligible virtual displayで画面の向きの要求を`SCREEN_ORIENTATION_USER`相当に扱う。
 - `AppCompatAspectRatioOverrides` は display ignore state を fullscreen / aspect ratio override 条件に含める。
 - `VirtualDeviceManager` / `AndroidManifest.xml` evidence では、`CREATE_VIRTUAL_DEVICE` は `internal|role`、`ADD_TRUSTED_DISPLAY` は `signature|role` で、ordinary app 向け runtime permission ではない。
 - `DisplayContent` / `TaskFragment` / `ConfigurationContainer` / `WindowMetrics` は display / task bounds / density から app-facing configuration / metrics を計算するため、projection 先の large bounds が layout に反映され得る。
@@ -66,7 +66,7 @@ Android 16 では、virtual device owner projection 環境で app settings overr
 
 - companion app streaming / virtual device projection で利用されるアプリ。
 - phone portrait 専用 UI のアプリ。
-- fixed orientation / fixed aspect ratio / `resizeableActivity=false` に依存するアプリ。
+- 固定方向 / 固定aspect ratio / `resizeableActivity=false`に依存するアプリ。
 - car display / Chromebook / PC / VR display で利用され得るアプリ。
 - camera、media、map、game、productivity、form、document editing など window size / orientation / input modality に敏感なアプリ。
 - custom `DisplayMetrics` / `WindowMetrics` assumptions を持つアプリ。

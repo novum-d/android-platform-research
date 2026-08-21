@@ -30,7 +30,7 @@ Note:
 | Android 16 / targetSdkVersion 36 / `sw >= 600dp` / opt-out なし | 制約無視。stretched layout、off-screen component、state preservation risk |
 | Android 16 / targetSdkVersion 36 / `sw < 600dp` | large screen 条件を満たさないため対象外 |
 | Android 16 / targetSdkVersion 36 / game app | `ApplicationInfo.CATEGORY_GAME` により対象外 |
-| Android 16 / targetSdkVersion 36 / user aspect ratio setting exception | user preference により universal resizable から外れる |
+| Android 16 / targetSdkVersion 36 / user aspect ratio setting exception | user preferenceにより、あらゆるウィンドウサイズへ変更可能とする判定から外れる |
 | Android 16 / targetSdkVersion 36 / Activity or Application opt-out | Android 16 では従来の compatibility mode 側へ一時的に戻せる |
 | Android 15 / targetSdkVersion 36 | Android 16 の large screen default ignore 差分はないため、同一挙動とは結論しない |
 
@@ -63,7 +63,7 @@ platform が直接 UI を壊すのではなく、orientation・resizability・as
 
 ## 対応要否（Required Action）
 
-- 必須対応: targetSdkVersion 36 化するアプリで、large screen 上の fixed orientation / fixed aspect ratio / state preservation 不足がある場合。
+- 必須対応: targetSdkVersion 36化するアプリで、large screen上の固定方向 / 固定aspect ratio / state preservation不足がある場合。
 - 推奨対応: adaptive layout、state preservation、split screen、desktop windowing、foldable posture、rotation、visual regression の確認。
 - 一時対応: Android 16 target では `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` を activity または application に指定できるが、恒久対応として扱わない。
 - 不要に近い: large screen でも既に responsive に動作し、rotation / resize / recreation で状態を保持できるアプリ。
@@ -79,7 +79,7 @@ platform が直接 UI を壊すのではなく、orientation・resizability・as
 | Android 16 | 36 | `sw >= 600dp` / Application opt-out | package 全体で一時的に従来挙動 |
 | Android 16 | 36 | `sw < 600dp` | 対象外 |
 | Android 16 | 36 | game category | 対象外 |
-| Android 16 | 36 | user aspect ratio setting exception | user preference により universal resizable から外れる |
+| Android 16 | 36 | user aspect ratio setting exception | user preferenceにより、あらゆるウィンドウサイズへ変更可能とする判定から外れる |
 | Android 16 | 36 | device rotation | Activity recreation / saved state を確認 |
 | Android 16 | 36 | split screen / desktop windowing | bounds change、animation、fixed-position UI を確認 |
 

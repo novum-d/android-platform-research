@@ -66,7 +66,7 @@ AOSPで直接のtargetSdkVersion 37 gateを閉じられていないため、OS /
 | 観点 | Android 16 / target36 | Android 17 / target37 |
 | --- | --- | --- |
 | System behavior | orientation / aspect / resizability制約を無視するがtemporary opt-out可能 |制約を無視し、`PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` opt-outも無効 |
-| App signal | opt-out Activityはpillarbox / fixed orientationを維持可能 | available areaにresize / rotate |
+| App signal | opt-out Activityはpillarbox / 固定方向を維持可能 | available areaにresize / rotate |
 | 対応 | opt-out対象と削除条件を記録 | adaptive layout、state保存、multi-window / fold / desktop testを完了 |
 
 状態差:

@@ -27,10 +27,10 @@ Note:
 | シナリオ | 期待挙動 |
 | --- | --- |
 | Android 16 / targetSdkVersion 35 | 本 Behavior Change の既定適用対象外。従来の orientation / aspect ratio / compatibility mode を維持する想定 |
-| Android 16 / targetSdkVersion 36 / `sw >= 600dp` / opt-out なし | fixed orientation、non-resizable、min/max aspect ratio が無視され、pillarboxing なしで window 全体を使用 |
+| Android 16 / targetSdkVersion 36 / `sw >= 600dp` / opt-outなし | 固定方向、サイズ変更不可、min/max aspect ratioの制約が無視され、pillarboxingなしでwindow全体を使用 |
 | Android 16 / targetSdkVersion 36 / `sw < 600dp` | large screen 条件を満たさないため対象外 |
 | Android 16 / targetSdkVersion 36 / game app | `ApplicationInfo.CATEGORY_GAME` により対象外 |
-| Android 16 / targetSdkVersion 36 / user aspect ratio setting exception | user preference が非 resizable と互換な場合は universal resizable から外れる |
+| Android 16 / targetSdkVersion 36 / user aspect ratio setting exception | user preferenceがサイズ変更不可と互換な場合は、あらゆるウィンドウサイズへ変更可能とする判定から外れる |
 | Android 16 / targetSdkVersion 36 / opt-out あり | Android 16 では従来の compatibility mode 側へ一時的に戻せる |
 | Android 15 / targetSdkVersion 36 | Android 16 の large screen default ignore 差分はないため、同一挙動とは結論しない |
 
@@ -46,7 +46,7 @@ Android 16 では、targetSdkVersion 36 以上のアプリが large screen（`sw
 
 理由:
 - 影響は targetSdkVersion 36 化、Android 16、`sw >= 600dp`、非 game、opt-out なし、user exception なしが重なった場合に発生する。
-- fixed orientation、non-resizable、min/max aspect ratio、pillarboxing 前提の UI では visual regression が起きやすい。
+- 固定方向、サイズ変更不可、min/max aspect ratio、pillarboxingを前提とするUIではvisual regressionが起きやすい。
 - opt-out は一時的で、API 37 以降を見据えた adaptive layout 対応が必要。
 
 ## 影響対象（Who Is Affected）
@@ -56,7 +56,7 @@ Android 16 では、targetSdkVersion 36 以上のアプリが large screen（`sw
 - `minAspectRatio` / `maxAspectRatio` に依存するアプリ。
 - pillarboxing / compatibility mode に依存するアプリ。
 - `setRequestedOrientation()` を runtime に呼ぶアプリ。
-- `getRequestedOrientation()` の戻り値と実効 orientation を混同しているアプリ。
+- `getRequestedOrientation()`の戻り値と、システムが実際に採用した画面の向きを混同しているアプリ。
 - preferred orientation / user orientation 前提の UI を持つアプリ。
 - fixed aspect ratio 前提の UI を持つアプリ。
 - large screen / tablet / foldable / desktop windowing 対応が不十分なアプリ。
@@ -64,7 +64,7 @@ Android 16 では、targetSdkVersion 36 以上のアプリが large screen（`sw
 
 ## 対応要否（Required Action）
 
-- 必須対応: targetSdkVersion 36 化するアプリで、large screen 上の fixed orientation / non-resizable / aspect ratio / pillarboxing 前提がある場合。
+- 必須対応: targetSdkVersion 36化するアプリで、large screen上の固定方向 / サイズ変更不可 / aspect ratio / pillarboxingの前提がある場合。
 - 推奨対応: adaptive layout、state preservation、split screen、desktop windowing、foldable posture、visual regression の確認。
 - 一時対応: Android 16 target では `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` を activity または application に指定できるが、恒久対応として扱わない。
 - 不要に近い: large screen でも既に responsive に動作し、orientation / aspect ratio / non-resizable 制約に依存していないアプリ。
@@ -80,13 +80,13 @@ Android 16 では、targetSdkVersion 36 以上のアプリが large screen（`sw
 | Android 16 | 36 | `sw >= 600dp` / Application opt-out | package 全体で一時的に従来挙動 |
 | Android 16 | 36 | `sw < 600dp` | 対象外 |
 | Android 16 | 36 | game category | 対象外 |
-| Android 16 | 36 | user aspect ratio setting exception | user preference により universal resizable から外れる |
+| Android 16 | 36 | user aspect ratio setting exception | user preferenceにより、あらゆるウィンドウサイズへ変更可能とする判定から外れる |
 
 追加テスト:
 - Android 15 / targetSdkVersion 36 が検証可能な場合の比較。
 - portrait / landscape / reverse / sensor / user orientation 指定。
 - `setRequestedOrientation()` 呼び出し後の orientation、configuration、activity recreation。
-- `getRequestedOrientation()` の戻り値と実効 window bounds。
+- `getRequestedOrientation()`の戻り値と、アプリに実際に割り当てられたウィンドウ領域。
 - `resizeableActivity=false`、`minAspectRatio`、`maxAspectRatio` 指定あり / なし。
 - full-screen、multi-window、split screen、desktop windowing。
 - user aspect ratio settings。

@@ -178,10 +178,10 @@ Android 16 all apps ページの `Virtual device owner overrides` 配下にあ�
 | `VirtualDeviceManager#createVirtualDevice` | `CREATE_VIRTUAL_DEVICE` permission required | Android 16 でも system / role 前提 | virtual device owner が trusted / privileged component である根拠。 |
 | `VirtualDeviceImpl#createVirtualDisplay` | owner UID check と owned display tracking | Android 16 でも caller owner / display ownership を検査 | companion app streaming / projection の display ownership 境界を示す。 |
 | `AndroidManifest.xml` permissions | `CREATE_VIRTUAL_DEVICE` / `ADD_TRUSTED_DISPLAY` は public runtime permission ではない | `CREATE_VIRTUAL_DEVICE` は `internal|role`、`ADD_TRUSTED_DISPLAY` は `signature|role` | ordinary app が任意に same override を使えない根拠。 |
-| `VirtualDisplayConfig#isIgnoreActivitySizeRestrictions()` / Builder method | `android-15.0.0_r36` にも flagged SystemApi として存在 | Android 16 でも fixed orientation / aspect ratio / resizability ignore を表す SystemApi | 親項目 per-app override の入口。 |
+| `VirtualDisplayConfig#isIgnoreActivitySizeRestrictions()` / Builder method | `android-15.0.0_r36`にもflagged SystemApiとして存在 | Android 16でも固定方向 / aspect ratio / サイズ変更可否の制約を無視することを表すSystemApi | 親項目per-app overrideの入口。 |
 | `DisplayManagerService#createVirtualDisplayInternal` | trusted virtual display permission path は存在 | trusted flag がない場合は request を無視し、trusted の場合だけ WindowManager に設定 | selected virtual device / trusted display gate の実装根拠。 |
 | `DisplayWindowSettings#setIgnoreActivitySizeRestrictionsOnDisplayLocked` | display override setting として存在 | display uniqueId / `Display.TYPE_VIRTUAL` に setting を保存 | local physical display と projected virtual display を分ける根拠。 |
-| `AppCompatOrientationPolicy#overrideOrientationIfNeeded` | eligible display で orientation request を `SCREEN_ORIENTATION_USER` に変換 | Android 16 target でも同経路 | orientation restriction ignored の根拠。 |
+| `AppCompatOrientationPolicy#overrideOrientationIfNeeded` | eligible displayで画面の向きの要求を`SCREEN_ORIENTATION_USER`に変換 | Android 16 targetでも同経路 | orientation restriction ignoredの根拠。 |
 | `AppCompatAspectRatioOverrides#hasFullscreenOverride` | display ignore condition を fullscreen override 条件に含む | Android 16 target でも同経路 | aspect ratio / resizability override impact の根拠。 |
 | `AppCompatUtils#isDisplayIgnoreActivitySizeRestrictions` | aconfig flag + display setting gate | targetSdkVersion 36 ではなく flag / display 条件 | targetSdkVersion gate がない根拠。 |
 | `WindowMetrics#getBounds()` / `getDensity()` | window bounds と density を公開 | Android 16 でも app-facing metrics として存在 | projected display / large screen bounds が app layout に影響する説明根拠。 |
@@ -208,14 +208,14 @@ Diff interpretation:
 
 ### Projection display override path
 
-`VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions(boolean)` は fixed orientation、aspect ratio、resizability restrictions を無視する virtual display property を設定する。`DisplayManagerService` は trusted virtual display でない場合に request を無視し、trusted の場合のみ WindowManager に display-level setting を渡す。
+`VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions(boolean)`は固定方向、aspect ratio、サイズ変更可否の制約を無視するvirtual display propertyを設定する。`DisplayManagerService`はtrusted virtual displayでない場合に要求を無視し、trustedの場合のみWindowManagerにdisplay-level settingを渡す。
 
 Diff interpretation:
 - 親項目 `Per-app overrides` の実装根拠であり、`References` section から直接発生する変更ではない。
 
 ### WindowManager app-compat path
 
-`AppCompatOrientationPolicy` と `AppCompatAspectRatioOverrides` は display ignore state を参照し、orientation request / fullscreen / aspect ratio behavior に影響させる。`AppCompatUtils` は aconfig flag と display setting を gate にしており、targetSdkVersion 36 gate は確認できない。
+`AppCompatOrientationPolicy`と`AppCompatAspectRatioOverrides`はdisplay ignore stateを参照し、画面の向きの要求 / fullscreen / aspect ratio behaviorに影響させる。`AppCompatUtils`はaconfig flagとdisplay settingをgateにしており、targetSdkVersion 36 gateは確認できない。
 
 Diff interpretation:
 - Android 16 / targetSdkVersion 35 と Android 16 / targetSdkVersion 36 を分けても、本件の virtual display owner path 自体は targetSdkVersion 36 を必要条件としない。
@@ -304,7 +304,7 @@ Diff interpretation:
 - companion app streaming / virtual device projection で利用されるアプリ。
 - virtual device owner / privileged companion app と連携するアプリ。
 - phone portrait 専用 UI のアプリ。
-- fixed orientation を前提にするアプリ。
+- 固定方向を前提にするアプリ。
 - aspect ratio 制限を前提にするアプリ。
 - `resizeableActivity=false` や resizability 制限を持つアプリ。
 - large screen / external display / desktop mode / Chromebook / car display / VR display で利用され得るアプリ。

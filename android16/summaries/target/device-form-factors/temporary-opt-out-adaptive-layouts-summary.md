@@ -35,8 +35,8 @@ Note:
 | --- | --- |
 | Android 16 / targetSdkVersion 35 | targetSdkVersion 36 起因の base behavior は既定適用対象外 |
 | Android 16 / targetSdkVersion 36 / `sw >= 600dp` / no opt-out | orientation / resizability / aspect ratio restrictions は無視 |
-| Android 16 / targetSdkVersion 36 / `sw >= 600dp` / Application-level opt-out | 全 activity が universal resizable path から外れる |
-| Android 16 / targetSdkVersion 36 / `sw >= 600dp` / Activity-level opt-out | 該当 activity のみ universal resizable path から外れる |
+| Android 16 / targetSdkVersion 36 / `sw >= 600dp` / Application-level opt-out | 全activityが、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる |
+| Android 16 / targetSdkVersion 36 / `sw >= 600dp` / Activity-level opt-out | 該当activityのみが、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる |
 | Android 16 / targetSdkVersion 36 / both Application-level and Activity-level opt-out | application-level true により全 activity opt-out |
 | Android 16 / targetSdkVersion 36 / opt-out false | opt-out なしと同等 |
 | Android 16 / targetSdkVersion 36 / `sw < 600dp` | large screen gate を満たさないため base behavior 対象外 |
@@ -115,7 +115,7 @@ Android 16 では `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` により
 - Compat framework: `UNIVERSAL_RESIZABLE_BY_DEFAULT` / 357141415、Android 16 / API 36 以上 target で enabled。
 - AOSP files: `ActivityInfo.java`、`WindowManager.java`、`PackageManager.java`、`DisplayContent.java`、`ActivityRecord.java`、`AppCompatResizeOverrides.java`、`AppCompatAspectRatioPolicy.java`。
 - AOSP source context: manifest property -> `PackageManager#getPropertyAsUser()` -> `AppCompatResizeOverrides#allowRestrictedResizability()` -> `ActivityRecord#isUniversalResizeable()`。
-- Diff interpretation: Android 16 tag で large screen default ignore 経路が追加。opt-out true は universal resizable path を抑止する。
+- Diff interpretation: Android 16 tagでlarge screen default ignore経路が追加。opt-out trueは、あらゆるウィンドウサイズへ変更可能とする処理経路を抑止する。
 - API surface: property は public current / test-current には出ない hidden property。manifest property name 文字列として指定する。
 
 ## 人間の判断欄（Human Decision）

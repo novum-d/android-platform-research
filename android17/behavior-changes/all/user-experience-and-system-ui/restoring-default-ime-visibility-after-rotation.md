@@ -97,7 +97,7 @@ Compat framework:
 - 検証対象の適用条件文: Android 17 から、app が処理しない configuration change 後に previous IME visibility は復元されない。
 - AOSP targetSdk gate: 確認した IME restore path では見つからない。
 - Compat framework entry: 見つからない。
-- 補足: `frameworks-base` 上では Android 16 tag にも同じ aconfig flag と `WindowManagerService` 分岐が存在するため、Android 17 での実効有効化は release flag/config 側の差分で説明される可能性がある。
+- 補足: `frameworks-base`上ではAndroid 16 tagにも同じaconfig flagと`WindowManagerService`分岐が存在するため、Android 17で実際に有効になる条件はrelease flag/config側の差分で説明される可能性がある。
 
 ---
 
@@ -221,7 +221,7 @@ git -C frameworks-base diff android-16.0.0_r4 android-17.0.0_r1 -- \
 
 - Android 17 に OS アップデートしただけで適用されるか: Yes / 条件付き。
 - targetSdkVersion に依存しない根拠: 公式文書は all apps ページに掲載し、targetSdkVersion 条件を示していない。AOSP の確認済み path に targetSdkVersion ゲートはない。
-- Android 16 以前での挙動: tag 上の `frameworks-base` には同じ flag と分岐が存在するため、Android 16 release での実効挙動は flag default / release config に依存する可能性がある。公式文書は Android 17 からの挙動変更として説明している。
+- Android 16以前での挙動: tag上の`frameworks-base`には同じflagと分岐が存在するため、Android 16 releaseで実際に観測される挙動はflag default / release configに依存する可能性がある。公式文書はAndroid 17からの挙動変更として説明している。
 
 ## targetSdkVersion 37 以上での挙動（targetSdkVersion 37 Behavior）
 

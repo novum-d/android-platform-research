@@ -33,7 +33,7 @@ Note:
 | Android 16 / targetSdkVersion 36 / projected by virtual device owner | targetSdkVersion 35 と同じ。本件は targetSdkVersion 36 固有ではない。 |
 | Android 16 / trusted or privileged virtual device owner | selected trusted virtual display に override を適用可能。 |
 | Android 16 / ordinary app without virtual device owner privilege | 同じ override を任意には使えない。 |
-| Android 16 / orientation restriction ignored | fixed orientation 前提が崩れる可能性あり。 |
+| Android 16 / orientation restriction ignored | 固定方向の前提が崩れる可能性あり。 |
 | Android 16 / aspect ratio restriction ignored | min/max aspect ratio 前提が崩れる可能性あり。 |
 | Android 16 / resizability restriction ignored | `resizeableActivity=false` 前提が崩れる可能性あり。 |
 | Android 15 / targetSdkVersion 36 | Android 16 公式 behavior change としては扱わず、比較用 baseline。 |
@@ -47,7 +47,7 @@ Android 16 では、virtual device owner がアプリを virtual device 上で�
 ## 顧客影響（Customer Impact）
 
 - 影響あり / 要確認。
-- phone portrait 専用 UI、fixed orientation、aspect ratio 制限、`resizeableActivity=false` に依存するアプリは、large screen / landscape / external display 上で UI が崩れる可能性がある。
+- phone portrait専用UI、固定方向、aspect ratio制限、`resizeableActivity=false`に依存するアプリは、large screen / landscape / external display上でUIが崩れる可能性がある。
 - local phone display の通常実行と混同しない。
 - PC、VR、car infotainment、Chromebook などへの projection / companion app streaming use case があるアプリは優先的に確認する。
 
@@ -55,7 +55,7 @@ Android 16 では、virtual device owner がアプリを virtual device 上で�
 
 - companion app streaming / virtual device projection で利用されるアプリ。
 - phone portrait 専用 UI のアプリ。
-- fixed orientation / fixed aspect ratio / unresizable 前提のアプリ。
+- 固定方向 / 固定aspect ratio / サイズ変更不可を前提とするアプリ。
 - large screen / external display / desktop mode / Chromebook / car display / VR display で利用され得るアプリ。
 - camera / media / map / game / productivity / document editing など window size / orientation / input modality に敏感なアプリ。
 - WindowMetrics / DisplayMetrics / resources qualifier 前提が強い custom layout を持つアプリ。

@@ -35,17 +35,23 @@
 
 Android 16 へ OS アップデートしただけで、targetSdkVersion 35 以下のアプリへ本変更が既定適用されるわけではない。
 
-## 読み方: 指定値・保持値・実効挙動を分ける
+## 読み方: 指定値・保持値・システムが実際に採用する挙動を分ける
 
 「ignored」は、manifest parser や API call がなくなるという意味ではない。次の 3 段階を分けて確認する。
 
 | 段階 | 意味 | 例 |
 | --- | --- | --- |
 | 指定・要求 | manifest または runtime API からアプリが渡す値 | `screenOrientation="portrait"`、`setRequestedOrientation(...)` |
-| 保持・取得 | framework 内部や getter で確認できる requested value | `ActivityInfo.screenOrientation`、`getRequestedOrientation()` |
-| 実効挙動 | WindowManager policy が最終的に採用する orientation、bounds、resizability | 横向きの大画面全体へ再レイアウトされる |
+| 保持・取得 | framework 内部や getter で確認できる要求値 | `ActivityInfo.screenOrientation`、`getRequestedOrientation()` |
+| システムが実際に採用する挙動 | WindowManager policy が最終的に採用する画面の向き、ウィンドウ領域、サイズ変更可否 | 横向きの大画面全体へ再レイアウトされる |
 
-指定値や getter の戻り値が残っていても、実効 orientation や window bounds の制約として尊重されない場合がある。
+指定値やgetterの戻り値が残っていても、システムが実際に採用する画面の向きや、アプリに割り当てるウィンドウ領域の制約として採用されない場合がある。
+
+本文では、人向けの説明に次の日本語表現を使う。AOSPのメソッド名、compat change名、ログ、引用原文などの識別子は翻訳しない。
+
+- 制限対象となる固定方向
+- 画面の向きの要求 / 要求値
+- あらゆるウィンドウサイズへ変更可能とする状態・判定
 
 ## 「無視」はデフォルト値へ書き換えるという意味ではない
 
@@ -55,43 +61,43 @@ Android 16 へ OS アップデートしただけで、targetSdkVersion 35 以下
 Manifest / runtime API で値を指定
 -> 値を parse、保持、または system server へ送信
 -> Adaptive layouts の適用条件を評価
--> 対象なら fixed orientation / non-resizable / aspect ratio 制約から除外
--> display または multi-window container の条件で実効 configuration / bounds を決定
+-> 対象なら固定方向・サイズ変更不可・アスペクト比の制約から除外
+-> display またはmulti-window containerの条件で、実際に適用するConfigurationとウィンドウ領域を決定
 ```
 
 属性・APIごとの違いは次のとおり。
 
-| 属性・API | 指定値そのもの | policy 内部での扱い | 実効結果 | デフォルト値化と呼べるか |
+| 属性・API | 指定値そのもの | policy 内部での扱い | システムが実際に採用する結果 | デフォルト値化と呼べるか |
 | --- | --- | --- | --- | --- |
-| `android:screenOrientation` | `ActivityInfo.screenOrientation` に保持され得る | restricted fixed orientation は実効 orientation 解決時に `SCREEN_ORIENTATION_UNSPECIFIED` 相当として扱われる | アプリの固定方向ではなく display / window policy に従う | No。manifest 値を書き換えるのではなく、解決時に制約から外す |
-| `setRequestedOrientation()` | request は system server へ送られ、requested value が残る場合がある | restricted fixed orientation request を最終 orientation の制約にしない | request と実画面の orientation が一致しない場合がある | No。method の引数をデフォルト値へ変更するわけではない |
-| `getRequestedOrientation()` | requested value を返す経路が残る | getter の戻り値は実効 orientation の正本にならない | portrait を返しても landscape bounds で表示され得る | No。常に `UNSPECIFIED` やデフォルト値を返すわけではない |
+| `android:screenOrientation` | `ActivityInfo.screenOrientation` に保持され得る | 制限対象となる固定方向は、最終的な画面の向きを決める際に`SCREEN_ORIENTATION_UNSPECIFIED`相当として扱われる | アプリの固定方向ではなくdisplay / window policyに従う | No。manifest値を書き換えるのではなく、解決時に制約から外す |
+| `setRequestedOrientation()` | 画面の向きの要求はsystem serverへ送られ、要求値が残る場合がある | 制限対象となる固定方向の要求を、最終的な画面の向きの制約にしない | 要求した向きと実際の画面の向きが一致しない場合がある | No。methodの引数をデフォルト値へ変更するわけではない |
+| `getRequestedOrientation()` | 要求値を返す経路が残る | getterの戻り値は、システムが実際に採用した画面の向きを示す正本にならない | portraitを返しても横長のウィンドウ領域で表示され得る | No。常に`UNSPECIFIED`やデフォルト値を返すわけではない |
 | `android:resizeableActivity="false"` | manifest value と `resizeMode` の入力経路は残る | `isUniversalResizeable()` により最終的な resizable 判定が true になり得る | 全画面以外に分割画面や可変boundsでも表示される | No。属性を `true` へ書き換えるのではなく、判定結果を上書きする |
-| `android:minAspectRatio` / `android:maxAspectRatio` | manifest 指定値は保持され得る | universal resizable 時、aspect ratio policy は実効 min / max を `0` として扱う | 指定比率でboundsを制限せず、利用可能なwindowを使う | No。`0` はこのpolicyで「制約なし」を表す実効値であり、manifest値の書き換えではない |
+| `android:minAspectRatio` / `android:maxAspectRatio` | manifest指定値は保持され得る | あらゆるウィンドウサイズへ変更可能と判定された場合、aspect ratio policyは判定に使うmin / maxを`0`として扱う | 指定比率でウィンドウ領域を制限せず、利用可能な領域を使う | No。`0`はこのpolicyで「制約なし」を表す値であり、manifest値の書き換えではない |
 
 `SCREEN_ORIENTATION_UNSPECIFIED` 相当や aspect ratio `0` が内部処理に現れても、すべての属性・APIがそれぞれの宣言上のデフォルト値へ戻された、と一般化しない。共通する意味は「アプリ指定の制約を最終レイアウト決定に使わない」である。
 
 ### 全画面モードとマルチウィンドウモード
 
-制約を無視する基本的な意味は両モードで同じだが、制約を除外した後に実効boundsを決める外部条件が異なる。
+制約を無視する基本的な意味は両モードで同じだが、制約を除外した後にアプリへ割り当てるウィンドウ領域を決める外部条件が異なる。
 
 | Mode | 制約を除外した後の主な決定条件 | 期待される見え方 | 確認すべき情報 |
 | --- | --- | --- | --- |
-| Full-screen | display の回転、利用可能領域、system bar / display feature | app は固定orientationやpillarboxに依存せず、原則として利用可能な画面全体へ配置される | requested value、`Configuration.orientation`、WindowMetrics、実画面 |
-| Multi-window | split-screen dividerやdesktop windowingが与えるwindow container bounds | 物理displayの向きにかかわらず、縦長・横長・狭幅などのwindowへ再レイアウトされる | requested value、window bounds変更、configuration change、UI state |
+| Full-screen | displayの回転、利用可能領域、system bar / display feature | appは固定方向やpillarboxに依存せず、原則として利用可能な画面全体へ配置される | 要求値、`Configuration.orientation`、WindowMetrics、実画面 |
+| Multi-window | split-screen dividerやdesktop windowingが与えるwindow container bounds | 物理displayの向きにかかわらず、縦長・横長・狭幅などのwindowへ再レイアウトされる | 要求値、window bounds変更、configuration change、UI state |
 
 したがって、実装側は「無視された後にどのデフォルト値になるか」ではなく、「現在与えられたwindow boundsとconfigurationに対してUIをどう適応させるか」を基準にする。window変更でActivityが再生成されるか、configuration callbackになるかもmanifest属性のデフォルト値からは判断せず、実機で状態保持を含めて確認する。
 
 ## Manifest 属性・runtime API 一覧
 
-| 種別 | 属性・API | 従来依存していた挙動 | Android 16 / target 36 / large screen での実効挙動 | 値・呼び出しの扱い | 主な確認方法 |
+| 種別 | 属性・API | 従来依存していた挙動 | Android 16 / target 36 / large screenでシステムが実際に採用する挙動 | 値・呼び出しの扱い | 主な確認方法 |
 | --- | --- | --- | --- | --- | --- |
-| Manifest | `android:screenOrientation` | Activity を指定した orientation family に固定する | 下表の列挙値は fixed orientation constraint として無視される | manifest value は parse され `ActivityInfo` に保持され得る | 端末回転後の `Configuration.orientation`、window bounds、画面表示を確認 |
-| Manifest | `android:resizeableActivity="false"` | Activity を non-resizable とし、compatibility mode を期待する | universal resizable 条件では resizable 扱いになり、false による制約は効かない | manifest value の入力経路は残る | 全画面、分割画面、window resize で bounds 追従を確認 |
-| Manifest | `android:minAspectRatio` | 最小 aspect ratio で window bounds を制限する | universal resizable 条件では aspect ratio policy が 0 扱いにし、制約として効かない | manifest value の入力経路は残る | 縦長・横長・分割画面で実効 bounds と content scaling を確認 |
-| Manifest | `android:maxAspectRatio` | 最大 aspect ratio で window bounds を制限する | universal resizable 条件では aspect ratio policy が 0 扱いにし、制約として効かない | manifest value の入力経路は残る | pillarbox の有無、実効 bounds、content scaling を確認 |
-| Runtime API | `Activity#setRequestedOrientation(int)` | 実行中に Activity の orientation 変更を要求する | restricted fixed orientation request は実効 constraint として無視される | request は system server へ渡り、requested value が残る場合がある | 呼び出し前後の getter、configuration、recreation、bounds を別々に記録 |
-| Runtime API | `Activity#getRequestedOrientation()` | 現在の requested orientation を取得する | getter の値だけでは実効 orientation や window bounds を判定できない | requested value を返す経路は残る | getter と `Configuration.orientation`、WindowMetrics、画面キャプチャを比較 |
+| Manifest | `android:screenOrientation` | Activityを指定した画面の向きに固定する | 下表の列挙値は固定方向の制約として採用されない | manifest値はparseされ`ActivityInfo`に保持され得る | 端末回転後の`Configuration.orientation`、アプリに割り当てられたウィンドウ領域、画面表示を確認 |
+| Manifest | `android:resizeableActivity="false"` | Activityをサイズ変更不可とし、compatibility modeを期待する | あらゆるウィンドウサイズへ変更可能とする条件ではサイズ変更可能として扱われ、falseによる制約は効かない | manifest値の入力経路は残る | 全画面、分割画面、window resizeで領域の追従を確認 |
+| Manifest | `android:minAspectRatio` | 最小アスペクト比でウィンドウ領域を制限する | あらゆるウィンドウサイズへ変更可能とする条件ではaspect ratio policyが0扱いにし、制約として効かない | manifest値の入力経路は残る | 縦長・横長・分割画面でアプリに割り当てられたウィンドウ領域とcontent scalingを確認 |
+| Manifest | `android:maxAspectRatio` | 最大アスペクト比でウィンドウ領域を制限する | あらゆるウィンドウサイズへ変更可能とする条件ではaspect ratio policyが0扱いにし、制約として効かない | manifest値の入力経路は残る | pillarboxの有無、アプリに割り当てられたウィンドウ領域、content scalingを確認 |
+| Runtime API | `Activity#setRequestedOrientation(int)` | 実行中にActivityの画面の向きの変更を要求する | 制限対象となる固定方向の要求は、最終的に適用する制約として採用されない | 要求はsystem serverへ渡り、要求値が残る場合がある | 呼び出し前後のgetter、Configuration、recreation、ウィンドウ領域を別々に記録 |
+| Runtime API | `Activity#getRequestedOrientation()` | 現在の画面の向きの要求値を取得する | getterの値だけでは、システムが実際に採用した画面の向きやアプリに割り当てられたウィンドウ領域を判定できない | 要求値を返す経路は残る | getterと`Configuration.orientation`、WindowMetrics、画面キャプチャを比較 |
 
 公式文書では `resizableActivity` と表記される箇所があるが、Android manifest の属性名は `android:resizeableActivity` である。コード検索では後者を使う。
 
@@ -101,24 +107,24 @@ Manifest / runtime API で値を指定
 
 | Family | Manifest value | Runtime constant | 条件成立時の扱い |
 | --- | --- | --- | --- |
-| Portrait | `portrait` | `ActivityInfo.SCREEN_ORIENTATION_PORTRAIT` | fixed portrait constraint として無視 |
-| Portrait | `reversePortrait` | `ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT` | fixed portrait constraint として無視 |
-| Portrait | `sensorPortrait` | `ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT` | fixed portrait constraint として無視 |
-| Portrait | `userPortrait` | `ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT` | fixed portrait constraint として無視 |
-| Landscape | `landscape` | `ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE` | fixed landscape constraint として無視 |
-| Landscape | `reverseLandscape` | `ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE` | fixed landscape constraint として無視 |
-| Landscape | `sensorLandscape` | `ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE` | fixed landscape constraint として無視 |
-| Landscape | `userLandscape` | `ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE` | fixed landscape constraint として無視 |
+| Portrait | `portrait` | `ActivityInfo.SCREEN_ORIENTATION_PORTRAIT` | portraitへの固定制約として採用されない |
+| Portrait | `reversePortrait` | `ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT` | portraitへの固定制約として採用されない |
+| Portrait | `sensorPortrait` | `ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT` | portraitへの固定制約として採用されない |
+| Portrait | `userPortrait` | `ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT` | portraitへの固定制約として採用されない |
+| Landscape | `landscape` | `ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE` | landscapeへの固定制約として採用されない |
+| Landscape | `reverseLandscape` | `ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE` | landscapeへの固定制約として採用されない |
+| Landscape | `sensorLandscape` | `ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE` | landscapeへの固定制約として採用されない |
+| Landscape | `userLandscape` | `ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE` | landscapeへの固定制約として採用されない |
 
 ## 制約ごとの処理経路
 
-| 入力 | 主な framework 経路 | 実効無視につながる処理 | 開発者が誤解しやすい点 |
+| 入力 | 主なframework経路 | 最終的な制約として採用されなくなる処理 | 開発者が誤解しやすい点 |
 | --- | --- | --- | --- |
-| `screenOrientation` | manifest parsing -> `ActivityInfo.screenOrientation` -> `ActivityRecord#getOverrideOrientation()` | restricted fixed orientation を `SCREEN_ORIENTATION_UNSPECIFIED` 相当に解決 | manifest が読まれないのではなく、最終 policy で制約として採用されない |
-| `setRequestedOrientation()` | `Activity` -> `ActivityClientController` -> `ActivityRecord#setRequestedOrientation()` | requested value と resolved orientation が分離する | method call が no-op になると決めつけない。configuration change の有無も別に観測する |
-| `getRequestedOrientation()` | `Activity` / `ActivityRecord#getRequestedOrientation()` | requested value を返す経路が残る | getter が portrait でも、表示中の window が landscape bounds になる可能性がある |
+| `screenOrientation` | manifest parsing -> `ActivityInfo.screenOrientation` -> `ActivityRecord#getOverrideOrientation()` | 制限対象となる固定方向を`SCREEN_ORIENTATION_UNSPECIFIED`相当に解決 | manifestが読まれないのではなく、最終policyで制約として採用されない |
+| `setRequestedOrientation()` | `Activity` -> `ActivityClientController` -> `ActivityRecord#setRequestedOrientation()` | 要求値と、解決後の画面の向きが分離する | method callがno-opになると決めつけない。configuration changeの有無も別に観測する |
+| `getRequestedOrientation()` | `Activity` / `ActivityRecord#getRequestedOrientation()` | 要求値を返す経路が残る | getterがportraitでも、表示中のwindowが横長の領域になる可能性がある |
 | `resizeableActivity=false` | manifest parsing -> `ActivityInfo.resizeMode` -> `ActivityRecord#isResizeable()` | `isUniversalResizeable()` が resizable 判定に含まれる | false を指定しても split screen や resize を避けられるとは限らない |
-| `minAspectRatio` / `maxAspectRatio` | manifest parsing -> `ActivityInfo` -> `AppCompatAspectRatioPolicy` | universal resizable 時に min / max を 0 として扱う | 指定値が存在しても pillarbox や固定比率を保証しない |
+| `minAspectRatio` / `maxAspectRatio` | manifest parsing -> `ActivityInfo` -> `AppCompatAspectRatioPolicy` | あらゆるウィンドウサイズへ変更可能と判定された場合にmin / maxを0として扱う | 指定値が存在してもpillarboxや固定比率を保証しない |
 
 詳細な AOSP file、symbol、baseline / target diff、confidence は primary report の「AOSP 調査」を参照する。
 
@@ -126,11 +132,11 @@ Manifest / runtime API で値を指定
 
 | 種別 | 属性・設定 | `true` / 選択時の効果 | Scope | 注意点 |
 | --- | --- | --- | --- | --- |
-| Manifest | `android:appCategory="game"` | game exception の判定対象となり、universal resizable path から外れる | Application | game であることを回避策として偽装しない。実際の category と一致させる |
-| Manifest property | `android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` | restricted resizability を一時的に許可し、従来の compatibility mode 側へ戻す | Application または Activity | temporary opt-out。API level 37 target では適用されないと公式文書が説明している |
-| User setting | device の app aspect ratio setting で app default behavior を明示選択 | user aspect ratio exception として universal resizable path から外れる | User / app | 端末・OEM依存。アプリ側の恒久対応として扱わない |
+| Manifest | `android:appCategory="game"` | game exceptionの判定対象となり、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる | Application | gameであることを回避策として偽装しない。実際のcategoryと一致させる |
+| Manifest property | `android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` | サイズ変更を制限する指定を一時的に許可し、従来のcompatibility mode側へ戻す | ApplicationまたはActivity | temporary opt-out。API level 37 targetでは適用されないと公式文書が説明している |
+| User setting | deviceのapp aspect ratio settingでapp default behaviorを明示選択 | user aspect ratio exceptionとして、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる | User / app | 端末・OEM依存。アプリ側の恒久対応として扱わない |
 | Compat framework | `UNIVERSAL_RESIZABLE_BY_DEFAULT` / `357141415` | enable で新挙動、disable で旧挙動を比較できる | Package | debuggable build での検証用。製品仕様の opt-out として扱わない |
-| Device configuration | OEM / device config override | orientation request や resize policy が既定と異なる可能性がある | Device | 公式 Exceptions の3項目とは分け、対象端末で Observed を記録する |
+| Device configuration | OEM / device config override | 画面の向きの要求やresize policyが既定と異なる可能性がある | Device | 公式Exceptionsの3項目とは分け、対象端末でObservedを記録する |
 
 ## Temporary opt-out の記述例
 
@@ -191,7 +197,7 @@ rg -n 'setRequestedOrientation|getRequestedOrientation|requestedOrientation' \
 | --- | --- | --- |
 | UI制御 | camera、media、editor画面で orientation を固定 | window bounds に応じた layout と content scaling を定義 |
 | Compatibility依存 | `resizeableActivity=false`、aspect ratio、pillarbox 前提 | 全画面・分割画面・desktop windowing を通常状態として検証 |
-| Getter依存 | `getRequestedOrientation()` で分岐 | 実効 configuration / window bounds を使う設計へ見直す |
+| Getter依存 | `getRequestedOrientation()`で分岐 | 実際に適用されたConfigurationと、アプリに割り当てられたウィンドウ領域を使う設計へ見直す |
 | 一時回避 | opt-out property | Activity単位へ限定し、削除条件を記録 |
 | 正当な例外 | game category | category と実際のアプリ用途が一致することを確認 |
 
@@ -213,7 +219,7 @@ Pixel Tablet実機でAndroidアプリ画面の証跡を収集する場合は、[
 | --- | --- | --- | --- | --- | --- |
 | Baseline target | Android 16 | 35 | default | なし | 新挙動は既定適用されない |
 | Forced new behavior | Android 16 | 35 | enable | なし | 移行前に新挙動を先行確認 |
-| Default new behavior | Android 16 | 36 | default | なし | 条件成立時に制約を実効無視 |
+| Default new behavior | Android 16 | 36 | default | なし | 条件成立時に指定された制約を最終的な制約として採用しない |
 | Forced old behavior | Android 16 | 36 | disable | なし | 同一buildで旧挙動と比較 |
 | Temporary opt-out | Android 16 | 36 | default | Activity または Application | opt-out scope だけ従来挙動側へ戻る |
 
@@ -221,7 +227,7 @@ Pixel Tablet実機でAndroidアプリ画面の証跡を収集する場合は、[
 
 ## Expected / Observed 記録表
 
-| Case | 指定・要求値 | Getter / 保持値 | 実効 orientation | Window bounds | UI状態 | Expected | Observed |
+| Case | 指定・要求値 | Getter / 保持値 | システムが実際に採用した画面の向き | アプリに割り当てられたウィンドウ領域 | UI状態 | Expected | Observed |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `<case>` | `<manifest/API value>` | `<getter result>` | `<portrait/landscape>` | `<width x height dp>` | `<preserved/lost>` | `<primary reportから導出>` | 未実施 |
 
@@ -231,10 +237,10 @@ Observed を未確認のまま Expected と混ぜない。端末モデル、buil
 
 | 誤解 | 正しい読み方 |
 | --- | --- |
-| `setRequestedOrientation()` は呼び出されなくなる | call path は残る。fixed orientation request が実効 constraint として尊重されない |
-| `getRequestedOrientation()` が portrait なら画面も portrait | getter は requested value を返し得る。実効 orientation と bounds は別に確認する |
-| `resizeableActivity=false` なら分割画面に入らない | universal resizable 条件では false による制約へ依存できない |
-| aspect ratio 属性が残っていれば pillarbox される | universal resizable 条件では min / max aspect ratio が実効制約として効かない |
+| `setRequestedOrientation()`は呼び出されなくなる | call pathは残る。固定方向の要求が最終的な制約として採用されない |
+| `getRequestedOrientation()`がportraitなら画面もportrait | getterは要求値を返し得る。システムが実際に採用した画面の向きと、アプリに割り当てられたウィンドウ領域は別に確認する |
+| `resizeableActivity=false`なら分割画面に入らない | あらゆるウィンドウサイズへ変更可能とする条件では、falseによる制約へ依存できない |
+| aspect ratio属性が残っていればpillarboxされる | あらゆるウィンドウサイズへ変更可能とする条件では、min / max aspect ratioが最終的な制約として効かない |
 | split screen の窓幅が600dp未満なら変更対象外 | platform gate の600dpは display 基準。UI adaptation は現在の窓幅基準 |
 | opt-out を入れれば対応完了 | 一時的な移行猶予であり、API 37 target では適用されない |
 

@@ -107,7 +107,7 @@ Runtime / window:
 
 - 値を取得するだけで分岐に使っていない箇所と、実際に処理を変える箇所を分ける。
 - helper、ViewModel、Flow / LiveData / State、callbackを経由する場合もconsumerまで追跡する。
-- requested orientationと実効orientation / window boundsを混同していないか確認する。
+- アプリが要求した画面の向きと、システムが実際に採用した画面の向き・アプリに割り当てられたウィンドウ領域を混同していないか確認する。
 - displayの600dp gateと現在のapp window幅によるUI breakpointを混同していないか確認する。
 - target 35 / 36、full-screen / multi-windowでbranchの入力値または選択結果が変わるか確認する。
 - branchがlayout、resource選択、navigation、Activity recreation、state restoration、rendering、入力受付へ与える影響を記録する。
@@ -163,7 +163,7 @@ Window / rotation条件:
 
 - 実行前に元のuser rotation mode / valueを保存する。
 - `adb shell wm help`が示すsyntaxだけを使う。
-- commandが成功しても、rotation番号からportrait / landscapeを決めず、実効display情報、window bounds、screenshotで確認する。
+- commandが成功しても、rotation番号からportrait / landscapeを決めず、端末で確認したdisplay情報、アプリに割り当てられたウィンドウ領域、screenshotで確認する。
 - ADBによるlogical rotationと、Pixel Tabletを物理的に回す操作を区別して記録する。
 - 加速度sensor、端末姿勢、外部displayなど物理状態の影響が検証対象なら、必要な時点でユーザーへ物理操作を依頼し、自動ADB操作で代替しない。
 
@@ -180,7 +180,7 @@ Window / rotation条件:
 
 - `am compat enable|disable|reset UNIVERSAL_RESIZABLE_BY_DEFAULT <package>`を使う前に、debuggable buildと対象端末でtoggle可能か確認する。
 - toggleはapp processを停止するため、毎回同じinitial stateとentry pointから画面へ到達し直す。
-- case開始前に実効compat stateを保存する。
+- case開始前に、実際に適用されているcompat changeの状態を保存する。
 - 最後にpackage overrideをresetする。
 
 ## Phase 6: Evidence collection
@@ -230,7 +230,7 @@ caseごとに次を比較してください。
 - target 35 default vs target 35 compat enable
 - target 36 default vs target 36 compat disable
 - full-screen vs split-screen wide vs split-screen narrow
-- requested orientation vs effective orientation / bounds
+- アプリが要求した画面の向き vs システムが実際に採用した画面の向き・アプリに割り当てられたウィンドウ領域
 - app codeで取得した属性値 vs 選択されたbranch vs visual result
 - rotation / resize前後のlayout、navigation、scroll / focus、input、state preservation
 

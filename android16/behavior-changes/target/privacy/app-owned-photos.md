@@ -328,7 +328,7 @@ Android 16 r4 API surface には以下が public permission として存在す�
 ### Observations
 
 - Pre-selection は PhotoPicker query / projection 層で実装されている。
-- Access revocation は MediaProvider database update と access filtering によって実効化される。
+- Access revocationはMediaProvider database updateとaccess filteringによって実際に適用される。
 - Full access、limited access、denied は同じ影響ではない。
 - App-owned media と user-selected media は同じ picker selection UI に現れるが、access の根拠は異なる。
 

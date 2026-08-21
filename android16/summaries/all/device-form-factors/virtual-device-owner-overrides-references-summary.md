@@ -35,7 +35,7 @@ Primary classification:
 - Android Developers 公式ページでは、`References` section は `Companion app streaming` link のみ。
 - Source Android の正しい参照先は `https://source.android.com/docs/core/permissions/app-streaming`。同文書は `COMPANION_DEVICE_APP_STREAMING` role、virtual display、remote display streaming、remote input injection を説明している。
 - 親項目の AOSP evidence では、`VirtualDeviceManager#createVirtualDevice` が `CREATE_VIRTUAL_DEVICE` を要求し、ordinary app 向けではない。
-- `VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions(boolean)` は fixed orientation、aspect ratio、resizability を無視する virtual display property を設定する。
+- `VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions(boolean)`は固定方向、aspect ratio、サイズ変更可否の制約を無視するvirtual display propertyを設定する。
 - `DisplayManagerService` は trusted virtual display でない場合、この request を無視する。
 - WindowManager app-compat path は display ignore state を参照し、orientation / aspect ratio / fullscreen behavior に影響する。
 - 該当 path に targetSdkVersion 36 gate は見つからない。
@@ -63,7 +63,7 @@ Primary classification:
 - companion app streaming / virtual device projection で利用されるアプリ。
 - virtual device owner / privileged companion app と連携するアプリ。
 - phone portrait 専用 UI のアプリ。
-- fixed orientation / aspect ratio / `resizeableActivity=false` に依存するアプリ。
+- 固定方向 / aspect ratio / `resizeableActivity=false`に依存するアプリ。
 - large screen / external display / desktop mode / Chromebook / car display / VR display で利用され得るアプリ。
 - adaptive layout / responsive UI へ移行すべきアプリ。
 - References / companion app streaming documentation を確認すべきアプリ。

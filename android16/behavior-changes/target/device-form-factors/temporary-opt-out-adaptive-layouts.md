@@ -63,7 +63,7 @@ Category:
 - High
 
 理由:
-- 公式文書、公式 compat framework changes、AOSP ChangeId、targetSdkVersion gate、large screen gate、property 定義、application / activity property lookup、universal resizable 抑止経路、API 37 removal TODO が一致している。
+- 公式文書、公式compat framework changes、AOSP ChangeId、targetSdkVersion gate、large screen gate、property定義、application / activity property lookup、あらゆるウィンドウサイズへ変更可能とする判定の抑止経路、API 37 removal TODOが一致している。
 - `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` は API reference page では検索できず、AOSP でも `@hide` として定義されているため、公開 API 定数として利用するのではなく manifest property name 文字列として扱う必要がある。
 
 ### 適用条件分類（Applicability Classification）
@@ -101,7 +101,7 @@ Compat framework:
 
 Android 16 の `Opt out temporarily` 節は、Adaptive layouts の base behavior、つまり large screen で orientation / resizability / aspect ratio restrictions を無視する挙動を、一時的に application level または activity level で抑止する方法を説明している。
 
-AOSP evidence では、`PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` は `WindowManager` に hidden property として定義され、`AppCompatResizeOverrides` が `PackageManager#getPropertyAsUser()` で application-level property を先に確認し、true でなければ activity-level property を確認する。どちらかが true の場合、`ActivityRecord#isUniversalResizeable()` が false になり、base behavior の universal resizable path から外れる。
+AOSP evidenceでは、`PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY`は`WindowManager`にhidden propertyとして定義され、`AppCompatResizeOverrides`が`PackageManager#getPropertyAsUser()`でapplication-level propertyを先に確認し、trueでなければactivity-level propertyを確認する。どちらかがtrueの場合、`ActivityRecord#isUniversalResizeable()`がfalseになり、base behaviorの「あらゆるウィンドウサイズへ変更可能とする処理経路」から外れる。
 
 この opt-out は Android 16 の移行猶予であり、公式文書は API level 37 target では適用されないと説明している。AOSP にも `TODO(b/357141415): Remove this from sdk 37` がある。顧客向けには、OS アップデートだけの影響、targetSdkVersion 36 化による base behavior、temporary opt-out の効果を分けて説明する。
 
@@ -155,8 +155,8 @@ To opt out at the activity level, add the property in the <activity> tag.
 
 # 変更内容（What Changed）
 
-- Android 16 の adaptive layouts base behavior は `UNIVERSAL_RESIZABLE_BY_DEFAULT` により、large screen で fixed orientation / aspect ratio / resizability restrictions を無視する。
-- `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` を application または activity に指定すると、AOSP の `ActivityRecord#isUniversalResizeable()` が false になり、base behavior の universal resizable path から外れる。
+- Android 16のadaptive layouts base behaviorは`UNIVERSAL_RESIZABLE_BY_DEFAULT`により、large screenで固定方向・アスペクト比・サイズ変更可否の制約を無視する。
+- `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true`をapplicationまたはactivityに指定すると、AOSPの`ActivityRecord#isUniversalResizeable()`がfalseになり、base behaviorの「あらゆるウィンドウサイズへ変更可能とする処理経路」から外れる。
 - application-level property は package-level lookup で先に判定されるため、true なら全 activity に効く。
 - activity-level property は specific activity component の property として読まれるため、該当 activity に限定される。
 - `android:value="false"` または未指定では opt-out にならない。
@@ -175,8 +175,8 @@ To opt out at the activity level, add the property in the <activity> tag.
 ## targetSdkVersion 36 以上での挙動（targetSdkVersion 36 Behavior）
 
 - Android 16 / targetSdkVersion 36 / `sw >= 600dp` / non-game / user exception なし / opt-out なしでは、base behavior が適用される。
-- application-level opt-out true では、package の全 activity が universal resizable path から外れる。
-- activity-level opt-out true では、該当 activity のみ universal resizable path から外れる。
+- application-level opt-out trueでは、packageの全activityが、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる。
+- activity-level opt-out trueでは、該当activityのみが、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる。
 - application-level true と activity-level true が混在しても、application-level true の時点で true を返すため、全 activity が opt-out される。
 - application-level false と activity-level true の場合、application-level は抑止せず、該当 activity の activity-level true が効く。
 - activity-level false は opt-out にならない。application-level true がある場合、activity-level false で再度 opt-in する経路は確認できない。
@@ -184,13 +184,13 @@ To opt out at the activity level, add the property in the <activity> tag.
 ## Android 15 / targetSdkVersion 36
 
 - `android-15.0.0_r36` にも `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` と `ActivityRecord#isUniversalResizeable()` の準備コードは存在する。
-- ただし `android-16.0.0_r4` では `DisplayContent#getIgnoreOrientationRequest()` に「large screen は既定で orientation request を無視する」分岐が追加されている。Android 15 tag には同等の default large screen 分岐は確認できなかった。
+- ただし`android-16.0.0_r4`では`DisplayContent#getIgnoreOrientationRequest()`に「large screenでは既定で画面の向きの要求を無視する」分岐が追加されている。Android 15 tagには同等のdefault large screen分岐は確認できなかった。
 - よって Android 15 / targetSdkVersion 36 で opt-out property を指定しても、Android 16 の公式 Behavior Change と同一の抑止効果とは結論しない。検証可能な環境があれば Android 16 / targetSdkVersion 36 と比較する。
 
 ## Game / user aspect ratio setting / `sw < 600dp`
 
 - game、user aspect ratio setting exception、`sw < 600dp` は base behavior 自体から外れる条件である。
-- これらの条件では temporary opt-out property の有無にかかわらず、base behavior の universal resizable path に入らない可能性が高い。
+- これらの条件ではtemporary opt-out propertyの有無にかかわらず、base behaviorの「あらゆるウィンドウサイズへ変更可能とする処理経路」に入らない可能性が高い。
 - ただし端末固有 DeviceConfig や user setting は別条件として確認する。
 
 ---
@@ -216,22 +216,22 @@ To opt out at the activity level, add the property in the <activity> tag.
 | ファイル / シンボル | Android 15 baseline | Android 16 target | このコードパスを根拠にする理由 |
 | --- | --- | --- | --- |
 | `ActivityInfo.UNIVERSAL_RESIZABLE_BY_DEFAULT` | Change ID 357141415、`@EnabledAfter(VANILLA_ICE_CREAM)` が存在 | 同じ | targetSdkVersion 36 gate と compat override の根拠 |
-| `DisplayContent#getIgnoreOrientationRequest()` | large screen default ignore 分岐なし | `isLargeScreen()` なら orientation request を既定で ignore | base behavior の Android 16 差分 |
+| `DisplayContent#getIgnoreOrientationRequest()` | large screen default ignore分岐なし | `isLargeScreen()`なら画面の向きの要求を既定で無視 | base behaviorのAndroid 16差分 |
 | `DisplayContent#isLargeScreen()` / `WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP` | threshold は 600 | threshold は 600 | `sw >= 600dp` 判定 |
 | `WindowManager.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` | hidden property として存在 | hidden property として存在、SDK 37 removal TODO あり | opt-out property 定義 |
 | `AppCompatResizeOverrides` constructor | application-level -> activity-level の順で property を読む | 同じ | scope と優先順位 |
 | `PackageManager#getPropertyAsUser()` | property 取得 API が存在 | 同じ | manifest property が PackageManager property として参照される根拠 |
 | `ActivityRecord#isUniversalResizeable()` | `allowRestrictedResizability()` が true なら false | 同じ | opt-out が base behavior を抑止する根拠 |
 | `ActivityRecord#isResizeable()` | `isUniversalResizeable()` を含む | 同じ | opt-out true で `resizeableActivity=false` が従来 policy に戻る根拠 |
-| `AppCompatAspectRatioPolicy#getMinAspectRatio()` / `getMaxAspectRatio()` | universal resizable なら 0 | 同じ | opt-out true で min/max aspect ratio が従来 policy に戻る根拠 |
-| `ActivityRecord#getOverrideOrientation()` | universal resizable path に接続 | 同じ | opt-out true で fixed orientation 無視 path から外れる根拠 |
+| `AppCompatAspectRatioPolicy#getMinAspectRatio()` / `getMaxAspectRatio()` | あらゆるウィンドウサイズへ変更可能と判定された場合は0 | 同じ | opt-out trueでmin/max aspect ratioが従来policyに戻る根拠 |
+| `ActivityRecord#getOverrideOrientation()` | あらゆるウィンドウサイズへ変更可能とする処理経路に接続 | 同じ | opt-out trueで固定方向を無視する処理経路から外れる根拠 |
 | `core/api/current.txt` / `test-current.txt` | property は public current / test-current に出ない | 同じ | property は公開 API 定数ではなく hidden manifest property |
 
 必須記入項目（Required context）:
 - Entry point / caller: manifest `<property>` -> PackageManager property -> `AppCompatResizeOverrides#allowRestrictedResizability()` -> `ActivityRecord#isUniversalResizeable()`。
 - Relevant class or service responsibility: WindowManager / ActivityTaskManager は activity の orientation、window bounds、resizeability、size compat、aspect ratio policy、letterbox / compatibility mode を解決する。
 - Baseline Android behavior: Android 15 tag では Android 16 の large screen default ignore 分岐は確認できない。
-- Target Android behavior: Android 16 tag では targetSdkVersion 36 compat change と large screen gate により universal resizable path が既定有効になる。temporary opt-out true はその path を抑止する。
+- Target Android behavior: Android 16 tagではtargetSdkVersion 36 compat changeとlarge screen gateにより、あらゆるウィンドウサイズへ変更可能とする処理経路が既定有効になる。temporary opt-out trueはその処理経路を抑止する。
 - Diff kind: changed condition / changed default。Android 16 tag の `DisplayContent#getIgnoreOrientationRequest()` が large screen default true を返す条件を追加している。
 - Classification support: targetSdkVersion 36 gate と runtime condition / opt-out があるため `TARGET_SDK_36_CONDITIONAL`。
 - Unrelated or excluded paths: UI state loss、stretched layout、off-screen animation は `Common breaking changes` の影響説明であり、本 report では opt-out mechanism の直接証跡としては扱わない。
@@ -340,13 +340,13 @@ if (mAppCompatController.getResizeOverrides().allowRestrictedResizability()) {
 }
 ```
 
-このため opt-out true は `isUniversalResizeable()` を false にする。結果として、base behavior で無視されるはずだった制約が universal resizable path から外れる。
+このためopt-out trueは`isUniversalResizeable()`をfalseにする。結果として、base behaviorで無視されるはずだった制約が「あらゆるウィンドウサイズへ変更可能とする処理経路」から外れる。
 
 | 制約 / API | opt-out なし | opt-out true |
 | --- | --- | --- |
-| `screenOrientation` / fixed orientation | large screen で実効制約として尊重されない | universal resizable path から外れ、従来 policy に戻る可能性 |
-| `Activity#setRequestedOrientation()` | requested orientation が実効 orientation constraint として尊重されない | 従来 policy / device policy に従う可能性 |
-| `Activity#getRequestedOrientation()` | requested value と実効 orientation / bounds が乖離し得る | requested value と実効制約が近くなる可能性。ただし戻り値だけで判断しない |
+| `screenOrientation` / 固定方向 | large screenで最終的な制約として採用されない | あらゆるウィンドウサイズへ変更可能とする処理経路から外れ、従来policyに戻る可能性 |
+| `Activity#setRequestedOrientation()` | 要求した画面の向きが最終的な制約として採用されない | 従来policy / device policyに従う可能性 |
+| `Activity#getRequestedOrientation()` | 要求値と、システムが実際に採用した画面の向き・アプリに割り当てられたウィンドウ領域が乖離し得る | 要求値と最終的な制約が近くなる可能性。ただし戻り値だけで判断しない |
 | `resizeableActivity=false` | `isResizeable()` が `isUniversalResizeable()` を含むため non-resizable 前提が崩れる | `isUniversalResizeable()` が false になり、manifest の resize mode が残る |
 | `minAspectRatio` / `maxAspectRatio` | aspect ratio policy が 0 扱いになり制限として効かない | `isUniversalResizeable()` false により manifest ratio が評価される |
 | Pillarboxing / compatibility mode | 公式文書上 pillarboxing は使われず full display window を満たす | 公式文書上 previous behavior / compatibility mode に戻る |
@@ -405,8 +405,8 @@ AOSP:
 | シナリオ | 期待挙動 / 確認点 |
 | --- | --- |
 | Android 16 / targetSdkVersion 36 / `sw >= 600dp` / no opt-out | orientation / resizability / aspect ratio restrictions は無視 |
-| Android 16 / targetSdkVersion 36 / `sw >= 600dp` / Application-level opt-out | 全 activity が universal resizable path から外れる |
-| Android 16 / targetSdkVersion 36 / `sw >= 600dp` / Activity-level opt-out | 該当 activity のみ universal resizable path から外れる |
+| Android 16 / targetSdkVersion 36 / `sw >= 600dp` / Application-level opt-out | 全activityが、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる |
+| Android 16 / targetSdkVersion 36 / `sw >= 600dp` / Activity-level opt-out | 該当activityのみが、あらゆるウィンドウサイズへ変更可能とする処理経路から外れる |
 | Android 16 / targetSdkVersion 36 / `sw >= 600dp` / both Application-level and Activity-level opt-out | application-level true により全 activity opt-out |
 | Android 16 / targetSdkVersion 36 / `sw >= 600dp` / opt-out false | opt-out なしと同等 |
 | Android 16 / targetSdkVersion 36 / `sw < 600dp` | large screen gate を満たさないため base behavior 対象外 |
@@ -421,7 +421,7 @@ AOSP:
 
 ## temporary opt-out を検討しているアプリ
 
-- Android 16 / targetSdkVersion 36 / large screen で fixed orientation / non-resizable / aspect ratio 前提の UI が崩れる場合に、一時的な回避策として検討できる。
+- Android 16 / targetSdkVersion 36 / large screenで固定方向・サイズ変更不可・アスペクト比を前提とするUIが崩れる場合に、一時的な回避策として検討できる。
 - API 37 以降は使えない前提で、恒久対応は adaptive layout 化である。
 
 ## Application-level opt-out を指定するアプリ
@@ -439,7 +439,7 @@ AOSP:
 - application-level true があると全 activity に効くため、activity-level false で個別に opt-in する設計は AOSP evidence 上確認できない。
 - mixed strategy では application-level を未指定または false にし、必要な activity だけ true にするのが実装経路に合う。
 
-## fixed orientation / aspect ratio / compatibility mode に依存するアプリ
+## 固定方向 / aspect ratio / compatibility modeに依存するアプリ
 
 - opt-out true で previous behavior / compatibility mode に戻せる可能性がある。
 - ただし temporary であり、API 37 以降に向けて fixed assumption を解消する必要がある。
@@ -488,7 +488,7 @@ opt-out 条件:
 - `<activity>` に property true を指定し、指定 activity と未指定 activity で挙動差を確認する。
 - property false と未指定を比較し、base behavior が抑止されないことを確認する。
 - `adb shell am compat enable UNIVERSAL_RESIZABLE_BY_DEFAULT <package>` / `disable` で compat change を切り替える。
-- `dumpsys window` / `dumpsys package` で requested orientation、bounds、letterbox / compatibility mode 関連 state、manifest property を確認する。
+- `dumpsys window` / `dumpsys package`で要求した画面の向き、bounds、letterbox / compatibility mode関連state、manifest propertyを確認する。
 
 ---
 

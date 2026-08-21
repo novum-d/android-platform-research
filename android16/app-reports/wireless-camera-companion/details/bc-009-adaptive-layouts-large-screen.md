@@ -20,7 +20,7 @@ Behavior Change 文書:
 - portrait 固定 UI。
 
 アプリが該当する可能性:
-- Conditional。large screen 上で fixed orientation / non-resizable / aspect ratio 制限に依存する場合に該当。
+- Conditional。large screen上で固定方向 / サイズ変更不可 / aspect ratio制限に依存する場合に該当。
 
 ## 適用条件分類
 
@@ -49,7 +49,7 @@ Confidence:
 ## アプリ影響
 
 想定される影響:
-- fixed orientation の live view が landscape / large window に伸びる。
+- 固定方向を前提としたlive viewがlandscape / large windowに伸びる。
 - `resizeableActivity=false` や min/max aspect ratio による保護が効かない。
 - camera preview の aspect ratio、button position、touch target、state restoration が崩れる。
 

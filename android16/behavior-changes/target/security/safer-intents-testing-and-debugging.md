@@ -16,7 +16,7 @@
 - Confidence: High
 
 
-Confidence note: 公式文書は Android 16 初期 impact を manifest opt-in に限定している。AOSP でも `android:intentMatchingFlags` / feature flag / cross-app resolution が実効 gate であり、targetSdkVersion 36 だけでは有効にならないことを確認できるため、`OPT_IN_ONLY` として High confidence とする。
+Confidence note: 公式文書はAndroid 16初期impactをmanifest opt-inに限定している。AOSPでも`android:intentMatchingFlags` / feature flag / cross-app resolutionが実際の適用条件であり、targetSdkVersion 36だけでは有効にならないことを確認できるため、`OPT_IN_ONLY`としてHigh confidenceとする。
 
 ## Official Documentation Review
 

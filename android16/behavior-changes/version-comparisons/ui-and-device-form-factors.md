@@ -25,8 +25,8 @@ target 36 で変わる adaptive layouts、edge-to-edge、Predictive Back、font 
 
 | 観点 | Android 15 | Android 16 / target 36 |
 | --- | --- | --- |
-| System behavior | fixed orientation、non-resizable、aspect ratio制約によりpillarbox / compat表示し得る | large screenでは制約を既定で無視し、利用可能window全体へ |
-| App signal | requested orientation / fixed boundsに近いlayout | rotation、resize、configuration change、広いbounds |
+| System behavior | 固定方向、サイズ変更不可、aspect ratio制約によりpillarbox / compat表示し得る | large screenでは制約を既定で無視し、利用可能window全体へ |
+| App signal | 要求した画面の向き / 固定された領域に近いlayout | rotation、resize、configuration change、広いbounds |
 | 対応 | phone固定前提を検出 | WindowMetrics、adaptive pane、state保存、resize / rotate試験 |
 
 game、user aspect ratio、temporary opt-out などの例外は主レポートで確認する。
