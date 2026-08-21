@@ -47,6 +47,41 @@ Android 16 へ OS アップデートしただけで、targetSdkVersion 35 以下
 
 指定値や getter の戻り値が残っていても、実効 orientation や window bounds の制約として尊重されない場合がある。
 
+## 「無視」はデフォルト値へ書き換えるという意味ではない
+
+結論として、manifest 属性や runtime API の値が一律にデフォルト値へ変更されるわけではない。「無視」は、指定・要求された値を最終的な orientation、resizability、aspect ratio、window bounds を決める制約として採用しない、という意味である。
+
+```text
+Manifest / runtime API で値を指定
+-> 値を parse、保持、または system server へ送信
+-> Adaptive layouts の適用条件を評価
+-> 対象なら fixed orientation / non-resizable / aspect ratio 制約から除外
+-> display または multi-window container の条件で実効 configuration / bounds を決定
+```
+
+属性・APIごとの違いは次のとおり。
+
+| 属性・API | 指定値そのもの | policy 内部での扱い | 実効結果 | デフォルト値化と呼べるか |
+| --- | --- | --- | --- | --- |
+| `android:screenOrientation` | `ActivityInfo.screenOrientation` に保持され得る | restricted fixed orientation は実効 orientation 解決時に `SCREEN_ORIENTATION_UNSPECIFIED` 相当として扱われる | アプリの固定方向ではなく display / window policy に従う | No。manifest 値を書き換えるのではなく、解決時に制約から外す |
+| `setRequestedOrientation()` | request は system server へ送られ、requested value が残る場合がある | restricted fixed orientation request を最終 orientation の制約にしない | request と実画面の orientation が一致しない場合がある | No。method の引数をデフォルト値へ変更するわけではない |
+| `getRequestedOrientation()` | requested value を返す経路が残る | getter の戻り値は実効 orientation の正本にならない | portrait を返しても landscape bounds で表示され得る | No。常に `UNSPECIFIED` やデフォルト値を返すわけではない |
+| `android:resizeableActivity="false"` | manifest value と `resizeMode` の入力経路は残る | `isUniversalResizeable()` により最終的な resizable 判定が true になり得る | 全画面以外に分割画面や可変boundsでも表示される | No。属性を `true` へ書き換えるのではなく、判定結果を上書きする |
+| `android:minAspectRatio` / `android:maxAspectRatio` | manifest 指定値は保持され得る | universal resizable 時、aspect ratio policy は実効 min / max を `0` として扱う | 指定比率でboundsを制限せず、利用可能なwindowを使う | No。`0` はこのpolicyで「制約なし」を表す実効値であり、manifest値の書き換えではない |
+
+`SCREEN_ORIENTATION_UNSPECIFIED` 相当や aspect ratio `0` が内部処理に現れても、すべての属性・APIがそれぞれの宣言上のデフォルト値へ戻された、と一般化しない。共通する意味は「アプリ指定の制約を最終レイアウト決定に使わない」である。
+
+### 全画面モードとマルチウィンドウモード
+
+制約を無視する基本的な意味は両モードで同じだが、制約を除外した後に実効boundsを決める外部条件が異なる。
+
+| Mode | 制約を除外した後の主な決定条件 | 期待される見え方 | 確認すべき情報 |
+| --- | --- | --- | --- |
+| Full-screen | display の回転、利用可能領域、system bar / display feature | app は固定orientationやpillarboxに依存せず、原則として利用可能な画面全体へ配置される | requested value、`Configuration.orientation`、WindowMetrics、実画面 |
+| Multi-window | split-screen dividerやdesktop windowingが与えるwindow container bounds | 物理displayの向きにかかわらず、縦長・横長・狭幅などのwindowへ再レイアウトされる | requested value、window bounds変更、configuration change、UI state |
+
+したがって、実装側は「無視された後にどのデフォルト値になるか」ではなく、「現在与えられたwindow boundsとconfigurationに対してUIをどう適応させるか」を基準にする。window変更でActivityが再生成されるか、configuration callbackになるかもmanifest属性のデフォルト値からは判断せず、実機で状態保持を含めて確認する。
+
 ## Manifest 属性・runtime API 一覧
 
 | 種別 | 属性・API | 従来依存していた挙動 | Android 16 / target 36 / large screen での実効挙動 | 値・呼び出しの扱い | 主な確認方法 |
