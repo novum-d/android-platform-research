@@ -62,6 +62,7 @@ classification、confidence、evidence、Human Decisionを置き換えない。
 | FAQ | [GPU syscall filtering concepts](target/security/gpu-syscall-filtering-concepts-faq.md) | [GPU syscall filtering](target/security/gpu-syscall-filtering.md) |
 | Implementation examples | [Fixed-rate work scheduling examples](case-guides/fixed-rate-work-scheduling-optimization-implementation-examples.md) | [Fixed-rate work scheduling optimization](target/core-functionality/fixed-rate-work-scheduling-optimization.md) |
 | Implementation examples | [Predictive back examples](case-guides/migration-or-opt-out-required-for-predictive-back-implementation-examples.md) | [Migration or opt-out required for predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md) |
+| Manifest / API behavior guide | [Adaptive layouts manifest / API behavior](case-guides/adaptive-layouts-manifest-api-behavior-guide.md) | [Adaptive layouts](target/device-form-factors/adaptive-layouts.md) |
 | Category action guide | [Connectivity and security](case-guides/connectivity-and-security.md) | Multiple Behavior Changes |
 | Category action guide | [Core functionality](case-guides/core-functionality.md) | Multiple Behavior Changes |
 | Category action guide | [Privacy and health](case-guides/privacy-and-health.md) | Multiple Behavior Changes |

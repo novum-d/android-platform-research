@@ -9,6 +9,8 @@
 
 Report: [Adaptive layouts](../target/device-form-factors/adaptive-layouts.md)
 
+Manifest / API guide: [Adaptive layouts manifest / API behavior](adaptive-layouts-manifest-api-behavior-guide.md)
+
 | ケース | 判定条件 | 対応手順 | 最低限の検証 |
 | --- | --- | --- | --- |
 | `< sw600dp` | small screen | 従来挙動を baseline とする | portrait / landscape |

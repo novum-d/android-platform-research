@@ -1,5 +1,7 @@
 # Temporary opt-out 調査レポート
 
+Companion guide: [Adaptive layouts Manifest / API 挙動ガイド](../../case-guides/adaptive-layouts-manifest-api-behavior-guide.md)
+
 ## 基本情報（Metadata）
 
 ### 調査対象 Android バージョン（Android Versions）
