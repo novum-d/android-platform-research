@@ -302,3 +302,56 @@ Source context の補足:
 
 判断（Decision）:
 - 未判断
+
+---
+
+## 再検証記録（2026-08-22）
+
+### 調査日（Investigation Date）
+
+- 2026-08-22
+
+### 公式ドキュメント再確認（Original Documentation Recheck）
+
+- Android 17 の all-apps / target Behavior Change ページを再取得し、このレポートが参照する公式 section の掲載と適用範囲を再確認した。
+- 公式ページの最終更新表示: all-apps / target: 2026-08-14 UTC。
+- Android 17 compat framework 一覧は 2026-08-22 時点でも HTTP 404 のため、公式 Behavior Change 文書と AOSP annotation / gate を正とした。
+- 既存の引用は短い要約として扱い、適用条件は公式ページ種別と AOSP gate の両方で再評価した。
+
+### AOSP 証拠ワークスペース（AOSP Evidence Workspaces）
+
+| AOSP project | Official remote URL | Checkout path | Working tree | From tag / resolved commit | To tag / resolved commit | Comparison command | Dirty risk / limitations |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `platform/frameworks/base` | `https://android.googlesource.com/platform/frameworks/base` | `frameworks-base/` | Clean | `android-16.0.0_r4` / `45034f0663f960d9ee5fb0a101a4732b71f6e2f4` | `android-17.0.0_r1` / `94b4c163b7dfe5ce3607f7bb8456f9573f7de57d` | `git -C frameworks-base diff --no-renames --name-only android-16.0.0_r4 android-17.0.0_r1` | なし。明示タグ比較のため working tree の内容は根拠に含めない。 |
+
+### ソース文脈・差分解釈の再確認（Source Context Reviewed / Diff Interpretation）
+
+- 各 official remote で Android 16 / 17 の最新通常リリースタグが `android-16.0.0_r4` / `android-17.0.0_r1` のままであることを確認した。
+- 上表の project-level `--name-only` 比較を再実行し、既存本文の path / symbol 別 source context、gate、追加・削除・条件変更・既定値変更・差分なしの解釈を再確認した。
+- タグと解決済み commit が既存調査の比較対象から変わっていないため、本文の evidence record を別タグへ機械的に置換していない。
+- 実機 Observed は新規実施していない。既存の「未実施」「未確認」および不足根拠はそのまま維持した。
+
+### 事実（Facts）
+
+- `android-16.0.0_r4` と `android-17.0.0_r1` は 2026-08-22 時点の最新通常リリースタグである。
+- 上表に再検証時の working tree 状態を記録し、official remote、両タグ、解決済み commit を確認した。展開中または dirty の working tree は根拠に使用していない。
+- 公式 section と AOSP evidence の比較 pair は一致している。
+
+### 観察（Observations）
+
+- 最新タグが変わっていないため、今回の再検証で既存の source diff 解釈を変更する新しい AOSP tag evidence は生じなかった。
+- report 内に残る Medium / Low confidence、OEM / Mainline / QPR 条件、未確認の module enforcement は解消したものとして扱わない。
+
+### 仮説（Hypotheses）
+
+- 新しい仮説は追加しない。既存本文で仮説または可能性として記載した事項は、実機・製品 build・未確認 module の evidence が得られるまで事実へ昇格しない。
+
+### 結論（Conclusions）
+
+- 既存本文の主分類、confidence、対応候補を維持する。既存の不足根拠がある場合はその制約も維持する。
+- 全件再検証の横断記録は [`android17/analysis/REVALIDATION_2026-08-22.md`](../../../analysis/REVALIDATION_2026-08-22.md) を参照する。
+
+### Human Decision
+
+- この再検証では最終 priority、severity、release readiness、顧客説明優先度を変更していない。
+- 人間の判断は [Android 17 Decision Log](../../../decisions/DECISION_LOG.md) を正とする。

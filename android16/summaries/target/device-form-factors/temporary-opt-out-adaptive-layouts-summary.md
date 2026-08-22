@@ -128,3 +128,10 @@ Android 16 では `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` により
 
 Owner notes:
 - 最終優先度、severity、release readiness、顧客 communication priority は repository owner が判断する。
+
+## 再検証記録（2026-08-22）
+
+- Android 16 の公式 Behavior Change 一覧と最新通常AOSPタグを再確認した。
+- 対応する[主レポート](../../../behavior-changes/target/device-form-factors/temporary-opt-out-adaptive-layouts.md)で official section、AOSP project / remote / checkout、解決済み commit、比較 command、dirty risk を再検証した。
+- 主レポートの分類、confidence、未確認事項を維持し、実機未実施の項目を Observed 済みへ変更していない。
+- 全件の結果は[再検証台帳](../../../analysis/REVALIDATION_2026-08-22.md)を参照する。

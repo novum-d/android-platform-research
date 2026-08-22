@@ -31,6 +31,19 @@ Android 16: key missing通知 -> auth failure切断 -> local bond保持 -> user-
 
 自動接続の試行自体がなくなるのではなく、bond loss 検出後の復旧主体が変わる。
 
+### CompanionDeviceManager による Bluetooth bond 削除 API
+
+- [主レポート](../target/connectivity/new-way-to-remove-bluetooth-bond.md)
+- [要約](../../summaries/target/connectivity/new-way-to-remove-bluetooth-bond-summary.md)
+- 適用: `API_ADDITION_ONLY`
+
+| 観点 | Android 15 | Android 16 |
+| --- | --- | --- |
+| API availability | AOSP tag には `@FlaggedApi` 付き source があるため、製品 SDK の公開状態は別確認が必要 | 公式文書が `CompanionDeviceManager.removeBond(int)` を public API として案内 |
+| Runtime behavior | API を呼ばないアプリへ自動適用されない | valid association / `BLUETOOTH_CONNECT` / MAC address 条件で明示的に bond 削除を開始 |
+| App signal | 製品 SDK と既存 unpair 実装に依存 | 即時戻り値と `ACTION_BOND_STATE_CHANGED` を分けて扱う |
+| 対応 | system Settings または既存経路 | CDM 管理機器の unpair 導線へ選択的に採用 |
+
 ### Companion Device Manager discovery timeout
 
 - [主レポート](../all/security/companion-apps-no-longer-notified-of-discovery-timeouts.md)
@@ -108,6 +121,7 @@ Android 15 tag に guarded code は存在するため、製品 flag と公式 An
 | Safer Intents | strict receiver matching | resolve failure、PM warning | component-scoped exception |
 | GPU | SELinux IOCTL xperm | denial / native feature failure | supported graphics API |
 | MediaStore | per-UID token | opaque string | generation API |
+| CDM bond removal API | association を検証して明示的に unpair | 即時戻り値 + bond-state broadcast | system Settings / 既存 unpair 導線 |
 
 ## 5. OS / targetSdk マトリクス
 
@@ -119,6 +133,7 @@ Android 15 tag に guarded code は存在するため、製品 flag と公式 An
 | Safer Intents | receiving opt-in対象外 | manifest opt-in時のみ | manifest opt-in時のみ |
 | GPU | legacy policy | device / build条件でfilter | target35と同じ |
 | MediaStore version | legacy | target35はlegacy見込み | per-UID opaque token |
+| CDM bond removal API | Android 15 SDK 公開状態を別確認 | API を呼ばなければ変更なし | API 36 として選択的に採用 |
 
 ## 6. 比較試験
 
@@ -129,6 +144,7 @@ Android 15 tag に guarded code は存在するため、製品 flag と公式 An
 | S3 | filter不一致explicit Intent | deliveryし得る | opt-in時block | 未実施 |
 | S4 | restricted Mali IOCTL / release | legacy policy | SELinux deny | 未実施 |
 | S5 | 2 appで`getVersion()`比較 |同値になり得る | target36ではUID別 | 未実施 |
+| S6 | CDM association に `removeBond()` | Android 15 SDK 公開状態を別確認 | 開始結果 + `BOND_NONE` / failureを監視 | 未実施 |
 
 ## 7. Evidence / Human Decision
 

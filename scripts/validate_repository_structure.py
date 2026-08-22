@@ -374,6 +374,57 @@ def validate_android_artifacts(scope: dict, root: Path, errors: list[str]) -> No
         and not any(part in separate for part in path.relative_to(behavior_root).parts)
     ]
     require_indexed(behavior_root / "README.md", behavior_files, root, errors)
+
+    exempt_directories = set(policy["summary_exempt_directories"])
+    exempt_files = set(policy["summary_exempt_files"])
+    investigation_reports = sorted(
+        report
+        for report in (
+            list((behavior_root / "all").rglob("*.md"))
+            + list((behavior_root / "target").rglob("*.md"))
+        )
+        if not any(
+            part in exempt_directories
+            for part in report.relative_to(behavior_root).parts
+        )
+        and report.relative_to(behavior_root).as_posix() not in exempt_files
+    )
+    provenance_terms = (
+        "Official remote URL",
+        "Checkout path",
+        "resolved commit",
+        "Comparison command",
+        "Dirty risk",
+    )
+    for report in investigation_reports:
+        validate_required_content(
+            report,
+            (
+                ("Investigation Date", ("investigation date",)),
+                ("Original Documentation", ("original documentation",)),
+                ("AOSP Evidence Workspaces", ("aosp evidence workspaces",)),
+                ("Source Context Reviewed", ("source context reviewed",)),
+                ("Diff Interpretation", ("diff interpretation",)),
+                ("Facts", ("facts",)),
+                ("Observations", ("observations",)),
+                ("Hypotheses", ("hypotheses",)),
+                ("Conclusions", ("conclusions",)),
+                ("Human Decision", ("human decision",)),
+            ),
+            root,
+            errors,
+        )
+        report_text = report.read_text(encoding="utf-8")
+        for term in provenance_terms:
+            if term not in report_text:
+                fail(errors, f"AOSP provenance field {term!r} is missing from {relative(report, root)}")
+        if scope["baseline"]["aosp_tag"] not in report_text or scope["target"]["aosp_tag"] not in report_text:
+            fail(errors, f"current scope tag pair is missing from {relative(report, root)}")
+        expected_document_prefix = (
+            f"https://developer.android.com/about/versions/{scope['android_version']}/behavior-changes"
+        )
+        if expected_document_prefix not in report_text:
+            fail(errors, f"official Behavior Change URL is missing from {relative(report, root)}")
     for directory in separate:
         child_root = behavior_root / directory
         if child_root.is_dir():
@@ -392,8 +443,6 @@ def validate_android_artifacts(scope: dict, root: Path, errors: list[str]) -> No
         root,
         errors,
     )
-    exempt_directories = set(policy["summary_exempt_directories"])
-    exempt_files = set(policy["summary_exempt_files"])
     expected_summaries: set[Path] = set()
     for report in behavior_root.rglob("*.md"):
         report_relative = report.relative_to(behavior_root)
@@ -406,6 +455,9 @@ def validate_android_artifacts(scope: dict, root: Path, errors: list[str]) -> No
     for summary in summary_files:
         if summary.resolve() not in expected_summaries:
             fail(errors, f"one-page summary has no primary report: {relative(summary, root)}")
+        text = summary.read_text(encoding="utf-8")
+        if "再検証記録" not in text or "主レポート" not in text:
+            fail(errors, f"one-page summary lacks current revalidation traceability: {relative(summary, root)}")
 
     app_reports_root = version_root / "app-reports"
     if app_reports_root.is_dir():

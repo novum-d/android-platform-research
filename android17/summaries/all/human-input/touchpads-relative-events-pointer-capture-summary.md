@@ -87,3 +87,10 @@ Android 17 では、touchpad を pointer capture 中に使った場合、default
 
 判断（Decision）:
 - 人間による判断が必要
+
+## 再検証記録（2026-08-22）
+
+- Android 17 の公式 Behavior Change 一覧と最新通常AOSPタグを再確認した。
+- 対応する[主レポート](../../../behavior-changes/all/human-input/touchpads-relative-events-pointer-capture.md)で official section、AOSP project / remote / checkout、解決済み commit、比較 command、dirty risk を再検証した。
+- 主レポートの分類、confidence、未確認事項を維持し、実機未実施の項目を Observed 済みへ変更していない。
+- 全件の結果は[再検証台帳](../../../analysis/REVALIDATION_2026-08-22.md)を参照する。

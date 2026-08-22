@@ -180,7 +180,7 @@ Mainline module または Google Play system update の配信状態に依存す�
 
 | Report | Summary | Notes | Status |
 | --- | --- | --- | --- |
-| 現在、primary label が `API_ADDITION_ONLY` の tracked report はありません。 |  | 新 API を含む item も互換性影響または OS / target 条件を伴う場合は別 classification に分類。 |  |
+| [CompanionDeviceManager による Bluetooth bond 削除 API](target/connectivity/new-way-to-remove-bluetooth-bond.md) | [Summary](../summaries/target/connectivity/new-way-to-remove-bluetooth-bond-summary.md) | CDM association を使う明示的な unpair API。既存アプリへの自動適用なし | AOSP 根拠再検証済み / Medium confidence |
 
 ## Unknown / Needs Evidence
 

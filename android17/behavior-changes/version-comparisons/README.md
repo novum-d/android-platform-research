@@ -18,11 +18,11 @@ Android 16 / 17 で比較する companion index である。
 | 基本 targetSdkVersion | 36 | 36 |
 | targetSdk比較 | 必要な項目だけ target 37 buildを追加 | target 36 / 37を分離 |
 | App build | 同一build | 同一build |
-| 公式文書確認日 | 2026-07-28 | 2026-07-28 |
+| 公式文書確認日 | 2026-08-22 | 2026-08-22 |
 | Observed | 実機未実施 | 実機未実施 |
 
 `git ls-remote` で確認した `frameworks/base` の最新 Android 17 release tag は
-2026-07-28時点で `android-17.0.0_r1`。
+2026-08-22時点で `android-17.0.0_r1`。
 
 公式 Entry Point:
 

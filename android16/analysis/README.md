@@ -50,3 +50,7 @@ Use explicit tag comparisons when collecting evidence.
 ```bash
 git -C frameworks-base diff <from-tag> <to-tag> -- <path>
 ```
+
+## 再検証台帳
+
+- [全項目再検証台帳（2026-08-22）](REVALIDATION_2026-08-22.md)

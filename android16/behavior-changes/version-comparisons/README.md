@@ -15,10 +15,14 @@ Android 15 と Android 16 で比較するための companion index である。
 | 基本 targetSdkVersion | 35 | 35 |
 | targetSdk 比較 | 必要な項目だけ target 36 build を追加 | target 35 / 36 を分離 |
 | アプリ build | 同一 build | 同一 build |
+| 公式文書確認日 | 2026-08-22 | 2026-08-22 |
 | Observed | 実機未実施 | 実機未実施 |
 
 QPR、Mainline、OEM、GPU、window size、permission、manifest opt-in などの追加条件は、
 各分冊の項目ごとに固定または分離して比較する。
+
+2026-08-22 時点で `frameworks/base` と各利用AOSP projectの最新通常リリースタグは
+`android-15.0.0_r36` / `android-16.0.0_r4` のままである。
 
 ## 分冊
 

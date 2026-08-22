@@ -16,7 +16,7 @@ Entry Point:
 - https://developer.android.com/about/versions/16/behavior-changes-16
 
 公式文書確認日:
-- 2026-07-28
+- 2026-08-22
 
 ## 使い方（How to Use）
 

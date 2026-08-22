@@ -2,7 +2,7 @@
 
 ## 位置づけ
 
-2026-07-28時点の
+2026-08-22時点の
 [Android 17 features and changes list](https://developer.android.com/about/versions/17/summary)
 とローカルの主レポート一覧を比較し、まだ独立したtraceability reportがない項目を記録する。
 

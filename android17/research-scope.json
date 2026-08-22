@@ -18,17 +18,17 @@
     "all_apps": {
       "url": "https://developer.android.com/about/versions/17/behavior-changes-all",
       "availability": "published",
-      "checked_at": "2026-08-20"
+      "checked_at": "2026-08-22"
     },
     "target_sdk": {
       "url": "https://developer.android.com/about/versions/17/behavior-changes-17",
       "availability": "published",
-      "checked_at": "2026-08-20"
+      "checked_at": "2026-08-22"
     },
     "compat_framework": {
       "url": "https://developer.android.com/about/versions/17/reference/compat-framework-changes",
       "availability": "unpublished",
-      "checked_at": "2026-08-20",
+      "checked_at": "2026-08-22",
       "fallback": "Use AOSP ChangeId annotations until the page is published."
     }
   },

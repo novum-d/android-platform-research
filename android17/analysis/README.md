@@ -42,3 +42,7 @@ AOSP checkout や比較するタグの組み合わせが変わった場合は、
 - 公式 Behavior Change の該当セクションを先に読む。
 - そのセクションに関係しそうな package / API 名を `analysis/` の候補ファイルで探す。
 - 候補ファイルは入口として使うに留め、最終根拠は AOSP source diff と source context に記録する。
+
+## 再検証台帳
+
+- [全項目再検証台帳（2026-08-22）](REVALIDATION_2026-08-22.md)

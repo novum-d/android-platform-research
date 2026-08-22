@@ -7,7 +7,7 @@
 現在の状況:
 - Android 17 の公式ドキュメントと release tag は公開済み。
 - AOSP 根拠は、`android-16.0.0_r4` と `android-17.0.0_r1` の明示的なタグ比較で確認する。
-- この組み合わせは、2026-08-20 に [AOSP `platform/frameworks/base` の公式 refs](https://android.googlesource.com/platform/frameworks/base/+refs) で確認した Android 16 / 17 の最新通常リリースタグである。新規調査と既存調査の更新開始時には、ルート `AGENTS.md` の tag freshness rule に従って再確認する。
+- この組み合わせは、2026-08-22 に [AOSP `platform/frameworks/base` の公式 refs](https://android.googlesource.com/platform/frameworks/base/+refs) で確認した Android 16 / 17 の最新通常リリースタグである。新規調査と既存調査の更新開始時には、ルート `AGENTS.md` の tag freshness rule に従って再確認する。
 
 比較元:
 - android-16.0.0_r4

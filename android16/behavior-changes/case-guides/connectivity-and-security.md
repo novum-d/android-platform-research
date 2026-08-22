@@ -11,6 +11,7 @@ Reports:
 - [Improved bond loss handling](../all/connectivity/improved-bond-loss-handling.md)
 - [New intents to handle bond loss and encryption changes](../target/connectivity/new-intents-to-handle-bond-loss-and-encryption-changes.md)
 - [Adapting to varying OEM implementations](../target/connectivity/adapting-to-varying-oem-implementations-bond-loss.md)
+- [CompanionDeviceManager による Bluetooth bond 削除 API](../target/connectivity/new-way-to-remove-bluetooth-bond.md)
 
 | ケース | 判定条件 | 対応手順 | 最低限の検証 |
 | --- | --- | --- | --- |
@@ -23,7 +24,7 @@ Reports:
 | IOP / OEM workaround | 例外的に local bond が削除 | 「常に bond retained」と仮定せず fallback を実行 | affected app/device combination |
 
 注記:
-- `CompanionDeviceManager.removeBond(int)` は公式ページにあるが、独立した repository report は未作成である。正式な finding 化までは preliminary procedure として扱う。
+- `CompanionDeviceManager.removeBond(int)` は `API_ADDITION_ONLY`。既存アプリへの自動的な挙動変更ではなく、CDM association を管理するアプリが明示的に採用する API である。
 
 ## Companion Device Manager discovery timeout
 

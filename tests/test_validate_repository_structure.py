@@ -146,6 +146,66 @@ class RepositoryValidatorTest(unittest.TestCase):
             self.assertTrue(any("has no summary" in error for error in errors), errors)
             self.assertTrue(any("has no migration checklist" in error for error in errors), errors)
 
+    def test_android_primary_report_requires_revalidation_provenance(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            version_root = root / "android16"
+            report_root = version_root / "behavior-changes" / "target" / "category"
+            summary_root = version_root / "summaries" / "target" / "category"
+            report_root.mkdir(parents=True)
+            summary_root.mkdir(parents=True)
+            report = report_root / "change.md"
+            report.write_text(
+                """# Change
+
+Investigation Date
+Original Documentation
+https://developer.android.com/about/versions/16/behavior-changes-16#change
+AOSP Evidence Workspaces
+Official remote URL
+Checkout path
+resolved commit
+Comparison command
+Dirty risk
+android-15.0.0_r36
+android-16.0.0_r4
+Source Context Reviewed
+Diff Interpretation
+Facts
+Observations
+Hypotheses
+Conclusions
+Human Decision
+""",
+                encoding="utf-8",
+            )
+            companion = report_root / "guide.md"
+            companion.write_text("# Guide\n", encoding="utf-8")
+            behavior_index = version_root / "behavior-changes" / "README.md"
+            behavior_index.write_text(
+                "[Change](target/category/change.md)\n[Guide](target/category/guide.md)\n",
+                encoding="utf-8",
+            )
+            summary = summary_root / "change-summary.md"
+            summary.write_text("# Summary\n\n主レポート\n\n## 再検証記録\n", encoding="utf-8")
+            (version_root / "summaries" / "README.md").write_text(
+                "[Summary](target/category/change-summary.md)\n",
+                encoding="utf-8",
+            )
+            scope = self.scope(version_root)
+            scope["artifact_policy"]["summary_exempt_files"] = ["target/category/guide.md"]
+
+            errors: list[str] = []
+            validator.validate_android_artifacts(scope, root, errors)
+            self.assertEqual(errors, [])
+
+            report.write_text(
+                report.read_text(encoding="utf-8").replace("Dirty risk\n", ""),
+                encoding="utf-8",
+            )
+            validator.validate_android_artifacts(scope, root, errors)
+            self.assertTrue(any("'Dirty risk' is missing" in error for error in errors), errors)
+
     def test_agp_registry_rejects_stable_preview_path_collision(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
