@@ -127,6 +127,7 @@ android17/behavior-changes/target/privacy/local-network-permission.md
 
 この主レポートを正として、Kotlin、Manifest、permission denial時の処理、
 Android 16 / 17とtargetSdkVersion 36 / 37を分けたtest例を作成または更新してください。
+コードは完成品ではなく、対象アプリの既存architectureへ調整して組み込む移行例として記載してください。
 ```
 
 対象projectがある場合:
@@ -134,13 +135,15 @@ Android 16 / 17とtargetSdkVersion 36 / 37を分けたtest例を作成または�
 ```text
 android17/behavior-changes/<report>.md を正として、<project-path>の実装方式に合わせた対応例を作成してください。
 既存コードは変更せず、検出方法とBefore / After例を補足資料へまとめてください。
+コードは完成品ではなく、既存architectureへ調整して組み込む移行例として明記してください。
 ```
 
 ### 制約
 
 - 主レポートのclassification、confidence、AOSP evidenceを再判定しない。
 - gate未解決の項目を確定コードとして書かず、検証用pseudocodeと明記する。
-- 完成コードと誤認させず、architecture、error policy、lifecycleへの調整点を示す。
+- 各コード例は完成品ではなく、対象アプリの既存architectureへ調整して組み込む移行例であると明記する。
+- state management、navigation、dependency injection、error policy、lifecycle、threading、test strategyのうち、対象例に関係する調整点を示す。
 - 実装例から主レポートと要約へリンクを戻す。
 
 ### 主な成果物

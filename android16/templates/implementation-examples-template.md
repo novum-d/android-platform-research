@@ -29,7 +29,8 @@ Android 16 Behavior Change:
 
 - primary report の「対応候補」には、代表的な短いコード例とこのファイルへのリンクだけを置く。
 - フレームワーク別、画面別、テスト補助用など複数パターンの実装例はこのファイルに集約する。
-- 実装例はそのまま貼り付ける完成コードではなく、移行方針を具体化するためのサンプルとして扱う。
+- 掲載するコードはそのまま貼り付けて使う完成品ではなく、対象アプリの既存architectureへ調整して組み込む移行例として扱う。
+- state management、navigation、dependency injection、error policy、lifecycle、threading、test strategyのうち、各例に関係する調整点を明記する。
 - 各例は「既存実装で探す箇所」「移行前」「移行後」「移行手順」「確認観点」をセットで書く。
 - opt-out 例を載せる場合は、一時対応であること、適用範囲、削除条件、リスクを明記する。
 
@@ -91,6 +92,9 @@ Android 16 Behavior Change:
 2. `<step>`
 3. `<step>`
 
+既存architectureへの調整点:
+- `<state management / navigation / dependency injection / error policy / lifecycle / threading / test strategy>`
+
 確認観点:
 - `<how to verify this migration>`
 
@@ -121,6 +125,9 @@ Android 16 Behavior Change:
 1. `<step>`
 2. `<step>`
 3. `<step>`
+
+既存architectureへの調整点:
+- `<state management / navigation / dependency injection / error policy / lifecycle / threading / test strategy>`
 
 確認観点:
 - `<how to verify this migration>`

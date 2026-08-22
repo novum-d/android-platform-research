@@ -19,7 +19,8 @@ classification、confidence、AOSP evidence、Human Decisionは主レポート�
 
 ## 使い方
 
-- 例は完成コードではなく、対象アプリのarchitecture、error policy、lifecycleへ合わせる。
+- 掲載するコードはそのまま貼り付けて使う完成品ではなく、対象アプリの既存architectureへ調整して組み込む移行例として扱う。
+- state management、navigation、dependency injection、error policy、lifecycle、threading、test strategyのうち、各例に関係する調整点を明記する。
 - 「既存実装の検出」「移行前」「移行後」「失敗処理」「検証」をセットで記載する。
 - API level、permission、targetSdk、OEM / module条件を省略しない。
 - temporary opt-outには適用範囲、risk、削除条件を付ける。
@@ -59,6 +60,10 @@ rg -n "<API|manifest|pattern>" app src
 // After
 ```
 
+既存architectureへの調整点:
+
+- [記入]
+
 失敗処理:
 
 - [記入]
@@ -74,6 +79,10 @@ rg -n "<API|manifest|pattern>" app src
 ```xml
 <!-- Example -->
 ```
+
+既存architectureへの調整点:
+
+- [記入]
 
 注意:
 
