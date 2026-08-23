@@ -47,7 +47,7 @@ Category:
 
 ### 調査日（Investigation Date）
 
-2026-07-03
+2026-08-23
 
 ### 信頼度（Confidence）
 
@@ -71,10 +71,25 @@ Category:
 - Android version: Android 16 以上。
 - targetSdkVersion: 36 以上。
 - Device/form factor: display `smallestScreenWidthDp >= 600`。
+- Windowing mode: full-screen または multi-window。ここで multi-window は上位概念であり、split screen と desktop windowing を含む。
 - App category: `ApplicationInfo.CATEGORY_GAME` ではない。
 - User setting: user aspect ratio setting が app default / 非 resizable と互換な例外状態ではない。
 - Opt-out: `android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` が application / activity に指定されていない。
 - App behavior: 固定方向、サイズ変更不可、min/max aspect ratio、pillarboxing、優先する画面の向き、固定aspect ratioの前提に依存している場合に顕在化しやすい。
+
+条件式としてまとめると次のとおり。
+
+```text
+Android 16 以上
+AND targetSdkVersion 36 以上
+AND 表示先ディスプレイの smallestScreenWidthDp >= 600
+AND（full-screen OR multi-window）
+AND game 例外ではない
+AND temporary opt-out なし
+AND user aspect ratio setting 例外なし
+```
+
+`full-screen` と `multi-window` は同時に満たす条件ではなく、どちらの表示状態でも制約無視が適用されるという意味である。desktop windowing は multi-window の一形態なので対象に含まれる。`smallestScreenWidthDp >= 600` は現在のアプリウィンドウ幅ではなく表示先ディスプレイの判定であり、split screen や desktop windowing によって現在のウィンドウ幅が 600dp 未満になっても、それだけで本 Behavior Change の対象外にはならない。
 
 Compat framework:
 - Change ID: 357141415
@@ -129,6 +144,8 @@ You can also test this behavior by using the app compatibility framework and ena
 
 公式文書は、Android 16 / targetSdkVersion 36 以上の large screen 向け Behavior Change として説明している。したがって、targetSdkVersion 35 以下の既存アプリが Android 16 へ OS アップデートしただけで同じ既定挙動になる、とは説明しない。
 
+補足の公式 [Support multi-window mode](https://developer.android.com/develop/adaptive-apps/guides/support-multi-window-mode) は、multi-window mode の表示形態として split-screen、picture-in-picture、desktop windowing を挙げている。本レポートで desktop windowing を multi-window の一形態として扱う根拠はこの定義である。
+
 ---
 
 # 変更内容（What Changed）
@@ -153,6 +170,9 @@ You can also test this behavior by using the app compatibility framework and ena
 ## targetSdkVersion 36 以上での挙動（targetSdkVersion 36 Behavior）
 
 - Android 16 / targetSdkVersion 36 / `sw >= 600dp` / game ではない / opt-out なし / user exception なし: orientation、resizability、aspect ratio constraints は無視される。
+- 公式文書の「full-screen and multi-window modes」は、制約無視が両方の表示状態をカバーするという意味である。`full-screen AND multi-window` を同時に満たす必要はない。
+- desktop windowing は multi-window mode の一形態である。split screen を desktop window 内でさらに開始できるかどうかとは無関係に、desktop windowing 自体が対象となる。
+- `sw >= 600dp` は表示先ディスプレイの `smallestScreenWidthDp` で判定する。現在のアプリウィンドウ幅や端末の portrait / landscape の向きだけで適用対象から外れない。
 - `setRequestedOrientation()`を呼んでも固定方向の指定として効かず、large screen上ではwindow全体を使う方向へ解決される。
 - `getRequestedOrientation()`の戻り値と、システムが実際に採用した画面の向き・アプリに割り当てられたウィンドウ領域は分けて考える。AOSPでは要求した画面の向きを返す経路が残るが、最終的なlayoutの制約としては採用されない。
 
@@ -249,8 +269,9 @@ You can also test this behavior by using the app compatibility framework and ena
 | `sw < 600dp` | large screen gate を満たさないため、本 Behavior Change の適用対象外 |
 | game app | `ApplicationInfo.CATEGORY_GAME`により、あらゆるウィンドウサイズへ変更可能とする判定の対象外 |
 | user aspect ratio setting exception | user preferenceがサイズ変更不可と互換な場合、あらゆるウィンドウサイズへ変更可能とする判定から外れる |
-| multi-window | 公式文書上は large screen devices の multi-window でも constraints ignored。AOSP の resizable 判定により non-resizable 制約を避ける |
 | full-screen | 公式文書上は full-screen でも constraints ignored。pillarboxing 前提ではなく window 全体を使う |
+| multi-window | 公式文書上は large screen devices の multi-window でも constraints ignored。split screen と desktop windowing を含む |
+| desktop windowing で現在の window 幅が 600dp 未満 | `sw` は表示先 display の判定なので、window 幅が狭くなったことだけでは対象外にならない |
 
 ---
 
@@ -406,3 +427,9 @@ Owner notes:
 
 - この再検証では最終 priority、severity、release readiness、顧客説明優先度を変更していない。
 - 人間の判断は [Android 16 Decision Log](../../../decisions/DECISION_LOG.md) を正とする。
+
+## 追補確認（2026-08-23）
+
+- Android 16 Behavior Change と Support multi-window mode の公式文書を再確認し、desktop windowing が multi-window の一形態であることを適用条件へ明記した。
+- `sw >= 600dp` は現在のアプリウィンドウ幅ではなく表示先ディスプレイの `smallestScreenWidthDp` 判定であることを明記した。
+- latest standard AOSP tag pair は `android-15.0.0_r36` / `android-16.0.0_r4` のままで、主分類、confidence、AOSP差分解釈、Human Decision は変更していない。

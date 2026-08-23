@@ -18,17 +18,17 @@
     "all_apps": {
       "url": "https://developer.android.com/about/versions/16/behavior-changes-all",
       "availability": "published",
-      "checked_at": "2026-08-22"
+      "checked_at": "2026-08-23"
     },
     "target_sdk": {
       "url": "https://developer.android.com/about/versions/16/behavior-changes-16",
       "availability": "published",
-      "checked_at": "2026-08-22"
+      "checked_at": "2026-08-23"
     },
     "compat_framework": {
       "url": "https://developer.android.com/about/versions/16/reference/compat-framework-changes",
       "availability": "published",
-      "checked_at": "2026-08-22"
+      "checked_at": "2026-08-23"
     }
   },
   "output_roots": {
