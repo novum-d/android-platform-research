@@ -19,7 +19,7 @@ Note:
 - targetSdkVersion 36 以上: Yes。`UNIVERSAL_RESIZABLE_BY_DEFAULT` / 357141415 が targetSdkVersion 36 以上で default enabled。
 - その他の必須条件（Other required conditions）: Android 16 以上、display `sw >= 600dp`、game ではない、temporary opt-out なし、user aspect ratio setting exception なし。
 - 表示状態: full-screen または multi-window のどちらでも対象。multi-window には split screen と desktop windowing が含まれる。
-- `sw` の意味: 現在のアプリウィンドウ幅ではなく表示先ディスプレイの `smallestScreenWidthDp`。ウィンドウ幅が 600dp 未満になったことだけでは対象外にならない。
+- `sw` の意味: `smallest width` の略。現在のアプリウィンドウ幅ではなく表示先ディスプレイの短い側に相当する `smallestScreenWidthDp`。通常の画面回転では長辺と短辺が入れ替わるだけなので基本的に変わらず、ウィンドウ幅が 600dp 未満になったことだけでも対象外にならない。
 - Compat Change ID: `UNIVERSAL_RESIZABLE_BY_DEFAULT` / 357141415
 - Compat default state: Android 16 / API level 36 以上を target するアプリで enabled。AOSP annotation は `@EnabledAfter(VANILLA_ICE_CREAM)`。
 - Temporary opt-out: `android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` を application または activity property として指定。ただし公式文書と AOSP TODO は API 37 以降で使えなくなる予定を示す。
@@ -44,6 +44,8 @@ Note:
 Android 16 では、targetSdkVersion 36 以上のアプリが large screen（`sw >= 600dp`）で実行される場合、orientation、resizability、aspect ratio の制約が既定で無視される。アプリは user preferred orientation や manifest aspect ratio に関係なく display window 全体を使う。
 
 ここで公式文書の「full-screen and multi-window modes」は、両方を同時に満たすという意味ではなく、full-screen と multi-window のどちらでも制約が無視されるという意味である。desktop windowing は multi-window の一形態として対象に含まれる。`sw >= 600dp` は表示先ディスプレイの条件であり、現在のアプリウィンドウ幅や端末の向きだけでは変わらない。
+
+Pixel Tablet を単純化して、portrait を `800dp x 1280dp`、landscape を `1280dp x 800dp` とする概念例では、どちらも短い側は 800dp のため表示先ディスプレイは `sw800dp` となる。split screen で現在のアプリウィンドウ幅が 500dp になっても、Android 16 の platform 判定は表示先ディスプレイの 800dp を基準とするため、本 Behavior Change の `sw600dp` 条件を満たしたままである。一方、アプリの layout は現在利用できる 500dp 幅を基準に狭い幅向け UI へ適応する。foldable の外側 / 内側 display 切り替えや外部 display への移動など、表示先ディスプレイ自体が変わる場合は `sw` を再評価する。
 
 この変更は Android 16 への OS アップデートだけの影響ではなく、Android 16 端末上で targetSdkVersion 36 化した場合の large screen behavior change として扱う。
 
@@ -137,4 +139,5 @@ Owner notes:
 ## 追補確認（2026-08-23）
 
 - full-screen / multi-window のOR条件、desktop windowing の位置づけ、display `sw` と現在のwindow幅の違いを主レポートと同期した。
+- `sw` は通常の画面回転では基本的に変わらないことと、Pixel Tablet の display `sw800dp` / split screen window幅 500dp の概念例を追加した。数値は説明用であり、実機 Observed ではない。
 - AOSP tag pair、主分類、confidence、Human Decision に変更なし。

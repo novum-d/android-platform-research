@@ -91,6 +91,27 @@ AND user aspect ratio setting 例外なし
 
 `full-screen` と `multi-window` は同時に満たす条件ではなく、どちらの表示状態でも制約無視が適用されるという意味である。desktop windowing は multi-window の一形態なので対象に含まれる。`smallestScreenWidthDp >= 600` は現在のアプリウィンドウ幅ではなく表示先ディスプレイの判定であり、split screen や desktop windowing によって現在のウィンドウ幅が 600dp 未満になっても、それだけで本 Behavior Change の対象外にはならない。
 
+### `sw` と現在のアプリウィンドウ幅の違い
+
+`sw` は `smallest width` の略で、ここでは表示先ディスプレイの短い側に相当する幅を density-independent pixel（dp）で表す。同じディスプレイを通常の portrait / landscape 回転にした場合は長辺と短辺が入れ替わるだけなので、`smallestScreenWidthDp` は基本的に変わらない。
+
+以下は Pixel Tablet の表示領域を単純化した概念例であり、実測値はシステム UI などによって異なる場合がある。
+
+```text
+portrait:   800dp x 1280dp
+landscape: 1280dp x 800dp
+smallest width: 800dp
+```
+
+どちらの向きでも短い側は 800dp なので、この例の表示先ディスプレイは `sw800dp` であり、`sw600dp` 以上の platform behavior gate を満たす。さらに split screen や desktop windowing でアプリへ割り当てられた現在の window 幅が 500dp になっても、次の2つは別々に評価する。
+
+| 判定対象 | 例 | 用途 |
+| --- | --- | --- |
+| 表示先ディスプレイの smallest width | 800dp | 本 Behavior Change で制約を無視するかの platform 判定 |
+| 現在のアプリウィンドウ幅 | 500dp | 1ペイン、navigation bar など狭い幅向け UI を選ぶ layout 判定 |
+
+したがって、この例では本 Behavior Change の制約無視は適用対象のままだが、アプリ UI は現在の 500dp 幅へ適応する必要がある。画面回転だけでは表示先ディスプレイの `sw` は基本的に変わらないが、foldable の外側 / 内側 display 切り替え、外部 display への移動など、表示先ディスプレイ自体が変わる場合は再評価する。
+
 Compat framework:
 - Change ID: 357141415
 - Change name: `UNIVERSAL_RESIZABLE_BY_DEFAULT`
@@ -432,4 +453,5 @@ Owner notes:
 
 - Android 16 Behavior Change と Support multi-window mode の公式文書を再確認し、desktop windowing が multi-window の一形態であることを適用条件へ明記した。
 - `sw >= 600dp` は現在のアプリウィンドウ幅ではなく表示先ディスプレイの `smallestScreenWidthDp` 判定であることを明記した。
+- `sw` は通常の画面回転では基本的に変わらないことと、Pixel Tablet の表示先ディスプレイが `sw800dp`、split screen の現在の window 幅が 500dp になる概念例を追記した。数値は platform gate と UI layout 判定の違いを示す説明用であり、実機 Observed にはしていない。
 - latest standard AOSP tag pair は `android-15.0.0_r36` / `android-16.0.0_r4` のままで、主分類、confidence、AOSP差分解釈、Human Decision は変更していない。

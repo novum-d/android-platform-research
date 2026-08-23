@@ -170,6 +170,19 @@ Behavior Change の platform gate は、対象 display の `smallestScreenWidthD
 
 一方、アプリの adaptive UI は、現在利用できる app window bounds を基準に組み替える。全画面の tablet でも分割画面では app window が狭くなるため、platform gate と UI breakpoint は別々に扱う。
 
+`sw` は `smallest width` の略で、表示先ディスプレイの短い側に相当する幅を dp で表す。同じディスプレイを通常の portrait / landscape 回転にした場合、長辺と短辺が入れ替わるだけなので `sw` は基本的に変わらない。
+
+Pixel Tablet を単純化した概念例（システム UI などにより実際の値とは差があり得る）:
+
+```text
+portrait:                 800dp x 1280dp
+landscape:               1280dp x 800dp
+display smallest width:           800dp（sw800dp）
+split screen app window width:    500dp
+```
+
+この場合、画面回転後も display は `sw800dp` であり、本 Behavior Change の `sw600dp` gate を満たす。split screen で app window 幅が 500dp になっても platform gate は満たしたままだが、UI は現在の 500dp 幅に合わせて組み替える。foldable の外側 / 内側 display 切り替えや外部 display への移動など、表示先 display 自体が変わる場合は `sw` を再評価する。
+
 | 判定 | 用途 | 基準 |
 | --- | --- | --- |
 | Platform behavior gate | orientation / resizability / aspect ratio 制約を無視するか | display の smallest width |
