@@ -55,7 +55,7 @@ Report: [Fully deprecating JobInfo#setImportantWhileForeground](../all/core-func
 
 Report: [Fixed rate work scheduling optimization](../target/core-functionality/fixed-rate-work-scheduling-optimization.md)
 
-Examples: [Implementation examples](fixed-rate-work-scheduling-optimization-implementation-examples.md)
+Examples: [Implementation examples](../implementation-examples/fixed-rate-work-scheduling-optimization-implementation-examples.md)
 
 | ケース | 判定条件 | 対応手順 | 最低限の検証 |
 | --- | --- | --- | --- |

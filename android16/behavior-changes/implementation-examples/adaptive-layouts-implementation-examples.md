@@ -12,7 +12,7 @@
 - [adaptive-layouts-summary.md](../../summaries/target/device-form-factors/adaptive-layouts-summary.md)
 
 Manifest / API の挙動:
-- [adaptive-layouts-manifest-api-behavior-guide.md](adaptive-layouts-manifest-api-behavior-guide.md)
+- [adaptive-layouts-manifest-api-behavior-guide.md](../case-guides/adaptive-layouts-manifest-api-behavior-guide.md)
 
 ## 対象（Target）
 
@@ -51,7 +51,7 @@ Android 16 Behavior Change:
 - camera / media / preview は、container の bounds と content の aspect ratio を分離し、Fit / Crop を画面要件として明示する。
 
 一時対応:
-- Android 16 の未移行 Activity に限り、Activity-level の `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` を検討できる。記述方法、適用範囲、削除条件は [Manifest / API 挙動ガイド](adaptive-layouts-manifest-api-behavior-guide.md#temporary-opt-out-の記述例) を参照する。
+- Android 16 の未移行 Activity に限り、Activity-level の `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY` を検討できる。記述方法、適用範囲、削除条件は [Manifest / API 挙動ガイド](../case-guides/adaptive-layouts-manifest-api-behavior-guide.md#temporary-opt-out-の記述例) を参照する。
 - opt-out は API 37 target では適用されない予定であり、恒久対応として扱わない。
 
 避けるべき方針:
@@ -636,7 +636,7 @@ app/src/screenshotTest/kotlin/com/example/items/ItemsScreenshotTest.kt
 
 前提:
 - Case B / E の compat change 操作は debuggable build を使用し、切り替え後は同じ entry point と初期状態から開始する。
-- `UNIVERSAL_RESIZABLE_BY_DEFAULT` の adb 操作は [Manifest / API 挙動ガイド](adaptive-layouts-manifest-api-behavior-guide.md#compat-change-による比較) を参照する。
+- `UNIVERSAL_RESIZABLE_BY_DEFAULT` の adb 操作は [Manifest / API 挙動ガイド](../case-guides/adaptive-layouts-manifest-api-behavior-guide.md#compat-change-による比較) を参照する。
 - 各 Case で端末、OS build、display `smallestScreenWidthDp`、app window bounds、orientation、windowing mode、targetSdkVersion、compat state、opt-out scope を記録する。
 
 ### UI / lifecycle matrix
@@ -689,5 +689,5 @@ Official implementation guidance:
 Repository evidence and verification guides:
 - [主レポート](../target/device-form-factors/adaptive-layouts.md)
 - [1ページ要約](../../summaries/target/device-form-factors/adaptive-layouts-summary.md)
-- [Manifest / API 挙動ガイド](adaptive-layouts-manifest-api-behavior-guide.md)
+- [Manifest / API 挙動ガイド](../case-guides/adaptive-layouts-manifest-api-behavior-guide.md)
 - [Pixel Tablet 回転・window resize 検証プロンプト](../../../.codex/prompts/verify-app-rotation-on-pixel-tablet.md)

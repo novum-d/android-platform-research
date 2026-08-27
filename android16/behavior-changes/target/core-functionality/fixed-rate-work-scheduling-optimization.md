@@ -335,7 +335,7 @@ You can also test by using the app compatibility framework and enabling the STPE
 - network、DB、UI 更新、file I/O を fixed-rate task で行う場合、復帰直後の連続実行がなくなっても正しいか確認する。
 - idempotent でない periodic task は、最大 1 回実行でもデータ欠落や retry 不足にならないか確認する。
 - WorkManager / JobScheduler は本 Behavior Change の公式移行先でも、`scheduleAtFixedRate` の等価な置換 API でもない。process death 後も再実行するという別要件が確認された場合だけ、background work の別設計として検討する。
-- 詳細な Before / After、Timer、Java、テストコードは [Fixed rate work scheduling optimization - 実装例](../../case-guides/fixed-rate-work-scheduling-optimization-implementation-examples.md) を参照する。
+- 詳細な Before / After、Timer、Java、テストコードは [Fixed rate work scheduling optimization - 実装例](../../implementation-examples/fixed-rate-work-scheduling-optimization-implementation-examples.md) を参照する。
 - 5 秒周期での予定時刻、実開始、完了、process 復帰、長時間 task の違いは [Fixed rate work scheduling optimization - 実行挙動比較](fixed-rate-work-scheduling-optimization-runtime-behavior-comparison.md) を参照する。
 
 代表例:

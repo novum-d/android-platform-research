@@ -64,7 +64,7 @@ Android 16 では、targetSdkVersion 36 以上のアプリが large screen（`sw
 - 推奨対応: adaptive layout、state preservation、split screen、desktop windowing、foldable posture、visual regression の確認。
 - 一時対応: Android 16 target では `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` を activity または application に指定できるが、恒久対応として扱わない。
 - 不要に近い: large screen でも既に responsive に動作し、orientation / aspect ratio / non-resizable 制約に依存していないアプリ。
-- 実装例: [Compose / Navigation 3によるAdaptive layouts対応例](../../../behavior-changes/case-guides/adaptive-layouts-implementation-examples.md)。対象アプリのarchitectureへ調整して組み込む移行例として使用する。
+- 実装例: [Compose / Navigation 3によるAdaptive layouts対応例](../../../behavior-changes/implementation-examples/adaptive-layouts-implementation-examples.md)。対象アプリのarchitectureへ調整して組み込む移行例として使用する。
 
 ## テストマトリクス（Test Matrix）
 

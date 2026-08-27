@@ -18,13 +18,14 @@
 6. [templates/customer-report-template.md](templates/customer-report-template.md) で調査レポートの書式を確認する
 7. [templates/one-page-summary-template.md](templates/one-page-summary-template.md) で 1ページ要約の書式を確認する
 8. 読者向け FAQ が必要な場合は [templates/behavior-change-faq-template.md](templates/behavior-change-faq-template.md) を使い、主レポートとは別のファイルにする
-9. コード例や framework 別の移行例が必要な場合は [templates/implementation-examples-template.md](templates/implementation-examples-template.md) を使い、`behavior-changes/case-guides/` に置く
-10. 複数の API / 実装方式について、実行時刻、callback の順序、fallback を比較する場合は [templates/runtime-behavior-comparison-template.md](templates/runtime-behavior-comparison-template.md) を使う
-11. 同じ操作の Android 15 / 16 間の挙動差を比較する場合は [Android OS バージョン間挙動比較テンプレート](../docs/templates/android-os-version-behavior-comparison-template.md) を使う
-12. 調査済み項目の Android 15 / 16 差は [Android 15 → 16 挙動比較一覧](behavior-changes/version-comparisons/README.md) で確認する
-13. [summaries/README.md](summaries/README.md) で要約一覧を確認する
-14. 特定アプリ向けの横断評価は[アプリ別調査一覧](app-reports/README.md)で確認する
-15. [decisions/DECISION_LOG.md](decisions/DECISION_LOG.md) で人間の判断ログを確認する
+9. コード例や framework 別の移行例が必要な場合は [templates/implementation-examples-template.md](templates/implementation-examples-template.md) を使い、`behavior-changes/implementation-examples/` に置く
+10. 調査済み項目の実装・設定例は [Android 16対応例一覧](behavior-changes/implementation-examples/README.md) で確認する
+11. 複数の API / 実装方式について、実行時刻、callback の順序、fallback を比較する場合は [templates/runtime-behavior-comparison-template.md](templates/runtime-behavior-comparison-template.md) を使う
+12. 同じ操作の Android 15 / 16 間の挙動差を比較する場合は [Android OS バージョン間挙動比較テンプレート](../docs/templates/android-os-version-behavior-comparison-template.md) を使う
+13. 調査済み項目の Android 15 / 16 差は [Android 15 → 16 挙動比較一覧](behavior-changes/version-comparisons/README.md) で確認する
+14. [summaries/README.md](summaries/README.md) で要約一覧を確認する
+15. 特定アプリ向けの横断評価は[アプリ別調査一覧](app-reports/README.md)で確認する
+16. [decisions/DECISION_LOG.md](decisions/DECISION_LOG.md) で人間の判断ログを確認する
 
 ## 計画とバックログ
 

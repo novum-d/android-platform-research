@@ -17,6 +17,31 @@ SPEC.loader.exec_module(validator)
 
 
 class RepositoryValidatorTest(unittest.TestCase):
+    def test_implementation_examples_must_use_dedicated_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            behavior_root = root / "android16" / "behavior-changes"
+            misplaced = behavior_root / "case-guides" / "sample-implementation-examples.md"
+            misplaced.parent.mkdir(parents=True)
+            misplaced.write_text("# Misplaced\n", encoding="utf-8")
+
+            errors: list[str] = []
+            validator.validate_implementation_example_locations(behavior_root, root, errors)
+            self.assertEqual(
+                errors,
+                [
+                    "implementation example must be under behavior-changes/implementation-examples: "
+                    "android16/behavior-changes/case-guides/sample-implementation-examples.md"
+                ],
+            )
+
+            correct = behavior_root / "implementation-examples" / misplaced.name
+            correct.parent.mkdir()
+            misplaced.rename(correct)
+            errors.clear()
+            validator.validate_implementation_example_locations(behavior_root, root, errors)
+            self.assertEqual(errors, [])
+
     def test_checked_date_must_be_real_and_not_future(self) -> None:
         errors: list[str] = []
         validator.validate_checked_date("2026-02-30", errors, "checked_at")

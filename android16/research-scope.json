@@ -46,10 +46,12 @@
   ],
   "artifact_policy": {
     "separately_indexed_directories": [
+      "implementation-examples",
       "version-comparisons"
     ],
     "summary_exempt_directories": [
       "case-guides",
+      "implementation-examples",
       "version-comparisons"
     ],
     "summary_exempt_files": [

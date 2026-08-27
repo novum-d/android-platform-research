@@ -149,7 +149,7 @@ android17/behavior-changes/<report>.md を正として、<project-path>の実装
 ### 主な成果物
 
 - version固有の`implementation-examples-template.md`を使用する。
-- Android 16では通常`behavior-changes/case-guides/`、Android 17では`behavior-changes/implementation-examples/`の既存構成に従う。
+- Android versionにかかわらず、実装例は`behavior-changes/implementation-examples/`へ置く。`case-guides/`はケース選択、カテゴリ別対応手順、挙動ガイドに限定する。
 
 ## UC-04: 人間の判断をDecision Logへ記録
 

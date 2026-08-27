@@ -70,6 +70,29 @@ templates remain human-facing instructions and must agree with that metadata.
 Run `python3 scripts/validate_repository_structure.py` after changing version
 scope or repository structure.
 
+## Companion Artifact Directory Roles
+
+Use the same directory responsibilities for every Android version:
+
+- `android<version>/behavior-changes/case-guides/` contains case-selection
+  tables, category-level action procedures, and behavior-oriented guides. It
+  must not contain files whose primary purpose is concrete implementation code.
+- `android<version>/behavior-changes/implementation-examples/` contains
+  Kotlin, Java, Manifest, XML, native, and test examples, including Before /
+  After migration examples. Create and maintain a `README.md` index in this
+  directory when it exists.
+- Files named `*-implementation-examples.md` belong only under
+  `implementation-examples/`, never under `case-guides/` or a primary report
+  category.
+- Primary reports remain the source of truth for evidence, applicability,
+  confidence, and Human Decision. Both companion directories link back to the
+  relevant primary reports.
+
+Do not introduce version-specific directory differences for these artifact
+types. When adding the first implementation example for a version, create the
+dedicated `implementation-examples/` directory and register it in that
+version's `research-scope.json` artifact policy.
+
 ## AOSP Tag Freshness
 
 For a new Android Platform finding or an update to an existing finding, use the

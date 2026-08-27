@@ -12,7 +12,7 @@ Behavior Change の根拠、適用条件、分類、confidence、人間の判断
 - [fixed-rate-work-scheduling-optimization-summary.md](../../../summaries/target/core-functionality/fixed-rate-work-scheduling-optimization-summary.md)
 
 実装例:
-- [fixed-rate-work-scheduling-optimization-implementation-examples.md](../../case-guides/fixed-rate-work-scheduling-optimization-implementation-examples.md)
+- [fixed-rate-work-scheduling-optimization-implementation-examples.md](../../implementation-examples/fixed-rate-work-scheduling-optimization-implementation-examples.md)
 
 ## 対象（Target）
 

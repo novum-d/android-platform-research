@@ -113,6 +113,18 @@ AOSP 根拠は両 tag の明示的な比較を使う。
 
 ファイルに `Android 16`、`targetSdkVersion 36`、`android-16.0.0_r4`、または Android 16 固有の調査優先度が含まれる場合、そのファイルは通常 `docs/` ではなく `android16/` 配下に置く。
 
+Behavior Changeの補足資料は、Android versionにかかわらず次の責務で分ける。
+
+```text
+android<version>/behavior-changes/case-guides/
+  ケース選択、カテゴリ別対応手順、挙動ガイド
+
+android<version>/behavior-changes/implementation-examples/
+  Kotlin、Java、Manifest、XML、native、testの実装・移行例
+```
+
+`*-implementation-examples.md`は必ず`implementation-examples/`へ置き、同ディレクトリの`README.md`から索引する。Android version固有の事情を理由に、この責務を入れ替えない。
+
 例:
 - `targetSdkVersion 37` の検証マトリクスは `android17/templates/` または `android17/behavior-changes/` に置く。
 - すべての Android バージョンで使う「AOSP checkout の扱い」は `docs/workflow/` に置く。

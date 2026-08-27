@@ -2,7 +2,7 @@
 
 Companion guide: [Manifest / API 挙動ガイド](../../case-guides/adaptive-layouts-manifest-api-behavior-guide.md)
 
-Implementation examples: [Compose / Navigation 3 対応例](../../case-guides/adaptive-layouts-implementation-examples.md)
+Implementation examples: [Compose / Navigation 3 対応例](../../implementation-examples/adaptive-layouts-implementation-examples.md)
 
 ## 基本情報（Metadata）
 
@@ -360,7 +360,7 @@ LazyVerticalGrid(
 }
 ```
 
-navigation bar / rail、Navigation 3 list-detail、media scaling、state restoration、form factor 別 screenshot test を含む移行例は[Adaptive layouts実装例](../../case-guides/adaptive-layouts-implementation-examples.md)を参照する。コードは完成品ではなく、対象アプリの既存architectureへ調整して組み込む。
+navigation bar / rail、Navigation 3 list-detail、media scaling、state restoration、form factor 別 screenshot test を含む移行例は[Adaptive layouts実装例](../../implementation-examples/adaptive-layouts-implementation-examples.md)を参照する。コードは完成品ではなく、対象アプリの既存architectureへ調整して組み込む。
 
 ---
 

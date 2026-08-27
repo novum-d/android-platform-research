@@ -9,7 +9,7 @@
 
 Report: [Adaptive layouts](../target/device-form-factors/adaptive-layouts.md)
 
-Implementation examples: [Adaptive layouts Compose / Navigation 3 examples](adaptive-layouts-implementation-examples.md)
+Implementation examples: [Adaptive layouts Compose / Navigation 3 examples](../implementation-examples/adaptive-layouts-implementation-examples.md)
 
 Manifest / API guide: [Adaptive layouts manifest / API behavior](adaptive-layouts-manifest-api-behavior-guide.md)
 
@@ -51,7 +51,7 @@ Report: [Edge to edge opt-out going away](../target/user-experience-and-system-u
 Reports:
 - [Primary report](../target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md)
 - [Dispatcher animation guide](../target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md)
-- [Implementation examples](migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
+- [Implementation examples](../implementation-examples/migration-or-opt-out-required-for-predictive-back-implementation-examples.md)
 
 | ケース | 判定条件 | 対応手順 | 最低限の検証 |
 | --- | --- | --- | --- |

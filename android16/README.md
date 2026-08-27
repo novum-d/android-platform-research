@@ -38,6 +38,7 @@ android16/AGENTS.md
 | --- | --- |
 | [behavior-changes/README.md](behavior-changes/README.md) | Behavior Change セクションごとの調査レポート一覧と適用条件分類 |
 | [behavior-changes/CASE_BASED_ACTION_GUIDE.md](behavior-changes/CASE_BASED_ACTION_GUIDE.md) | Behavior Change ごとの複数ケース別対応手順 |
+| [behavior-changes/implementation-examples/README.md](behavior-changes/implementation-examples/README.md) | Android 16のコード・設定・テスト対応例一覧 |
 | [summaries/README.md](summaries/README.md) | 1ページ要約一覧 |
 | [app-reports/wireless-camera-companion/investigation-report.md](app-reports/wireless-camera-companion/investigation-report.md) | カメラ連携アプリ向け Android 16 影響調査 |
 | [behavior-changes/APPLICABILITY_CLASSIFICATION.md](behavior-changes/APPLICABILITY_CLASSIFICATION.md) | Android 16 用の適用条件分類 |

@@ -165,6 +165,7 @@ Evidence は以下の単位で整理してください。
 
 Behavior Change の対応候補に複数のコード例、framework 別実装例、temporary opt-out の具体例を載せる場合は、primary report へ長いコードを直接集約しない。
 version directory に implementation examples template がある場合は、そのテンプレートを使って実装例ファイルを作成し、primary report の「対応候補」には代表的な短い例と実装例ファイルへのリンクを置く。
+実装例はAndroid versionにかかわらず`android<version>/behavior-changes/implementation-examples/`へ置き、専用`README.md`から索引する。`case-guides/`はケース選択、カテゴリ別対応手順、挙動ガイドに限定する。
 
 Behavior Change を読む際の用語、前提、処理経路、よくある誤解を複数の質問として整理する場合は、FAQ を primary report と別ファイルにする。
 version directory に FAQ template がある場合は、そのテンプレートを使い、primary report には FAQ の位置づけと companion file へのリンクだけを置く。classification、confidence、evidence、Human Decision は primary report を正とする。

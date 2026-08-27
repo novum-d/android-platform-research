@@ -95,7 +95,7 @@ android16/templates/implementation-examples-template.md
 Store implementation examples under:
 
 ```text
-android16/behavior-changes/case-guides/
+android16/behavior-changes/implementation-examples/
 ```
 
 Keep primary reports focused on evidence, applicability, impact, and action candidates.

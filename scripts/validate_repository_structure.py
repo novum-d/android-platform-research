@@ -347,6 +347,17 @@ def require_indexed(index: Path, files: list[Path], root: Path, errors: list[str
             fail(errors, f"artifact is not indexed: {relative(path, root)}")
 
 
+def validate_implementation_example_locations(behavior_root: Path, root: Path, errors: list[str]) -> None:
+    examples = list(behavior_root.rglob("*-implementation-examples.md"))
+    for example in examples:
+        if example.relative_to(behavior_root).parts[0] != "implementation-examples":
+            fail(
+                errors,
+                "implementation example must be under behavior-changes/implementation-examples: "
+                f"{relative(example, root)}",
+            )
+
+
 def validate_android_artifacts(scope: dict, root: Path, errors: list[str]) -> None:
     if not scope or not isinstance(scope.get("artifact_policy"), dict):
         return
@@ -354,6 +365,12 @@ def validate_android_artifacts(scope: dict, root: Path, errors: list[str]) -> No
     behavior_root = version_root / "behavior-changes"
     policy = scope["artifact_policy"]
     separate = set(policy["separately_indexed_directories"])
+    validate_implementation_example_locations(behavior_root, root, errors)
+    if list(behavior_root.rglob("*-implementation-examples.md")) and "implementation-examples" not in separate:
+        fail(
+            errors,
+            f"implementation-examples must be separately indexed in {scope['version_dir']}/research-scope.json",
+        )
     for directory in separate | set(policy["summary_exempt_directories"]):
         if not (behavior_root / directory).is_dir():
             fail(errors, f"artifact policy directory does not exist: {scope['version_dir']}/behavior-changes/{directory}")

@@ -40,7 +40,7 @@ FAQ companions:
 
 Implementation examples:
 - 複数のコード例、framework 別移行例、temporary opt-out の具体例が必要な場合は、`android16/templates/implementation-examples-template.md` を使って companion implementation examples file を作成する。
-- implementation examples file は `android16/behavior-changes/case-guides/` に置く。
+- implementation examples file は `android16/behavior-changes/implementation-examples/` に置き、専用の[対応例一覧](implementation-examples/README.md)から到達可能にする。
 - primary report の「対応候補」には、代表的な短い snippet と companion file へのリンクだけを置く。
 
 Runtime behavior comparisons:
@@ -60,9 +60,9 @@ classification、confidence、evidence、Human Decisionを置き換えない。
 | Runtime behavior comparison | [Predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-runtime-behavior-comparison.md) | [Migration or opt-out required for predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md) |
 | Dispatcher / animation guide | [Predictive back dispatcher and animation guide](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back-dispatcher-animation-guide.md) | [Migration or opt-out required for predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md) |
 | FAQ | [GPU syscall filtering concepts](target/security/gpu-syscall-filtering-concepts-faq.md) | [GPU syscall filtering](target/security/gpu-syscall-filtering.md) |
-| Implementation examples | [Fixed-rate work scheduling examples](case-guides/fixed-rate-work-scheduling-optimization-implementation-examples.md) | [Fixed-rate work scheduling optimization](target/core-functionality/fixed-rate-work-scheduling-optimization.md) |
-| Implementation examples | [Predictive back examples](case-guides/migration-or-opt-out-required-for-predictive-back-implementation-examples.md) | [Migration or opt-out required for predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md) |
-| Implementation examples | [Adaptive layouts examples](case-guides/adaptive-layouts-implementation-examples.md) | [Adaptive layouts](target/device-form-factors/adaptive-layouts.md) |
+| Implementation examples | [Fixed-rate work scheduling examples](implementation-examples/fixed-rate-work-scheduling-optimization-implementation-examples.md) | [Fixed-rate work scheduling optimization](target/core-functionality/fixed-rate-work-scheduling-optimization.md) |
+| Implementation examples | [Predictive back examples](implementation-examples/migration-or-opt-out-required-for-predictive-back-implementation-examples.md) | [Migration or opt-out required for predictive back](target/user-experience-and-system-ui/migration-or-opt-out-required-for-predictive-back.md) |
+| Implementation examples | [Adaptive layouts examples](implementation-examples/adaptive-layouts-implementation-examples.md) | [Adaptive layouts](target/device-form-factors/adaptive-layouts.md) |
 | Manifest / API behavior guide | [Adaptive layouts manifest / API behavior](case-guides/adaptive-layouts-manifest-api-behavior-guide.md) | [Adaptive layouts](target/device-form-factors/adaptive-layouts.md) |
 | Category action guide | [Connectivity and security](case-guides/connectivity-and-security.md) | Multiple Behavior Changes |
 | Category action guide | [Core functionality](case-guides/core-functionality.md) | Multiple Behavior Changes |
