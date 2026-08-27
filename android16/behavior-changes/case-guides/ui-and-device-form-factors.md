@@ -9,6 +9,8 @@
 
 Report: [Adaptive layouts](../target/device-form-factors/adaptive-layouts.md)
 
+Implementation examples: [Adaptive layouts Compose / Navigation 3 examples](adaptive-layouts-implementation-examples.md)
+
 Manifest / API guide: [Adaptive layouts manifest / API behavior](adaptive-layouts-manifest-api-behavior-guide.md)
 
 | ケース | 判定条件 | 対応手順 | 最低限の検証 |

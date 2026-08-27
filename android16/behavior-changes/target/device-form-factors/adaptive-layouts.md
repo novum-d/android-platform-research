@@ -2,6 +2,8 @@
 
 Companion guide: [Manifest / API 挙動ガイド](../../case-guides/adaptive-layouts-manifest-api-behavior-guide.md)
 
+Implementation examples: [Compose / Navigation 3 対応例](../../case-guides/adaptive-layouts-implementation-examples.md)
+
 ## 基本情報（Metadata）
 
 ### 調査対象 Android バージョン（Android Versions）
@@ -345,6 +347,20 @@ The opt-out is temporary and won't apply when targeting API level 37 in a future
 - `resizeableActivity=false` と aspect ratio manifest 指定に依存した互換表示をやめ、multi-window / split screen / desktop windowing を通常の表示状態として扱う。
 - `setRequestedOrientation()` による UI 制御を見直し、必要なら component 単位の layout adaptation と state restoration に置き換える。
 - 一時的に移行期間が必要な activity だけ `PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY=true` を検討する。ただし API 37 以降を見据えて恒久対応を並行する。
+
+代表例として、繰り返し項目は端末種別や orientation ではなく、現在利用できる app window の幅に追従させる。
+
+```kotlin
+LazyVerticalGrid(
+    columns = GridCells.Adaptive(minSize = 280.dp),
+) {
+    items(items, key = Item::id) { item ->
+        ItemCard(item = item, modifier = Modifier.fillMaxWidth())
+    }
+}
+```
+
+navigation bar / rail、Navigation 3 list-detail、media scaling、state restoration、form factor 別 screenshot test を含む移行例は[Adaptive layouts実装例](../../case-guides/adaptive-layouts-implementation-examples.md)を参照する。コードは完成品ではなく、対象アプリの既存architectureへ調整して組み込む。
 
 ---
 
