@@ -61,6 +61,7 @@ android17/AGENTS.md
 | レポート | 対象範囲 |
 | --- | --- |
 | [Wireless camera companion](app-reports/wireless-camera-companion/investigation-report.md) | カメラ連携アプリ向けに、Bluetooth、local network、audio、security、native / ART、大画面 UI などを横断評価 |
+| [Payment multi-app architecture](app-reports/payment-multi-app-architecture/investigation-report.md) | 顧客別サービスアプリとカメラ・NFC 等の機能別アプリへ分割する構成の状態管理、画面遷移、運用コスト、Android 16 / 17 リスクを横断評価 |
 
 ## バージョニング
 

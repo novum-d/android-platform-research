@@ -6,3 +6,4 @@ Behavior Changeを特定のアプリ構成・ユースケースへ横断適用�
 | App / use case | Investigation report |
 | --- | --- |
 | Wireless camera companion | [investigation-report.md](wireless-camera-companion/investigation-report.md) |
+| Payment multi-app architecture | [investigation-report.md](payment-multi-app-architecture/investigation-report.md) |
